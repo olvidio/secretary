@@ -28,4 +28,15 @@ final class ProteccionCsrfTest extends TestCase
         $malo = new Request('POST', '/login', [], ['_csrf' => 'otro'], ['csrf' => $token]);
         self::assertFalse(ProteccionCsrf::valido($malo));
     }
+
+    public function testRenovarTokenGeneraValorDistinto(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        $_SESSION['csrf'] = 'anterior';
+        $nuevo = ProteccionCsrf::renovarToken();
+        self::assertNotSame('anterior', $nuevo);
+        self::assertSame($nuevo, $_SESSION['csrf']);
+    }
 }

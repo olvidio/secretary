@@ -30,6 +30,15 @@ interface IdentidadRepository
 
     public function vincularPersona(int $identidadId, int $personaId): void;
 
+    public function desvincularPersona(int $personaId): void;
+
+    public function identidadDePersona(int $personaId): ?Identidad;
+
+    /**
+     * @return list<array{id:int, email:string, alias:?string, nombre:string, rol:string}>
+     */
+    public function usuariosDeCentro(int $centroId): array;
+
     public function totpConfirmado(int $identidadId): bool;
 
     public function totpSecretoCifrado(int $identidadId): ?string;

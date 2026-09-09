@@ -6,6 +6,7 @@ namespace src\shared\infrastructure\persistence;
 
 use PDO;
 use src\acceso\infrastructure\persistence\AccesoSeeder;
+use src\apuntes\infrastructure\persistence\PlantillaApunteSeeder;
 use src\ambito\infrastructure\persistence\AmbitoSeeder;
 use src\conceptos\domain\services\CatalogoConceptos;
 use src\personal\infrastructure\persistence\Nivel1Seeder;
@@ -34,6 +35,7 @@ final class SchemaInstaller
         // que NO pasa por aquí, tiene que invocarlo también por su cuenta.
         AmbitoSeeder::sembrar($this->pdo);
         AccesoSeeder::sembrar($this->pdo);
+        PlantillaApunteSeeder::sembrar($this->pdo);
         Nivel1Seeder::sembrar($this->pdo);
     }
 

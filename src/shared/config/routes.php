@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use FastRoute\RouteCollector;
+use src\ambito\infrastructure\http\CentroController;
 use src\ambito\infrastructure\http\EjercicioController;
 use src\ambito\infrastructure\http\TesoreriaController;
 use src\apuntes\infrastructure\http\ApunteController;
+use src\apuntes\infrastructure\http\PlantillaApunteController;
 use src\arqueo\infrastructure\http\ArqueoController;
 use src\asientos\infrastructure\http\TraspasoController;
 use src\cierre\infrastructure\http\CierreController;
@@ -34,6 +36,12 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/configuracion', [ConfiguracionController::class, 'get']);
     $r->addRoute('POST', '/api/configuracion', [ConfiguracionController::class, 'save']);
 
+    $r->addRoute('GET', '/api/centros', [CentroController::class, 'get']);
+    $r->addRoute('POST', '/api/centros', [CentroController::class, 'create']);
+    $r->addRoute('POST', '/api/centros/import', [CentroController::class, 'import']);
+    $r->addRoute('POST', '/api/centros/vaciar', [CentroController::class, 'vaciar']);
+    $r->addRoute('POST', '/api/centros/usuarios', [CentroController::class, 'addUsuario']);
+
     $r->addRoute('GET', '/api/personas', [PersonaController::class, 'list']);
     $r->addRoute('POST', '/api/personas', [PersonaController::class, 'save']);
     $r->addRoute('DELETE', '/api/personas/{id:\d+}', [PersonaController::class, 'delete']);
@@ -41,8 +49,14 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/conceptos', [ConceptoController::class, 'list']);
 
     $r->addRoute('GET', '/api/apuntes', [ApunteController::class, 'list']);
+    $r->addRoute('GET', '/api/apuntes/sugerencias', [ApunteController::class, 'sugerencias']);
+    $r->addRoute('GET', '/api/apuntes/cuadre', [ApunteController::class, 'cuadre']);
     $r->addRoute('POST', '/api/apuntes', [ApunteController::class, 'create']);
     $r->addRoute('DELETE', '/api/apuntes/{id:\d+}', [ApunteController::class, 'delete']);
+
+    $r->addRoute('GET', '/api/plantillas-apunte', [PlantillaApunteController::class, 'list']);
+    $r->addRoute('POST', '/api/plantillas-apunte', [PlantillaApunteController::class, 'save']);
+    $r->addRoute('DELETE', '/api/plantillas-apunte/{id:\d+}', [PlantillaApunteController::class, 'delete']);
 
     $r->addRoute('GET', '/api/cierre', [CierreController::class, 'preview']);
     $r->addRoute('POST', '/api/cierre', [CierreController::class, 'run']);

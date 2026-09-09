@@ -89,7 +89,7 @@ final class SincronizarAsientosImportados
         }
 
         $personasPorIniciales = [];
-        foreach ($this->personas->listar() as $persona) {
+        foreach ($this->personas->listarDeCentro($centroId) as $persona) {
             $personasPorIniciales[strtolower($persona->iniciales)] = $persona;
         }
 

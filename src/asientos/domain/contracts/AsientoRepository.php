@@ -58,6 +58,20 @@ interface AsientoRepository
     /** @return list<Asiento> */
     public function listarPorEjercicio(int $ejercicioId, ?string $libro = null): array;
 
+    /**
+     * Observaciones previas de `$iniciales` en el libro que contienen `$texto`.
+     * Ordenadas por frecuencia (más usadas primero).
+     *
+     * @return list<array{observaciones: string, concepto_codigo: string}>
+     */
+    public function sugerirPorGlosa(
+        int $ejercicioId,
+        string $libro,
+        string $texto,
+        string $iniciales,
+        int $limite = 12,
+    ): array;
+
     public function borrarPorEjercicio(int $ejercicioId): void;
 
     public function borrarCierresEntre(int $ejercicioId, DateTimeImmutable $desde, DateTimeImmutable $hasta): void;

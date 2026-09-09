@@ -11,6 +11,7 @@ final class Request
      * @param array<string, mixed> $body
      * @param array<string, mixed> $session
      * @param array<string, string> $headers
+     * @param array<string, mixed> $files
      */
     public function __construct(
         public readonly string $method,
@@ -20,6 +21,7 @@ final class Request
         public readonly array $session,
         public readonly string $rawBody = '',
         public readonly array $headers = [],
+        public readonly array $files = [],
     ) {
     }
 
@@ -46,7 +48,16 @@ final class Request
             $_SESSION ?? [],
             $raw,
             self::cabecerasDesdeServidor(),
+            $_FILES,
         );
+    }
+
+    /** @return array<string, mixed>|null */
+    public function file(string $key): ?array
+    {
+        $info = $this->files[$key] ?? null;
+
+        return is_array($info) ? $info : null;
     }
 
     public function query(string $key, ?string $default = null): ?string

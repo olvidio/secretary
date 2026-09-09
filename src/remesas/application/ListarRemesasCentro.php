@@ -26,7 +26,7 @@ final class ListarRemesasCentro
     {
         $ctx = $this->ambito->ejecutar();
         $nombres = [];
-        foreach ($this->personas->listar() as $p) {
+        foreach ($this->personas->listarDeCentro($ctx->centroId) as $p) {
             if ($p->id !== null) {
                 $nombres[$p->id] = $p;
             }

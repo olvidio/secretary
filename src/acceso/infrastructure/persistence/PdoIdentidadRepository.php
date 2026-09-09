@@ -160,6 +160,51 @@ final class PdoIdentidadRepository implements IdentidadRepository
         $st->execute([':i' => $identidadId, ':p' => $personaId]);
     }
 
+    public function desvincularPersona(int $personaId): void
+    {
+        $st = $this->pdo->prepare('DELETE FROM identidad_persona WHERE persona_id = :p');
+        $st->execute([':p' => $personaId]);
+    }
+
+    public function identidadDePersona(int $personaId): ?Identidad
+    {
+        $st = $this->pdo->prepare(
+            'SELECT i.* FROM identidades i
+             INNER JOIN identidad_persona ip ON ip.identidad_id = i.id
+             WHERE ip.persona_id = :p LIMIT 1'
+        );
+        $st->execute([':p' => $personaId]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
+    public function usuariosDeCentro(int $centroId): array
+    {
+        $st = $this->pdo->prepare(
+            'SELECT i.id, i.email, i.alias, i.nombre, ic.rol
+             FROM identidad_centro ic
+             INNER JOIN identidades i ON i.id = ic.identidad_id
+             WHERE ic.centro_id = :c
+             ORDER BY i.alias NULLS LAST, i.email'
+        );
+        $st->execute([':c' => $centroId]);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $out[] = [
+                'id' => (int) $row['id'],
+                'email' => (string) $row['email'],
+                'alias' => is_string($row['alias'] ?? null) && $row['alias'] !== ''
+                    ? (string) $row['alias']
+                    : null,
+                'nombre' => (string) $row['nombre'],
+                'rol' => (string) $row['rol'],
+            ];
+        }
+
+        return $out;
+    }
+
     public function totpConfirmado(int $identidadId): bool
     {
         $st = $this->pdo->prepare(

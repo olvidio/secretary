@@ -155,7 +155,7 @@ final class ObtenerResumen613
             $n = $cfg->numResidentes;
             if ($n === null) {
                 $n = 0;
-                foreach ($this->personas->listar() as $p) {
+                foreach ($this->personas->listarDeCentro($contexto->centroId) as $p) {
                     if (!$p->exentaEnMes((int) $cfg->fechaCierre->format('n'))) {
                         $n++;
                     }

@@ -42,7 +42,7 @@ final class CalcularSaldos
         $saldoA = Dinero::zero();
         $porPersonaMap = [];
         $personasPorId = [];
-        foreach ($this->personas->listar() as $p) {
+        foreach ($this->personas->listarDeCentro($contexto->centroId) as $p) {
             if ($p->id !== null) {
                 $personasPorId[$p->id] = $p;
             }
@@ -66,7 +66,7 @@ final class CalcularSaldos
         }
 
         $porPersona = [];
-        foreach ($this->personas->listar() as $p) {
+        foreach ($this->personas->listarDeCentro($contexto->centroId) as $p) {
             $s = $porPersonaMap[$p->iniciales] ?? Dinero::zero();
             if ($iniciales !== null && $p->iniciales !== $iniciales) {
                 continue;

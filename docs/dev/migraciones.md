@@ -78,6 +78,9 @@ La Fase 6 añade `migraciones/0008_identidades.sql` (identidades, TOTP, `rutas_a
 La siembra de rutas e identidad `scl` es `AccesoSeeder`, no SQL de la migración, y se
 invoca después de `AmbitoSeeder` (hace falta un centro al que vincular).
 
+La Fase 9 (parcial) añade `migraciones/0011_vinculo_usuario_centro.sql`: `personas.email`,
+únicas `(centro_id, iniciales)` en vez de iniciales globales, y una identidad por persona.
+
 ## `db:install`
 
 `db:install` pasa a ser `db:migrate` + semillas (`SchemaInstaller::install()`):

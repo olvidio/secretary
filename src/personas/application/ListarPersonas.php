@@ -22,4 +22,22 @@ final class ListarPersonas
 
         return $out;
     }
+
+    /**
+     * Listado de la pantalla Nombres: solo el centro de sesión, con el correo
+     * de acceso personal (fuera de toArray() para no tocar el golden master).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function ejecutarDeCentro(int $centroId): array
+    {
+        $out = [];
+        foreach ($this->repo->listarDeCentro($centroId) as $p) {
+            $fila = $p->toArray();
+            $fila['email'] = $p->email ?? '';
+            $out[] = $fila;
+        }
+
+        return $out;
+    }
 }

@@ -25,7 +25,7 @@ final class PageController
 
         return Response::html($this->view->standalone('login/view/login.php', [
             'error' => $error,
-            'csrf' => ProteccionCsrf::asegurarToken(),
+            'csrf' => ProteccionCsrf::renovarToken(),
         ]));
     }
 
@@ -51,7 +51,7 @@ final class PageController
 
         return Response::html($this->view->standalone('login/view/totp_activar.php', [
             'error' => $error,
-            'csrf' => ProteccionCsrf::asegurarToken(),
+            'csrf' => ProteccionCsrf::renovarToken(),
             'secreto' => (string) ($_SESSION['totp_secreto'] ?? ''),
             'uri' => (string) ($_SESSION['totp_uri'] ?? ''),
         ]));
@@ -67,7 +67,7 @@ final class PageController
 
         return Response::html($this->view->standalone('login/view/totp_verificar.php', [
             'error' => $error,
-            'csrf' => ProteccionCsrf::asegurarToken(),
+            'csrf' => ProteccionCsrf::renovarToken(),
         ]));
     }
 
@@ -99,7 +99,7 @@ final class PageController
 
         return Response::html($this->view->standalone('login/view/elegir_centro.php', [
             'error' => $error,
-            'csrf' => ProteccionCsrf::asegurarToken(),
+            'csrf' => ProteccionCsrf::renovarToken(),
             'centros' => $centros,
         ]));
     }
@@ -111,6 +111,7 @@ final class PageController
 
         return Response::html($this->view->page($view, [
             'usuario' => $_SESSION['usuario'] ?? '',
+            'centroNombre' => self::nombreCentroSesion(),
             'nav' => $nav,
             'csrf' => ProteccionCsrf::asegurarToken(),
             'cuentaEntrada' => $vars['cuenta'] ?? null,
@@ -160,5 +161,26 @@ final class PageController
         }
 
         return '/';
+    }
+
+    private static function nombreCentroSesion(): string
+    {
+        $id = isset($_SESSION['centro_id']) ? (int) $_SESSION['centro_id'] : 0;
+        $centros = $_SESSION['centros'] ?? [];
+        if ($id <= 0 || !is_array($centros)) {
+            return '';
+        }
+        foreach ($centros as $c) {
+            if (!is_array($c)) {
+                continue;
+            }
+            if ((int) ($c['centro_id'] ?? 0) === $id) {
+                $nombre = (string) ($c['nombre'] ?? $c['codigo'] ?? '');
+
+                return $nombre;
+            }
+        }
+
+        return '';
     }
 }

@@ -22,6 +22,8 @@ use src\personas\domain\contracts\PersonaRepository;
 use src\personas\domain\entity\Persona;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
 use src\presupuestos\domain\entity\LineaPresupuesto;
+use src\ambito\domain\contracts\EjercicioRepository;
+use src\ambito\domain\entity\Ejercicio;
 use src\ambito\infrastructure\persistence\AmbitoSeeder;
 use src\ambito\infrastructure\persistence\PdoCentroRepository;
 use src\ambito\infrastructure\persistence\PdoCuentaRepository;
@@ -47,6 +49,7 @@ final class ImportarExcelSecretario
         private readonly ApunteRepository $apuntes,
         private readonly PresupuestoRepository $presupuesto,
         private readonly ?SincronizarAsientosImportados $sincronizar = null,
+        private readonly ?EjercicioRepository $ejercicios = null,
     ) {
     }
 
@@ -73,10 +76,13 @@ final class ImportarExcelSecretario
         }
         $filasExcel = $this->leerFilasTalonarios($book);
         $cfgLeida = $this->leerConfig($book);
+        $aislado = $centroCodigo !== null && trim($centroCodigo) !== '';
 
         if ($dryRun) {
             $nApuntes = count($filasExcel);
-            AmbitoSeeder::sembrar($this->pdo);
+            if (!$aislado) {
+                AmbitoSeeder::sembrar($this->pdo);
+            }
             $destino = $this->resolverDestino($centroCodigo, $ejercicioEtiqueta, $cfgLeida);
             $stats = $this->sincronizador()->ejecutar(
                 $destino['centro_id'],
@@ -114,21 +120,29 @@ final class ImportarExcelSecretario
         ];
         $this->pdo->beginTransaction();
         try {
-            $this->config->guardar($cfgLeida);
-            if ($reemplazar) {
-                // Instantánea de `apuntes` y presupuesto para el golden master y el
-                // listado legado. El libro diario (asientos) ya no se borra: D8.
-                $this->apuntes->borrarTodos();
-                $this->presupuesto->borrarCuenta('P');
-                $this->presupuesto->borrarCuenta('G');
+            if (!$aislado) {
+                $this->config->guardar($cfgLeida);
+                if ($reemplazar) {
+                    // Instantánea de `apuntes` y presupuesto para el golden master y el
+                    // listado legado. El libro diario (asientos) ya no se borra: D8.
+                    $this->apuntes->borrarTodos();
+                    $this->presupuesto->borrarCuenta('P');
+                    $this->presupuesto->borrarCuenta('G');
+                }
+                AmbitoSeeder::sembrar($this->pdo);
             }
-            $nPersonas = $this->importarPersonas($book, $reemplazar);
-            $nEntidades = $this->importarEntidades($book);
-            $nPresu = $this->importarPresupuestos($book);
-            $nApuntes = $this->persistirApuntes($filasExcel);
-            AmbitoSeeder::sembrar($this->pdo);
-            Nivel1Seeder::sembrar($this->pdo);
             $destino = $this->resolverDestino($centroCodigo, $ejercicioEtiqueta, $cfgLeida);
+            if ($aislado) {
+                $this->alinearEjercicioAbierto($destino['centro_id'], $cfgLeida);
+            }
+            $nPersonas = $this->importarPersonas($book, $reemplazar, $destino['centro_id']);
+            AmbitoSeeder::poblarLibros($this->pdo, $destino['centro_id']);
+            if (!$aislado) {
+                $nEntidades = $this->importarEntidades($book);
+                $nPresu = $this->importarPresupuestos($book);
+                $nApuntes = $this->persistirApuntes($filasExcel);
+            }
+            Nivel1Seeder::sembrar($this->pdo);
             $stats = $this->sincronizador()->ejecutar(
                 $destino['centro_id'],
                 $destino['ejercicio_id'],
@@ -178,7 +192,7 @@ final class ImportarExcelSecretario
         ConfiguracionCentro $cfg,
     ): array {
         $centroRepo = new PdoCentroRepository($this->pdo);
-        $ejercicioRepo = new PdoEjercicioRepository($this->pdo);
+        $ejercicioRepo = $this->repoEjercicios();
         $codigo = $centroCodigo !== null && $centroCodigo !== ''
             ? $centroCodigo
             : trim($cfg->centro);
@@ -212,6 +226,44 @@ final class ImportarExcelSecretario
         }
 
         return ['centro_id' => $centro->id, 'ejercicio_id' => $ejercicio->id];
+    }
+
+    /**
+     * Ajusta el ejercicio abierto del centro destino a las fechas del Excel,
+     * sin tocar el singleton `configuracion` (otro centro puede estar usándolo).
+     */
+    private function alinearEjercicioAbierto(int $centroId, ConfiguracionCentro $cfg): void
+    {
+        $ejercicio = $this->repoEjercicios()->abiertoDe($centroId);
+        if ($ejercicio === null || $ejercicio->id === null) {
+            return;
+        }
+        $periodo = $cfg->periodo();
+        $corte = $periodo->fechaCorte;
+        if ($corte < $periodo->fechaInicio) {
+            $corte = $periodo->fechaInicio;
+        }
+        if ($corte > $periodo->fechaFin) {
+            $corte = $periodo->fechaFin;
+        }
+        $etiqueta = $cfg->modoEjercicio === 'Curso'
+            ? sprintf('%d-%02d', $cfg->anio, ($cfg->anio + 1) % 100)
+            : (string) $cfg->anio;
+        $this->repoEjercicios()->guardar(new Ejercicio(
+            $ejercicio->id,
+            $ejercicio->centroId,
+            $etiqueta,
+            $periodo->fechaInicio,
+            $periodo->fechaFin,
+            $corte,
+            $ejercicio->estado,
+            $ejercicio->ejercicioAnteriorId,
+        ));
+    }
+
+    private function repoEjercicios(): EjercicioRepository
+    {
+        return $this->ejercicios ?? new PdoEjercicioRepository($this->pdo);
     }
 
     private function leerConfig(XlsxReader $book): ConfiguracionCentro
@@ -252,15 +304,12 @@ final class ImportarExcelSecretario
     }
 
     /**
-     * Upsert por `iniciales` (Fase 2b, ver el comentario en `ejecutar()`): busca la
-     * persona existente por `iniciales` y, si existe, actualiza sobre su `id` en vez
-     * de recrearla, para no romper la FK `cuentas.persona_id`. Al terminar, si
-     * `$reemplazar` es cierto, sincroniza `activo` con la lista de iniciales
-     * encontradas en esta pasada: quien ha desaparecido del Excel se marca inactivo
-     * (nunca se borra, para no perder su histórico ni la cuenta que lo referencia),
-     * y quien reaparece se reactiva.
+     * Upsert por `(centro_id, iniciales)` (Fase 2b / Fase 9): busca la persona
+     * existente en ese centro y, si existe, actualiza sobre su `id` en vez de
+     * recrearla, para no romper la FK `cuentas.persona_id`. Al terminar, si
+     * `$reemplazar` es cierto, sincroniza `activo` solo en ese centro.
      */
-    private function importarPersonas(XlsxReader $book, bool $reemplazar): int
+    private function importarPersonas(XlsxReader $book, bool $reemplazar, int $centroId): int
     {
         $sheet = $book->sheet('Nombres P');
         $n = 0;
@@ -278,7 +327,7 @@ final class ImportarExcelSecretario
             if (!empty($cols['K']) && is_numeric($cols['K'])) {
                 $fijo = new Dinero(number_format((float) $cols['K'], 2, '.', ''));
             }
-            $existente = $this->personas->porIniciales($iniciales);
+            $existente = $this->personas->porInicialesDeCentro($centroId, $iniciales);
             $this->personas->guardar(new Persona(
                 $existente?->id,
                 $nombre,
@@ -290,13 +339,16 @@ final class ImportarExcelSecretario
                 self::mesInt($cols['I'] ?? null),
                 $fijo,
                 $n + 1,
+                $centroId,
+                $existente->activo ?? true,
+                $existente->email ?? null,
             ));
             $inicialesPresentes[] = $iniciales;
             $n++;
         }
 
         if ($reemplazar) {
-            $this->personas->sincronizarActivos($inicialesPresentes);
+            $this->personas->sincronizarActivos($inicialesPresentes, $centroId);
         }
 
         return $n;

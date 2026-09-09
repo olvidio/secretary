@@ -73,11 +73,8 @@ final class CrearApunte
         if ($iniciales !== '' && $this->personas->porIniciales($iniciales) === null) {
             throw new InvalidArgumentException('Iniciales no reconocidas');
         }
-        $obs = $this->observaciones(
-            (string) ($datos['observaciones'] ?? ''),
-            $concepto->nombre,
-            $datos
-        );
+        $obsRaw = (string) ($datos['observaciones'] ?? '');
+        $obs = $obsRaw === '' ? null : $obsRaw;
         $cantidad = Dinero::fromInput((string) ($datos['cantidad'] ?? ''));
         if ($cantidad->isNegative() || $cantidad->isZero()) {
             throw new InvalidArgumentException('La cantidad debe ser positiva');
@@ -128,7 +125,7 @@ final class CrearApunte
         );
 
         $personasPorIniciales = [];
-        foreach ($this->personas->listar() as $persona) {
+        foreach ($this->personas->listarDeCentro($centroId) as $persona) {
             $personasPorIniciales[strtolower($persona->iniciales)] = $persona;
         }
 
@@ -161,7 +158,7 @@ final class CrearApunte
 
         $asiento = $resultado['asientos'][0]->withFechaOperacion($fechaOperacion);
         $mapaCuentas = $this->mapaCuentas($centroId);
-        $mapaPersonas = $this->mapaPersonas();
+        $mapaPersonas = $this->mapaPersonas($centroId);
 
         if (!$fechasDistintas) {
             $asientoGuardado = $this->asientos->guardar($asiento);
@@ -380,35 +377,16 @@ final class CrearApunte
     }
 
     /** @return array<int, \src\personas\domain\entity\Persona> */
-    private function mapaPersonas(): array
+    private function mapaPersonas(int $centroId): array
     {
         $mapa = [];
-        foreach ($this->personas->listar() as $persona) {
+        foreach ($this->personas->listarDeCentro($centroId) as $persona) {
             if ($persona->id !== null) {
                 $mapa[$persona->id] = $persona;
             }
         }
 
         return $mapa;
-    }
-
-    /** @param array<string, mixed> $datos */
-    private function observaciones(string $obs, string $nombreConcepto, array $datos): ?string
-    {
-        if ($obs === '') {
-            return null;
-        }
-        if (str_starts_with($obs, ' ')) {
-            return $nombreConcepto;
-        }
-        if (str_starts_with($obs, '_')) {
-            return 'Decepal';
-        }
-        if ($obs === '=' && isset($datos['observaciones_anterior'])) {
-            return (string) $datos['observaciones_anterior'];
-        }
-
-        return $obs;
     }
 
     private function parseFecha(string $raw): DateTimeImmutable

@@ -12,11 +12,10 @@
 <p id="home-meta" class="muted"></p>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
-  const r = await api('/api/configuracion');
-  if (r.ok) {
-    const c = r.config;
-    document.getElementById('home-meta').textContent =
-      c.centro + ' · ' + c.modo_ejercicio + ' ' + c.anio + ' · cierre ' + fmtFecha(c.fecha_cierre);
+  const r = await api('/api/centros');
+  if (r.ok && r.centro) {
+    const c = r.centro;
+    document.getElementById('home-meta').textContent = c.nombre || c.codigo || '';
   }
 });
 </script>

@@ -40,7 +40,7 @@ final class ObtenerE37
         $saldosCc = $this->saldosCcPorPersona($contexto->centroId, $contexto->ejercicioId, $desde, $hasta);
 
         $filas = [];
-        foreach ($this->personas->listar() as $p) {
+        foreach ($this->personas->listarDeCentro($contexto->centroId) as $p) {
             $tot = CalculadoraE37::totalesDesdeMovimientos(
                 $movs[$p->iniciales] ?? [],
                 $saldosCc[$p->iniciales] ?? 0,
@@ -108,7 +108,7 @@ final class ObtenerE37
     private function saldosCcPorPersona(int $centroId, int $ejercicioId, string $desde, string $hasta): array
     {
         $personasPorId = [];
-        foreach ($this->personas->listar() as $p) {
+        foreach ($this->personas->listarDeCentro($centroId) as $p) {
             if ($p->id !== null) {
                 $personasPorId[$p->id] = $p;
             }

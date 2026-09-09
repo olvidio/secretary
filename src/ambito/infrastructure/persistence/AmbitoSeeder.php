@@ -43,8 +43,18 @@ final class AmbitoSeeder
 
         $centroId = self::sembrarCentro($pdo, $cfg);
         self::sembrarEjercicio($pdo, $centroId, $cfg);
-        [$cajaId, $bancoId] = self::sembrarCuentasFisicas($pdo, $centroId);
         self::sembrarAmbitoPersonas($pdo, $centroId);
+        self::poblarLibros($pdo, $centroId);
+    }
+
+    /**
+     * Plan maestro, tesorería, puentes y cuentas personales de un centro ya
+     * existente. Idempotente. Lo usa el seeder del centro de `configuracion` y
+     * el alta de un segundo centro (Fase 9).
+     */
+    public static function poblarLibros(PDO $pdo, int $centroId): void
+    {
+        [$cajaId, $bancoId] = self::sembrarCuentasFisicas($pdo, $centroId);
         self::sembrarPlanMaestro($pdo, $centroId);
         self::sembrarCuentasTesoreria($pdo, $centroId, $cajaId, $bancoId);
         self::sembrarPuenteEntreLibros($pdo, $centroId);

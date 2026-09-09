@@ -36,7 +36,7 @@ final class ListarApuntes
             }
         }
         $mapaPersonas = [];
-        foreach ($this->personas->listar() as $persona) {
+        foreach ($this->personas->listarDeCentro($contexto->centroId) as $persona) {
             if ($persona->id !== null) {
                 $mapaPersonas[$persona->id] = $persona;
             }

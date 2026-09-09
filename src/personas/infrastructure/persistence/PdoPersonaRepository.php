@@ -26,6 +26,20 @@ final class PdoPersonaRepository implements PersonaRepository
         return $out;
     }
 
+    public function listarDeCentro(int $centroId): array
+    {
+        $st = $this->pdo->prepare(
+            'SELECT * FROM personas WHERE centro_id = :c ORDER BY orden, id'
+        );
+        $st->execute([':c' => $centroId]);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $out[] = $this->hydrate($row);
+        }
+
+        return $out;
+    }
+
     public function porId(int $id): ?Persona
     {
         $st = $this->pdo->prepare('SELECT * FROM personas WHERE id = :id');
@@ -44,16 +58,43 @@ final class PdoPersonaRepository implements PersonaRepository
         return is_array($row) ? $this->hydrate($row) : null;
     }
 
+    public function porInicialesDeCentro(int $centroId, string $iniciales): ?Persona
+    {
+        $st = $this->pdo->prepare(
+            'SELECT * FROM personas WHERE centro_id = :c AND iniciales = :i'
+        );
+        $st->execute([':c' => $centroId, ':i' => $iniciales]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
+    public function porEmail(string $email): ?Persona
+    {
+        $email = strtolower(trim($email));
+        if ($email === '') {
+            return null;
+        }
+        $st = $this->pdo->prepare('SELECT * FROM personas WHERE lower(email) = :e LIMIT 1');
+        $st->execute([':e' => $email]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
     public function guardar(Persona $persona): Persona
     {
         if ($persona->id === null) {
             // centro_id se incluye sólo en el alta: si es null aquí, AmbitoSeeder lo
             // backfilleará en el siguiente db:migrate (ver comentario en Persona::centroId).
             $sql = 'INSERT INTO personas (nombre, apellidos, iniciales, mes_exento_inicio, mes_exento_fin,
-                    mes_exento2_inicio, mes_exento2_fin, importe_vivienda_fijo, orden, centro_id)
-                 VALUES (:n, :a, :i, :e1, :e2, :e3, :e4, :imp, :o, :cid)';
+                    mes_exento2_inicio, mes_exento2_fin, importe_vivienda_fijo, orden, centro_id, email)
+                 VALUES (:n, :a, :i, :e1, :e2, :e3, :e4, :imp, :o, :cid, :email)';
             $params = $this->params($persona);
             $params[':cid'] = $persona->centroId;
+            $params[':email'] = $persona->email !== null && $persona->email !== ''
+                ? strtolower($persona->email)
+                : null;
             $id = $this->insertId($sql, $params);
         } else {
             // La actualización NO toca centro_id deliberadamente: el formulario de
@@ -75,6 +116,13 @@ final class PdoPersonaRepository implements PersonaRepository
         $row = $st->fetch();
 
         return $this->hydrate(is_array($row) ? $row : []);
+    }
+
+    public function guardarEmail(int $id, ?string $email): void
+    {
+        $valor = $email !== null && trim($email) !== '' ? strtolower(trim($email)) : null;
+        $st = $this->pdo->prepare('UPDATE personas SET email = :e WHERE id = :id');
+        $st->execute([':e' => $valor, ':id' => $id]);
     }
 
     /** @param array<string, mixed> $params */
@@ -101,7 +149,7 @@ final class PdoPersonaRepository implements PersonaRepository
         $this->pdo->exec('DELETE FROM personas');
     }
 
-    public function sincronizarActivos(array $inicialesPresentes): array
+    public function sincronizarActivos(array $inicialesPresentes, ?int $centroId = null): array
     {
         if ($inicialesPresentes === []) {
             // Ver el comentario del contrato: una lista vacía no debe desactivar a
@@ -117,15 +165,22 @@ final class PdoPersonaRepository implements PersonaRepository
             $params[$ph] = $iniciales;
         }
         $lista = implode(', ', $placeholders);
+        $filtroCentro = '';
+        if ($centroId !== null) {
+            $filtroCentro = ' AND centro_id = :c';
+            $params[':c'] = $centroId;
+        }
 
         $activar = $this->pdo->prepare(
             "UPDATE personas SET activo = TRUE WHERE activo = FALSE AND iniciales IN ($lista)"
+            . $filtroCentro
         );
         $activar->execute($params);
         $activadas = $activar->rowCount();
 
         $desactivar = $this->pdo->prepare(
             "UPDATE personas SET activo = FALSE WHERE activo = TRUE AND iniciales NOT IN ($lista)"
+            . $filtroCentro
         );
         $desactivar->execute($params);
         $desactivadas = $desactivar->rowCount();
@@ -170,6 +225,9 @@ final class PdoPersonaRepository implements PersonaRepository
             (int) ($row['orden'] ?? 0),
             isset($row['centro_id']) ? (int) $row['centro_id'] : null,
             !isset($row['activo']) || (bool) $row['activo'],
+            is_string($row['email'] ?? null) && $row['email'] !== ''
+                ? strtolower((string) $row['email'])
+                : null,
         );
     }
 }

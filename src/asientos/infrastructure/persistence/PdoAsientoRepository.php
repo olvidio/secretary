@@ -453,6 +453,63 @@ final class PdoAsientoRepository implements AsientoRepository
         return $this->listar($ejercicioId, $filtros);
     }
 
+    public function sugerirPorGlosa(
+        int $ejercicioId,
+        string $libro,
+        string $texto,
+        string $iniciales,
+        int $limite = 12,
+    ): array {
+        $libro = strtoupper($libro);
+        if (!in_array($libro, ['P', 'G'], true)) {
+            return [];
+        }
+        $q = trim($texto);
+        $ini = strtolower(trim($iniciales));
+        if ($q === '' || $ini === '') {
+            return [];
+        }
+        $limite = max(1, min(50, $limite));
+        $sql = "SELECT a.glosa AS observaciones, c.codigo AS concepto_codigo
+            FROM asientos a
+            INNER JOIN movimientos m ON m.asiento_id = a.id
+            INNER JOIN cuentas c ON c.id = m.cuenta_id
+            INNER JOIN personas p ON p.id = a.persona_id
+            WHERE a.ejercicio_id = :ej
+              AND a.libro = :lib
+              AND a.anulado_at IS NULL
+              AND a.tipo IN ('normal', 'periodificacion')
+              AND a.glosa IS NOT NULL
+              AND btrim(a.glosa) <> ''
+              AND c.tipo IN ('ingreso', 'gasto', 'patrimonio')
+              AND lower(p.iniciales) = :ini
+              AND strpos(lower(a.glosa), lower(:q)) > 0
+            GROUP BY a.glosa, c.codigo
+            ORDER BY COUNT(*) DESC, MAX(a.fecha) DESC, a.glosa
+            LIMIT {$limite}";
+        $st = $this->pdo->prepare($sql);
+        $st->execute([
+            ':ej' => $ejercicioId,
+            ':lib' => $libro,
+            ':ini' => $ini,
+            ':q' => $q,
+        ]);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $obs = trim((string) $row['observaciones']);
+            $codigo = trim((string) $row['concepto_codigo']);
+            if ($obs === '' || $codigo === '') {
+                continue;
+            }
+            $out[] = [
+                'observaciones' => $obs,
+                'concepto_codigo' => $codigo,
+            ];
+        }
+
+        return $out;
+    }
+
     public function borrarPorEjercicio(int $ejercicioId): void
     {
         $st = $this->pdo->prepare('DELETE FROM asientos WHERE ejercicio_id = :ej');

@@ -5,7 +5,7 @@
 - Capas: ver `AGENTS.md`.
 - Login: email o alias (`scl`) + contraseña + TOTP de centro. Ver `docs/dev/acceso.md`.
   Hace falta `APP_KEY` en `.env`.
-- Importación: `php bin/console.php import:excel [ruta.xlsm] [--dry-run] [--centro=CODIGO] [--ejercicio=ETIQUETA]`. Idempotente por fila (D8, `docs/dev/importacion.md`).
+- Importación: `php bin/console.php import:excel [ruta.xlsm] [--dry-run] [--centro=CODIGO] [--ejercicio=ETIQUETA]`. Idempotente por fila (D8, `docs/dev/importacion.md`). Desde `/centros` se sube el Excel a un centro concreto; `--centro` no toca `configuracion` ni el libro de los demás.
 - Libro diario: `asientos` + `movimientos` (céntimos, cuadre estricto). La entrada Excel (A/B/C) se traduce detrás (`TraductorApuntesAAsientos`). `SignoTesoreria` ya no existe.
 - Saldos de caja/banco: `SUM(debe − haber)` de cuentas de tesorería (`CAJA` / `BANCO`). Saldos personales: cuentas `CC.*` del libro P.
 - Tesorería física compartida P+G (`docs/dev/tesoreria.md`): alta en `/tesoreria`, traspasos y préstamos en `/traspasos`. El arqueo se cuadra contra el saldo físico (P+G).

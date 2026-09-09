@@ -11,6 +11,9 @@
 <header class="ribbon">
     <div class="ribbon-top">
         <strong>Secretario</strong>
+        <?php if (!empty($centroNombre)): ?>
+            <span class="centro"><?= htmlspecialchars((string) $centroNombre, ENT_QUOTES) ?></span>
+        <?php endif; ?>
         <span class="user"><?= htmlspecialchars((string) ($usuario ?? ''), ENT_QUOTES) ?></span>
         <a href="/logout">Salir</a>
     </div>
@@ -18,6 +21,7 @@
         <div class="group">
             <span>Inicio</span>
             <a href="/configuracion" class="<?= ($nav ?? '') === 'configuracion' ? 'on' : '' ?>">Configuración</a>
+            <a href="/centros" class="<?= ($nav ?? '') === 'centros' ? 'on' : '' ?>">Centros</a>
             <a href="/nombres" class="<?= ($nav ?? '') === 'nombres' ? 'on' : '' ?>">Nombres</a>
         </div>
         <div class="group">
@@ -49,6 +53,8 @@
             <a href="/saldos" class="<?= ($nav ?? '') === 'saldos' ? 'on' : '' ?>">Saldos</a>
             <a href="/conceptos-p" class="<?= ($nav ?? '') === 'conceptos-p' ? 'on' : '' ?>">Conceptos P</a>
             <a href="/conceptos-g" class="<?= ($nav ?? '') === 'conceptos-g' ? 'on' : '' ?>">Conceptos G</a>
+            <a href="/plantillas-p" class="<?= ($nav ?? '') === 'plantillas-p' ? 'on' : '' ?>">Plantillas P</a>
+            <a href="/plantillas-g" class="<?= ($nav ?? '') === 'plantillas-g' ? 'on' : '' ?>">Plantillas G</a>
             <a href="/por-concepto" class="<?= ($nav ?? '') === 'por-concepto' ? 'on' : '' ?>">Por concepto</a>
             <a href="/ejercicios" class="<?= ($nav ?? '') === 'ejercicios' ? 'on' : '' ?>">Ejercicios</a>
             <a href="/tesoreria" class="<?= ($nav ?? '') === 'tesoreria' ? 'on' : '' ?>">Tesorería</a>

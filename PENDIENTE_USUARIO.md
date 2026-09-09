@@ -7,10 +7,10 @@ Decisiones tomadas por defecto al implementar. Corrige aquí o en el chat si alg
 | Nombre | Secretario (carpeta `secretary`) |
 | Docker | `/home/dani/docker_images/secretary` (nginx **8005**, Postgres **5455**, Adminer **8085**). Independiente de Orbix. |
 | Base de datos | PostgreSQL `secretario` / `secretario`. Desde el host: puerto **5455**. Dentro del contenedor PHP: host `db`. |
-| Usuario de la app | `scl` / `cambiar` (cámbialo en `.env`: `APP_USER`, `APP_PASSWORD`). Tras Fase 6 el alias `scl` es una identidad de centro: hay que confirmar TOTP la primera vez. `APP_KEY` cifra el secreto. Nivel 1 de prueba: `yo` / `cambiar`, sin TOTP, pantalla `/yo`. |
+| Usuario de la app | `scl` / `cambiar` (cámbialo en `.env`: `APP_USER`, `APP_PASSWORD`). Tras Fase 6 el alias `scl` es una identidad de centro: hay que confirmar TOTP la primera vez. `APP_KEY` cifra el secreto. Otro centro: en **Centros** crea la entidad y su secretario (`scl2`). Nivel 1: pon el correo en **Nombres**, o el demo `yo` / `cambiar` en `/yo`. |
 | Idioma | Español |
 | Tipo de cierre de mes | `vivienda` (concepto P 21 + G 11). El centro del Excel es **Montagut** (no empieza por `agd` ni `sss+`). Si fuera agd/sss+, pon `tipo_cierre=necesidades` en Configuración |
-| Excel | `moviments2026.xlsm` no se versiona. Importar con `composer import` o `docker compose exec php-fpm php bin/console.php import:excel` |
+| Excel | `moviments2026.xlsm` no se versiona. Importar desde **Centros** (al crear o en este centro) o con `composer import` / `docker compose exec php-fpm php bin/console.php import:excel`. En pruebas: **Vaciar datos** en Centros y volver a importar. |
 
 ## Cómo arrancar
 

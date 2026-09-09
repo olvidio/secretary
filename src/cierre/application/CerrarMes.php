@@ -49,7 +49,7 @@ final class CerrarMes
             $gastos = $gastos->add(Dinero::fromCents($cents));
         }
 
-        $reparto = RepartoCierre::calcular($gastos, $this->personas->listar(), $mes);
+        $reparto = RepartoCierre::calcular($gastos, $this->personas->listarDeCentro($contexto->centroId), $mes);
         if (!$confirmar) {
             $prev = [];
             foreach ($reparto as $r) {

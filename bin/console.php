@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use src\acceso\infrastructure\persistence\AccesoSeeder;
+use src\apuntes\infrastructure\persistence\PlantillaApunteSeeder;
 use src\ambito\infrastructure\persistence\AmbitoSeeder;
 use src\asientos\application\ConvertirApuntesAAsientos;
 use src\importacion\application\ImportarExcelSecretario;
@@ -44,6 +45,7 @@ if ($cmd === 'db:migrate') {
     // ya existentes, sin pasar por `SchemaInstaller::install()` (que sería reinstalar).
     AmbitoSeeder::sembrar($pdo);
     AccesoSeeder::sembrar($pdo);
+    PlantillaApunteSeeder::sembrar($pdo);
     Nivel1Seeder::sembrar($pdo);
     if ($aplicadas !== []) {
         fwrite(STDOUT, 'Aplicadas: ' . implode(', ', $aplicadas) . "\n");

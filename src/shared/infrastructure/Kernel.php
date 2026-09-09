@@ -117,8 +117,25 @@ final class Kernel
         if (str_starts_with($request->path, '/api/')) {
             return Response::json(['ok' => false, 'error' => $decision->error ?? 'No autenticado'], $decision->status);
         }
+        if ($decision->error === 'Token CSRF inválido') {
+            $_SESSION['login_error'] = 'La sesión ha caducado o el navegador no guardó la cookie. '
+                . 'Recargue la página e inténtelo de nuevo.';
+            ProteccionCsrf::renovarToken();
+
+            return Response::redirect($this->destinoTrasCsrfInvalido($request->path));
+        }
 
         return new Response($decision->error ?? 'No autorizado', $decision->status);
+    }
+
+    private function destinoTrasCsrfInvalido(string $path): string
+    {
+        return match ($path) {
+            '/totp-activar', '/api/totp/confirmar' => '/totp-activar',
+            '/totp-verificar', '/api/totp/verificar' => '/totp-verificar',
+            '/elegir-centro', '/api/centros/elegir' => '/elegir-centro',
+            default => '/login',
+        };
     }
 
     public function container(): Container

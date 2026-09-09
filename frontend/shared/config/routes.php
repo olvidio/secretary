@@ -18,6 +18,7 @@ return static function (RouteCollector $r): void {
     $pages = [
         ['/', 'shared/view/home.php', 'inicio'],
         ['/configuracion', 'configuracion/view/form.php', 'configuracion'],
+        ['/centros', 'ambito/view/centros.php', 'centros'],
         ['/nombres', 'personas/view/listado.php', 'nombres'],
         ['/presupuesto-p', 'presupuestos/view/form.php', 'presupuesto-p'],
         ['/presupuesto-g', 'presupuestos/view/form.php', 'presupuesto-g'],
@@ -33,6 +34,8 @@ return static function (RouteCollector $r): void {
         ['/saldos', 'informes/view/saldos.php', 'saldos'],
         ['/conceptos-p', 'conceptos/view/listado.php', 'conceptos-p'],
         ['/conceptos-g', 'conceptos/view/listado.php', 'conceptos-g'],
+        ['/plantillas-p', 'plantillas/view/listado.php', 'plantillas-p'],
+        ['/plantillas-g', 'plantillas/view/listado.php', 'plantillas-g'],
         ['/por-concepto', 'informes/view/por_concepto.php', 'por-concepto'],
         ['/ayuda', 'ayuda/view/ayuda.php', 'ayuda'],
         ['/arqueo-p', 'arqueo/view/form.php', 'arqueo-p'],
@@ -72,6 +75,12 @@ return static function (RouteCollector $r): void {
             $extra['cuenta'] = 'P';
         }
         if ($nav === 'conceptos-g') {
+            $extra['cuenta'] = 'G';
+        }
+        if ($nav === 'plantillas-p') {
+            $extra['cuenta'] = 'P';
+        }
+        if ($nav === 'plantillas-g') {
             $extra['cuenta'] = 'G';
         }
         $r->addRoute('GET', $path, [PageController::class, 'page', $extra]);

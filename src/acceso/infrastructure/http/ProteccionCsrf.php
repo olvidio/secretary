@@ -11,6 +11,15 @@ final class ProteccionCsrf
     public static function asegurarToken(): string
     {
         if (session_status() === PHP_SESSION_ACTIVE && empty($_SESSION['csrf'])) {
+            self::renovarToken();
+        }
+
+        return (string) ($_SESSION['csrf'] ?? '');
+    }
+
+    public static function renovarToken(): string
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION['csrf'] = bin2hex(random_bytes(32));
         }
 

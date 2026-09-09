@@ -11,11 +11,20 @@ interface PersonaRepository
     /** @return list<Persona> */
     public function listar(): array;
 
+    /** @return list<Persona> */
+    public function listarDeCentro(int $centroId): array;
+
     public function porId(int $id): ?Persona;
 
     public function porIniciales(string $iniciales): ?Persona;
 
+    public function porInicialesDeCentro(int $centroId, string $iniciales): ?Persona;
+
+    public function porEmail(string $email): ?Persona;
+
     public function guardar(Persona $persona): Persona;
+
+    public function guardarEmail(int $id, ?string $email): void;
 
     public function borrar(int $id): void;
 
@@ -35,10 +44,12 @@ interface PersonaRepository
      *
      * Por seguridad, una lista vacía no toca a nadie (protege contra un fallo de
      * parseo del origen que deje la lista vacía por error: no tiene sentido
-     * desactivar a todo el mundo por eso).
+     * desactivar a todo el mundo por eso). Si se indica `$centroId`, solo se
+     * tocan las personas de ese centro (Fase 9: no desactivar a los de otra
+     * entidad al importar).
      *
      * @param list<string> $inicialesPresentes
      * @return array{activadas:int, desactivadas:int}
      */
-    public function sincronizarActivos(array $inicialesPresentes): array;
+    public function sincronizarActivos(array $inicialesPresentes, ?int $centroId = null): array;
 }

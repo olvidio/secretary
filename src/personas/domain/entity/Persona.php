@@ -32,6 +32,10 @@ final class Persona
         // que centroId: no debe alterar tests/golden/personas.json. El criterio de baja
         // vive en ImportarExcelSecretario::importarPersonas().
         public readonly bool $activo = true,
+        // Correo de acceso al libro personal (Fase 9). Tampoco va en toArray(): el
+        // golden master compara ListarPersonas byte a byte. La pantalla Nombres lo
+        // añade encima al listar.
+        public readonly ?string $email = null,
     ) {
     }
 

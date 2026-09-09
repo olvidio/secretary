@@ -42,9 +42,15 @@ php bin/console.php import:excel [fichero.xlsm] [--dry-run] [--centro=Montagut] 
 
 `--dry-run` informa altas/cambios/bajas sin escribir asientos ni hashes. `--centro` y `--ejercicio` eligen el destino; por defecto, el centro del Excel y su ejercicio abierto.
 
+Con `--centro=CODIGO` (o al importar desde **Centros** en la web) la pasada es **aislada**: no pisa el singleton `configuracion`, ni `apuntes`, ni el presupuesto global. Solo nombres y asientos de ese centro. El ejercicio abierto se alinea a las fechas del Excel.
+
+En `/centros` se puede adjuntar el `.xlsm` al crear otra entidad, o importarlo después en **Este centro**. **Vaciar datos (pruebas)** borra asientos, remesas, arqueos e `import_filas` de ese centro para recargar el Excel; conserva usuarios, cuentas y nombres.
+
 `asientos:convertir` queda como no-op si el ejercicio ya tiene asientos: la conversión vive en la importación.
 
 ## Tests
 
 - `tests/integration/ImportacionIdempotenteTest.php` — tres pasadas, id estables, asiento manual, cambio de hash, baja, `--dry-run`
+- `tests/integration/MulticentroAccesoTest.php` — importación aislada a un segundo centro, vaciado y recarga
 - `tests/unit/HashFilaImportacionTest.php`
+- `tests/unit/RecibirFicheroExcelTest.php`

@@ -6,6 +6,8 @@ namespace src\apuntes\infrastructure\http;
 
 use InvalidArgumentException;
 use src\apuntes\application\BorrarApunte;
+use src\apuntes\application\BuscarSugerenciasObservacion;
+use src\apuntes\application\CalcularCuadreApuntesA;
 use src\apuntes\application\CrearApunte;
 use src\apuntes\application\ListarApuntes;
 use src\shared\infrastructure\http\ContestarJson;
@@ -18,6 +20,8 @@ final class ApunteController
         private readonly ListarApuntes $listar,
         private readonly CrearApunte $crear,
         private readonly BorrarApunte $borrar,
+        private readonly BuscarSugerenciasObservacion $sugerenciasObs,
+        private readonly CalcularCuadreApuntesA $cuadreApuntesA,
     ) {
     }
 
@@ -33,6 +37,32 @@ final class ApunteController
         ], static fn ($v) => $v !== null && $v !== '');
 
         return ContestarJson::ok(['apuntes' => $this->listar->ejecutar($filtros)]);
+    }
+
+    public function cuadre(Request $request, array $vars = []): Response
+    {
+        return ContestarJson::ok([
+            'cuadre' => $this->cuadreApuntesA->ejecutar(
+                (string) ($request->query('cuenta') ?? 'P'),
+                (string) ($request->query('iniciales') ?? ''),
+                (string) ($request->query('fecha') ?? ''),
+            ),
+        ]);
+    }
+
+    public function sugerencias(Request $request, array $vars = []): Response
+    {
+        try {
+            return ContestarJson::ok([
+                'sugerencias' => $this->sugerenciasObs->ejecutar(
+                    (string) ($request->query('q') ?? ''),
+                    (string) ($request->query('cuenta') ?? 'P'),
+                    (string) ($request->query('iniciales') ?? ''),
+                ),
+            ]);
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
     }
 
     public function create(Request $request, array $vars = []): Response

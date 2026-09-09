@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use src\ambito\application\AsegurarCuentaCorrientePersona;
+use src\ambito\application\CrearCentro;
+use src\ambito\application\VaciarDatosCentro;
 use src\ambito\application\CrearCuentaFisica;
 use src\ambito\application\CrearEjercicio;
 use src\ambito\application\DesactivarCuentaFisica;
@@ -12,6 +15,9 @@ use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\contracts\CuentaFisicaRepository;
 use src\ambito\domain\contracts\CuentaRepository;
 use src\ambito\domain\contracts\EjercicioRepository;
+use src\ambito\domain\contracts\PobladorCentro;
+use src\ambito\infrastructure\http\CentroController;
+use src\ambito\infrastructure\persistence\PdoPobladorCentro;
 use src\ambito\domain\value_objects\ContextoActual;
 use src\ambito\infrastructure\http\EjercicioController;
 use src\ambito\infrastructure\http\TesoreriaController;
@@ -28,11 +34,18 @@ use src\asientos\infrastructure\http\TraspasoController;
 use src\asientos\infrastructure\persistence\PdoAsientoRepository;
 use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
 use src\apuntes\application\BorrarApunte;
+use src\apuntes\application\BorrarPlantillaApunte;
+use src\apuntes\application\BuscarSugerenciasObservacion;
 use src\apuntes\application\CrearApunte;
+use src\apuntes\application\GuardarPlantillaApunte;
 use src\apuntes\application\ListarApuntes;
+use src\apuntes\application\ListarPlantillasApunte;
 use src\apuntes\domain\contracts\ApunteRepository;
+use src\apuntes\domain\contracts\PlantillaApunteRepository;
 use src\apuntes\infrastructure\http\ApunteController;
+use src\apuntes\infrastructure\http\PlantillaApunteController;
 use src\apuntes\infrastructure\persistence\PdoApunteRepository;
+use src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository;
 use src\arqueo\application\GuardarArqueo;
 use src\arqueo\domain\contracts\ArqueoRepository;
 use src\arqueo\infrastructure\http\ArqueoController;
@@ -66,11 +79,13 @@ use src\presupuestos\application\GuardarPresupuesto;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
 use src\presupuestos\infrastructure\http\PresupuestoController;
 use src\presupuestos\infrastructure\persistence\PdoPresupuestoRepository;
+use src\acceso\application\AsegurarIdentidadCentro;
 use src\acceso\application\AutorizarPeticion;
 use src\acceso\application\ConfirmarTotp;
 use src\acceso\application\IniciarSesion;
 use src\acceso\application\PrepararTotp;
 use src\acceso\application\VerificarSegundoFactor;
+use src\acceso\application\VincularEmailPersona;
 use src\acceso\domain\contracts\AccesoRutaRepository;
 use src\acceso\domain\contracts\CifradorSecretos as CifradorSecretosContrato;
 use src\acceso\domain\contracts\IdentidadRepository;
@@ -112,9 +127,11 @@ return [
     PersonaRepository::class => autowire(PdoPersonaRepository::class),
     ConceptoRepository::class => autowire(PdoConceptoRepository::class),
     ApunteRepository::class => autowire(PdoApunteRepository::class),
+    PlantillaApunteRepository::class => autowire(PdoPlantillaApunteRepository::class),
     PresupuestoRepository::class => autowire(PdoPresupuestoRepository::class),
     ArqueoRepository::class => autowire(PdoArqueoRepository::class),
     CentroRepository::class => autowire(PdoCentroRepository::class),
+    PobladorCentro::class => autowire(PdoPobladorCentro::class),
     EjercicioRepository::class => autowire(PdoEjercicioRepository::class),
     CuentaFisicaRepository::class => autowire(PdoCuentaFisicaRepository::class),
     CuentaRepository::class => autowire(PdoCuentaRepository::class),
@@ -171,8 +188,14 @@ return [
     GuardarConfiguracion::class => autowire(),
     ListarPersonas::class => autowire(),
     GuardarPersona::class => autowire(),
+    VincularEmailPersona::class => autowire(),
+    AsegurarIdentidadCentro::class => autowire(),
+    AsegurarCuentaCorrientePersona::class => autowire(),
+    CrearCentro::class => autowire(),
+    VaciarDatosCentro::class => autowire(),
     ListarConceptos::class => autowire(),
     ListarApuntes::class => autowire(),
+    BuscarSugerenciasObservacion::class => autowire(),
     CrearApunte::class => autowire(),
     BorrarApunte::class => autowire(),
     CerrarMes::class => autowire(),
@@ -183,6 +206,7 @@ return [
     CrearEjercicio::class => autowire(),
     ListarEjercicios::class => autowire(),
     EjercicioController::class => autowire(),
+    CentroController::class => autowire(),
     ObtenerResumen613::class => autowire(),
     ObtenerE37::class => autowire(),
     CalcularSaldos::class => autowire(),
@@ -198,6 +222,7 @@ return [
     PersonaController::class => autowire(),
     ConceptoController::class => autowire(),
     ApunteController::class => autowire(),
+    PlantillaApunteController::class => autowire(),
     CierreController::class => autowire(),
     InformeController::class => autowire(),
     PresupuestoController::class => autowire(),

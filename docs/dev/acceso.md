@@ -16,9 +16,15 @@ códigos de recuperación, CSRF y autorización por tabla.
    (redirección a `/yo`). Una sesión de centro no entra en `/yo`.
 
 El usuario `usuarios.scl` se migra a `scl@secretario.local` con alias `scl` y vínculo
-de `admin` al centro de `configuracion`. Si hay personas con centro, se siembra también
-`yo@secretario.local` (alias `yo`) vinculada a la primera persona (`AccesoSeeder`,
-después de `AmbitoSeeder`).
+de `admin` al centro de `configuracion`. Cada secretario extra (`scl2`, …) se da de
+alta en `/centros` y queda vinculado **solo** a ese centro (`identidad_centro`): no
+ve las cuentas ni los nombres de los demás. Si hay personas con centro, se siembra
+también `yo@secretario.local` (alias `yo`) vinculada a la primera persona
+(`AccesoSeeder`, después de `AmbitoSeeder`).
+
+El correo de un nombre (pantalla Nombres) crea o enlaza una identidad de **persona**
+a esa fila. Esa persona ya pertenece al centro de la sesión (`personas.centro_id`);
+el login con ese correo entra en `/yo` y no puede leer el libro del centro.
 
 ## TOTP y cifrado
 
