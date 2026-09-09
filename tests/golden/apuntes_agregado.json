@@ -1,0 +1,292 @@
+{
+    "por_cuenta_concepto": [
+        {
+            "concepto_codigo": "11",
+            "cuenta": "G",
+            "n": 20,
+            "suma": "24713.00"
+        },
+        {
+            "concepto_codigo": "12",
+            "cuenta": "G",
+            "n": 1,
+            "suma": "80.00"
+        },
+        {
+            "concepto_codigo": "208",
+            "cuenta": "G",
+            "n": 3,
+            "suma": "32.04"
+        },
+        {
+            "concepto_codigo": "209",
+            "cuenta": "G",
+            "n": 1,
+            "suma": "1000.00"
+        },
+        {
+            "concepto_codigo": "210",
+            "cuenta": "G",
+            "n": 4,
+            "suma": "906.35"
+        },
+        {
+            "concepto_codigo": "211",
+            "cuenta": "G",
+            "n": 23,
+            "suma": "29713.00"
+        },
+        {
+            "concepto_codigo": "212",
+            "cuenta": "G",
+            "n": 1,
+            "suma": "65.25"
+        },
+        {
+            "concepto_codigo": "214",
+            "cuenta": "G",
+            "n": 4,
+            "suma": "136.62"
+        },
+        {
+            "concepto_codigo": "215",
+            "cuenta": "G",
+            "n": 1,
+            "suma": "900.00"
+        },
+        {
+            "concepto_codigo": "32",
+            "cuenta": "G",
+            "n": 2,
+            "suma": "7646.38"
+        },
+        {
+            "concepto_codigo": "111",
+            "cuenta": "P",
+            "n": 94,
+            "suma": "148285.41"
+        },
+        {
+            "concepto_codigo": "112",
+            "cuenta": "P",
+            "n": 3,
+            "suma": "300.00"
+        },
+        {
+            "concepto_codigo": "21",
+            "cuenta": "P",
+            "n": 46,
+            "suma": "54748.51"
+        },
+        {
+            "concepto_codigo": "22",
+            "cuenta": "P",
+            "n": 64,
+            "suma": "6712.06"
+        },
+        {
+            "concepto_codigo": "23",
+            "cuenta": "P",
+            "n": 16,
+            "suma": "1351.73"
+        },
+        {
+            "concepto_codigo": "24",
+            "cuenta": "P",
+            "n": 5,
+            "suma": "5261.00"
+        },
+        {
+            "concepto_codigo": "25",
+            "cuenta": "P",
+            "n": 33,
+            "suma": "6934.82"
+        },
+        {
+            "concepto_codigo": "26",
+            "cuenta": "P",
+            "n": 37,
+            "suma": "7020.40"
+        },
+        {
+            "concepto_codigo": "27",
+            "cuenta": "P",
+            "n": 26,
+            "suma": "6913.70"
+        },
+        {
+            "concepto_codigo": "28",
+            "cuenta": "P",
+            "n": 10,
+            "suma": "1750.35"
+        },
+        {
+            "concepto_codigo": "4",
+            "cuenta": "P",
+            "n": 6,
+            "suma": "2807.84"
+        },
+        {
+            "concepto_codigo": "73",
+            "cuenta": "P",
+            "n": 11,
+            "suma": "23700.00"
+        },
+        {
+            "concepto_codigo": "74",
+            "cuenta": "P",
+            "n": 9,
+            "suma": "10100.00"
+        },
+        {
+            "concepto_codigo": "75",
+            "cuenta": "P",
+            "n": 3,
+            "suma": "16150.00"
+        }
+    ],
+    "por_cuenta_iniciales": [
+        {
+            "cuenta": "G",
+            "iniciales": "",
+            "n": 7,
+            "suma": "12446.38"
+        },
+        {
+            "cuenta": "G",
+            "iniciales": "ac",
+            "n": 10,
+            "suma": "15000.00"
+        },
+        {
+            "cuenta": "G",
+            "iniciales": "ds",
+            "n": 8,
+            "suma": "3023.90"
+        },
+        {
+            "cuenta": "G",
+            "iniciales": "fb",
+            "n": 8,
+            "suma": "8210.00"
+        },
+        {
+            "cuenta": "G",
+            "iniciales": "jmg",
+            "n": 8,
+            "suma": "12140.00"
+        },
+        {
+            "cuenta": "G",
+            "iniciales": "mv",
+            "n": 2,
+            "suma": "686.00"
+        },
+        {
+            "cuenta": "G",
+            "iniciales": "pp",
+            "n": 12,
+            "suma": "9600.00"
+        },
+        {
+            "cuenta": "G",
+            "iniciales": "rd",
+            "n": 5,
+            "suma": "4086.36"
+        },
+        {
+            "cuenta": "P",
+            "iniciales": "ac",
+            "n": 23,
+            "suma": "16250.00"
+        },
+        {
+            "cuenta": "P",
+            "iniciales": "af",
+            "n": 24,
+            "suma": "37770.02"
+        },
+        {
+            "cuenta": "P",
+            "iniciales": "ds",
+            "n": 64,
+            "suma": "10981.36"
+        },
+        {
+            "cuenta": "P",
+            "iniciales": "fb",
+            "n": 31,
+            "suma": "39522.90"
+        },
+        {
+            "cuenta": "P",
+            "iniciales": "jmg",
+            "n": 42,
+            "suma": "59832.00"
+        },
+        {
+            "cuenta": "P",
+            "iniciales": "mv",
+            "n": 47,
+            "suma": "32303.00"
+        },
+        {
+            "cuenta": "P",
+            "iniciales": "pp",
+            "n": 67,
+            "suma": "49751.28"
+        },
+        {
+            "cuenta": "P",
+            "iniciales": "qr",
+            "n": 20,
+            "suma": "13050.00"
+        },
+        {
+            "cuenta": "P",
+            "iniciales": "rd",
+            "n": 45,
+            "suma": "32575.26"
+        }
+    ],
+    "por_cuenta_origen": [
+        {
+            "cuenta": "G",
+            "n": 44,
+            "origen": "A",
+            "suma": "49642.36"
+        },
+        {
+            "cuenta": "G",
+            "n": 10,
+            "origen": "B",
+            "suma": "11170.28"
+        },
+        {
+            "cuenta": "G",
+            "n": 6,
+            "origen": "C",
+            "suma": "4380.00"
+        },
+        {
+            "cuenta": "P",
+            "n": 272,
+            "origen": "A",
+            "suma": "273454.46"
+        },
+        {
+            "cuenta": "P",
+            "n": 66,
+            "origen": "B",
+            "suma": "14271.36"
+        },
+        {
+            "cuenta": "P",
+            "n": 25,
+            "origen": "C",
+            "suma": "4310.00"
+        }
+    ],
+    "suma_total": "357228.46",
+    "total_apuntes": 423
+}

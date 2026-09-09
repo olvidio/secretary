@@ -1,0 +1,299 @@
+{
+    "config": {
+        "anio": 2026,
+        "centro": "Montagut",
+        "fecha_cierre": "2026-06-30",
+        "fecha_inicio": "2026-01-01",
+        "media_cocina_acum": null,
+        "media_cocina_mes": null,
+        "meses": 6,
+        "modo_ejercicio": "Año",
+        "num_residentes": 5,
+        "observaciones_613_g": null,
+        "observaciones_613_p": null,
+        "saldo_cc_personales": null,
+        "tipo_cierre": "vivienda",
+        "version": "7"
+    },
+    "cuenta": "P",
+    "lineas": [
+        {
+            "codigo": "111",
+            "etiqueta": "1. Trabajo",
+            "pct": 1.082339,
+            "previsto": "131158.00",
+            "previsto_es": "131.158,00",
+            "realizado": "141957.41",
+            "realizado_es": "141.957,41"
+        },
+        {
+            "codigo": "112",
+            "etiqueta": "2. Familia",
+            "pct": 0.15,
+            "previsto": "2000.00",
+            "previsto_es": "2.000,00",
+            "realizado": "300.00",
+            "realizado_es": "300,00"
+        },
+        {
+            "codigo": "113",
+            "etiqueta": "3. Varios",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "12",
+            "etiqueta": "2. Extraordinarios",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "21",
+            "etiqueta": "Vivienda",
+            "pct": 0.942338,
+            "previsto": "54620.00",
+            "previsto_es": "54.620,00",
+            "realizado": "51470.51",
+            "realizado_es": "51.470,51"
+        },
+        {
+            "codigo": "22",
+            "etiqueta": "Ordinarios",
+            "pct": 1.019263,
+            "previsto": "6420.00",
+            "previsto_es": "6.420,00",
+            "realizado": "6543.67",
+            "realizado_es": "6.543,67"
+        },
+        {
+            "codigo": "23",
+            "etiqueta": "Ropa",
+            "pct": 0.578665,
+            "previsto": "1850.00",
+            "previsto_es": "1.850,00",
+            "realizado": "1070.53",
+            "realizado_es": "1.070,53"
+        },
+        {
+            "codigo": "24",
+            "etiqueta": "ca, crt, cv",
+            "pct": 0.467644,
+            "previsto": "11250.00",
+            "previsto_es": "11.250,00",
+            "realizado": "5261.00",
+            "realizado_es": "5.261,00"
+        },
+        {
+            "codigo": "25",
+            "etiqueta": "Médicos",
+            "pct": 1.031756,
+            "previsto": "6135.00",
+            "previsto_es": "6.135,00",
+            "realizado": "6329.82",
+            "realizado_es": "6.329,82"
+        },
+        {
+            "codigo": "26",
+            "etiqueta": "Coche, viajes",
+            "pct": 0.820225,
+            "previsto": "8350.00",
+            "previsto_es": "8.350,00",
+            "realizado": "6848.88",
+            "realizado_es": "6.848,88"
+        },
+        {
+            "codigo": "27",
+            "etiqueta": "Estudios y otros",
+            "pct": 0.948426,
+            "previsto": "7200.00",
+            "previsto_es": "7.200,00",
+            "realizado": "6828.67",
+            "realizado_es": "6.828,67"
+        },
+        {
+            "codigo": "28",
+            "etiqueta": "Obligaciones económicas",
+            "pct": 2.3338,
+            "previsto": "750.00",
+            "previsto_es": "750,00",
+            "realizado": "1750.35",
+            "realizado_es": "1.750,35"
+        },
+        {
+            "codigo": "4",
+            "etiqueta": "Ayudas familiares",
+            "pct": 1.016781,
+            "previsto": "2761.50",
+            "previsto_es": "2.761,50",
+            "realizado": "2807.84",
+            "realizado_es": "2.807,84"
+        },
+        {
+            "codigo": "51",
+            "etiqueta": "Atención sacerdotal de mujeres",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "52",
+            "etiqueta": "Atención crt, cv y otras actividades",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "6",
+            "etiqueta": "Necesidades de la sede",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "71",
+            "etiqueta": "Necesidades generales",
+            "pct": 0,
+            "previsto": "2183.50",
+            "previsto_es": "2.183,50",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "72",
+            "etiqueta": "Fundació Montseny",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "73",
+            "etiqueta": "Fundació Proas",
+            "pct": 1.446667,
+            "previsto": "15000.00",
+            "previsto_es": "15.000,00",
+            "realizado": "21700.00",
+            "realizado_es": "21.700,00"
+        },
+        {
+            "codigo": "74",
+            "etiqueta": "Prelatura",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "10100.00",
+            "realizado_es": "10.100,00"
+        },
+        {
+            "codigo": "75",
+            "etiqueta": "Associació Montroig",
+            "pct": 1.615,
+            "previsto": "10000.00",
+            "previsto_es": "10.000,00",
+            "realizado": "16150.00",
+            "realizado_es": "16.150,00"
+        },
+        {
+            "codigo": "76",
+            "etiqueta": "Associació Assitència i Salut",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "77",
+            "etiqueta": "Proico",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "78",
+            "etiqueta": "Casa Escrivá",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "79",
+            "etiqueta": "Otras labores",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "9",
+            "etiqueta": "Saldo en las c\/c personales",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "216.36",
+            "realizado_es": "216,36"
+        }
+    ],
+    "observaciones": null,
+    "saldo_cc_personales": null,
+    "totales": {
+        "atencion_labores": {
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        "disponible": {
+            "previsto": "36583.00",
+            "previsto_es": "36.583,00",
+            "realizado": "56153.98",
+            "realizado_es": "56.153,98"
+        },
+        "gastos": {
+            "pct": 0.891571,
+            "previsto": "96575.00",
+            "previsto_es": "96.575,00",
+            "realizado": "86103.43",
+            "realizado_es": "86.103,43"
+        },
+        "ingresos": {
+            "pct": 1.068335,
+            "previsto": "133158.00",
+            "previsto_es": "133.158,00",
+            "realizado": "142257.41",
+            "realizado_es": "142.257,41"
+        },
+        "labores": {
+            "pct": 1.763938,
+            "previsto": "27183.50",
+            "previsto_es": "27.183,50",
+            "realizado": "47950.00",
+            "realizado_es": "47.950,00"
+        },
+        "saldo_final": {
+            "previsto": "6638.00",
+            "previsto_es": "6.638,00",
+            "realizado": "5396.14",
+            "realizado_es": "5.396,14"
+        }
+    }
+}

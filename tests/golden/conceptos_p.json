@@ -1,0 +1,236 @@
+[
+    {
+        "codigo": "111",
+        "cuenta": "P",
+        "descripcion": "111 Trabajo: al neto de impuestos",
+        "etiqueta": "111 Trabajo",
+        "naturaleza": "ingreso",
+        "nombre": "Trabajo",
+        "orden": 10
+    },
+    {
+        "codigo": "112",
+        "cuenta": "P",
+        "descripcion": "112 Familia",
+        "etiqueta": "112 Familia",
+        "naturaleza": "ingreso",
+        "nombre": "Familia",
+        "orden": 20
+    },
+    {
+        "codigo": "113",
+        "cuenta": "P",
+        "descripcion": "113 Varios",
+        "etiqueta": "113 Varios",
+        "naturaleza": "ingreso",
+        "nombre": "Varios",
+        "orden": 30
+    },
+    {
+        "codigo": "12",
+        "cuenta": "P",
+        "descripcion": "12 Extraordinarios: de la dl",
+        "etiqueta": "12 Extraordinarios",
+        "naturaleza": "ingreso",
+        "nombre": "Extraordinarios",
+        "orden": 40
+    },
+    {
+        "codigo": "21",
+        "cuenta": "P",
+        "descripcion": "21 Vivienda: cantidad para contribuir a los gastos de la casa",
+        "etiqueta": "21 Vivienda",
+        "naturaleza": "gasto",
+        "nombre": "Vivienda",
+        "orden": 50
+    },
+    {
+        "codigo": "22",
+        "cuenta": "P",
+        "descripcion": "22 Ordinarios: higiene, comida, móvil, transporte, gasolina, aparcamiento, medicinas no caras",
+        "etiqueta": "22 Ordinarios",
+        "naturaleza": "gasto",
+        "nombre": "Ordinarios",
+        "orden": 60
+    },
+    {
+        "codigo": "23",
+        "cuenta": "P",
+        "descripcion": "23 Ropa",
+        "etiqueta": "23 Ropa",
+        "naturaleza": "gasto",
+        "nombre": "Ropa",
+        "orden": 70
+    },
+    {
+        "codigo": "24",
+        "cuenta": "P",
+        "descripcion": "24 ca, crt y cv",
+        "etiqueta": "24 ca, crt y cv",
+        "naturaleza": "gasto",
+        "nombre": "ca, crt y cv",
+        "orden": 80
+    },
+    {
+        "codigo": "25",
+        "cuenta": "P",
+        "descripcion": "25 Médicos: incluye medicinas de cierta cuantía",
+        "etiqueta": "25 Médicos",
+        "naturaleza": "gasto",
+        "nombre": "Médicos",
+        "orden": 90
+    },
+    {
+        "codigo": "26",
+        "cuenta": "P",
+        "descripcion": "26 Coche, viajes: mantenimiento y viajes largos",
+        "etiqueta": "26 Coche, viajes",
+        "naturaleza": "gasto",
+        "nombre": "Coche, viajes",
+        "orden": 100
+    },
+    {
+        "codigo": "27",
+        "cuenta": "P",
+        "descripcion": "27 Estudios y otros: matrícula, suscripciones, academia, colegio profesional, cuota clubes",
+        "etiqueta": "27 Estudios y otros",
+        "naturaleza": "gasto",
+        "nombre": "Estudios y otros",
+        "orden": 110
+    },
+    {
+        "codigo": "28",
+        "cuenta": "P",
+        "descripcion": "28 Obligaciones económicas: inversiones, créditos. No impuestos",
+        "etiqueta": "28 Obligaciones económicas",
+        "naturaleza": "gasto",
+        "nombre": "Obligaciones económicas",
+        "orden": 120
+    },
+    {
+        "codigo": "4",
+        "cuenta": "P",
+        "descripcion": "4 Ayudas familiares",
+        "etiqueta": "4 Ayudas familiares",
+        "naturaleza": "gasto",
+        "nombre": "Ayudas familiares",
+        "orden": 130
+    },
+    {
+        "codigo": "51",
+        "cuenta": "P",
+        "descripcion": "51 Atención sacerdotal de mujeres",
+        "etiqueta": "51 Atención sacerdotal de mujeres",
+        "naturaleza": "gasto",
+        "nombre": "Atención sacerdotal de mujeres",
+        "orden": 140
+    },
+    {
+        "codigo": "52",
+        "cuenta": "P",
+        "descripcion": "52 Atención crt, cv y otras actividades",
+        "etiqueta": "52 Atención crt, cv y otras actividades",
+        "naturaleza": "gasto",
+        "nombre": "Atención crt, cv y otras actividades",
+        "orden": 150
+    },
+    {
+        "codigo": "6",
+        "cuenta": "P",
+        "descripcion": "6 Necesidades de la casa \/ sede",
+        "etiqueta": "6 Necesidades de la casa \/ sede",
+        "naturaleza": "gasto",
+        "nombre": "Necesidades de la casa \/ sede",
+        "orden": 160
+    },
+    {
+        "codigo": "71",
+        "cuenta": "P",
+        "descripcion": "71 Necesidades generales",
+        "etiqueta": "71 Necesidades generales",
+        "naturaleza": "gasto",
+        "nombre": "Necesidades generales",
+        "orden": 170
+    },
+    {
+        "codigo": "72",
+        "cuenta": "P",
+        "descripcion": "72 Fundació Montseny",
+        "etiqueta": "72 Fundació Montseny",
+        "naturaleza": "gasto",
+        "nombre": "Fundació Montseny",
+        "orden": 180
+    },
+    {
+        "codigo": "73",
+        "cuenta": "P",
+        "descripcion": "73 Fundació Proas",
+        "etiqueta": "73 Fundació Proas",
+        "naturaleza": "gasto",
+        "nombre": "Fundació Proas",
+        "orden": 190
+    },
+    {
+        "codigo": "74",
+        "cuenta": "P",
+        "descripcion": "74 Prelatura",
+        "etiqueta": "74 Prelatura",
+        "naturaleza": "gasto",
+        "nombre": "Prelatura",
+        "orden": 200
+    },
+    {
+        "codigo": "75",
+        "cuenta": "P",
+        "descripcion": "75 Associació Montroig",
+        "etiqueta": "75 Associació Montroig",
+        "naturaleza": "gasto",
+        "nombre": "Associació Montroig",
+        "orden": 210
+    },
+    {
+        "codigo": "76",
+        "cuenta": "P",
+        "descripcion": "76 Associació Assitència i Salut",
+        "etiqueta": "76 Associació Assitència i Salut",
+        "naturaleza": "gasto",
+        "nombre": "Associació Assitència i Salut",
+        "orden": 220
+    },
+    {
+        "codigo": "77",
+        "cuenta": "P",
+        "descripcion": "77 Proico",
+        "etiqueta": "77 Proico",
+        "naturaleza": "gasto",
+        "nombre": "Proico",
+        "orden": 230
+    },
+    {
+        "codigo": "78",
+        "cuenta": "P",
+        "descripcion": "78 Casa Escrivá",
+        "etiqueta": "78 Casa Escrivá",
+        "naturaleza": "gasto",
+        "nombre": "Casa Escrivá",
+        "orden": 240
+    },
+    {
+        "codigo": "79",
+        "cuenta": "P",
+        "descripcion": "79 ",
+        "etiqueta": "79 ",
+        "naturaleza": "gasto",
+        "nombre": "",
+        "orden": 250
+    },
+    {
+        "codigo": "9",
+        "cuenta": "P",
+        "descripcion": "9 Saldo en las c\/c personales (no afecta a caja\/banco)",
+        "etiqueta": "9 Saldo en las c\/c personales",
+        "naturaleza": "saldo",
+        "nombre": "Saldo en las c\/c personales",
+        "orden": 260
+    }
+]

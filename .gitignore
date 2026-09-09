@@ -1,0 +1,13 @@
+/.idea/
+*.iml
+/vendor/
+/var/data/*.sqlite
+/var/data/*.sqlite-journal
+/var/cache/*
+!/var/cache/.gitkeep
+!/var/data/.gitkeep
+.env
+*.xlsm
+/datos/
+/build/
+.phpunit.cache

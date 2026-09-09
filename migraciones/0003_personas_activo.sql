@@ -1,0 +1,13 @@
+-- Fase 2b (docs/dev/plan_ampliaciones.md, "Registro de fases") — reparación del
+-- importador. La Fase 2 introdujo `cuentas.persona_id` con clave ajena a
+-- `personas`, y el importador seguía haciendo `borrarTodos()` de `personas`, lo
+-- que rompe con un `FOREIGN KEY violation` en cuanto existe al menos una cuenta
+-- (CC.<INICIALES>) que referencia a una persona. La reparación sustituye el
+-- borrado por un upsert por `iniciales` (ya UNIQUE) y necesita distinguir una
+-- persona que sigue en el Excel de una que ha desaparecido de él.
+--
+-- Una persona que desaparece del Excel no se borra (rompería la cuenta que la
+-- referencia y perdería su histórico de apuntes/saldos): se marca `activo =
+-- FALSE`. Ver `src/importacion/application/ImportarExcelSecretario.php` y
+-- `docs/dev/plan_ampliaciones.md` (fila "2b Reparación importador").
+ALTER TABLE personas ADD COLUMN IF NOT EXISTS activo BOOLEAN NOT NULL DEFAULT TRUE;

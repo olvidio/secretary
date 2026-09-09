@@ -1,0 +1,209 @@
+[
+    {
+        "codigo": "11",
+        "cuenta": "G",
+        "descripcion": "11 Vivienda \/ local: para n contribución a gastos generales; para agd vivienda propia",
+        "etiqueta": "11 Vivienda \/ local",
+        "naturaleza": "ingreso",
+        "nombre": "Vivienda \/ local",
+        "orden": 10
+    },
+    {
+        "codigo": "12",
+        "cuenta": "G",
+        "descripcion": "12 Donativos: conseguidos por personas del ctr o del patronato",
+        "etiqueta": "12 Donativos",
+        "naturaleza": "ingreso",
+        "nombre": "Donativos",
+        "orden": 20
+    },
+    {
+        "codigo": "13",
+        "cuenta": "G",
+        "descripcion": "13 Otras ayudas: compensación gastos de otro ctr",
+        "etiqueta": "13 Otras ayudas",
+        "naturaleza": "ingreso",
+        "nombre": "Otras ayudas",
+        "orden": 30
+    },
+    {
+        "codigo": "14",
+        "cuenta": "G",
+        "descripcion": "14 Ayudas de los de la casa: contribución a los gastos del ctr",
+        "etiqueta": "14 Ayudas de los de la casa",
+        "naturaleza": "ingreso",
+        "nombre": "Ayudas de los de la casa",
+        "orden": 40
+    },
+    {
+        "codigo": "15",
+        "cuenta": "G",
+        "descripcion": "15 Ayudas extraordinarias: contribución de la dl",
+        "etiqueta": "15 Ayudas extraordinarias",
+        "naturaleza": "ingreso",
+        "nombre": "Ayudas extraordinarias",
+        "orden": 50
+    },
+    {
+        "codigo": "201",
+        "cuenta": "G",
+        "descripcion": "201 Agua",
+        "etiqueta": "201 Agua",
+        "naturaleza": "gasto",
+        "nombre": "Agua",
+        "orden": 60
+    },
+    {
+        "codigo": "202",
+        "cuenta": "G",
+        "descripcion": "202 Luz",
+        "etiqueta": "202 Luz",
+        "naturaleza": "gasto",
+        "nombre": "Luz",
+        "orden": 70
+    },
+    {
+        "codigo": "203",
+        "cuenta": "G",
+        "descripcion": "203 Teléfono",
+        "etiqueta": "203 Teléfono",
+        "naturaleza": "gasto",
+        "nombre": "Teléfono",
+        "orden": 80
+    },
+    {
+        "codigo": "204",
+        "cuenta": "G",
+        "descripcion": "204 Gas",
+        "etiqueta": "204 Gas",
+        "naturaleza": "gasto",
+        "nombre": "Gas",
+        "orden": 90
+    },
+    {
+        "codigo": "205",
+        "cuenta": "G",
+        "descripcion": "205 Otros suministros",
+        "etiqueta": "205 Otros suministros",
+        "naturaleza": "gasto",
+        "nombre": "Otros suministros",
+        "orden": 100
+    },
+    {
+        "codigo": "206",
+        "cuenta": "G",
+        "descripcion": "206 Comunidad vecinos, seguros e impuestos",
+        "etiqueta": "206 Comunidad vecinos, seguros e impuestos",
+        "naturaleza": "gasto",
+        "nombre": "Comunidad vecinos, seguros e impuestos",
+        "orden": 110
+    },
+    {
+        "codigo": "207",
+        "cuenta": "G",
+        "descripcion": "207 Alquileres",
+        "etiqueta": "207 Alquileres",
+        "naturaleza": "gasto",
+        "nombre": "Alquileres",
+        "orden": 120
+    },
+    {
+        "codigo": "208",
+        "cuenta": "G",
+        "descripcion": "208 Instalación y conservación",
+        "etiqueta": "208 Instalación y conservación",
+        "naturaleza": "gasto",
+        "nombre": "Instalación y conservación",
+        "orden": 130
+    },
+    {
+        "codigo": "209",
+        "cuenta": "G",
+        "descripcion": "209 Administración: sueldos y Seguridad Social",
+        "etiqueta": "209 Administración: sueldos y Seguridad Social",
+        "naturaleza": "gasto",
+        "nombre": "Administración: sueldos y Seguridad Social",
+        "orden": 140
+    },
+    {
+        "codigo": "210",
+        "cuenta": "G",
+        "descripcion": "210 Administración: resto",
+        "etiqueta": "210 Administración: resto",
+        "naturaleza": "gasto",
+        "nombre": "Administración: resto",
+        "orden": 150
+    },
+    {
+        "codigo": "211",
+        "cuenta": "G",
+        "descripcion": "211 Asociación: cantidad que el ctr paga a la Asociación gestora",
+        "etiqueta": "211 Asociación",
+        "naturaleza": "gasto",
+        "nombre": "Asociación",
+        "orden": 160
+    },
+    {
+        "codigo": "212",
+        "cuenta": "G",
+        "descripcion": "212 Suscripciones, papelería, libros",
+        "etiqueta": "212 Suscripciones, papelería, libros",
+        "naturaleza": "gasto",
+        "nombre": "Suscripciones, papelería, libros",
+        "orden": 170
+    },
+    {
+        "codigo": "213",
+        "cuenta": "G",
+        "descripcion": "213 Coches",
+        "etiqueta": "213 Coches",
+        "naturaleza": "gasto",
+        "nombre": "Coches",
+        "orden": 180
+    },
+    {
+        "codigo": "214",
+        "cuenta": "G",
+        "descripcion": "214 Reyes",
+        "etiqueta": "214 Reyes",
+        "naturaleza": "gasto",
+        "nombre": "Reyes",
+        "orden": 190
+    },
+    {
+        "codigo": "215",
+        "cuenta": "G",
+        "descripcion": "215 Otros",
+        "etiqueta": "215 Otros",
+        "naturaleza": "gasto",
+        "nombre": "Otros",
+        "orden": 200
+    },
+    {
+        "codigo": "32",
+        "cuenta": "G",
+        "descripcion": "32 Disponible a 1 de enero",
+        "etiqueta": "32 Disponible a 1 de enero",
+        "naturaleza": "disponible",
+        "nombre": "Disponible a 1 de enero",
+        "orden": 210
+    },
+    {
+        "codigo": "41",
+        "cuenta": "G",
+        "descripcion": "41 Banco a Caja",
+        "etiqueta": "41 Banco a Caja",
+        "naturaleza": "transferencia",
+        "nombre": "Banco a Caja",
+        "orden": 220
+    },
+    {
+        "codigo": "42",
+        "cuenta": "G",
+        "descripcion": "42 Caja a banco",
+        "etiqueta": "42 Caja a banco",
+        "naturaleza": "transferencia",
+        "nombre": "Caja a banco",
+        "orden": 230
+    }
+]

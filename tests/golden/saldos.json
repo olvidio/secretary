@@ -1,0 +1,71 @@
+{
+    "banco": "2224.44",
+    "banco_es": "2.224,44",
+    "caja": "2870.00",
+    "caja_es": "2.870,00",
+    "hasta": "2026-06-30",
+    "por_persona": [
+        {
+            "iniciales": "ac",
+            "nombre": "Antoni Companys",
+            "saldo_a": "0.00",
+            "saldo_a_es": "0,00"
+        },
+        {
+            "iniciales": "fb",
+            "nombre": "Francesc Boix",
+            "saldo_a": "130.00",
+            "saldo_a_es": "130,00"
+        },
+        {
+            "iniciales": "ds",
+            "nombre": "Daniel Serrabou",
+            "saldo_a": "0.00",
+            "saldo_a_es": "0,00"
+        },
+        {
+            "iniciales": "jrm",
+            "nombre": "Josep Maria Ribot",
+            "saldo_a": "0.00",
+            "saldo_a_es": "0,00"
+        },
+        {
+            "iniciales": "rd",
+            "nombre": "Rafa Dionis",
+            "saldo_a": "86.36",
+            "saldo_a_es": "86,36"
+        },
+        {
+            "iniciales": "af",
+            "nombre": "Agustí Fontarnau",
+            "saldo_a": "0.00",
+            "saldo_a_es": "0,00"
+        },
+        {
+            "iniciales": "jmg",
+            "nombre": "Josep Maria Grau",
+            "saldo_a": "0.00",
+            "saldo_a_es": "0,00"
+        },
+        {
+            "iniciales": "qr",
+            "nombre": "Quico Ribas",
+            "saldo_a": "0.00",
+            "saldo_a_es": "0,00"
+        },
+        {
+            "iniciales": "pp",
+            "nombre": "Pere Puig",
+            "saldo_a": "0.00",
+            "saldo_a_es": "0,00"
+        },
+        {
+            "iniciales": "mv",
+            "nombre": "Manel Vicente",
+            "saldo_a": "0.00",
+            "saldo_a_es": "0,00"
+        }
+    ],
+    "saldo_a": "216.36",
+    "saldo_a_es": "216,36"
+}

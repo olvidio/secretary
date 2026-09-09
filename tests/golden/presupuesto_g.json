@@ -1,0 +1,44 @@
+[
+    {
+        "concepto_codigo": "11",
+        "cuenta": "G",
+        "previsto": "53540.00",
+        "previsto_es": "53.540,00"
+    },
+    {
+        "concepto_codigo": "14",
+        "cuenta": "G",
+        "previsto": "13276.00",
+        "previsto_es": "13.276,00"
+    },
+    {
+        "concepto_codigo": "208",
+        "cuenta": "G",
+        "previsto": "500.00",
+        "previsto_es": "500,00"
+    },
+    {
+        "concepto_codigo": "210",
+        "cuenta": "G",
+        "previsto": "16616.00",
+        "previsto_es": "16.616,00"
+    },
+    {
+        "concepto_codigo": "211",
+        "cuenta": "G",
+        "previsto": "48500.00",
+        "previsto_es": "48.500,00"
+    },
+    {
+        "concepto_codigo": "212",
+        "cuenta": "G",
+        "previsto": "200.00",
+        "previsto_es": "200,00"
+    },
+    {
+        "concepto_codigo": "214",
+        "cuenta": "G",
+        "previsto": "1000.00",
+        "previsto_es": "1.000,00"
+    }
+]

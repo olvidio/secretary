@@ -1,0 +1,92 @@
+[
+    {
+        "concepto_codigo": "4",
+        "cuenta": "P",
+        "previsto": "5523.00",
+        "previsto_es": "5.523,00"
+    },
+    {
+        "concepto_codigo": "21",
+        "cuenta": "P",
+        "previsto": "109240.00",
+        "previsto_es": "109.240,00"
+    },
+    {
+        "concepto_codigo": "22",
+        "cuenta": "P",
+        "previsto": "12840.00",
+        "previsto_es": "12.840,00"
+    },
+    {
+        "concepto_codigo": "23",
+        "cuenta": "P",
+        "previsto": "3700.00",
+        "previsto_es": "3.700,00"
+    },
+    {
+        "concepto_codigo": "24",
+        "cuenta": "P",
+        "previsto": "22500.00",
+        "previsto_es": "22.500,00"
+    },
+    {
+        "concepto_codigo": "25",
+        "cuenta": "P",
+        "previsto": "12270.00",
+        "previsto_es": "12.270,00"
+    },
+    {
+        "concepto_codigo": "26",
+        "cuenta": "P",
+        "previsto": "16700.00",
+        "previsto_es": "16.700,00"
+    },
+    {
+        "concepto_codigo": "27",
+        "cuenta": "P",
+        "previsto": "14400.00",
+        "previsto_es": "14.400,00"
+    },
+    {
+        "concepto_codigo": "28",
+        "cuenta": "P",
+        "previsto": "1500.00",
+        "previsto_es": "1.500,00"
+    },
+    {
+        "concepto_codigo": "71",
+        "cuenta": "P",
+        "previsto": "4367.00",
+        "previsto_es": "4.367,00"
+    },
+    {
+        "concepto_codigo": "73",
+        "cuenta": "P",
+        "previsto": "30000.00",
+        "previsto_es": "30.000,00"
+    },
+    {
+        "concepto_codigo": "75",
+        "cuenta": "P",
+        "previsto": "20000.00",
+        "previsto_es": "20.000,00"
+    },
+    {
+        "concepto_codigo": "111",
+        "cuenta": "P",
+        "previsto": "262316.00",
+        "previsto_es": "262.316,00"
+    },
+    {
+        "concepto_codigo": "112",
+        "cuenta": "P",
+        "previsto": "4000.00",
+        "previsto_es": "4.000,00"
+    },
+    {
+        "concepto_codigo": "113",
+        "cuenta": "P",
+        "previsto": "0.00",
+        "previsto_es": "0,00"
+    }
+]

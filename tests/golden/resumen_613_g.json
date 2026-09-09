@@ -1,0 +1,248 @@
+{
+    "config": {
+        "anio": 2026,
+        "centro": "Montagut",
+        "fecha_cierre": "2026-06-30",
+        "fecha_inicio": "2026-01-01",
+        "media_cocina_acum": null,
+        "media_cocina_mes": null,
+        "meses": 6,
+        "modo_ejercicio": "Año",
+        "num_residentes": 5,
+        "observaciones_613_g": null,
+        "observaciones_613_p": null,
+        "saldo_cc_personales": null,
+        "tipo_cierre": "vivienda",
+        "version": "7"
+    },
+    "cuenta": "G",
+    "gasto_vivienda_persona_mes": "991.90",
+    "gasto_vivienda_persona_mes_es": "991,90",
+    "lineas": [
+        {
+            "codigo": "11",
+            "etiqueta": "Vivienda \/ local",
+            "pct": 0.811692,
+            "previsto": "26770.00",
+            "previsto_es": "26.770,00",
+            "realizado": "21729.00",
+            "realizado_es": "21.729,00"
+        },
+        {
+            "codigo": "12",
+            "etiqueta": "Donativos",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "80.00",
+            "realizado_es": "80,00"
+        },
+        {
+            "codigo": "13",
+            "etiqueta": "Otras ayudas",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "14",
+            "etiqueta": "Ayudas de los del ctr para la sede",
+            "pct": 0,
+            "previsto": "6638.00",
+            "previsto_es": "6.638,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "15",
+            "etiqueta": "Ayudas extraordinarias",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "201",
+            "etiqueta": "Agua",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "202",
+            "etiqueta": "Luz",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "203",
+            "etiqueta": "Teléfono",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "204",
+            "etiqueta": "Gas",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "205",
+            "etiqueta": "Otros suministros",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "206",
+            "etiqueta": "Comunidad vecinos, seguros e impuestos",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "207",
+            "etiqueta": "Alquileres",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "208",
+            "etiqueta": "Instalación y conservación",
+            "pct": 0.07944,
+            "previsto": "250.00",
+            "previsto_es": "250,00",
+            "realizado": "19.86",
+            "realizado_es": "19,86"
+        },
+        {
+            "codigo": "209",
+            "etiqueta": "Administración: sueldos y Seguridad Social",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "1000.00",
+            "realizado_es": "1.000,00"
+        },
+        {
+            "codigo": "210",
+            "etiqueta": "Administración: resto",
+            "pct": 0.109094,
+            "previsto": "8308.00",
+            "previsto_es": "8.308,00",
+            "realizado": "906.35",
+            "realizado_es": "906,35"
+        },
+        {
+            "codigo": "211",
+            "etiqueta": "Asociación",
+            "pct": 1.102227,
+            "previsto": "24250.00",
+            "previsto_es": "24.250,00",
+            "realizado": "26729.00",
+            "realizado_es": "26.729,00"
+        },
+        {
+            "codigo": "212",
+            "etiqueta": "Suscripciones, papelería, libros",
+            "pct": 0.6525,
+            "previsto": "100.00",
+            "previsto_es": "100,00",
+            "realizado": "65.25",
+            "realizado_es": "65,25"
+        },
+        {
+            "codigo": "213",
+            "etiqueta": "Coches",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
+        },
+        {
+            "codigo": "214",
+            "etiqueta": "Reyes",
+            "pct": 0.27324,
+            "previsto": "500.00",
+            "previsto_es": "500,00",
+            "realizado": "136.62",
+            "realizado_es": "136,62"
+        },
+        {
+            "codigo": "215",
+            "etiqueta": "Otros",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "900.00",
+            "realizado_es": "900,00"
+        },
+        {
+            "codigo": "32",
+            "etiqueta": "Disponible al inicio",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "7646.38",
+            "realizado_es": "7.646,38"
+        }
+    ],
+    "media_cocina_acum": null,
+    "media_cocina_mes": null,
+    "num_personas": 5,
+    "observaciones": null,
+    "saldo_banco": "2224.44",
+    "saldo_banco_es": "2.224,44",
+    "saldo_caja": "2870.00",
+    "saldo_caja_es": "2.870,00",
+    "totales": {
+        "disponible": {
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "-301.70",
+            "realizado_es": "-301,70"
+        },
+        "gastos": {
+            "pct": 0.890717,
+            "previsto": "33408.00",
+            "previsto_es": "33.408,00",
+            "realizado": "29757.08",
+            "realizado_es": "29.757,08"
+        },
+        "ingresos": {
+            "pct": 0.652808,
+            "previsto": "33408.00",
+            "previsto_es": "33.408,00",
+            "realizado": "21809.00",
+            "realizado_es": "21.809,00"
+        },
+        "saldo_ingresos_gastos": {
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "-7948.08",
+            "realizado_es": "-7.948,08"
+        }
+    }
+}
