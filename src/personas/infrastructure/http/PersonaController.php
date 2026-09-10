@@ -36,6 +36,7 @@ final class PersonaController
             $resultado = $this->guardar->ejecutar($request->json());
             $fila = $resultado['persona']->toArray();
             $fila['email'] = $resultado['persona']->email ?? '';
+            $fila['vivienda_aporta_generales'] = $resultado['persona']->viviendaAportaGenerales;
             $payload = ['persona' => $fila];
             if ($resultado['password_inicial'] !== null) {
                 $payload['password_inicial'] = $resultado['password_inicial'];

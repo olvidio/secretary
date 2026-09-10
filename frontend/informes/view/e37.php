@@ -5,7 +5,7 @@
 </form>
 <table id="tabla-e37">
     <thead>
-    <tr><th>Fecha</th><th>Inic.</th><th>Concepto</th><th>Observaciones</th><th class="num">Cantidad</th></tr>
+    <tr><th>Fecha</th><th>Inic.</th><th>Concepto</th><th>Observaciones</th><th class="num">Cantidad</th><th></th></tr>
     </thead>
     <tbody></tbody>
 </table>
@@ -29,7 +29,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const tr = document.createElement('tr');
       tr.innerHTML = `<td>${esc(a.fecha_es)}</td><td>${esc(a.iniciales || '')}</td>
         <td>${esc(a.concepto_codigo)}</td><td>${esc(a.observaciones || '')}</td>
-        <td class="num">${esc(a.cantidad_es)}</td>`;
+        <td class="num">${esc(a.cantidad_es)}</td>
+        <td class="col-acc">${accionesApunteHtml(a)}</td>`;
+      enlazarAccionesApunte(tr, a, load);
       tb.appendChild(tr);
     });
     const t = r.totales;

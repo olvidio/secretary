@@ -7,7 +7,11 @@ namespace src\informes\application;
 use src\ambito\application\ResolverAmbitoActual;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
+use src\informes\domain\contracts\Informe613MesRepository;
 use src\informes\domain\services\Calculadora613;
+use src\plan\domain\contracts\PartidaLaboresRepository;
+use src\plan\domain\services\CatalogoPlanesContables;
+use src\plan\domain\services\Estructura613P;
 use src\personas\domain\contracts\PersonaRepository;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
 use src\shared\domain\value_objects\Dinero;
@@ -20,6 +24,8 @@ final class ObtenerResumen613
         private readonly PresupuestoRepository $presupuesto,
         private readonly PersonaRepository $personas,
         private readonly ResolverAmbitoActual $ambito,
+        private readonly PartidaLaboresRepository $partidasLabores,
+        private readonly Informe613MesRepository $informes613Mes,
     ) {
     }
 
@@ -59,7 +65,15 @@ final class ObtenerResumen613
         }
 
         $presu = $this->presupuesto->listar($cuenta);
-        $defs = $cuenta === 'P' ? Calculadora613::estructuraP() : Calculadora613::estructuraG();
+        $partidasLabores = [];
+        $codigosLabores = [];
+        if ($cuenta === 'P') {
+            $partidasLabores = $this->partidasLabores->paraCentro($contexto->centroId);
+            $codigosLabores = Estructura613P::codigosLabores($partidasLabores);
+            $defs = Calculadora613::estructuraP($partidasLabores);
+        } else {
+            $defs = Calculadora613::estructuraG();
+        }
         $lineas = Calculadora613::lineas($realizado, $presu, $periodo, $defs, $saldoCodigo9);
 
         $index = [];
@@ -117,7 +131,7 @@ final class ObtenerResumen613
             $ingresos = $sum(['111', '112', '113', '12']);
             $gastos = $sum(['21', '22', '23', '24', '25', '26', '27', '28']);
             $atLab = $sum(['51', '52']);
-            $lab = $sum(['71', '72', '73', '74', '75', '76', '77', '78', '79']);
+            $lab = $sum($codigosLabores);
             $dispPrev = (new Dinero($ingresos['previsto']))->sub(new Dinero($gastos['previsto']));
             $dispReal = (new Dinero($ingresos['realizado']))->sub(new Dinero($gastos['realizado']));
             $ay = $index['4'] ?? $sum(['4']);
@@ -142,8 +156,9 @@ final class ObtenerResumen613
                     'realizado_es' => $saldoReal->formatEs(),
                 ],
             ];
-            $payload['observaciones'] = $cfg->observaciones613P;
-            $payload['saldo_cc_personales'] = $cfg->saldoCcPersonales;
+            $this->aplicarCamposManuales($payload, $contexto->ejercicioId, $cfg->fechaCierre, 'P');
+            $payload['plan_contable'] = CatalogoPlanesContables::H16N;
+            $payload['partidas_labores'] = $codigosLabores;
         } else {
             $ingresos = $sum(['11', '12', '13', '14', '15']);
             $gastos = $sum(['201', '202', '203', '204', '205', '206', '207', '208', '209', '210', '211', '212', '213', '214', '215']);
@@ -182,15 +197,33 @@ final class ObtenerResumen613
             $payload['num_personas'] = $n;
             $payload['gasto_vivienda_persona_mes'] = $gastoViv->toString();
             $payload['gasto_vivienda_persona_mes_es'] = $gastoViv->formatEs();
-            $payload['media_cocina_mes'] = $cfg->mediaCocinaMes;
-            $payload['media_cocina_acum'] = $cfg->mediaCocinaAcum;
             $payload['saldo_caja'] = $caja->toString();
             $payload['saldo_caja_es'] = $caja->formatEs();
             $payload['saldo_banco'] = $banco->toString();
             $payload['saldo_banco_es'] = $banco->formatEs();
-            $payload['observaciones'] = $cfg->observaciones613G;
+            $this->aplicarCamposManuales($payload, $contexto->ejercicioId, $cfg->fechaCierre, 'G');
         }
 
         return $payload;
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function aplicarCamposManuales(
+        array &$payload,
+        int $ejercicioId,
+        \DateTimeImmutable $fechaCierre,
+        string $cuenta,
+    ): void {
+        $manual = $this->informes613Mes->buscar($ejercicioId, $fechaCierre, $cuenta);
+        $payload['observaciones'] = $manual?->observaciones;
+        $payload['enviado'] = $manual?->enviado ?? false;
+        if ($cuenta === 'P') {
+            $payload['saldo_cc_personales'] = $manual?->saldoCcPersonales;
+        } else {
+            $payload['media_cocina_mes'] = $manual?->mediaCocinaMes;
+            $payload['media_cocina_acum'] = $manual?->mediaCocinaAcum;
+            $payload['dinero_arqueo_caja'] = $manual?->dineroArqueoCaja;
+            $payload['dinero_arqueo_banco'] = $manual?->dineroArqueoBanco;
+        }
     }
 }

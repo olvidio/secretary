@@ -31,6 +31,22 @@
     <p class="muted">Mientras estemos de pruebas: vaciar asientos, remesas y arqueos para volver a cargar el Excel. Quedan el centro, los usuarios y los nombres.</p>
     <button type="button" id="btn-vaciar" class="peligro">Vaciar datos (pruebas)</button>
     <p class="ok" id="msg-vaciar" hidden></p>
+
+    <section id="sec-labores" hidden>
+        <h3>VII. Otras labores apostólicas (613 P)</h3>
+        <p class="muted" id="labores-ayuda">Partidas del capítulo VII en el plan H16n. Aparecen en el 613 P y como conceptos de gasto en P.</p>
+        <table id="tabla-labores">
+            <thead>
+            <tr><th>Código</th><th>Etiqueta</th><th></th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <p class="grid-form" style="margin-top:.5rem">
+            <button type="button" id="btn-add-labor">Añadir partida</button>
+            <button type="button" id="btn-save-labores">Guardar partidas</button>
+        </p>
+        <p class="ok" id="msg-labores" hidden></p>
+    </section>
 </section>
 
 <section>
@@ -60,6 +76,50 @@ function textoImportacion(imp) {
   if (!imp) return '';
   return ' Importados ' + (imp.personas || 0) + ' nombres y ' + (imp.asientos || 0) + ' asientos.';
 }
+function filaLabor(p = {}) {
+  const tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td><input name="codigo" required pattern="7\\d{1,2}" maxlength="3" ' +
+    'placeholder="71" value="' + esc(p.codigo || '') + '"></td>' +
+    '<td><input name="etiqueta" required value="' + esc(p.etiqueta || '') + '"></td>' +
+    '<td><button type="button" class="btn-quitar">Quitar</button></td>';
+  tr.querySelector('.btn-quitar')?.addEventListener('click', () => tr.remove());
+  return tr;
+}
+
+function partidasDelFormulario() {
+  return [...document.querySelectorAll('#tabla-labores tbody tr')].map((tr) => ({
+    codigo: tr.querySelector('[name=codigo]').value.trim(),
+    etiqueta: tr.querySelector('[name=etiqueta]').value.trim(),
+  }));
+}
+
+function sugerirCodigoLabor() {
+  const usados = new Set(partidasDelFormulario().map((p) => p.codigo));
+  for (let n = 71; n <= 79; n++) {
+    const c = String(n);
+    if (!usados.has(c)) return c;
+  }
+  for (let n = 790; n <= 799; n++) {
+    const c = String(n);
+    if (!usados.has(c)) return c;
+  }
+  return '791';
+}
+
+async function loadLabores() {
+  const sec = document.getElementById('sec-labores');
+  const r = await api('/api/centros/partidas-labores');
+  if (!r.ok) {
+    sec.hidden = true;
+    return;
+  }
+  sec.hidden = false;
+  const tb = document.querySelector('#tabla-labores tbody');
+  tb.innerHTML = '';
+  (r.partidas || []).forEach((p) => tb.appendChild(filaLabor(p)));
+}
+
 async function loadCentro() {
   const r = await api('/api/centros');
   const p = document.getElementById('centro-actual');
@@ -70,7 +130,9 @@ async function loadCentro() {
     return;
   }
   const c = r.centro || {};
-  p.textContent = (c.nombre || c.codigo || '') + (c.tipo_cierre ? ' · cierre ' + c.tipo_cierre : '');
+  p.textContent = (c.nombre || c.codigo || '')
+    + ' · plan H16n'
+    + (c.tipo_cierre ? ' · cierre ' + c.tipo_cierre : '');
   (r.usuarios || []).forEach((u) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${esc(u.alias)}</td><td>${esc(u.email)}</td><td>${esc(u.nombre)}</td><td>${esc(u.rol)}</td>`;
@@ -84,6 +146,22 @@ document.addEventListener('DOMContentLoaded', () => {
   if (ini && !ini.value) ini.value = year + '-01-01';
   if (fin && !fin.value) fin.value = year + '-12-31';
   loadCentro();
+  loadLabores();
+  document.getElementById('btn-add-labor')?.addEventListener('click', () => {
+    const tb = document.querySelector('#tabla-labores tbody');
+    tb.appendChild(filaLabor({ codigo: sugerirCodigoLabor(), etiqueta: '' }));
+    tb.lastElementChild?.querySelector('[name=etiqueta]')?.focus();
+  });
+  document.getElementById('btn-save-labores')?.addEventListener('click', async () => {
+    const msg = document.getElementById('msg-labores');
+    msg.hidden = true;
+    const partidas = partidasDelFormulario();
+    const s = await api('/api/centros/partidas-labores', { method: 'POST', body: { partidas } });
+    if (!s.ok) return alert(s.error);
+    msg.hidden = false;
+    msg.textContent = 'Partidas guardadas.';
+    await loadLabores();
+  });
   document.getElementById('form-usuario').onsubmit = async (ev) => {
     ev.preventDefault();
     const s = await api('/api/centros/usuarios', {method:'POST', body: formObj(ev.target)});

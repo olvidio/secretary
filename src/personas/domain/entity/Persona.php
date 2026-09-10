@@ -36,6 +36,8 @@ final class Persona
         // golden master compara ListarPersonas byte a byte. La pantalla Nombres lo
         // añade encima al listar.
         public readonly ?string $email = null,
+        /** Si el gasto P/21 debe tener entrada G/11. Independiente del tipo de centro. */
+        public readonly bool $viviendaAportaGenerales = true,
     ) {
     }
 
@@ -62,7 +64,12 @@ final class Persona
         return $mes >= $ini || $mes <= $fin;
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * Golden master: no incluir vivienda_aporta_generales (se añade en
+     * ListarPersonas::ejecutarDeCentro).
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

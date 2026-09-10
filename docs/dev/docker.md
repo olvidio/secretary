@@ -21,8 +21,27 @@ El Excel de un segundo centro se carga en **Centros** (al crearlo o después). `
 
 No citar los valores `POSTGRES_*` en el `docker-compose.yml` (las comillas acaba metiéndolas en el usuario).
 
-La VPN del equipo (tabla de rutas 220) ya excluye `172.17.0.0/16` y `172.19.0.0/16` (Orbix). Este stack usa `172.31.0.0/16`. Si tras un reconectado de VPN no abre http://127.0.0.1:8005:
+## VPN (FortiClient) y Docker
+
+FortiClient usa la **tabla de rutas 220**. Sin un `throw`, el tráfico a `172.x` (redes Docker) entra en el túnel y `http://127.0.0.1:8005` deja de responder.
+
+| Red | Uso |
+| --- | --- |
+| `172.17.0.0/16` | docker0 |
+| `172.19.0.0/16` | Orbix |
+| `172.31.0.0/16` | Secretario |
+
+**Arreglo permanente (FortiClient):** instala el timer que reaplica los throws al arranque y cada minuto (FortiClient regenera la tabla al reconectar):
 
 ```bash
-sudo ip route add throw 172.31.0.0/16 table 220
+cd /home/dani/docker_images/secretary
+sudo ./install-vpn-throw.sh
+```
+
+Atajo puntual: `sudo ./vpn-throw.sh`
+
+**Si también usas strongSwan** (`/etc/swanctl/conectar-dlb*.sh`), añade en `/etc/swanctl/swanctl.conf` un bypass igual que Orbix (bloque `bypass-orbix-net`) para `172.31.0.0/16`, luego:
+
+```bash
+sudo swanctl --load-conns
 ```

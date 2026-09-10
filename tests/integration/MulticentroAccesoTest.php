@@ -212,6 +212,7 @@ final class MulticentroAccesoTest extends TestCase
             $crearEjercicio,
             new PdoPobladorCentro($this->pdo),
             new AsegurarIdentidadCentro(new PdoIdentidadRepository($this->pdo)),
+            new \src\plan\infrastructure\persistence\PdoPartidaLaboresRepository($this->pdo),
         );
     }
 
@@ -231,6 +232,7 @@ final class MulticentroAccesoTest extends TestCase
             new VincularEmailPersona($identidades, $personas),
             new AsegurarCuentaCorrientePersona($cuentas),
             new AsegurarPlanPersonal($cuentas),
+            $config,
         );
     }
 

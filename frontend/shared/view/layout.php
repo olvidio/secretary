@@ -51,6 +51,7 @@
             <span>Utilidades</span>
             <a href="/fecha-cierre" class="<?= ($nav ?? '') === 'fecha-cierre' ? 'on' : '' ?>">Fecha cierre</a>
             <a href="/saldos" class="<?= ($nav ?? '') === 'saldos' ? 'on' : '' ?>">Saldos</a>
+            <a href="/comprobaciones" class="<?= ($nav ?? '') === 'comprobaciones' ? 'on' : '' ?>">Comprobaciones</a>
             <a href="/conceptos-p" class="<?= ($nav ?? '') === 'conceptos-p' ? 'on' : '' ?>">Conceptos P</a>
             <a href="/conceptos-g" class="<?= ($nav ?? '') === 'conceptos-g' ? 'on' : '' ?>">Conceptos G</a>
             <a href="/plantillas-p" class="<?= ($nav ?? '') === 'plantillas-p' ? 'on' : '' ?>">Plantillas P</a>
@@ -71,5 +72,6 @@ if (!empty($contentView) && is_file($contentView)) {
 ?>
 </main>
 <script src="/js/app.js"></script>
+<script src="/js/editar-apunte.js"></script>
 </body>
 </html>

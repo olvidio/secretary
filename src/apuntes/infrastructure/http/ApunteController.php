@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace src\apuntes\infrastructure\http;
 
 use InvalidArgumentException;
+use src\apuntes\application\ActualizarApunte;
 use src\apuntes\application\BorrarApunte;
 use src\apuntes\application\BuscarSugerenciasObservacion;
 use src\apuntes\application\CalcularCuadreApuntesA;
-use src\apuntes\application\CrearApunte;
+use src\apuntes\application\CrearApuntesDeEntrada;
 use src\apuntes\application\ListarApuntes;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
@@ -18,7 +19,8 @@ final class ApunteController
 {
     public function __construct(
         private readonly ListarApuntes $listar,
-        private readonly CrearApunte $crear,
+        private readonly CrearApuntesDeEntrada $crear,
+        private readonly ActualizarApunte $actualizar,
         private readonly BorrarApunte $borrar,
         private readonly BuscarSugerenciasObservacion $sugerenciasObs,
         private readonly CalcularCuadreApuntesA $cuadreApuntesA,
@@ -76,6 +78,23 @@ final class ApunteController
             return ContestarJson::ok(['apuntes' => $arr]);
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
+        }
+    }
+
+    public function update(Request $request, array $vars): Response
+    {
+        try {
+            $actualizados = $this->actualizar->ejecutar((int) $vars['id'], $request->json());
+            $arr = [];
+            foreach ($actualizados as $a) {
+                $arr[] = $a->toArray();
+            }
+
+            return ContestarJson::ok(['apuntes' => $arr]);
+        } catch (InvalidArgumentException $e) {
+            $codigo = $e->getMessage() === 'Apunte no encontrado' ? 404 : 400;
+
+            return ContestarJson::error($e->getMessage(), $codigo);
         }
     }
 

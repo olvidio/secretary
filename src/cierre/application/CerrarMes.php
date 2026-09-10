@@ -74,7 +74,7 @@ final class CerrarMes
         $this->asientos->borrarCierresEntre($contexto->ejercicioId, $desde, $hasta);
         $conceptoP = $cfg->tipoCierre === 'necesidades' ? '6' : '21';
         $conceptoG = $cfg->tipoCierre === 'necesidades' ? '14' : '11';
-        $obs = 'Cierre mes ' . $cierre->format('m/Y');
+        $obs = 'automático';
         $creados = [];
         foreach ($reparto as $r) {
             if ($r['importe']->isZero()) {

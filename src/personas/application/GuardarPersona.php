@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use src\acceso\application\VincularEmailPersona;
 use src\ambito\application\AsegurarCuentaCorrientePersona;
 use src\ambito\application\ResolverAmbitoActual;
+use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\personal\application\AsegurarPlanPersonal;
 use src\personas\domain\contracts\PersonaRepository;
 use src\personas\domain\entity\Persona;
@@ -21,6 +22,7 @@ final class GuardarPersona
         private readonly VincularEmailPersona $vincularEmail,
         private readonly AsegurarCuentaCorrientePersona $cuentaCorriente,
         private readonly AsegurarPlanPersonal $planPersonal,
+        private readonly ConfiguracionRepository $config,
     ) {
     }
 
@@ -69,6 +71,10 @@ final class GuardarPersona
             : $contexto->centroId;
         $activo = $existente !== null ? $existente->activo : true;
         $emailPersona = $existente !== null ? $existente->email : null;
+        $aportaDefault = $existente !== null
+            ? $existente->viviendaAportaGenerales
+            : $this->aportaPorDefectoCentro();
+        $aporta = self::boolFlag($datos['vivienda_aporta_generales'] ?? null, $aportaDefault);
         $persona = new Persona(
             $id,
             $nombre,
@@ -83,6 +89,7 @@ final class GuardarPersona
             $centroPersona,
             $activo,
             $emailPersona,
+            $aporta,
         );
         $guardada = $this->repo->guardar($persona);
         $this->cuentaCorriente->ejecutar($guardada);
@@ -112,5 +119,29 @@ final class GuardarPersona
         }
 
         return $n;
+    }
+
+    private function aportaPorDefectoCentro(): bool
+    {
+        return $this->config->get()->tipoCierre === 'vivienda';
+    }
+
+    private static function boolFlag(mixed $v, bool $default): bool
+    {
+        if ($v === null || $v === '') {
+            return $default;
+        }
+        if (is_bool($v)) {
+            return $v;
+        }
+        $s = strtolower(trim((string) $v));
+        if (in_array($s, ['1', 'true', 'si', 'sí', 'on'], true)) {
+            return true;
+        }
+        if (in_array($s, ['0', 'false', 'no', 'off'], true)) {
+            return false;
+        }
+
+        return $default;
     }
 }

@@ -1,5 +1,5 @@
 <h1>Nombres</h1>
-<p class="muted">El correo convierte a esa persona en usuario del libro personal de <em>este</em> centro. Si el correo es nuevo, se muestra una contraseña inicial para comunicársela una vez.</p>
+<p class="muted">El correo convierte a esa persona en usuario del libro personal de <em>este</em> centro. Si el correo es nuevo, se muestra una contraseña inicial para comunicársela una vez. «Vivienda aporta a generales» indica si un gasto P/21 debe tener la entrada G/11 (típico de n); si no, el 21 es solo personal (típico de agd). La exención de meses es para quien llega o se va a mitad de año (no se le pide movimiento ni entra en el cierre de vivienda esos meses). Quien no aporta a G debe dejarla vacía, para que Comprobaciones avise si no anota el mes.</p>
 <form id="form-persona" class="grid-form">
     <input type="hidden" name="id">
     <label>Nombre <input name="nombre" required></label>
@@ -11,6 +11,12 @@
     <label>Otro intervalo desde <input name="mes_exento2_inicio" type="number" min="1" max="12"></label>
     <label>Otro intervalo hasta <input name="mes_exento2_fin" type="number" min="1" max="12"></label>
     <label>Importe fijo vivienda <input name="importe_vivienda_fijo"></label>
+    <label>Vivienda aporta a generales
+        <select name="vivienda_aporta_generales">
+            <option value="1">Sí — P/21 tiene entrada G/11</option>
+            <option value="0">No — vivienda solo personal</option>
+        </select>
+    </label>
     <button type="submit">Guardar</button>
     <button type="button" id="btn-nuevo">Nuevo</button>
 </form>
@@ -19,7 +25,7 @@
     <thead>
     <tr>
         <th>#</th><th>Nombre</th><th>Apellidos</th><th>Iniciales</th><th>Correo</th>
-        <th>Exención</th><th>Vivienda fija</th><th></th>
+        <th>Exención</th><th>Vivienda fija</th><th>Aporta a G</th><th></th>
     </tr>
     </thead>
     <tbody></tbody>
@@ -35,8 +41,13 @@ async function loadPersonas() {
       <td>${esc(p.iniciales)}</td><td>${esc(p.email)}</td>
       <td>${p.mes_exento_inicio || ''}–${p.mes_exento_fin || ''} ${p.mes_exento2_inicio || ''}–${p.mes_exento2_fin || ''}</td>
       <td>${p.importe_vivienda_fijo || ''}</td>
+      <td>${p.vivienda_aporta_generales ? 'sí' : 'no'}</td>
       <td><button data-id="${p.id}">Editar</button> <button data-del="${p.id}">Borrar</button></td>`;
-    tr.querySelector('[data-id]').onclick = () => fillForm(document.getElementById('form-persona'), p);
+    tr.querySelector('[data-id]').onclick = () => {
+      const form = document.getElementById('form-persona');
+      fillForm(form, p);
+      form.querySelector('[name=vivienda_aporta_generales]').value = p.vivienda_aporta_generales ? '1' : '0';
+    };
     tr.querySelector('[data-del]').onclick = async () => {
       if (!confirm('¿Borrar ' + p.iniciales + '?')) return;
       await api('/api/personas/' + p.id, {method:'DELETE'});
@@ -45,12 +56,19 @@ async function loadPersonas() {
     tb.appendChild(tr);
   });
 }
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  let aportaDefault = '1';
+  const cfg = await api('/api/configuracion');
+  if (cfg.config && cfg.config.tipo_cierre === 'necesidades') {
+    aportaDefault = '0';
+  }
   loadPersonas();
   document.getElementById('btn-nuevo').onclick = () => {
     document.getElementById('form-persona').reset();
+    document.querySelector('[name=vivienda_aporta_generales]').value = aportaDefault;
     document.getElementById('msg-password').hidden = true;
   };
+  document.querySelector('[name=vivienda_aporta_generales]').value = aportaDefault;
   document.getElementById('form-persona').onsubmit = async (ev) => {
     ev.preventDefault();
     const s = await api('/api/personas', {method:'POST', body: formObj(ev.target)});
@@ -63,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
       msg.hidden = true;
     }
     ev.target.reset();
+    document.querySelector('[name=vivienda_aporta_generales]').value = aportaDefault;
     loadPersonas();
   };
 });

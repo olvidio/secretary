@@ -35,6 +35,7 @@ final class ListarPersonas
         foreach ($this->repo->listarDeCentro($centroId) as $p) {
             $fila = $p->toArray();
             $fila['email'] = $p->email ?? '';
+            $fila['vivienda_aporta_generales'] = $p->viviendaAportaGenerales;
             $out[] = $fila;
         }
 

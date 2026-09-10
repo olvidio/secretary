@@ -7,6 +7,7 @@ namespace src\arqueo\infrastructure\http;
 use InvalidArgumentException;
 use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\domain\contracts\CuentaFisicaRepository;
+use src\arqueo\application\BuscarCapuchinos;
 use src\arqueo\application\GuardarArqueo;
 use src\arqueo\domain\contracts\ArqueoRepository;
 use src\asientos\domain\contracts\AsientoRepository;
@@ -22,6 +23,7 @@ final class ArqueoController
     public function __construct(
         private readonly ArqueoRepository $repo,
         private readonly GuardarArqueo $guardar,
+        private readonly BuscarCapuchinos $buscarCapuchinos,
         private readonly CalcularSaldos $saldos,
         private readonly CuentaFisicaRepository $fisicas,
         private readonly AsientoRepository $asientos,
@@ -53,6 +55,20 @@ final class ArqueoController
                 $this->fisicas->listarActivasDeCentro($this->ambito->ejecutar()->centroId, 'caja'),
             ),
         ]);
+    }
+
+    public function capuchinos(Request $request, array $vars): Response
+    {
+        try {
+            $r = $this->buscarCapuchinos->ejecutar(
+                (string) ($request->query('diferencia') ?? ''),
+                $request->query('hasta'),
+            );
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+
+        return ContestarJson::ok($r);
     }
 
     public function save(Request $request, array $vars): Response

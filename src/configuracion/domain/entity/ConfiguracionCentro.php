@@ -18,11 +18,6 @@ final class ConfiguracionCentro
         public readonly string $tipoCierre,
         public readonly ?int $numResidentes,
         public readonly ?string $version,
-        public readonly ?string $observaciones613P,
-        public readonly ?string $observaciones613G,
-        public readonly ?string $mediaCocinaMes,
-        public readonly ?string $mediaCocinaAcum,
-        public readonly ?string $saldoCcPersonales,
     ) {
     }
 
@@ -58,11 +53,6 @@ final class ConfiguracionCentro
             $this->tipoCierre,
             $this->numResidentes,
             $this->version,
-            $this->observaciones613P,
-            $this->observaciones613G,
-            $this->mediaCocinaMes,
-            $this->mediaCocinaAcum,
-            $this->saldoCcPersonales,
         );
     }
 
@@ -88,11 +78,6 @@ final class ConfiguracionCentro
             'tipo_cierre' => $this->tipoCierre,
             'num_residentes' => $this->numResidentes,
             'version' => $this->version,
-            'observaciones_613_p' => $this->observaciones613P,
-            'observaciones_613_g' => $this->observaciones613G,
-            'media_cocina_mes' => $this->mediaCocinaMes,
-            'media_cocina_acum' => $this->mediaCocinaAcum,
-            'saldo_cc_personales' => $this->saldoCcPersonales,
             'meses' => $this->periodo()->mesesTranscurridos(),
         ];
     }

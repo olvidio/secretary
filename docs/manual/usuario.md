@@ -47,9 +47,12 @@ rechaza en **Remesas**. La caja propia no se mueve al centro.
 - **A/B/C:** A = no toca caja/banco del centro; B = banco; C = caja.
 - En Entrada P/G, con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto.
 - Cantidad siempre positiva; el signo lo da el concepto.
+- En **Apuntes**, **Por concepto** y **E37** se puede editar o borrar (salvo remesas). Al abrir, el cursor va a observaciones; si se cambia otro campo, pide confirmación al guardar.
 - Conceptos **41** (banco→caja) y **42** (caja→banco): se genera el apunte espejo.
 - Los apuntes A de una persona deberían cuadrar (ingresos = gastos) si se anota el 111 de contrapartida.
+- En **Nombres**, «vivienda aporta a generales» (por persona, no n/agd del centro): si está en sí, cada P/21 origen A debe tener la misma cantidad en G/11. **Comprobaciones** lo verifica. Ahí también se ve quién no ha anotado movimiento en el mes de cierre o en los anteriores (la exención deja fuera esos meses).
+- En **Entrada G**, un gasto con iniciales anota cuatro apuntes: ingreso P/111, gasto P/21, ingreso G/11 y el gasto de G. Si la persona no aporta vivienda a generales, solo el gasto.
 
 ## Cierre de mes
 
-En centros de n se carga **vivienda (21)** y el ingreso G **11**. En agd/sss+ se carga **necesidades (6)** y G **14**. Quien tiene intervalo de meses en Nombres no se incluye. Importe fijo: columna de vivienda en Nombres.
+En centros de n se carga **vivienda (21)** y el ingreso G **11**. En agd/sss+ se carga **necesidades (6)** y G **14**. Solo quien tiene «vivienda aporta a generales» en sí. La exención de meses (llegada o salida a mitad de año) deja fuera esos meses; quien no aporta no usa la exención para quedar fuera del cierre. Importe fijo: columna de vivienda en Nombres. Observaciones: **automático**.

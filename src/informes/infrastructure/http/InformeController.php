@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace src\informes\infrastructure\http;
 
+use InvalidArgumentException;
 use src\informes\application\CalcularSaldos;
+use src\informes\application\ComprobarPersonalesGenerales;
+use src\informes\application\ComprobarSaldos;
+use src\informes\application\GuardarInforme613Mes;
 use src\informes\application\ObtenerE37;
 use src\informes\application\ObtenerResumen613;
 use src\informes\application\ObtenerSaldosTesoreria;
@@ -19,6 +23,9 @@ final class InformeController
         private readonly ObtenerE37 $e37,
         private readonly CalcularSaldos $saldos,
         private readonly ObtenerSaldosTesoreria $saldosTesoreria,
+        private readonly ComprobarSaldos $comprobarSaldos,
+        private readonly ComprobarPersonalesGenerales $comprobarPersonalesGenerales,
+        private readonly GuardarInforme613Mes $guardarInforme613Mes,
     ) {
     }
 
@@ -26,6 +33,18 @@ final class InformeController
     {
         $cuenta = strtoupper((string) ($vars['cuenta'] ?? 'P'));
         return ContestarJson::ok($this->resumen613->ejecutar($cuenta));
+    }
+
+    public function guardarManual613(Request $request, array $vars): Response
+    {
+        $cuenta = strtoupper((string) ($vars['cuenta'] ?? 'P'));
+        try {
+            $informe = $this->guardarInforme613Mes->ejecutar($cuenta, $request->json());
+
+            return ContestarJson::ok(['manual' => $informe->toArray()]);
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
     }
 
     public function e37(Request $request, array $vars = []): Response
@@ -49,5 +68,15 @@ final class InformeController
             'hasta' => $request->query('hasta'),
             'cuentas' => $this->saldosTesoreria->ejecutar($request->query('hasta')),
         ]);
+    }
+
+    public function comprobacionesSaldos(Request $request, array $vars = []): Response
+    {
+        return ContestarJson::ok($this->comprobarSaldos->ejecutar($request->query('hasta')));
+    }
+
+    public function comprobaciones(Request $request, array $vars = []): Response
+    {
+        return ContestarJson::ok($this->comprobarPersonalesGenerales->ejecutar($request->query('hasta')));
     }
 }

@@ -12,6 +12,8 @@ use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\contracts\PobladorCentro;
 use src\ambito\domain\entity\Centro;
 use src\ambito\domain\entity\Ejercicio;
+use src\plan\domain\contracts\PartidaLaboresRepository;
+use src\plan\domain\services\CatalogoPlanesContables;
 
 /**
  * Alta de un centro aislado con su plan de cuentas y su secretario (Fase 9).
@@ -25,6 +27,7 @@ final class CrearCentro
         private readonly CrearEjercicio $crearEjercicio,
         private readonly PobladorCentro $poblador,
         private readonly AsegurarIdentidadCentro $asegurarIdentidad,
+        private readonly PartidaLaboresRepository $partidasLabores,
     ) {
     }
 
@@ -46,13 +49,15 @@ final class CrearCentro
         if ($this->centros->porCodigo($codigo) !== null) {
             throw new InvalidArgumentException('Ya existe un centro con ese código');
         }
-
         $this->pdo->beginTransaction();
         try {
-            $centro = $this->centros->guardar(new Centro(null, $codigo, $nombre, $tipo));
+            $centro = $this->centros->guardar(
+                new Centro(null, $codigo, $nombre, $tipo, CatalogoPlanesContables::H16N)
+            );
             if ($centro->id === null) {
                 throw new InvalidArgumentException('No se pudo crear el centro');
             }
+            $this->partidasLabores->sembrarPorDefecto($centro->id);
             $ejercicio = $this->crearEjercicio->ejecutar([
                 'centro_id' => $centro->id,
                 'etiqueta' => (string) ($datos['etiqueta'] ?? ''),

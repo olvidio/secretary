@@ -7,6 +7,7 @@
     <li><a href="/613-p">Resumen mensual 613 P</a></li>
     <li><a href="/613-g">Resumen mensual 613 G</a></li>
     <li><a href="/cierre">Apuntes de cierre de mes</a></li>
+    <li><a href="/comprobaciones">Comprobaciones P / G</a></li>
     <li><a href="/remesas">Remesas personales</a></li>
 </ul>
 <p id="home-meta" class="muted"></p>

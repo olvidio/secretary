@@ -30,11 +30,6 @@ final class SincronizarConfiguracionConEjercicio
             $actual->tipoCierre,
             $actual->numResidentes,
             $actual->version,
-            $actual->observaciones613P,
-            $actual->observaciones613G,
-            $actual->mediaCocinaMes,
-            $actual->mediaCocinaAcum,
-            $actual->saldoCcPersonales,
         ));
     }
 

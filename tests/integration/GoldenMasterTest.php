@@ -26,8 +26,10 @@ use src\importacion\application\ImportarExcelSecretario;
 use src\informes\application\CalcularSaldos;
 use src\informes\application\ObtenerE37;
 use src\informes\application\ObtenerResumen613;
+use src\informes\infrastructure\persistence\PdoInforme613MesRepository;
 use src\personas\application\ListarPersonas;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
+use src\plan\infrastructure\persistence\PdoPartidaLaboresRepository;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
 use src\presupuestos\infrastructure\persistence\PdoPresupuestoRepository;
 use src\shared\infrastructure\persistence\SchemaInstaller;
@@ -108,7 +110,15 @@ final class GoldenMasterTest extends TestCase
         $this->compararOActualizar('presupuesto_p', $this->dumpPresupuesto($presupuestoRepo, 'P'));
         $this->compararOActualizar('presupuesto_g', $this->dumpPresupuesto($presupuestoRepo, 'G'));
 
-        $resumen613 = new ObtenerResumen613($configRepo, $asientoRepo, $presupuestoRepo, $personaRepo, $ambito);
+        $resumen613 = new ObtenerResumen613(
+            $configRepo,
+            $asientoRepo,
+            $presupuestoRepo,
+            $personaRepo,
+            $ambito,
+            new PdoPartidaLaboresRepository($pdo),
+            new PdoInforme613MesRepository($pdo),
+        );
         $this->compararOActualizar('resumen_613_p', $resumen613->ejecutar('P'));
         $this->compararOActualizar('resumen_613_g', $resumen613->ejecutar('G'));
 

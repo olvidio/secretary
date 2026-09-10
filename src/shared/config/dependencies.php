@@ -33,21 +33,26 @@ use src\asientos\domain\services\TraductorApuntesAAsientos;
 use src\asientos\infrastructure\http\TraspasoController;
 use src\asientos\infrastructure\persistence\PdoAsientoRepository;
 use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
+use src\apuntes\application\ActualizarApunte;
 use src\apuntes\application\BorrarApunte;
 use src\apuntes\application\BorrarPlantillaApunte;
 use src\apuntes\application\BuscarSugerenciasObservacion;
 use src\apuntes\application\CrearApunte;
+use src\apuntes\application\CrearApuntesDeEntrada;
 use src\apuntes\application\GuardarPlantillaApunte;
 use src\apuntes\application\ListarApuntes;
 use src\apuntes\application\ListarPlantillasApunte;
 use src\apuntes\domain\contracts\ApunteRepository;
 use src\apuntes\domain\contracts\PlantillaApunteRepository;
+use src\apuntes\domain\services\ContrapartidasGastoGeneral;
 use src\apuntes\infrastructure\http\ApunteController;
 use src\apuntes\infrastructure\http\PlantillaApunteController;
 use src\apuntes\infrastructure\persistence\PdoApunteRepository;
 use src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository;
+use src\arqueo\application\BuscarCapuchinos;
 use src\arqueo\application\GuardarArqueo;
 use src\arqueo\domain\contracts\ArqueoRepository;
+use src\arqueo\domain\services\DetectarCapuchinos;
 use src\arqueo\infrastructure\http\ArqueoController;
 use src\arqueo\infrastructure\persistence\PdoArqueoRepository;
 use src\ambito\application\SincronizarConfiguracionConEjercicio;
@@ -66,10 +71,16 @@ use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\configuracion\infrastructure\http\ConfiguracionController;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\informes\application\CalcularSaldos;
+use src\informes\application\ComprobarPersonalesGenerales;
+use src\informes\application\GuardarInforme613Mes;
 use src\informes\application\ObtenerE37;
 use src\informes\application\ObtenerResumen613;
 use src\informes\application\ObtenerSaldosTesoreria;
+use src\informes\domain\contracts\Informe613MesRepository;
+use src\informes\domain\services\CuadreViviendaGenerales;
+use src\informes\domain\services\MesesSinMovimiento;
 use src\informes\infrastructure\http\InformeController;
+use src\informes\infrastructure\persistence\PdoInforme613MesRepository;
 use src\personas\application\GuardarPersona;
 use src\personas\application\ListarPersonas;
 use src\personas\domain\contracts\PersonaRepository;
@@ -79,6 +90,13 @@ use src\presupuestos\application\GuardarPresupuesto;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
 use src\presupuestos\infrastructure\http\PresupuestoController;
 use src\presupuestos\infrastructure\persistence\PdoPresupuestoRepository;
+use src\plan\domain\contracts\PartidaLaboresRepository;
+use src\plan\domain\contracts\PlanContableRepository;
+use src\plan\infrastructure\persistence\PdoPartidaLaboresRepository;
+use src\plan\application\GuardarPartidasLabores;
+use src\plan\application\ListarPartidasLabores;
+use src\plan\infrastructure\http\PartidaLaboresController;
+use src\plan\infrastructure\persistence\PdoPlanContableRepository;
 use src\acceso\application\AsegurarIdentidadCentro;
 use src\acceso\application\AutorizarPeticion;
 use src\acceso\application\ConfirmarTotp;
@@ -131,12 +149,18 @@ return [
     PresupuestoRepository::class => autowire(PdoPresupuestoRepository::class),
     ArqueoRepository::class => autowire(PdoArqueoRepository::class),
     CentroRepository::class => autowire(PdoCentroRepository::class),
+    PlanContableRepository::class => autowire(PdoPlanContableRepository::class),
+    PartidaLaboresRepository::class => autowire(PdoPartidaLaboresRepository::class),
+    ListarPartidasLabores::class => autowire(),
+    GuardarPartidasLabores::class => autowire(),
+    PartidaLaboresController::class => autowire(),
     PobladorCentro::class => autowire(PdoPobladorCentro::class),
     EjercicioRepository::class => autowire(PdoEjercicioRepository::class),
     CuentaFisicaRepository::class => autowire(PdoCuentaFisicaRepository::class),
     CuentaRepository::class => autowire(PdoCuentaRepository::class),
     AsientoRepository::class => autowire(PdoAsientoRepository::class),
     RemesaRepository::class => autowire(PdoRemesaRepository::class),
+    Informe613MesRepository::class => autowire(PdoInforme613MesRepository::class),
     TraductorApuntesAAsientos::class => autowire(),
     ProyectorAsientoAFilaExcel::class => autowire(),
     ConvertirApuntesAAsientos::class => autowire(),
@@ -197,6 +221,9 @@ return [
     ListarApuntes::class => autowire(),
     BuscarSugerenciasObservacion::class => autowire(),
     CrearApunte::class => autowire(),
+    ActualizarApunte::class => autowire(),
+    CrearApuntesDeEntrada::class => autowire(),
+    ContrapartidasGastoGeneral::class => autowire(),
     BorrarApunte::class => autowire(),
     CerrarMes::class => autowire(),
     CerrarEjercicio::class => autowire(),
@@ -208,6 +235,7 @@ return [
     EjercicioController::class => autowire(),
     CentroController::class => autowire(),
     ObtenerResumen613::class => autowire(),
+    GuardarInforme613Mes::class => autowire(),
     ObtenerE37::class => autowire(),
     CalcularSaldos::class => autowire(),
     ObtenerSaldosTesoreria::class => autowire(),
@@ -225,7 +253,12 @@ return [
     PlantillaApunteController::class => autowire(),
     CierreController::class => autowire(),
     InformeController::class => autowire(),
+    ComprobarPersonalesGenerales::class => autowire(),
+    CuadreViviendaGenerales::class => autowire(),
+    MesesSinMovimiento::class => autowire(),
     PresupuestoController::class => autowire(),
+    DetectarCapuchinos::class => autowire(),
+    BuscarCapuchinos::class => autowire(),
     ArqueoController::class => autowire(),
     TesoreriaController::class => autowire(),
     TraspasoController::class => autowire(),

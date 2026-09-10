@@ -5,6 +5,7 @@ declare(strict_types=1);
 use src\acceso\infrastructure\persistence\AccesoSeeder;
 use src\apuntes\infrastructure\persistence\PlantillaApunteSeeder;
 use src\ambito\infrastructure\persistence\AmbitoSeeder;
+use src\plan\infrastructure\persistence\PlanContableSeeder;
 use src\asientos\application\ConvertirApuntesAAsientos;
 use src\importacion\application\ImportarExcelSecretario;
 use src\personal\infrastructure\persistence\Nivel1Seeder;
@@ -43,7 +44,9 @@ if ($cmd === 'db:migrate') {
     // (instalación nueva sin sembrar aún); en `secretario` sí existe, así que aquí es
     // donde se puebla el ámbito (centros/ejercicios/cuentas_fisicas/cuentas) sobre datos
     // ya existentes, sin pasar por `SchemaInstaller::install()` (que sería reinstalar).
+    PlanContableSeeder::sembrar($pdo);
     AmbitoSeeder::sembrar($pdo);
+    PlanContableSeeder::sembrar($pdo);
     AccesoSeeder::sembrar($pdo);
     PlantillaApunteSeeder::sembrar($pdo);
     Nivel1Seeder::sembrar($pdo);

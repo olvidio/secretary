@@ -135,7 +135,12 @@ final class ImportarExcelSecretario
             if ($aislado) {
                 $this->alinearEjercicioAbierto($destino['centro_id'], $cfgLeida);
             }
-            $nPersonas = $this->importarPersonas($book, $reemplazar, $destino['centro_id']);
+            $nPersonas = $this->importarPersonas(
+                $book,
+                $reemplazar,
+                $destino['centro_id'],
+                $cfgLeida->tipoCierre === 'vivienda',
+            );
             AmbitoSeeder::poblarLibros($this->pdo, $destino['centro_id']);
             if (!$aislado) {
                 $nEntidades = $this->importarEntidades($book);
@@ -293,11 +298,6 @@ final class ImportarExcelSecretario
             $tipo,
             $num,
             $ver,
-            null,
-            null,
-            null,
-            null,
-            null,
         );
 
         return $cfg;
@@ -309,7 +309,7 @@ final class ImportarExcelSecretario
      * recrearla, para no romper la FK `cuentas.persona_id`. Al terminar, si
      * `$reemplazar` es cierto, sincroniza `activo` solo en ese centro.
      */
-    private function importarPersonas(XlsxReader $book, bool $reemplazar, int $centroId): int
+    private function importarPersonas(XlsxReader $book, bool $reemplazar, int $centroId, bool $aportaPorDefecto): int
     {
         $sheet = $book->sheet('Nombres P');
         $n = 0;
@@ -342,6 +342,7 @@ final class ImportarExcelSecretario
                 $centroId,
                 $existente->activo ?? true,
                 $existente->email ?? null,
+                $existente->viviendaAportaGenerales ?? $aportaPorDefecto,
             ));
             $inicialesPresentes[] = $iniciales;
             $n++;

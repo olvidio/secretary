@@ -1,6 +1,6 @@
 <?php $cuenta = $cuentaEntrada ?? 'P'; ?>
 <h1>Entrada apuntes <?= htmlspecialchars($cuenta, ENT_QUOTES) ?></h1>
-<p class="muted">Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.</p>
+<p class="muted">Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.<?php if ($cuenta === 'G'): ?> Un gasto de G con iniciales anota también P/111, P/21 y G/11 (si esa persona aporta vivienda a generales).<?php endif; ?></p>
 
 <div id="entrada-apuntes">
     <div class="entrada-cabecera">
@@ -40,7 +40,7 @@
                     <select id="sel-concepto" required></select>
                 </td>
                 <td class="col-fimp">
-                    <input id="inp-fimp" type="date" title="Vacío = la misma. Solo caja/banco.">
+                    <input id="inp-fimp" type="date" tabindex="-1" title="Vacío = la misma. Solo caja/banco.">
                 </td>
                 <td class="col-cant">
                     <input id="inp-cant" required inputmode="decimal">
@@ -61,8 +61,8 @@
         <button type="button" id="btn-cuadrar" hidden>Cuadrar (111)</button>
     </div>
     <p id="plantilla-preview" class="muted plantilla-preview" hidden></p>
-    <p class="muted entrada-hint">F. imputación vacía = la misma fecha de cabecera. Solo caja/banco.
-        Las <a href="/plantillas-<?= strtolower($cuenta) ?>">plantillas</a> recurrentes aparecen en el desplegable de concepto.</p>
+    <p class="muted entrada-hint">F. imputación vacía = la misma fecha de cabecera. Solo caja/banco; el tabulador la salta (de concepto a cantidad).
+        Las <a href="/plantillas-<?= strtolower($cuenta) ?>">plantillas</a> recurrentes aparecen en el desplegable de concepto.<?php if ($cuenta === 'G'): ?> Gasto con iniciales: P/111 → P/21 → G/11 → el gasto.<?php endif; ?></p>
 </div>
 
 <p id="msg" class="ok" hidden>Apunte guardado</p>
@@ -77,8 +77,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('hdr-fecha').value = hoy.slice(0, 7) === cierre.slice(0, 7) ? hoy : cierre;
 
   const selI = document.getElementById('hdr-iniciales');
+  const mapPersona = {};
   const pers = await api('/api/personas');
   (pers.personas || []).forEach(p => {
+    mapPersona[p.iniciales] = p;
     const o = document.createElement('option');
     o.value = p.iniciales;
     o.textContent = p.iniciales + ' — ' + p.nombre_completo;
@@ -88,11 +90,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const selC = document.getElementById('sel-concepto');
   const btnAnadir = document.getElementById('btn-anadir');
   const mapConcepto = {};
+  const mapEtiqueta = {};
   const plantillasById = {};
   let plantillaActiva = null;
   let optgroupPlantillas = null;
   const cons = await api('/api/conceptos?cuenta=' + CUENTA);
-  (cons.conceptos || []).forEach(c => { mapConcepto[c.codigo] = c; });
+  (cons.conceptos || []).forEach(c => { mapConcepto[c.codigo] = c; mapEtiqueta[CUENTA + ':' + c.codigo] = c.etiqueta; });
+  if (CUENTA === 'G') {
+    const consP = await api('/api/conceptos?cuenta=P');
+    (consP.conceptos || []).forEach(c => { mapEtiqueta['P:' + c.codigo] = c.etiqueta; });
+  }
 
   function pintarSelectConceptos() {
     selC.innerHTML = '';
@@ -162,9 +169,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   let sugItems = [];
   let sugIdx = -1;
 
-  function etiquetaConcepto(codigo) {
-    const o = selC.querySelector('option[value="' + CSS.escape(codigo) + '"]');
-    return o ? o.textContent : codigo;
+  function etiquetaConcepto(codigo, cuenta) {
+    const libro = cuenta || CUENTA;
+    const et = mapEtiqueta[libro + ':' + codigo];
+    if (et) return (libro !== CUENTA ? libro + ' ' : '') + et;
+    return (libro !== CUENTA ? libro + ' ' : '') + codigo;
   }
 
   function ocultarSug() {
@@ -193,6 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     inpObs.value = s.observaciones;
     selC.value = s.concepto_codigo;
     ocultarSug();
+    actualizarPreviewContrapartidas();
     inpObs.focus();
   }
 
@@ -217,6 +227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   inpObs.addEventListener('input', () => {
     clearTimeout(tSug);
     tSug = setTimeout(buscarSug, 200);
+    actualizarPreviewContrapartidas();
   });
   inpObs.addEventListener('keydown', (ev) => {
     if (ulSug.hidden) return;
@@ -278,6 +289,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     ).join(' → ');
   }
 
+  function personaAporta(ini) {
+    const p = mapPersona[ini];
+    if (!p) return true;
+    return p.vivienda_aporta_generales !== false;
+  }
+
+  function lineasContrapartidas() {
+    if (CUENTA !== 'G' || plantillaActiva) return null;
+    const ini = selI.value;
+    const codigo = selC.value;
+    if (!ini || !codigo || codigo.startsWith('@plantilla:')) return null;
+    const c = mapConcepto[codigo];
+    if (!c || c.naturaleza !== 'gasto') return null;
+    if (!personaAporta(ini)) return null;
+    const obs = inpObs.value;
+    const origen = selOrigen.value || 'A';
+    return [
+      { cuenta: 'P', origen: 'A', concepto_codigo: '111', observaciones: '' },
+      { cuenta: 'P', origen: 'A', concepto_codigo: '21', observaciones: obs },
+      { cuenta: 'G', origen: 'A', concepto_codigo: '11', observaciones: obs },
+      { cuenta: 'G', origen: origen, concepto_codigo: codigo, observaciones: obs },
+    ];
+  }
+
+  function actualizarPreviewContrapartidas() {
+    if (plantillaActiva) return;
+    const prev = document.getElementById('plantilla-preview');
+    const lineas = lineasContrapartidas();
+    if (!lineas) {
+      prev.hidden = true;
+      btnAnadir.textContent = 'Añadir';
+      return;
+    }
+    prev.textContent = 'Con iniciales: ' + resumenPlantilla({ lineas: lineas });
+    prev.hidden = false;
+    btnAnadir.textContent = 'Añadir (' + lineas.length + ')';
+  }
+
   function aplicarPlantilla(p) {
     plantillaActiva = p;
     const primera = (p.lineas || [])[0];
@@ -303,6 +352,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function onCabeceraChange() {
     resetFormulario();
     actualizarCuadre();
+    actualizarPreviewContrapartidas();
   }
 
   function cantidadNum(val) {
@@ -419,7 +469,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tdFimp = fimp && fimp !== fHdr ? fmtFecha(fimp) : '';
     tr.innerHTML =
       '<td>' + esc(datos.observaciones) + '</td>' +
-      '<td>' + esc(etiquetaConcepto(datos.concepto_codigo)) + '</td>' +
+      '<td>' + esc(etiquetaConcepto(datos.concepto_codigo, datos.cuenta)) + '</td>' +
       '<td>' + esc(tdFimp) + '</td>' +
       '<td class="num">' + esc(apunte?.cantidad_es || datos.cantidad) + '</td>' +
       '<td></td>';
@@ -474,10 +524,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       limpiarFilaActiva();
       inpObs.focus();
       await actualizarCuadre();
+      actualizarPreviewContrapartidas();
       return;
     }
 
     const datos = payloadFila();
+    const extras = lineasContrapartidas();
+    if (extras) datos.contrapartidas = true;
     const s = await api('/api/apuntes', { method: 'POST', body: datos });
     if (!s.ok) {
       document.getElementById('err').hidden = false;
@@ -485,11 +538,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     document.getElementById('msg').hidden = false;
-    const apunte = (s.apuntes || [])[0];
-    appendFilaGuardada(datos, apunte);
+    const creados = s.apuntes || [];
+    document.getElementById('msg').textContent = creados.length > 1
+      ? creados.length + ' apuntes guardados' : 'Apunte guardado';
+    creados.forEach(apunte => {
+      appendFilaGuardada({
+        observaciones: apunte.observaciones || datos.observaciones,
+        concepto_codigo: apunte.concepto_codigo,
+        fecha_imputacion: apunte.fecha_imputacion || '',
+        fecha: apunte.fecha || datos.fecha,
+        cantidad: apunte.cantidad,
+        cuenta: apunte.cuenta || datos.cuenta,
+      }, apunte);
+    });
+    if (creados.length === 0) {
+      appendFilaGuardada(datos, null);
+    }
     limpiarFilaActiva();
     inpObs.focus();
     await actualizarCuadre();
+    actualizarPreviewContrapartidas();
   }
 
   async function cuadrar() {
@@ -530,6 +598,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     limpiarPlantillaActiva();
+    actualizarPreviewContrapartidas();
+  });
+  selC.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Tab' && !ev.shiftKey) {
+      ev.preventDefault();
+      inpCant.focus();
+    }
   });
 
   btnAnadir.addEventListener('click', anadirApunte);
@@ -550,5 +625,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   selFisica.addEventListener('change', onCabeceraChange);
 
   actualizarCuadre();
+  actualizarPreviewContrapartidas();
 });
 </script>

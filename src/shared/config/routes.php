@@ -15,6 +15,7 @@ use src\conceptos\infrastructure\http\ConceptoController;
 use src\configuracion\infrastructure\http\ConfiguracionController;
 use src\informes\infrastructure\http\InformeController;
 use src\personas\infrastructure\http\PersonaController;
+use src\plan\infrastructure\http\PartidaLaboresController;
 use src\presupuestos\infrastructure\http\PresupuestoController;
 use src\acceso\infrastructure\http\AuthController;
 use src\personal\infrastructure\http\PersonalController;
@@ -41,6 +42,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/centros/import', [CentroController::class, 'import']);
     $r->addRoute('POST', '/api/centros/vaciar', [CentroController::class, 'vaciar']);
     $r->addRoute('POST', '/api/centros/usuarios', [CentroController::class, 'addUsuario']);
+    $r->addRoute('GET', '/api/centros/partidas-labores', [PartidaLaboresController::class, 'list']);
+    $r->addRoute('POST', '/api/centros/partidas-labores', [PartidaLaboresController::class, 'save']);
 
     $r->addRoute('GET', '/api/personas', [PersonaController::class, 'list']);
     $r->addRoute('POST', '/api/personas', [PersonaController::class, 'save']);
@@ -52,6 +55,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/apuntes/sugerencias', [ApunteController::class, 'sugerencias']);
     $r->addRoute('GET', '/api/apuntes/cuadre', [ApunteController::class, 'cuadre']);
     $r->addRoute('POST', '/api/apuntes', [ApunteController::class, 'create']);
+    $r->addRoute('PUT', '/api/apuntes/{id:\d+}', [ApunteController::class, 'update']);
     $r->addRoute('DELETE', '/api/apuntes/{id:\d+}', [ApunteController::class, 'delete']);
 
     $r->addRoute('GET', '/api/plantillas-apunte', [PlantillaApunteController::class, 'list']);
@@ -62,14 +66,18 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/cierre', [CierreController::class, 'run']);
 
     $r->addRoute('GET', '/api/informes/613/{cuenta:P|G}', [InformeController::class, 'resumen613']);
+    $r->addRoute('POST', '/api/informes/613/{cuenta:P|G}/manual', [InformeController::class, 'guardarManual613']);
     $r->addRoute('GET', '/api/informes/e37', [InformeController::class, 'e37']);
     $r->addRoute('GET', '/api/informes/e37-resumen', [InformeController::class, 'e37Resumen']);
     $r->addRoute('GET', '/api/informes/saldos', [InformeController::class, 'saldos']);
+    $r->addRoute('GET', '/api/informes/comprobaciones-saldos', [InformeController::class, 'comprobacionesSaldos']);
+    $r->addRoute('GET', '/api/informes/comprobaciones', [InformeController::class, 'comprobaciones']);
     $r->addRoute('GET', '/api/informes/tesoreria', [InformeController::class, 'tesoreria']);
 
     $r->addRoute('GET', '/api/presupuestos/{cuenta:P|G}', [PresupuestoController::class, 'get']);
     $r->addRoute('POST', '/api/presupuestos/{cuenta:P|G}', [PresupuestoController::class, 'save']);
 
+    $r->addRoute('GET', '/api/arqueos/capuchinos', [ArqueoController::class, 'capuchinos']);
     $r->addRoute('GET', '/api/arqueos/{cuenta:P|G}', [ArqueoController::class, 'get']);
     $r->addRoute('POST', '/api/arqueos/{cuenta:P|G}', [ArqueoController::class, 'save']);
     $r->addRoute('GET', '/api/arqueos/fisica/{id:\d+}', [ArqueoController::class, 'getFisica']);

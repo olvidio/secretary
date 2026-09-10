@@ -6,6 +6,7 @@ namespace src\ambito\infrastructure\persistence;
 
 use PDO;
 use src\conceptos\domain\services\CatalogoConceptos;
+use src\plan\domain\services\CatalogoPlanesContables;
 use src\configuracion\domain\entity\ConfiguracionCentro;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\shared\infrastructure\persistence\ConverterDate;
@@ -71,12 +72,24 @@ final class AmbitoSeeder
         $st->execute([':c' => $codigo]);
         $id = $st->fetchColumn();
         if ($id !== false) {
-            return (int) $id;
+            $centroId = (int) $id;
+            self::asignarPlanH16nSiFalta($pdo, $centroId);
+
+            return $centroId;
         }
-        $ins = $pdo->prepare(
-            'INSERT INTO centros (codigo, nombre, tipo_cierre) VALUES (:c, :n, :t) RETURNING id'
-        );
-        $ins->execute([':c' => $codigo, ':n' => $cfg->centro, ':t' => $cfg->tipoCierre]);
+        $planId = self::idPlan($pdo, CatalogoPlanesContables::H16N);
+        if ($planId === null) {
+            $ins = $pdo->prepare(
+                'INSERT INTO centros (codigo, nombre, tipo_cierre) VALUES (:c, :n, :t) RETURNING id'
+            );
+            $ins->execute([':c' => $codigo, ':n' => $cfg->centro, ':t' => $cfg->tipoCierre]);
+        } else {
+            $ins = $pdo->prepare(
+                'INSERT INTO centros (codigo, nombre, tipo_cierre, plan_contable_id)
+                 VALUES (:c, :n, :t, :p) RETURNING id'
+            );
+            $ins->execute([':c' => $codigo, ':n' => $cfg->centro, ':t' => $cfg->tipoCierre, ':p' => $planId]);
+        }
 
         return (int) $ins->fetchColumn();
     }
@@ -184,7 +197,13 @@ final class AmbitoSeeder
      */
     private static function sembrarPlanMaestro(PDO $pdo, int $centroId): void
     {
+        $excluir = CatalogoPlanesContables::codigosCapituloVIIReservados();
+        $partidasLabores = self::partidasLaboresDeCentro($pdo, $centroId);
+
         foreach (CatalogoConceptos::todos() as $c) {
+            if ($c['cuenta'] === 'P' && in_array($c['codigo'], $excluir, true)) {
+                continue;
+            }
             [$tipo, $naturaleza, $imputable] = match ($c['naturaleza']) {
                 'ingreso' => ['ingreso', 'acreedora', true],
                 'gasto' => ['gasto', 'deudora', true],
@@ -209,6 +228,76 @@ final class AmbitoSeeder
                 'orden' => $c['orden'],
             ]);
         }
+
+        foreach ($partidasLabores as $p) {
+            self::upsertCuenta($pdo, [
+                'centro_id' => $centroId,
+                'persona_id' => null,
+                'cuenta_fisica_id' => null,
+                'padre_id' => null,
+                'libro' => 'P',
+                'codigo' => $p['codigo'],
+                'nombre' => $p['etiqueta'],
+                'descripcion' => $p['etiqueta'],
+                'tipo' => 'gasto',
+                'naturaleza' => 'deudora',
+                'codigo_maestro' => $p['codigo'],
+                'imputable' => true,
+                'orden' => $p['orden'],
+            ]);
+        }
+    }
+
+    /**
+     * @return list<array{codigo:string,etiqueta:string,orden:int}>
+     */
+    private static function partidasLaboresDeCentro(PDO $pdo, int $centroId): array
+    {
+        $st = $pdo->prepare(
+            'SELECT codigo, etiqueta, orden FROM centro_partidas_labores
+             WHERE centro_id = :c AND activo = TRUE ORDER BY orden, codigo'
+        );
+        $st->execute([':c' => $centroId]);
+        $rows = $st->fetchAll();
+        if ($rows !== []) {
+            $out = [];
+            foreach ($rows as $row) {
+                $out[] = [
+                    'codigo' => (string) $row['codigo'],
+                    'etiqueta' => (string) $row['etiqueta'],
+                    'orden' => (int) $row['orden'],
+                ];
+            }
+
+            return $out;
+        }
+
+        return CatalogoPlanesContables::partidasLaboresLegacy();
+    }
+
+    private static function idPlan(PDO $pdo, string $codigo): ?int
+    {
+        try {
+            $st = $pdo->prepare('SELECT id FROM planes_contables WHERE codigo = :c');
+            $st->execute([':c' => $codigo]);
+            $id = $st->fetchColumn();
+        } catch (\PDOException) {
+            return null;
+        }
+
+        return $id !== false ? (int) $id : null;
+    }
+
+    private static function asignarPlanH16nSiFalta(PDO $pdo, int $centroId): void
+    {
+        $h16nId = self::idPlan($pdo, CatalogoPlanesContables::H16N);
+        if ($h16nId === null) {
+            return;
+        }
+        $upd = $pdo->prepare(
+            'UPDATE centros SET plan_contable_id = :p WHERE id = :id AND plan_contable_id IS NULL'
+        );
+        $upd->execute([':p' => $h16nId, ':id' => $centroId]);
     }
 
     /**

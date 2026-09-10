@@ -16,7 +16,8 @@ final class RepartoCierreTest extends TestCase
         $a = new Persona(1, 'Ana', 'A', 'aa', null, null, null, null, null, 1);
         $b = new Persona(2, 'Bea', 'B', 'bb', 1, 12, null, null, null, 2);
         $c = new Persona(3, 'Cal', 'C', 'cc', null, null, null, null, new Dinero('100.00'), 3);
-        $r = RepartoCierre::calcular(new Dinero('200.00'), [$a, $b, $c], 6);
+        $d = new Persona(4, 'Dani', 'D', 'dd', null, null, null, null, null, 4, null, true, null, false);
+        $r = RepartoCierre::calcular(new Dinero('200.00'), [$a, $b, $c, $d], 6);
         self::assertCount(2, $r);
         self::assertSame('aa', $r[0]['persona']->iniciales);
         self::assertSame('100.00', $r[0]['importe']->toString());

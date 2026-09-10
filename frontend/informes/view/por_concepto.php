@@ -5,7 +5,7 @@
     <button type="submit">Ver</button>
 </form>
 <table>
-    <thead><tr><th>Fecha</th><th>P/G</th><th>A/B/C</th><th>Inic.</th><th>Observaciones</th><th class="num">Cantidad</th></tr></thead>
+    <thead><tr><th>Fecha</th><th>P/G</th><th>A/B/C</th><th>Inic.</th><th>Observaciones</th><th class="num">Cantidad</th><th></th></tr></thead>
     <tbody id="tb"></tbody>
 </table>
 <p id="suma"></p>
@@ -38,7 +38,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const tr = document.createElement('tr');
       tr.innerHTML = `<td>${esc(a.fecha_es)}</td><td>${esc(a.cuenta)}</td><td>${esc(a.origen)}</td>
         <td>${esc(a.iniciales || '')}</td><td>${esc(a.observaciones || '')}</td>
-        <td class="num">${esc(a.cantidad_es)}</td>`;
+        <td class="num">${esc(a.cantidad_es)}</td>
+        <td class="col-acc">${accionesApunteHtml(a)}</td>`;
+      enlazarAccionesApunte(tr, a, () => document.getElementById('form-conc').requestSubmit());
       tb.appendChild(tr);
     });
     document.getElementById('suma').textContent = 'Suma: ' + s.toFixed(2);

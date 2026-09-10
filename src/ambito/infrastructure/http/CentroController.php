@@ -12,6 +12,7 @@ use src\ambito\application\CrearCentro;
 use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\application\VaciarDatosCentro;
 use src\ambito\domain\contracts\CentroRepository;
+use src\plan\domain\services\CatalogoPlanesContables;
 use src\importacion\application\ImportarExcelSecretario;
 use src\importacion\infrastructure\http\RecibirFicheroExcel;
 use src\shared\infrastructure\http\ContestarJson;
@@ -42,6 +43,7 @@ final class CentroController
         return ContestarJson::ok([
             'centro' => $centro->toArray(),
             'usuarios' => $this->identidades->usuariosDeCentro($ctx->centroId),
+            'planes_contables' => CatalogoPlanesContables::todos(),
         ]);
     }
 

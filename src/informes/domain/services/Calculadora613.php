@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace src\informes\domain\services;
 
+use src\plan\domain\services\CatalogoPlanesContables;
+use src\plan\domain\services\Estructura613P;
 use src\presupuestos\domain\entity\LineaPresupuesto;
 use src\shared\domain\value_objects\Dinero;
 use src\shared\domain\value_objects\PeriodoEjercicio;
@@ -63,38 +65,16 @@ final class Calculadora613
     }
 
     /**
+     * @param list<array{codigo:string,etiqueta:string}>|null $partidasLabores
      * @return list<array{codigo:string,etiqueta:string,codigos:list<string>}>
      */
-    public static function estructuraP(): array
+    public static function estructuraP(?array $partidasLabores = null): array
     {
-        return [
-            ['codigo' => '111', 'etiqueta' => '1. Trabajo', 'codigos' => ['111']],
-            ['codigo' => '112', 'etiqueta' => '2. Familia', 'codigos' => ['112']],
-            ['codigo' => '113', 'etiqueta' => '3. Varios', 'codigos' => ['113']],
-            ['codigo' => '12', 'etiqueta' => '2. Extraordinarios', 'codigos' => ['12']],
-            ['codigo' => '21', 'etiqueta' => 'Vivienda', 'codigos' => ['21']],
-            ['codigo' => '22', 'etiqueta' => 'Ordinarios', 'codigos' => ['22']],
-            ['codigo' => '23', 'etiqueta' => 'Ropa', 'codigos' => ['23']],
-            ['codigo' => '24', 'etiqueta' => 'ca, crt, cv', 'codigos' => ['24']],
-            ['codigo' => '25', 'etiqueta' => 'Médicos', 'codigos' => ['25']],
-            ['codigo' => '26', 'etiqueta' => 'Coche, viajes', 'codigos' => ['26']],
-            ['codigo' => '27', 'etiqueta' => 'Estudios y otros', 'codigos' => ['27']],
-            ['codigo' => '28', 'etiqueta' => 'Obligaciones económicas', 'codigos' => ['28']],
-            ['codigo' => '4', 'etiqueta' => 'Ayudas familiares', 'codigos' => ['4']],
-            ['codigo' => '51', 'etiqueta' => 'Atención sacerdotal de mujeres', 'codigos' => ['51']],
-            ['codigo' => '52', 'etiqueta' => 'Atención crt, cv y otras actividades', 'codigos' => ['52']],
-            ['codigo' => '6', 'etiqueta' => 'Necesidades de la sede', 'codigos' => ['6']],
-            ['codigo' => '71', 'etiqueta' => 'Necesidades generales', 'codigos' => ['71']],
-            ['codigo' => '72', 'etiqueta' => 'Fundació Montseny', 'codigos' => ['72']],
-            ['codigo' => '73', 'etiqueta' => 'Fundació Proas', 'codigos' => ['73']],
-            ['codigo' => '74', 'etiqueta' => 'Prelatura', 'codigos' => ['74']],
-            ['codigo' => '75', 'etiqueta' => 'Associació Montroig', 'codigos' => ['75']],
-            ['codigo' => '76', 'etiqueta' => 'Associació Assitència i Salut', 'codigos' => ['76']],
-            ['codigo' => '77', 'etiqueta' => 'Proico', 'codigos' => ['77']],
-            ['codigo' => '78', 'etiqueta' => 'Casa Escrivá', 'codigos' => ['78']],
-            ['codigo' => '79', 'etiqueta' => 'Otras labores', 'codigos' => ['79']],
-            ['codigo' => '9', 'etiqueta' => 'Saldo en las c/c personales', 'codigos' => ['9']],
-        ];
+        if ($partidasLabores === null) {
+            $partidasLabores = CatalogoPlanesContables::partidasLaboresPorDefecto();
+        }
+
+        return Estructura613P::construir($partidasLabores);
     }
 
     /**

@@ -40,7 +40,7 @@ final class AmbitoEjercicioTest extends TestCase
 
         $centroRepo = new PdoCentroRepository($pdo);
         $ejercicioRepo = new PdoEjercicioRepository($pdo);
-        $centro = $centroRepo->guardar(new Centro(null, 'CTR-LIBRE', 'Centro de período libre', 'vivienda'));
+        $centro = $centroRepo->guardar(new Centro(null, 'CTR-LIBRE', 'Centro de período libre', 'vivienda', 'H16n'));
 
         $crear = $this->crearEjercicioService($pdo, $ejercicioRepo);
         $ejercicio = $crear->ejecutar([
@@ -73,7 +73,7 @@ final class AmbitoEjercicioTest extends TestCase
 
         $centroRepo = new PdoCentroRepository($pdo);
         $ejercicioRepo = new PdoEjercicioRepository($pdo);
-        $centro = $centroRepo->guardar(new Centro(null, 'CTR-SOLAPE', 'Centro de solape', 'vivienda'));
+        $centro = $centroRepo->guardar(new Centro(null, 'CTR-SOLAPE', 'Centro de solape', 'vivienda', 'H16n'));
 
         $crear = $this->crearEjercicioService($pdo, $ejercicioRepo);
         $primero = $crear->ejecutar([
@@ -115,7 +115,7 @@ final class AmbitoEjercicioTest extends TestCase
         $centroA = $centroRepo->porCodigo('Centro');
         self::assertNotNull($centroA);
 
-        $centroB = $centroRepo->guardar(new Centro(null, 'CTR-B', 'Segundo centro', 'vivienda'));
+        $centroB = $centroRepo->guardar(new Centro(null, 'CTR-B', 'Segundo centro', 'vivienda', 'H16n'));
         $crear = $this->crearEjercicioService($pdo, $ejercicioRepo);
         $ejercicioB = $crear->ejecutar([
             'centro_id' => $centroB->id,

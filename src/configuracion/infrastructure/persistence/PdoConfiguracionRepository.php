@@ -34,9 +34,7 @@ final class PdoConfiguracionRepository implements ConfiguracionRepository
                 centro = :centro, anio = :anio, modo_ejercicio = :modo,
                 fecha_inicio = :ini, fecha_cierre = :cie, tipo_cierre = :tipo,
                 num_residentes = :num, version = :ver,
-                observaciones_613_p = :op, observaciones_613_g = :og,
-                media_cocina_mes = :mcm, media_cocina_acum = :mca,
-                saldo_cc_personales = :scc, updated_at = :upd
+                updated_at = :upd
              WHERE id = 1'
         );
         $st->execute([
@@ -48,11 +46,6 @@ final class PdoConfiguracionRepository implements ConfiguracionRepository
             ':tipo' => $config->tipoCierre,
             ':num' => $config->numResidentes,
             ':ver' => $config->version,
-            ':op' => $config->observaciones613P,
-            ':og' => $config->observaciones613G,
-            ':mcm' => $config->mediaCocinaMes,
-            ':mca' => $config->mediaCocinaAcum,
-            ':scc' => $config->saldoCcPersonales,
             ':upd' => date('c'),
         ]);
     }
@@ -75,11 +68,6 @@ final class PdoConfiguracionRepository implements ConfiguracionRepository
             (string) $row['tipo_cierre'],
             $row['num_residentes'] !== null ? (int) $row['num_residentes'] : null,
             $row['version'] !== null ? (string) $row['version'] : null,
-            $row['observaciones_613_p'] !== null ? (string) $row['observaciones_613_p'] : null,
-            $row['observaciones_613_g'] !== null ? (string) $row['observaciones_613_g'] : null,
-            $row['media_cocina_mes'] !== null ? (string) $row['media_cocina_mes'] : null,
-            $row['media_cocina_acum'] !== null ? (string) $row['media_cocina_acum'] : null,
-            $row['saldo_cc_personales'] !== null ? (string) $row['saldo_cc_personales'] : null,
         );
     }
 }

@@ -32,6 +32,7 @@ return static function (RouteCollector $r): void {
         ['/e37-resumen', 'informes/view/e37_resumen.php', 'e37-resumen'],
         ['/fecha-cierre', 'configuracion/view/fecha_cierre.php', 'fecha-cierre'],
         ['/saldos', 'informes/view/saldos.php', 'saldos'],
+        ['/comprobaciones', 'informes/view/comprobaciones.php', 'comprobaciones'],
         ['/conceptos-p', 'conceptos/view/listado.php', 'conceptos-p'],
         ['/conceptos-g', 'conceptos/view/listado.php', 'conceptos-g'],
         ['/plantillas-p', 'plantillas/view/listado.php', 'plantillas-p'],

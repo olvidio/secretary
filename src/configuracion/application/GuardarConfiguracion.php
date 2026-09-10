@@ -40,11 +40,6 @@ final class GuardarConfiguracion
             isset($datos['num_residentes']) && $datos['num_residentes'] !== ''
                 ? (int) $datos['num_residentes'] : $actual->numResidentes,
             $actual->version,
-            $datos['observaciones_613_p'] ?? $actual->observaciones613P,
-            $datos['observaciones_613_g'] ?? $actual->observaciones613G,
-            $datos['media_cocina_mes'] ?? $actual->mediaCocinaMes,
-            $datos['media_cocina_acum'] ?? $actual->mediaCocinaAcum,
-            $datos['saldo_cc_personales'] ?? $actual->saldoCcPersonales,
         );
         $this->repo->guardar($cfg);
 

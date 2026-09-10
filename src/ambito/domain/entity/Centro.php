@@ -11,6 +11,7 @@ final class Centro
         public readonly string $codigo,
         public readonly string $nombre,
         public readonly string $tipoCierre,
+        public readonly string $planContableCodigo,
         public readonly bool $activo = true,
     ) {
     }
@@ -23,6 +24,7 @@ final class Centro
             'codigo' => $this->codigo,
             'nombre' => $this->nombre,
             'tipo_cierre' => $this->tipoCierre,
+            'plan_contable' => $this->planContableCodigo,
             'activo' => $this->activo,
         ];
     }

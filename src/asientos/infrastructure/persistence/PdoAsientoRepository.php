@@ -327,7 +327,10 @@ final class PdoAsientoRepository implements AsientoRepository
 
     public function borrar(int $id): void
     {
-        $this->pdo->beginTransaction();
+        $propia = !$this->pdo->inTransaction();
+        if ($propia) {
+            $this->pdo->beginTransaction();
+        }
         try {
             $st = $this->pdo->prepare('SELECT asiento_par_id FROM asientos WHERE id = :id');
             $st->execute([':id' => $id]);
@@ -349,9 +352,13 @@ final class PdoAsientoRepository implements AsientoRepository
             if ($parId !== null && $parId !== $id) {
                 $del->execute([':id' => $parId]);
             }
-            $this->pdo->commit();
+            if ($propia) {
+                $this->pdo->commit();
+            }
         } catch (\Throwable $e) {
-            $this->pdo->rollBack();
+            if ($propia && $this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
             throw $e;
         }
     }

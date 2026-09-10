@@ -88,13 +88,15 @@ final class PdoPersonaRepository implements PersonaRepository
             // centro_id se incluye sólo en el alta: si es null aquí, AmbitoSeeder lo
             // backfilleará en el siguiente db:migrate (ver comentario en Persona::centroId).
             $sql = 'INSERT INTO personas (nombre, apellidos, iniciales, mes_exento_inicio, mes_exento_fin,
-                    mes_exento2_inicio, mes_exento2_fin, importe_vivienda_fijo, orden, centro_id, email)
-                 VALUES (:n, :a, :i, :e1, :e2, :e3, :e4, :imp, :o, :cid, :email)';
+                    mes_exento2_inicio, mes_exento2_fin, importe_vivienda_fijo, orden, centro_id, email,
+                    vivienda_aporta_generales)
+                 VALUES (:n, :a, :i, :e1, :e2, :e3, :e4, :imp, :o, :cid, :email, :aporta)';
             $params = $this->params($persona);
             $params[':cid'] = $persona->centroId;
             $params[':email'] = $persona->email !== null && $persona->email !== ''
                 ? strtolower($persona->email)
                 : null;
+            $params[':aporta'] = $persona->viviendaAportaGenerales ? 1 : 0;
             $id = $this->insertId($sql, $params);
         } else {
             // La actualización NO toca centro_id deliberadamente: el formulario de
@@ -103,7 +105,8 @@ final class PdoPersonaRepository implements PersonaRepository
             $st = $this->pdo->prepare(
                 'UPDATE personas SET nombre=:n, apellidos=:a, iniciales=:i, mes_exento_inicio=:e1,
                     mes_exento_fin=:e2, mes_exento2_inicio=:e3, mes_exento2_fin=:e4,
-                    importe_vivienda_fijo=:imp, orden=:o WHERE id = :id'
+                    importe_vivienda_fijo=:imp, orden=:o, vivienda_aporta_generales=:aporta
+                 WHERE id = :id'
             );
             $params = $this->params($persona);
             $params[':id'] = $persona->id;
@@ -116,6 +119,21 @@ final class PdoPersonaRepository implements PersonaRepository
         $row = $st->fetch();
 
         return $this->hydrate(is_array($row) ? $row : []);
+    }
+
+    private static function booleano(mixed $v): bool
+    {
+        if (is_bool($v)) {
+            return $v;
+        }
+        if (is_int($v) || is_float($v)) {
+            return (int) $v === 1;
+        }
+        if (is_string($v)) {
+            return in_array(strtolower($v), ['1', 't', 'true', 'yes', 'on'], true);
+        }
+
+        return false;
     }
 
     public function guardarEmail(int $id, ?string $email): void
@@ -201,6 +219,7 @@ final class PdoPersonaRepository implements PersonaRepository
             ':e4' => $p->mesExento2Fin,
             ':imp' => $p->importeViviendaFijo?->toString(),
             ':o' => $p->orden,
+            ':aporta' => $p->viviendaAportaGenerales ? 1 : 0,
         ];
     }
 
@@ -224,10 +243,11 @@ final class PdoPersonaRepository implements PersonaRepository
             $fijo,
             (int) ($row['orden'] ?? 0),
             isset($row['centro_id']) ? (int) $row['centro_id'] : null,
-            !isset($row['activo']) || (bool) $row['activo'],
+            !isset($row['activo']) || self::booleano($row['activo'] ?? true),
             is_string($row['email'] ?? null) && $row['email'] !== ''
                 ? strtolower((string) $row['email'])
                 : null,
+            !isset($row['vivienda_aporta_generales']) || self::booleano($row['vivienda_aporta_generales']),
         );
     }
 }

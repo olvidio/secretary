@@ -4,18 +4,14 @@
         "centro": "Montagut",
         "fecha_cierre": "2026-06-30",
         "fecha_inicio": "2026-01-01",
-        "media_cocina_acum": null,
-        "media_cocina_mes": null,
         "meses": 6,
         "modo_ejercicio": "Año",
         "num_residentes": 5,
-        "observaciones_613_g": null,
-        "observaciones_613_p": null,
-        "saldo_cc_personales": null,
         "tipo_cierre": "vivienda",
         "version": "7"
     },
     "cuenta": "P",
+    "enviado": false,
     "lineas": [
         {
             "codigo": "111",
@@ -253,6 +249,18 @@
         }
     ],
     "observaciones": null,
+    "partidas_labores": [
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79"
+    ],
+    "plan_contable": "H16n",
     "saldo_cc_personales": null,
     "totales": {
         "atencion_labores": {

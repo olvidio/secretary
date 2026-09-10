@@ -1,5 +1,5 @@
 <h1>Apuntes de cierre de mes</h1>
-<p>Reparte los gastos G 201–215 del mes de la fecha de cierre entre quienes no están exentos. Se pueden borrar y volver a generar.</p>
+<p>Reparte los gastos G 201–215 del mes de la fecha de cierre entre quienes aportan vivienda a generales. Quien no aporta no entra. La exención de meses solo deja fuera a quien aporta y llega o se va a mitad de año. Observaciones: «automático». Se pueden borrar y volver a generar.</p>
 <p id="resumen" class="muted"></p>
 <table id="prev">
     <thead><tr><th>Iniciales</th><th>Nombre</th><th class="num">Importe</th></tr></thead>
