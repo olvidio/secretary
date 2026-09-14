@@ -61,7 +61,7 @@ final class MulticentroAccesoTest extends TestCase
         $identidades = new PdoIdentidadRepository($this->pdo);
         $centros = new PdoCentroRepository($this->pdo);
         $personas = new PdoPersonaRepository($this->pdo);
-        $iniciar = new IniciarSesion($identidades);
+        $iniciar = new IniciarSesion($identidades, new \src\acceso\application\ResolverPersonaActiva($identidades));
 
         $loginScl = $iniciar->ejecutar('scl', 'cambiar');
         self::assertSame('centro', $loginScl->nivel);
@@ -105,11 +105,11 @@ final class MulticentroAccesoTest extends TestCase
         self::assertSame($centroB, $bea->centroId);
         self::assertSame('bea@example.test', $bea->email);
         self::assertNotNull($resultado['password_inicial']);
-        $nombresA = (new ListarPersonas($personas))->ejecutarDeCentro($centroA);
+        $nombresA = (new ListarPersonas($personas, new PdoCentroRepository($this->pdo)))->ejecutarDeCentro($centroA);
         self::assertCount(1, $nombresA);
         self::assertSame('aa', $nombresA[0]['iniciales']);
         self::assertSame('', $nombresA[0]['email']);
-        $nombresB = (new ListarPersonas($personas))->ejecutarDeCentro($centroB);
+        $nombresB = (new ListarPersonas($personas, new PdoCentroRepository($this->pdo)))->ejecutarDeCentro($centroB);
         self::assertCount(1, $nombresB);
         self::assertSame('bea@example.test', $nombresB[0]['email']);
         self::assertSame('aa', $nombresB[0]['iniciales']);

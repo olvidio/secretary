@@ -10,6 +10,12 @@ use src\personal\domain\services\CatalogoMaestroPersonal;
 
 final class AsegurarPlanPersonal
 {
+    public const CODIGO_PENDIENTE_GASTO = '22.pendiente';
+    public const CODIGO_PENDIENTE_INGRESO = '113.pendiente';
+    public const CODIGO_OTRA_GASTO = 'OTRA.gasto';
+    public const CODIGO_OTRA_INGRESO = 'OTRA.ingreso';
+    public const CODIGO_MAESTRO_OTRA = 'OTRA';
+
     public function __construct(private readonly CuentaRepository $cuentas)
     {
     }
@@ -57,6 +63,125 @@ final class AsegurarPlanPersonal
                 999,
             ));
         }
+        $this->asegurarPendiente(
+            $centroId,
+            $personaId,
+            self::CODIGO_PENDIENTE_GASTO,
+            '22',
+            'Por categorizar (gasto)',
+        );
+        $this->asegurarPendiente(
+            $centroId,
+            $personaId,
+            self::CODIGO_PENDIENTE_INGRESO,
+            '113',
+            'Por categorizar (ingreso)',
+        );
+        $this->asegurarOtra(
+            $centroId,
+            $personaId,
+            self::CODIGO_OTRA_GASTO,
+            'gasto',
+            'deudora',
+        );
+        $this->asegurarOtra(
+            $centroId,
+            $personaId,
+            self::CODIGO_OTRA_INGRESO,
+            'ingreso',
+            'acreedora',
+        );
+    }
+
+    public function pendienteDe(int $centroId, int $personaId, string $sentido): Cuenta
+    {
+        $this->ejecutar($centroId, $personaId);
+        $codigo = $sentido === 'ingreso' ? self::CODIGO_PENDIENTE_INGRESO : self::CODIGO_PENDIENTE_GASTO;
+        $cuenta = $this->cuentas->buscar($centroId, $personaId, 'X', $codigo);
+        if ($cuenta === null || $cuenta->id === null) {
+            throw new \InvalidArgumentException('No hay cuenta para movimientos por categorizar');
+        }
+
+        return $cuenta;
+    }
+
+    public static function esPendiente(string $codigo): bool
+    {
+        return in_array($codigo, [self::CODIGO_PENDIENTE_GASTO, self::CODIGO_PENDIENTE_INGRESO], true);
+    }
+
+    public static function esOtra(string $codigo): bool
+    {
+        return in_array($codigo, [self::CODIGO_OTRA_GASTO, self::CODIGO_OTRA_INGRESO], true);
+    }
+
+    public function otraDe(int $centroId, int $personaId, string $sentido): Cuenta
+    {
+        $this->ejecutar($centroId, $personaId);
+        $codigo = $sentido === 'ingreso' ? self::CODIGO_OTRA_INGRESO : self::CODIGO_OTRA_GASTO;
+        $cuenta = $this->cuentas->buscar($centroId, $personaId, 'X', $codigo);
+        if ($cuenta === null || $cuenta->id === null) {
+            throw new \InvalidArgumentException('No hay cuenta de otra contabilidad');
+        }
+
+        return $cuenta;
+    }
+
+    private function asegurarPendiente(
+        int $centroId,
+        int $personaId,
+        string $codigo,
+        string $maestro,
+        string $nombre,
+    ): void {
+        if ($this->cuentas->buscar($centroId, $personaId, 'X', $codigo) !== null) {
+            return;
+        }
+        $padre = $this->cuentas->buscar($centroId, $personaId, 'X', $maestro);
+        $this->cuentas->guardar(new Cuenta(
+            null,
+            $centroId,
+            $personaId,
+            null,
+            $padre?->id,
+            'X',
+            $codigo,
+            $nombre,
+            'Movimientos de banco pendientes de categorizar',
+            $padre !== null ? $padre->tipo : 'gasto',
+            $padre !== null ? $padre->naturaleza : 'deudora',
+            $maestro,
+            true,
+            $padre !== null ? $padre->orden : 0,
+        ));
+    }
+
+    private function asegurarOtra(
+        int $centroId,
+        int $personaId,
+        string $codigo,
+        string $tipo,
+        string $naturaleza,
+    ): void {
+        if ($this->cuentas->buscar($centroId, $personaId, 'X', $codigo) !== null) {
+            return;
+        }
+        $this->cuentas->guardar(new Cuenta(
+            null,
+            $centroId,
+            $personaId,
+            null,
+            null,
+            'X',
+            $codigo,
+            'Otra contabilidad',
+            'Movimientos de banco que no entran en el plan personal; siguen afectando al saldo de tesorería',
+            $tipo,
+            $naturaleza,
+            self::CODIGO_MAESTRO_OTRA,
+            true,
+            1000,
+        ));
     }
 
     private function asegurarTesoreria(int $centroId, int $personaId, string $maestro, string $nombre, int $orden): void

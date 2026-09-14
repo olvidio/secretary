@@ -20,6 +20,9 @@ interface PersonaRepository
 
     public function porInicialesDeCentro(int $centroId, string $iniciales): ?Persona;
 
+    /** @return list<Persona> */
+    public function buscarPorNombreEnCentro(int $centroId, string $termino): array;
+
     public function porEmail(string $email): ?Persona;
 
     public function guardar(Persona $persona): Persona;

@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace frontend\shared\http;
 
+use frontend\shared\config\CatalogoMenus;
 use frontend\shared\view\View;
 use src\acceso\application\PrepararTotp;
+use src\acceso\domain\contracts\IdentidadRepository;
+use src\acceso\domain\value_objects\IdiomaUsuario;
+use src\acceso\domain\value_objects\LayoutPantalla;
 use src\acceso\infrastructure\http\ProteccionCsrf;
+use src\ambito\domain\contracts\CentroRepository;
+use src\personal\domain\services\CatalogoBancosCsv;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
 
@@ -15,6 +21,8 @@ final class PageController
     public function __construct(
         private readonly View $view,
         private readonly PrepararTotp $prepararTotp,
+        private readonly IdentidadRepository $identidades,
+        private readonly CentroRepository $centros,
     ) {
     }
 
@@ -22,10 +30,63 @@ final class PageController
     {
         $error = $_SESSION['login_error'] ?? null;
         unset($_SESSION['login_error']);
+        $usuario = (string) ($_SESSION['login_usuario'] ?? $request->query('usuario', '') ?? '');
+        unset($_SESSION['login_usuario']);
 
         return Response::html($this->view->standalone('login/view/login.php', [
             'error' => $error,
             'csrf' => ProteccionCsrf::renovarToken(),
+            'usuario' => $usuario,
+        ]));
+    }
+
+    public function registro(Request $request, array $vars = []): Response
+    {
+        $error = $_SESSION['login_error'] ?? null;
+        unset($_SESSION['login_error']);
+        $previo = $_SESSION['registro'] ?? [];
+        unset($_SESSION['registro']);
+        if (!is_array($previo)) {
+            $previo = [];
+        }
+        $identificador = trim((string) ($request->query('usuario', '') ?? ''));
+        $usuario = (string) ($previo['usuario'] ?? '');
+        $email = (string) ($previo['email'] ?? '');
+        $nombre = (string) ($previo['nombre'] ?? '');
+        if ($usuario === '' && $email === '' && $identificador !== '') {
+            if (filter_var($identificador, FILTER_VALIDATE_EMAIL) !== false) {
+                $email = strtolower($identificador);
+                $local = strtolower((string) strstr($identificador, '@', true));
+                if (preg_match('/^[a-z][a-z0-9._-]{1,31}$/', $local) === 1) {
+                    $usuario = $local;
+                }
+            } else {
+                $usuario = strtolower($identificador);
+            }
+        }
+        $centros = [];
+        foreach ($this->centros->listar() as $c) {
+            if ($c->id === null || !$c->activo) {
+                continue;
+            }
+            $centros[] = [
+                'id' => $c->id,
+                'codigo' => $c->codigo,
+                'nombre' => $c->nombre,
+            ];
+        }
+        $centroId = isset($previo['centro_id']) && $previo['centro_id'] !== null
+            ? (int) $previo['centro_id']
+            : 0;
+
+        return Response::html($this->view->standalone('login/view/registro.php', [
+            'error' => $error,
+            'csrf' => ProteccionCsrf::renovarToken(),
+            'usuario' => $usuario,
+            'email' => $email,
+            'nombre' => $nombre,
+            'centros' => $centros,
+            'centroId' => $centroId,
         ]));
     }
 
@@ -104,21 +165,71 @@ final class PageController
         ]));
     }
 
+    public function elegirPersona(Request $request, array $vars = []): Response
+    {
+        if (empty($_SESSION['identidad_id'])) {
+            return Response::redirect('/login');
+        }
+        $id = (int) $_SESSION['identidad_id'];
+        $personas = $_SESSION['personas_vinculo'] ?? null;
+        if (!is_array($personas) || $personas === []) {
+            $personas = $this->identidades->personasVinculoDe($id);
+            $_SESSION['personas_vinculo'] = $personas;
+        }
+        if ($personas === []) {
+            return Response::redirect('/login');
+        }
+        if (count($personas) === 1) {
+            $_SESSION['persona_id'] = (int) $personas[0]['persona_id'];
+
+            return Response::redirect('/yo');
+        }
+        $error = $_SESSION['login_error'] ?? null;
+        unset($_SESSION['login_error']);
+
+        return Response::html($this->view->standalone('login/view/elegir_persona.php', [
+            'error' => $error,
+            'csrf' => ProteccionCsrf::renovarToken(),
+            'personas' => $personas,
+        ]));
+    }
+
     public function page(Request $request, array $vars): Response
     {
         $view = (string) ($vars['view'] ?? 'shared/view/home.php');
         $nav = (string) ($vars['nav'] ?? '');
+
+        $layout = $this->layoutUsuario();
+        $grupoActivo = str_starts_with($nav, 'cuenta-')
+            ? ''
+            : CatalogoMenus::grupoDe($layout, $nav);
 
         return Response::html($this->view->page($view, [
             'usuario' => $_SESSION['usuario'] ?? '',
             'centroNombre' => self::nombreCentroSesion(),
             'nav' => $nav,
             'csrf' => ProteccionCsrf::asegurarToken(),
+            'layout' => $layout,
+            'idioma' => $this->idiomaUsuario(),
+            'menuGrupos' => CatalogoMenus::grupos($layout),
+            'menuGrupoActivo' => $grupoActivo,
             'cuentaEntrada' => $vars['cuenta'] ?? null,
             'cuentaInforme' => $vars['informe'] ?? null,
             'cuentaArqueo' => $vars['arqueo'] ?? null,
             'cuentaPresupuesto' => $vars['presupuesto'] ?? null,
         ]));
+    }
+
+    public function cuenta(Request $request, array $vars): Response
+    {
+        if (($_SESSION['nivel'] ?? '') === 'persona') {
+            return $this->paginaYo(
+                (string) ($vars['view'] ?? 'acceso/view/cuenta_mail.php'),
+                (string) ($vars['nav'] ?? 'cuenta-mail'),
+            );
+        }
+
+        return $this->page($request, $vars);
     }
 
     public function yo(Request $request, array $vars = []): Response
@@ -136,23 +247,115 @@ final class PageController
         return $this->paginaYo('personal/view/categorias.php', 'yo-categorias');
     }
 
+    public function yoBanco(Request $request, array $vars = []): Response
+    {
+        return $this->paginaYo('personal/view/banco.php', 'yo-banco', [
+            'bancos' => CatalogoBancosCsv::todos(),
+        ]);
+    }
+
     public function yoRemesas(Request $request, array $vars = []): Response
     {
+        if (!$this->mostrarRemesasPersona()) {
+            return Response::redirect('/yo/centros');
+        }
+
         return $this->paginaYo('personal/view/remesas.php', 'yo-remesas');
     }
 
-    private function paginaYo(string $view, string $nav): Response
+    public function yoCierre(Request $request, array $vars = []): Response
     {
-        return Response::html($this->view->pageYo($view, [
+        return $this->paginaYo('personal/view/cierre.php', 'yo-cierre');
+    }
+
+    public function yoCentros(Request $request, array $vars = []): Response
+    {
+        return $this->paginaYo('personal/view/centros.php', 'yo-centros');
+    }
+
+    public function yoAyuda(Request $request, array $vars = []): Response
+    {
+        return $this->paginaYo('ayuda/view/ayuda.php', 'yo-ayuda');
+    }
+
+    /**
+     * @param array<string, mixed> $extra
+     */
+    private function paginaYo(string $view, string $nav, array $extra = []): Response
+    {
+        return Response::html($this->view->pageYo($view, array_merge([
             'usuario' => $_SESSION['usuario'] ?? '',
             'nav' => $nav,
             'csrf' => ProteccionCsrf::asegurarToken(),
-        ]));
+            'idioma' => $this->idiomaUsuario(),
+            'mostrarRemesas' => $this->mostrarRemesasPersona(),
+        ], $extra)));
+    }
+
+    private function mostrarRemesasPersona(): bool
+    {
+        $identidadId = isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : 0;
+        if ($identidadId <= 0) {
+            return false;
+        }
+
+        return $this->identidades->tienePersonaEnAlgunCentro($identidadId);
+    }
+
+    private function layoutUsuario(): string
+    {
+        $enSesion = $_SESSION['layout'] ?? null;
+        if (is_string($enSesion) && $enSesion !== '') {
+            try {
+                return (new LayoutPantalla($enSesion))->valor;
+            } catch (\InvalidArgumentException) {
+            }
+        }
+        $id = isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : 0;
+        if ($id <= 0) {
+            return LayoutPantalla::EXCEL;
+        }
+        try {
+            $layout = (new LayoutPantalla($this->identidades->layoutDe($id)))->valor;
+        } catch (\InvalidArgumentException) {
+            $layout = LayoutPantalla::EXCEL;
+        }
+        $_SESSION['layout'] = $layout;
+
+        return $layout;
+    }
+
+    private function idiomaUsuario(): string
+    {
+        $enSesion = $_SESSION['idioma'] ?? null;
+        if (is_string($enSesion) && $enSesion !== '') {
+            try {
+                return (new IdiomaUsuario($enSesion))->valor;
+            } catch (\InvalidArgumentException) {
+            }
+        }
+        $id = isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : 0;
+        if ($id <= 0) {
+            return IdiomaUsuario::ES;
+        }
+        try {
+            $idioma = (new IdiomaUsuario($this->identidades->idiomaDe($id)))->valor;
+        } catch (\InvalidArgumentException) {
+            $idioma = IdiomaUsuario::ES;
+        }
+        $_SESSION['idioma'] = $idioma;
+
+        return $idioma;
     }
 
     private function siguienteHome(): string
     {
         if (($_SESSION['nivel'] ?? '') === 'persona') {
+            $personas = $_SESSION['personas_vinculo'] ?? [];
+            if (is_array($personas) && count($personas) > 1 && empty($_SESSION['persona_id'])) {
+                return '/elegir-persona';
+            }
+
             return '/yo';
         }
         $centros = $_SESSION['centros'] ?? [];

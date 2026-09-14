@@ -6,6 +6,10 @@ códigos de recuperación, CSRF y autorización por tabla.
 ## Flujo
 
 1. `GET /login` — usuario o email + contraseña. El alias `scl` sigue valiendo.
+   Si el usuario no existe, se invita a `GET /registro`. El enlace **Registrarse**
+   del login inicia el mismo alta: identidad de **persona** (nivel 1) en un centro
+   (el único, o el elegido si hay varios). Tras crear la cuenta entra en `/yo`.
+   Un secretario de centro no se auto-registra: se da de alta en `/centros`.
 2. Identidad de **centro** sin TOTP confirmado → `GET /totp-activar` (clave e URI
    `otpauth://`). Confirmar con 6 dígitos. Se muestran **una vez** 8 códigos
    `XXXX-XXXX`.
@@ -57,6 +61,17 @@ deniega (default deny). Ámbitos: `publico`, `pendiente` (contraseña ok, 2FA no
 El centro de la sesión (`$_SESSION['centro_id']`) tiene preferencia en
 `ResolverAmbitoActual`; si falta, se usa `configuracion.centro` como hasta ahora.
 
+Cada identidad elige disposición de menús (`identidades.layout`: `excel` o `burger`)
+e idioma (`identidades.idioma`: `es` o `ca`) en el menú del nombre (esquina).
+Páginas: `/cuenta/mail`, `/cuenta/password`, `/cuenta/totp`, `/cuenta/layout`,
+`/cuenta/idioma`, `/cuenta/centro`, `/cuenta/tipo`. APIs bajo `/api/preferencias`
+(ámbito `autenticado`), incluidas `POST .../password` y `POST .../totp/preparar`
++ `.../totp/confirmar` para activar el segundo factor desde la cuenta ya iniciada.
+
+**Tipo:** nivel 2 = secretario de centro; nivel 1 = libro personal. Solo se puede
+pasar al otro nivel si la identidad tiene el vínculo correspondiente
+(`identidad_centro` o `identidad_persona`).
+
 ## Bloqueo
 
 5 fallos de contraseña o de 2FA → 15 minutos. Un acierto de contraseña limpia el
@@ -66,3 +81,6 @@ contador; el 2FA vuelve a contar por su lado.
 
 `POST /api/login` y `POST /login` (formulario). JSON necesita CSRF previo
 (`GET /api/csrf` o la cookie de sesión de un `GET /login`).
+
+`POST /api/registro` y `POST /registro`: usuario (alias), correo, contraseña
+(mínimo 6, repetida), nombre opcional y `centro_id` si hay más de un centro.

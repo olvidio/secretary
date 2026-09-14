@@ -46,4 +46,13 @@ composer db:status    # lista aplicadas y pendientes
 
 Detalle: `docs/dev/migraciones.md`.
 
+## Copias de seguridad
+
+```bash
+composer db:backup
+composer db:restore -- var/backups/secretario_YYYYMMDD_HHMMSS.sql --force
+```
+
+Detalle: `docs/dev/backup.md`.
+
 Ver también `PENDIENTE_USUARIO.md` y `docs/manual/usuario.md`.

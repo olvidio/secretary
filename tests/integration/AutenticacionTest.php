@@ -9,13 +9,20 @@ use PHPUnit\Framework\TestCase;
 use src\acceso\application\AutorizarPeticion;
 use src\acceso\application\ConfirmarTotp;
 use src\acceso\application\IniciarSesion;
+use src\acceso\application\ResolverPersonaActiva;
 use src\acceso\application\PrepararTotp;
+use src\acceso\application\RegistrarUsuario;
 use src\acceso\application\VerificarSegundoFactor;
 use src\acceso\domain\entity\Identidad;
 use src\acceso\domain\services\TotpRfc6238;
 use src\acceso\infrastructure\crypto\CifradorSecretos;
 use src\acceso\infrastructure\persistence\PdoAccesoRutaRepository;
 use src\acceso\infrastructure\persistence\PdoIdentidadRepository;
+use src\ambito\application\AsegurarCuentaCorrientePersona;
+use src\ambito\infrastructure\persistence\PdoCentroRepository;
+use src\ambito\infrastructure\persistence\PdoCuentaRepository;
+use src\personal\application\AsegurarPlanPersonal;
+use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\shared\infrastructure\persistence\SchemaInstaller;
 use Tests\Soporte\BaseDeDatosAislada;
 
@@ -31,7 +38,8 @@ final class AutenticacionTest extends TestCase
         $pdo = $this->prepararBaseDeTestVacia();
         (new SchemaInstaller($pdo))->install();
         $repo = new PdoIdentidadRepository($pdo);
-        $iniciar = new IniciarSesion($repo);
+        $resolver = new ResolverPersonaActiva($repo);
+        $iniciar = new IniciarSesion($repo, $resolver);
 
         $porAlias = $iniciar->ejecutar('scl', 'cambiar');
         self::assertSame('pendiente_activar', $porAlias->estado);
@@ -56,7 +64,7 @@ final class AutenticacionTest extends TestCase
         $despues = $iniciar->ejecutar('scl', 'cambiar');
         self::assertSame('pendiente_verificar', $despues->estado);
 
-        $verificar = new VerificarSegundoFactor($repo, $cifrador, self::PIMIENTO);
+        $verificar = new VerificarSegundoFactor($repo, $cifrador, $resolver, self::PIMIENTO);
         $ok = $verificar->ejecutar((int) $porAlias->identidadId, TotpRfc6238::codigo($datos['secreto']));
         self::assertSame('autenticado', $ok->estado);
 
@@ -116,7 +124,8 @@ final class AutenticacionTest extends TestCase
         self::assertNotNull($id->id);
         $repo->vincularPersona($id->id, $personaId);
 
-        $login = (new IniciarSesion($repo))->ejecutar('ana@example.test', 'clave');
+        $resolver = new ResolverPersonaActiva($repo);
+        $login = (new IniciarSesion($repo, $resolver))->ejecutar('ana@example.test', 'clave');
         self::assertSame('autenticado', $login->estado);
         self::assertSame('persona', $login->nivel);
         self::assertSame($personaId, $login->personaId);
@@ -158,7 +167,7 @@ final class AutenticacionTest extends TestCase
         $pdo = $this->prepararBaseDeTestVacia();
         (new SchemaInstaller($pdo))->install();
         $repo = new PdoIdentidadRepository($pdo);
-        $iniciar = new IniciarSesion($repo);
+        $iniciar = new IniciarSesion($repo, new ResolverPersonaActiva($repo));
         $ahora = new DateTimeImmutable('2026-09-09 12:00:00');
         for ($i = 0; $i < 5; $i++) {
             $r = $iniciar->ejecutar('scl', 'mal', $ahora);
@@ -184,10 +193,35 @@ final class AutenticacionTest extends TestCase
         $datos = (new PrepararTotp($repo, $cifrador))->ejecutar($id);
         $codigos = (new ConfirmarTotp($repo, $cifrador, self::PIMIENTO))
             ->ejecutar($id, TotpRfc6238::codigo($datos['secreto']));
-        $verificar = new VerificarSegundoFactor($repo, $cifrador, self::PIMIENTO);
+        $resolver = new ResolverPersonaActiva($repo);
+        $verificar = new VerificarSegundoFactor($repo, $cifrador, $resolver, self::PIMIENTO);
         $primero = $verificar->ejecutar($id, $codigos[0]);
         self::assertSame('autenticado', $primero->estado);
         $reuso = $verificar->ejecutar($id, $codigos[0]);
         self::assertSame('fallo', $reuso->estado);
+    }
+
+    public function testRegistroCreaPersonaYPermiteLogin(): void
+    {
+        $this->saltarSiNoHayPgsql();
+        $pdo = $this->prepararBaseDeTestVacia();
+        (new SchemaInstaller($pdo))->install();
+        $identidades = new PdoIdentidadRepository($pdo);
+        $cuentas = new PdoCuentaRepository($pdo);
+        $alta = (new RegistrarUsuario(
+            $identidades,
+            new PdoPersonaRepository($pdo),
+            new PdoCentroRepository($pdo),
+            new AsegurarPlanPersonal($cuentas),
+            new AsegurarCuentaCorrientePersona($cuentas),
+        ))->ejecutar('dani', 'dani@example.test', 'secret1', 'secret1', 'Dani');
+        self::assertNotNull($alta['identidad']->id);
+        $resolver = new ResolverPersonaActiva($identidades);
+        $login = (new IniciarSesion($identidades, $resolver))->ejecutar('dani', 'secret1');
+        self::assertSame('autenticado', $login->estado);
+        self::assertSame('persona', $login->nivel);
+        self::assertSame($alta['persona_id'], $login->personaId);
+        $desconocido = (new IniciarSesion($identidades, $resolver))->ejecutar('nadie', 'secret1');
+        self::assertSame('desconocido', $desconocido->estado);
     }
 }

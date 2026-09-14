@@ -15,6 +15,27 @@ final class AutorizarPeticionTest extends TestCase
     private const PAGINA = 'frontend\\shared\\http\\PageController';
     private const APUNTES = 'src\\apuntes\\infrastructure\\http\\ApunteController';
 
+    public function testFallbackAlCatalogoSiFaltaEnBd(): void
+    {
+        $rutas = $this->createStub(AccesoRutaRepository::class);
+        $rutas->method('ambitoDe')->willReturn(null);
+        $identidades = $this->createStub(IdentidadRepository::class);
+        $auth = new AutorizarPeticion($rutas, $identidades);
+        $d = $auth->ejecutar(
+            self::PAGINA,
+            'yoCierre',
+            'GET',
+            true,
+            1,
+            null,
+            null,
+            'persona',
+            false,
+            9,
+        );
+        self::assertTrue($d->permitido);
+    }
+
     public function testRutaNoCatalogadaSeDeniega(): void
     {
         $d = $this->autorizar()->ejecutar(
@@ -168,6 +189,65 @@ final class AutorizarPeticionTest extends TestCase
             false,
         );
         self::assertTrue($d->permitido);
+    }
+
+    public function testRegistroPublicoNoExigeSesion(): void
+    {
+        $dPagina = $this->autorizar()->ejecutar(
+            self::PAGINA,
+            'registro',
+            'GET',
+            true,
+            null,
+            null,
+            null,
+            '',
+            false,
+        );
+        self::assertTrue($dPagina->permitido);
+
+        $dApi = $this->autorizar()->ejecutar(
+            'src\\acceso\\infrastructure\\http\\AuthController',
+            'registro',
+            'POST',
+            true,
+            null,
+            null,
+            null,
+            '',
+            true,
+        );
+        self::assertTrue($dApi->permitido);
+    }
+
+    public function testCuentaEsAutenticadoParaCentroYPersona(): void
+    {
+        $dCentro = $this->autorizar([1 => true])->ejecutar(
+            self::PAGINA,
+            'cuenta',
+            'GET',
+            true,
+            1,
+            null,
+            10,
+            'centro',
+            false,
+        );
+        self::assertTrue($dCentro->permitido);
+
+        $dPersona = $this->autorizar([2 => true])->ejecutar(
+            self::PAGINA,
+            'cuenta',
+            'GET',
+            true,
+            2,
+            null,
+            null,
+            'persona',
+            false,
+            9,
+        );
+        self::assertTrue($dPersona->permitido);
     }
 
     /** @param array<int, bool> $totpPorId */

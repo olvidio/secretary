@@ -21,6 +21,9 @@ final class ConstructorAsientoPersonal
         int $cents,
         ?string $conceptoCodigo,
         ?\DateTimeImmutable $fechaOperacion = null,
+        string $origen = 'manual',
+        bool $gastoGenerales = false,
+        ?string $conceptoGenerales = null,
     ): Asiento {
         if ($cents <= 0) {
             throw new \InvalidArgumentException('La cantidad debe ser positiva');
@@ -47,12 +50,15 @@ final class ConstructorAsientoPersonal
             $fecha,
             $glosa,
             'normal',
-            'manual',
+            $origen,
             $personaId,
             $movimientos,
             $conceptoCodigo,
             null,
             $fechaOperacion,
+            null,
+            $gastoGenerales,
+            $conceptoGenerales,
         );
     }
 

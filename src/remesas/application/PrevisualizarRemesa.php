@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace src\remesas\application;
 
+use src\personal\application\ResolverPeriodoPersonal;
 use src\personas\domain\contracts\PersonaRepository;
 use src\remesas\domain\contracts\RemesaRepository;
 use src\remesas\domain\entity\Remesa;
@@ -16,6 +17,7 @@ final class PrevisualizarRemesa
         private readonly ResolverMesRemesa $mes,
         private readonly RemesaRepository $remesas,
         private readonly PersonaRepository $personas,
+        private readonly ResolverPeriodoPersonal $periodoPersonal,
     ) {
     }
 
@@ -34,10 +36,14 @@ final class PrevisualizarRemesa
         $abierto = $ejercicio->estado === 'abierto';
         $motivo = $abierto ? null : 'El ejercicio de ese mes está cerrado';
         $persona = $this->personas->porId($ctx->personaId);
+        $periodo = $this->periodoPersonal->ejecutar($ctx->personaId, $anio, $mes);
 
         return [
             'anio' => $anio,
             'mes' => $mes,
+            'desde' => $periodo['desde'],
+            'hasta' => $periodo['hasta'],
+            'fecha_cierre' => $periodo['fecha_cierre'],
             'ejercicio_id' => $ejercicio->id,
             'ejercicio_abierto' => $abierto,
             'persona' => $persona?->nombreCompleto(),

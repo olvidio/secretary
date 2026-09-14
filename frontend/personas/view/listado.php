@@ -21,10 +21,11 @@
     <button type="button" id="btn-nuevo">Nuevo</button>
 </form>
 <p class="ok" id="msg-password" hidden></p>
+<?php include __DIR__ . '/_solicitudes_vinculo.php'; ?>
 <table id="tabla-personas">
     <thead>
     <tr>
-        <th>#</th><th>Nombre</th><th>Apellidos</th><th>Iniciales</th><th>Correo</th>
+        <th>#</th><th>Centro</th><th>Nombre</th><th>Apellidos</th><th>Iniciales</th><th>Correo</th>
         <th>Exención</th><th>Vivienda fija</th><th>Aporta a G</th><th></th>
     </tr>
     </thead>
@@ -37,7 +38,7 @@ async function loadPersonas() {
   tb.innerHTML = '';
   (r.personas || []).forEach((p, i) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${i+1}</td><td>${esc(p.nombre)}</td><td>${esc(p.apellidos)}</td>
+    tr.innerHTML = `<td>${i+1}</td><td>${esc(p.centro_nombre || '')}</td><td>${esc(p.nombre)}</td><td>${esc(p.apellidos)}</td>
       <td>${esc(p.iniciales)}</td><td>${esc(p.email)}</td>
       <td>${p.mes_exento_inicio || ''}–${p.mes_exento_fin || ''} ${p.mes_exento2_inicio || ''}–${p.mes_exento2_fin || ''}</td>
       <td>${p.importe_vivienda_fijo || ''}</td>

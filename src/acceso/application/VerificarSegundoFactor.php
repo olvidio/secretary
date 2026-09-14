@@ -14,6 +14,7 @@ final class VerificarSegundoFactor
     public function __construct(
         private readonly IdentidadRepository $identidades,
         private readonly CifradorSecretos $cifrador,
+        private readonly ResolverPersonaActiva $resolverPersona,
         private readonly string $pimiento,
     ) {
     }
@@ -68,8 +69,7 @@ final class VerificarSegundoFactor
         $nivel = $centros !== [] ? 'centro' : 'persona';
         $personaId = null;
         if ($nivel === 'persona') {
-            $personas = $this->identidades->personasDe($identidad->id);
-            $personaId = $personas[0] ?? null;
+            $personaId = $this->resolverPersona->ejecutar($identidad->id, null)['persona_id'];
         }
 
         return new ResultadoLogin(

@@ -27,6 +27,12 @@ Gasto = debe − haber de cuentas `gasto`; ingreso = haber − debe de `ingreso`
 La fecha del asiento en P es el último día del mes (recortado al `fecha_fin`
 del ejercicio, D11).
 
+Los gastos personales marcados como **generales** (`gasto_generales` en X) van
+en `detalle_json.generales` por concepto G. Al aceptar, además del asiento P de
+remesa, `RegistrarGastosGeneralesDeRemesa` crea los apuntes G con
+contrapartidas (P/111, P/21, G/11, G/concepto), enlazados con el mismo
+`remesa_id` para poder revertir al sustituir o rechazar.
+
 `hash_contenido` es SHA-256 del JSON canónico `(codigo, importe)` ordenado. Un
 segundo envío con el mismo hash que la `enviada` pendiente no crea versión
 nueva.

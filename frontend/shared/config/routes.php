@@ -7,18 +7,39 @@ use frontend\shared\http\PageController;
 
 return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/login', [PageController::class, 'login']);
+    $r->addRoute('GET', '/registro', [PageController::class, 'registro']);
     $r->addRoute('GET', '/totp-activar', [PageController::class, 'totpActivar']);
     $r->addRoute('GET', '/totp-verificar', [PageController::class, 'totpVerificar']);
     $r->addRoute('GET', '/totp-codigos', [PageController::class, 'totpCodigos']);
     $r->addRoute('GET', '/elegir-centro', [PageController::class, 'elegirCentro']);
+    $r->addRoute('GET', '/elegir-persona', [PageController::class, 'elegirPersona']);
     $r->addRoute('GET', '/yo', [PageController::class, 'yo']);
     $r->addRoute('GET', '/yo/movimientos', [PageController::class, 'yoMovimientos']);
     $r->addRoute('GET', '/yo/categorias', [PageController::class, 'yoCategorias']);
+    $r->addRoute('GET', '/yo/banco', [PageController::class, 'yoBanco']);
     $r->addRoute('GET', '/yo/remesas', [PageController::class, 'yoRemesas']);
+    $r->addRoute('GET', '/yo/cierre', [PageController::class, 'yoCierre']);
+    $r->addRoute('GET', '/yo/centros', [PageController::class, 'yoCentros']);
+    $r->addRoute('GET', '/yo/ayuda', [PageController::class, 'yoAyuda']);
+    $cuenta = [
+        ['/cuenta/mail', 'acceso/view/cuenta_mail.php', 'cuenta-mail'],
+        ['/cuenta/password', 'acceso/view/cuenta_password.php', 'cuenta-password'],
+        ['/cuenta/totp', 'acceso/view/cuenta_totp.php', 'cuenta-totp'],
+        ['/cuenta/layout', 'acceso/view/cuenta_layout.php', 'cuenta-layout'],
+        ['/cuenta/idioma', 'acceso/view/cuenta_idioma.php', 'cuenta-idioma'],
+        ['/cuenta/centro', 'acceso/view/cuenta_centro.php', 'cuenta-centro'],
+        ['/cuenta/persona', 'acceso/view/cuenta_persona.php', 'cuenta-persona'],
+        ['/cuenta/tipo', 'acceso/view/cuenta_tipo.php', 'cuenta-tipo'],
+        ['/cuenta/copias', 'acceso/view/cuenta_copias.php', 'cuenta-copias'],
+    ];
+    foreach ($cuenta as [$path, $view, $nav]) {
+        $r->addRoute('GET', $path, [PageController::class, 'cuenta', ['view' => $view, 'nav' => $nav]]);
+    }
     $pages = [
         ['/', 'shared/view/home.php', 'inicio'],
         ['/configuracion', 'configuracion/view/form.php', 'configuracion'],
         ['/centros', 'ambito/view/centros.php', 'centros'],
+        ['/copias', 'shared/view/copias.php', 'copias'],
         ['/nombres', 'personas/view/listado.php', 'nombres'],
         ['/presupuesto-p', 'presupuestos/view/form.php', 'presupuesto-p'],
         ['/presupuesto-g', 'presupuestos/view/form.php', 'presupuesto-g'],

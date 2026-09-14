@@ -9,11 +9,12 @@ use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\domain\contracts\CuentaRepository;
 use src\ambito\domain\contracts\EjercicioRepository;
 use src\asientos\domain\contracts\AsientoRepository;
+use src\personal\application\ResolverPeriodoPersonal;
+use src\personal\domain\services\PeriodoPersonal;
 use src\personas\domain\contracts\PersonaRepository;
 use src\remesas\domain\contracts\RemesaRepository;
 use src\remesas\domain\entity\Remesa;
 use src\remesas\domain\services\ConstructorAsientoRemesa;
-use src\remesas\domain\services\PeriodoMesRemesa;
 
 final class AceptarRemesa
 {
@@ -24,6 +25,8 @@ final class AceptarRemesa
         private readonly CuentaRepository $cuentas,
         private readonly EjercicioRepository $ejercicios,
         private readonly PersonaRepository $personas,
+        private readonly ResolverPeriodoPersonal $periodoPersonal,
+        private readonly RegistrarGastosGeneralesDeRemesa $gastosGenerales,
     ) {
     }
 
@@ -47,7 +50,13 @@ final class AceptarRemesa
         }
         $persona = $this->personas->porId($remesa->personaId);
         $iniciales = $persona !== null ? strtoupper($persona->iniciales) : '';
-        $fecha = PeriodoMesRemesa::fechaAsiento($remesa->anio, $remesa->mes, $ejercicio);
+        $periodo = $this->periodoPersonal->ejecutar($remesa->personaId, $remesa->anio, $remesa->mes);
+        $desde = PeriodoPersonal::primerDia($remesa->anio, $remesa->mes);
+        $hasta = \DateTimeImmutable::createFromFormat('!Y-m-d', $periodo['hasta']);
+        if ($hasta === false) {
+            throw new InvalidArgumentException('Periodo de remesa no válido');
+        }
+        $fecha = PeriodoPersonal::fechaAsiento($desde, $hasta, $ejercicio);
         $glosa = sprintf('Remesa %s %02d/%d v%d', $iniciales, $remesa->mes, $remesa->anio, $remesa->version);
         $lineasAsiento = $this->lineasAsiento($remesa);
         $previa = $this->remesas->aceptadaDe(
@@ -57,7 +66,17 @@ final class AceptarRemesa
             $remesa->mes,
         );
 
-        $this->remesas->enTransaccion(function () use ($remesa, $previa, $ejercicio, $fecha, $glosa, $cc, $lineasAsiento): void {
+        $generales = $this->gastosGenerales;
+        $this->remesas->enTransaccion(function () use (
+            $remesa,
+            $previa,
+            $ejercicio,
+            $fecha,
+            $glosa,
+            $cc,
+            $lineasAsiento,
+            $generales,
+        ): void {
             if ($previa !== null && $previa->id !== null && $previa->id !== $remesa->id) {
                 $this->asientos->borrarPorRemesaId($previa->id);
                 $this->remesas->marcarEstado($previa->id, 'sustituida', true);
@@ -74,6 +93,7 @@ final class AceptarRemesa
             if ($asiento !== null) {
                 $this->asientos->guardar($asiento);
             }
+            $generales->ejecutar($remesa, $fecha, (int) $remesa->id);
             $this->remesas->marcarEstado((int) $remesa->id, 'aceptada', true);
         });
         $aceptada = $this->remesas->porId((int) $remesa->id);

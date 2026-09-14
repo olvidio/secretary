@@ -9,5 +9,10 @@
 .env
 *.xlsm
 /datos/
+/var/backups/*
+!/var/backups/.gitkeep
+!/var/backups/personal/
+/var/backups/personal/*
+!/var/backups/personal/.gitkeep
 /build/
 .phpunit.cache

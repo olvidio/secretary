@@ -44,3 +44,9 @@ function fmtFecha(iso) {
   const [y, m, d] = iso.split('-');
   return `${d}/${m}/${y}`;
 }
+
+document.addEventListener('click', (ev) => {
+  document.querySelectorAll('details.user-menu[open]').forEach((d) => {
+    if (!d.contains(ev.target)) d.removeAttribute('open');
+  });
+});

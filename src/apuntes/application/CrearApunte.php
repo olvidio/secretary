@@ -70,8 +70,12 @@ final class CrearApunte
         if ($cuenta === 'P' && $iniciales === '' && $conceptoCodigo !== '32') {
             throw new InvalidArgumentException('Las iniciales son obligatorias en P');
         }
-        if ($iniciales !== '' && $this->personas->porIniciales($iniciales) === null) {
-            throw new InvalidArgumentException('Iniciales no reconocidas');
+        if ($iniciales !== '') {
+            $this->config->get();
+            $centroApunte = $this->ambito->ejecutar()->centroId;
+            if ($this->personas->porInicialesDeCentro($centroApunte, $iniciales) === null) {
+                throw new InvalidArgumentException('Iniciales no reconocidas en este centro');
+            }
         }
         $obsRaw = (string) ($datos['observaciones'] ?? '');
         $obs = $obsRaw === '' ? null : $obsRaw;
@@ -82,11 +86,6 @@ final class CrearApunte
         $esCierre = !empty($datos['es_cierre']);
         $fechasDistintas = $fechaImputacion->format('Y-m-d') !== $fechaOperacion->format('Y-m-d');
         if ($fechasDistintas) {
-            if ($origen === 'A') {
-                throw new InvalidArgumentException(
-                    'La fecha de imputación distinta solo aplica a caja o banco (origen B o C)'
-                );
-            }
             if (in_array($conceptoCodigo, ['41', '42'], true)) {
                 throw new InvalidArgumentException('Un traspaso caja/banco no admite fecha de imputación distinta');
             }
@@ -160,13 +159,17 @@ final class CrearApunte
         $mapaCuentas = $this->mapaCuentas($centroId);
         $mapaPersonas = $this->mapaPersonas($centroId);
 
+        if (!empty($datos['remesa_id'])) {
+            $asiento = $asiento->withRemesaId((int) $datos['remesa_id']);
+        }
+
         if (!$fechasDistintas) {
             $asientoGuardado = $this->asientos->guardar($asiento);
 
             return [$this->proyector->proyectar($asientoGuardado, $mapaCuentas, $mapaPersonas)];
         }
 
-        $tesoreriaCuentaId = $this->idCuentaTesoreria($asiento, $mapaCuentas);
+        $tesoreriaCuentaId = $this->idCuentaContrapartida($asiento, $mapaCuentas);
         $puente = $this->cuentas->puentePeriodificacion($centroId, $asiento->libro);
         if ($puente === null || $puente->id === null) {
             throw new InvalidArgumentException('Falta la cuenta PUENTE.PERIODIFICACION del libro ' . $asiento->libro);
@@ -181,9 +184,16 @@ final class CrearApunte
             $ejercicioImputacion->id,
             $ejercicioOperacion->id,
         );
+        $imputacion = $par['imputacion'];
+        $tesoreria = $par['tesoreria'];
+        if (!empty($datos['remesa_id'])) {
+            $rid = (int) $datos['remesa_id'];
+            $imputacion = $imputacion->withRemesaId($rid);
+            $tesoreria = $tesoreria->withRemesaId($rid);
+        }
         [$imputacion, $tesoreria] = $this->asientos->guardarEnlazados(
-            $par['imputacion'],
-            $par['tesoreria'],
+            $imputacion,
+            $tesoreria,
             $permiteCerradoImputacion,
         );
         if ($permiteCerradoImputacion && $this->generarApertura !== null) {
@@ -244,23 +254,27 @@ final class CrearApunte
     /**
      * @param array<int, \src\ambito\domain\entity\Cuenta> $mapaCuentas
      */
-    private function idCuentaTesoreria(Asiento $asiento, array $mapaCuentas): int
+    private function idCuentaContrapartida(Asiento $asiento, array $mapaCuentas): int
     {
-        $tesoreriaId = null;
+        $contrapartidaId = null;
         foreach ($asiento->movimientos as $mov) {
             $cuenta = $mapaCuentas[$mov->cuentaId] ?? null;
-            if ($cuenta !== null && $cuenta->tipo === 'tesoreria') {
-                if ($tesoreriaId !== null) {
-                    throw new InvalidArgumentException('El asiento tiene más de una cuenta de tesorería; no se periodifica');
-                }
-                $tesoreriaId = $cuenta->id;
+            if ($cuenta === null) {
+                continue;
             }
+            if (in_array($cuenta->tipo, ['ingreso', 'gasto', 'patrimonio'], true)) {
+                continue;
+            }
+            if ($contrapartidaId !== null) {
+                throw new InvalidArgumentException('El asiento tiene más de una contrapartida; no se periodifica');
+            }
+            $contrapartidaId = $cuenta->id;
         }
-        if ($tesoreriaId === null) {
-            throw new InvalidArgumentException('No hay tesorería que periodificar en este asiento');
+        if ($contrapartidaId === null) {
+            throw new InvalidArgumentException('No hay contrapartida que periodificar en este asiento');
         }
 
-        return $tesoreriaId;
+        return $contrapartidaId;
     }
 
     private function resolverConcepto(int $centroId, string $libro, string $codigo): \src\ambito\domain\entity\Cuenta

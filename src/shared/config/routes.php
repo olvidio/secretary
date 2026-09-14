@@ -9,21 +9,29 @@ use src\ambito\infrastructure\http\TesoreriaController;
 use src\apuntes\infrastructure\http\ApunteController;
 use src\apuntes\infrastructure\http\PlantillaApunteController;
 use src\arqueo\infrastructure\http\ArqueoController;
+use src\ayuda\infrastructure\http\AyudaController;
 use src\asientos\infrastructure\http\TraspasoController;
 use src\cierre\infrastructure\http\CierreController;
 use src\conceptos\infrastructure\http\ConceptoController;
 use src\configuracion\infrastructure\http\ConfiguracionController;
 use src\informes\infrastructure\http\InformeController;
 use src\personas\infrastructure\http\PersonaController;
+use src\personas\infrastructure\http\VinculoCentroController;
 use src\plan\infrastructure\http\PartidaLaboresController;
 use src\presupuestos\infrastructure\http\PresupuestoController;
 use src\acceso\infrastructure\http\AuthController;
+use src\acceso\infrastructure\http\PreferenciaController;
+use src\personal\infrastructure\http\BancoPersonalController;
+use src\personal\infrastructure\http\CopiaPersonalController;
 use src\personal\infrastructure\http\PersonalController;
 use src\remesas\infrastructure\http\RemesaController;
+use src\shared\infrastructure\http\CopiaSeguridadController;
 
 return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/login', [AuthController::class, 'login']);
     $r->addRoute('POST', '/login', [AuthController::class, 'login']);
+    $r->addRoute('POST', '/api/registro', [AuthController::class, 'registro']);
+    $r->addRoute('POST', '/registro', [AuthController::class, 'registro']);
     $r->addRoute('GET', '/logout', [AuthController::class, 'logout']);
     $r->addRoute('GET', '/api/csrf', [AuthController::class, 'csrf']);
     $r->addRoute('POST', '/totp-activar', [AuthController::class, 'totpConfirmar']);
@@ -33,6 +41,18 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/totp/verificar', [AuthController::class, 'totpVerificar']);
     $r->addRoute('POST', '/elegir-centro', [AuthController::class, 'elegirCentro']);
     $r->addRoute('POST', '/api/centros/elegir', [AuthController::class, 'elegirCentro']);
+    $r->addRoute('POST', '/elegir-persona', [AuthController::class, 'elegirPersona']);
+    $r->addRoute('POST', '/api/personas/elegir', [AuthController::class, 'elegirPersona']);
+    $r->addRoute('GET', '/api/preferencias', [PreferenciaController::class, 'get']);
+    $r->addRoute('POST', '/api/preferencias/layout', [PreferenciaController::class, 'guardarLayout']);
+    $r->addRoute('POST', '/api/preferencias/mail', [PreferenciaController::class, 'guardarMail']);
+    $r->addRoute('POST', '/api/preferencias/password', [PreferenciaController::class, 'guardarPassword']);
+    $r->addRoute('POST', '/api/preferencias/totp/preparar', [PreferenciaController::class, 'totpPreparar']);
+    $r->addRoute('POST', '/api/preferencias/totp/confirmar', [PreferenciaController::class, 'totpConfirmar']);
+    $r->addRoute('POST', '/api/preferencias/idioma', [PreferenciaController::class, 'guardarIdioma']);
+    $r->addRoute('POST', '/api/preferencias/centro', [PreferenciaController::class, 'guardarCentro']);
+    $r->addRoute('POST', '/api/preferencias/persona', [PreferenciaController::class, 'guardarPersona']);
+    $r->addRoute('POST', '/api/preferencias/tipo', [PreferenciaController::class, 'guardarTipo']);
 
     $r->addRoute('GET', '/api/configuracion', [ConfiguracionController::class, 'get']);
     $r->addRoute('POST', '/api/configuracion', [ConfiguracionController::class, 'save']);
@@ -48,6 +68,14 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/personas', [PersonaController::class, 'list']);
     $r->addRoute('POST', '/api/personas', [PersonaController::class, 'save']);
     $r->addRoute('DELETE', '/api/personas/{id:\d+}', [PersonaController::class, 'delete']);
+
+    $r->addRoute('GET', '/api/vinculos-centro/solicitudes', [VinculoCentroController::class, 'listarCentro']);
+    $r->addRoute('GET', '/api/vinculos-centro/solicitudes/{id:\d+}/candidatos', [VinculoCentroController::class, 'candidatos']);
+    $r->addRoute('POST', '/api/vinculos-centro/solicitudes/{id:\d+}/aprobar', [VinculoCentroController::class, 'aprobar']);
+    $r->addRoute('POST', '/api/vinculos-centro/solicitudes/{id:\d+}/rechazar', [VinculoCentroController::class, 'rechazar']);
+    $r->addRoute('GET', '/api/yo/vinculos-centro', [VinculoCentroController::class, 'listarYo']);
+    $r->addRoute('GET', '/api/yo/vinculos-centro/centros', [VinculoCentroController::class, 'centrosDisponibles']);
+    $r->addRoute('POST', '/api/yo/vinculos-centro', [VinculoCentroController::class, 'solicitarYo']);
 
     $r->addRoute('GET', '/api/conceptos', [ConceptoController::class, 'list']);
 
@@ -99,9 +127,25 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/yo/resumen', [PersonalController::class, 'resumen']);
     $r->addRoute('GET', '/api/yo/movimientos', [PersonalController::class, 'movimientos']);
     $r->addRoute('POST', '/api/yo/movimientos', [PersonalController::class, 'crear']);
+    $r->addRoute('PUT', '/api/yo/movimientos/{id:\d+}', [PersonalController::class, 'actualizarMovimiento']);
+    $r->addRoute('POST', '/api/yo/movimientos/{id:\d+}/desdoblar', [PersonalController::class, 'desdoblarMovimiento']);
     $r->addRoute('DELETE', '/api/yo/movimientos/{id:\d+}', [PersonalController::class, 'borrarMovimiento']);
     $r->addRoute('GET', '/api/yo/categorias', [PersonalController::class, 'listarCategorias']);
+    $r->addRoute('GET', '/api/yo/conceptos-generales', [PersonalController::class, 'listarConceptosGenerales']);
+    $r->addRoute('GET', '/api/yo/copias', [CopiaPersonalController::class, 'list']);
+    $r->addRoute('POST', '/api/yo/copias/backup', [CopiaPersonalController::class, 'backup']);
+    $r->addRoute('GET', '/api/yo/copias/descargar', [CopiaPersonalController::class, 'descargar']);
+    $r->addRoute('POST', '/api/yo/copias/restore', [CopiaPersonalController::class, 'restore']);
+    $r->addRoute('POST', '/api/yo/copias/borrar', [CopiaPersonalController::class, 'borrar']);
     $r->addRoute('POST', '/api/yo/categorias', [PersonalController::class, 'crearCategoria']);
+    $r->addRoute('GET', '/api/yo/cierre', [PersonalController::class, 'cierre']);
+    $r->addRoute('POST', '/api/yo/cierre/defecto', [PersonalController::class, 'guardarCierreDefecto']);
+    $r->addRoute('POST', '/api/yo/cierre/mes', [PersonalController::class, 'guardarCierreMes']);
+    $r->addRoute('POST', '/api/yo/cierre/mes/borrar', [PersonalController::class, 'borrarCierreMes']);
+    $r->addRoute('GET', '/api/yo/banco/bancos', [BancoPersonalController::class, 'bancos']);
+    $r->addRoute('GET', '/api/yo/banco/pendientes', [BancoPersonalController::class, 'pendientes']);
+    $r->addRoute('POST', '/api/yo/banco/csv', [BancoPersonalController::class, 'importar']);
+    $r->addRoute('POST', '/api/yo/banco/categorizar', [BancoPersonalController::class, 'categorizar']);
 
     $r->addRoute('GET', '/api/yo/remesas/solicitudes', [RemesaController::class, 'solicitudesPersona']);
     $r->addRoute('POST', '/api/yo/remesas/solicitudes/{id:\d+}', [RemesaController::class, 'resolverSolicitud']);
@@ -115,4 +159,13 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/remesas/{id:\d+}/rechazar', [RemesaController::class, 'rechazar']);
     $r->addRoute('POST', '/api/remesas/{id:\d+}/lineas/{lineaId:\d+}/solicitar', [RemesaController::class, 'solicitarDetalle']);
     $r->addRoute('GET', '/api/remesas/{id:\d+}/lineas/{lineaId:\d+}/detalle', [RemesaController::class, 'detalleLinea']);
+
+    $r->addRoute('GET', '/api/ayuda/temas', [AyudaController::class, 'listarTemas']);
+    $r->addRoute('POST', '/api/ayuda/preguntar', [AyudaController::class, 'preguntar']);
+
+    $r->addRoute('GET', '/api/copias', [CopiaSeguridadController::class, 'list']);
+    $r->addRoute('POST', '/api/copias/backup', [CopiaSeguridadController::class, 'backup']);
+    $r->addRoute('GET', '/api/copias/descargar', [CopiaSeguridadController::class, 'descargar']);
+    $r->addRoute('POST', '/api/copias/restore', [CopiaSeguridadController::class, 'restore']);
+    $r->addRoute('POST', '/api/copias/borrar', [CopiaSeguridadController::class, 'borrar']);
 };

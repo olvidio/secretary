@@ -17,6 +17,15 @@ docker compose exec php-fpm php bin/console.php db:install
 docker compose exec php-fpm php bin/console.php import:excel
 ```
 
+Copias de seguridad: `docs/dev/backup.md` (`/copias`, `db:backup` / `db:restore` o `./backup.sh`).
+Tras clonar, deje `var/backups` escribible por PHP-FPM (`chmod 775 var/backups` o `777` en desarrollo).
+
+Tras cambiar el `dockerfile` (p. ej. `postgresql-client-15`), reconstruya PHP-FPM:
+
+```bash
+docker compose up -d --build php-fpm
+```
+
 El Excel de un segundo centro se carga en **Centros** (al crearlo o después). `--centro=CODIGO` en CLI no pisa la configuración del primero. Nginx admite hasta 32 MB (`client_max_body_size`); PHP-FPM, `upload_max_filesize`/`post_max_size` 32M en `web/php.ini`.
 
 No citar los valores `POSTGRES_*` en el `docker-compose.yml` (las comillas acaba metiéndolas en el usuario).

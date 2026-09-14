@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace src\personas\application;
 
+use src\ambito\domain\contracts\CentroRepository;
 use src\personas\domain\contracts\PersonaRepository;
 
 final class ListarPersonas
 {
-    public function __construct(private readonly PersonaRepository $repo)
-    {
+    public function __construct(
+        private readonly PersonaRepository $repo,
+        private readonly CentroRepository $centros,
+    ) {
     }
 
     /** @return list<array<string, mixed>> */
@@ -31,11 +34,17 @@ final class ListarPersonas
      */
     public function ejecutarDeCentro(int $centroId): array
     {
+        $centro = $this->centros->porId($centroId);
+        $centroNombre = $centro?->nombre ?? '';
+        $centroCodigo = $centro?->codigo ?? '';
         $out = [];
         foreach ($this->repo->listarDeCentro($centroId) as $p) {
             $fila = $p->toArray();
             $fila['email'] = $p->email ?? '';
             $fila['vivienda_aporta_generales'] = $p->viviendaAportaGenerales;
+            $fila['centro_id'] = $centroId;
+            $fila['centro_nombre'] = $centroNombre;
+            $fila['centro_codigo'] = $centroCodigo;
             $out[] = $fila;
         }
 

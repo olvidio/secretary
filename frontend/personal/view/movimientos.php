@@ -5,3 +5,4 @@
 </div>
 <p id="yo-lista-vacia" class="muted" hidden>No hay movimientos este mes.</p>
 <ul id="yo-lista" class="yo-lista"></ul>
+<?php include __DIR__ . '/_form_movimiento.php'; ?>

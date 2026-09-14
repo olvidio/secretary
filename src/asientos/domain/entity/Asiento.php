@@ -28,6 +28,8 @@ final class Asiento
         public readonly ?int $asientoParId = null,
         public readonly ?DateTimeImmutable $fechaOperacion = null,
         public readonly ?int $remesaId = null,
+        public readonly bool $gastoGenerales = false,
+        public readonly ?string $conceptoGenerales = null,
     ) {
         if (!in_array($libro, ['P', 'G', 'X'], true)) {
             throw new InvalidArgumentException('Libro no válido: ' . $libro);
@@ -74,6 +76,30 @@ final class Asiento
             $this->asientoParId,
             $this->fechaOperacion,
             $this->remesaId,
+            $this->gastoGenerales,
+            $this->conceptoGenerales,
+        );
+    }
+
+    public function withRemesaId(?int $remesaId): self
+    {
+        return new self(
+            $this->id,
+            $this->ejercicioId,
+            $this->libro,
+            $this->numero,
+            $this->fecha,
+            $this->glosa,
+            $this->tipo,
+            $this->origen,
+            $this->personaId,
+            $this->movimientos,
+            $this->conceptoCodigo,
+            $this->asientoParId,
+            $this->fechaOperacion,
+            $remesaId,
+            $this->gastoGenerales,
+            $this->conceptoGenerales,
         );
     }
 
@@ -94,6 +120,8 @@ final class Asiento
             $asientoParId,
             $this->fechaOperacion,
             $this->remesaId,
+            $this->gastoGenerales,
+            $this->conceptoGenerales,
         );
     }
 
@@ -114,6 +142,8 @@ final class Asiento
             $this->asientoParId,
             $this->fechaOperacion,
             $this->remesaId,
+            $this->gastoGenerales,
+            $this->conceptoGenerales,
         );
     }
 
@@ -134,6 +164,8 @@ final class Asiento
             $this->asientoParId,
             $fechaOperacion,
             $this->remesaId,
+            $this->gastoGenerales,
+            $this->conceptoGenerales,
         );
     }
 
@@ -154,6 +186,8 @@ final class Asiento
             'concepto_codigo' => $this->conceptoCodigo,
             'asiento_par_id' => $this->asientoParId,
             'remesa_id' => $this->remesaId,
+            'gasto_generales' => $this->gastoGenerales,
+            'concepto_generales' => $this->conceptoGenerales,
             'movimientos' => array_map(static fn (Movimiento $m) => $m->toArray(), $this->movimientos),
         ];
     }

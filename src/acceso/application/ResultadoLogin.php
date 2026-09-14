@@ -23,6 +23,11 @@ final class ResultadoLogin
 
     public function ok(): bool
     {
-        return $this->estado !== 'fallo';
+        return in_array($this->estado, ['autenticado', 'pendiente_activar', 'pendiente_verificar'], true);
+    }
+
+    public function desconocido(): bool
+    {
+        return $this->estado === 'desconocido';
     }
 }

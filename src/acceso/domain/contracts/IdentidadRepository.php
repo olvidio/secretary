@@ -26,9 +26,30 @@ interface IdentidadRepository
     /** @return list<int> */
     public function personasDe(int $identidadId): array;
 
+    /**
+     * Personas vinculadas con datos de centro para elegir sesión nivel 1.
+     *
+     * @return list<array{
+     *     persona_id: int,
+     *     iniciales: string,
+     *     nombre_completo: string,
+     *     centro_id: int,
+     *     centro_nombre: string,
+     *     centro_codigo: string,
+     *     anio: ?int
+     * }>
+     */
+    public function personasVinculoDe(int $identidadId): array;
+
     public function vincularCentro(int $identidadId, int $centroId, string $rol): void;
 
-    public function vincularPersona(int $identidadId, int $personaId): void;
+    public function vincularPersona(int $identidadId, int $personaId, ?int $anio = null): void;
+
+    public function tienePersonaEnCentro(int $identidadId, int $centroId): bool;
+
+    public function tienePersonaEnAlgunCentro(int $identidadId): bool;
+
+    public function anioVinculoPersona(int $identidadId, int $personaId): ?int;
 
     public function desvincularPersona(int $personaId): void;
 
@@ -54,4 +75,12 @@ interface IdentidadRepository
     public function recoveryPendientes(int $identidadId): array;
 
     public function marcarRecoveryUsado(int $id, DateTimeImmutable $cuando): void;
+
+    public function layoutDe(int $identidadId): string;
+
+    public function guardarLayout(int $identidadId, string $layout): void;
+
+    public function idiomaDe(int $identidadId): string;
+
+    public function guardarIdioma(int $identidadId, string $idioma): void;
 }

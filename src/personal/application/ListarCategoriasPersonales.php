@@ -35,6 +35,8 @@ final class ListarCategoriasPersonales
                 'padre_id' => $c->padreId,
             ];
             if (in_array($c->tipo, ['ingreso', 'gasto'], true)) {
+                $fila['pendiente'] = AsegurarPlanPersonal::esPendiente($c->codigo);
+                $fila['otra'] = AsegurarPlanPersonal::esOtra($c->codigo);
                 $categorias[] = $fila;
             }
             if ($c->tipo === 'tesoreria') {

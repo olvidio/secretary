@@ -129,7 +129,7 @@ final class PdoIdentidadRepository implements IdentidadRepository
     public function personasDe(int $identidadId): array
     {
         $st = $this->pdo->prepare(
-            'SELECT persona_id FROM identidad_persona WHERE identidad_id = :id'
+            'SELECT persona_id FROM identidad_persona WHERE identidad_id = :id ORDER BY persona_id'
         );
         $st->execute([':id' => $identidadId]);
         $ids = [];
@@ -138,6 +138,35 @@ final class PdoIdentidadRepository implements IdentidadRepository
         }
 
         return $ids;
+    }
+
+    public function personasVinculoDe(int $identidadId): array
+    {
+        $st = $this->pdo->prepare(
+            'SELECT p.id AS persona_id, p.iniciales, p.nombre, p.apellidos, p.centro_id,
+                    c.nombre AS centro_nombre, c.codigo AS centro_codigo, ip.anio
+             FROM identidad_persona ip
+             INNER JOIN personas p ON p.id = ip.persona_id
+             INNER JOIN centros c ON c.id = p.centro_id
+             WHERE ip.identidad_id = :id AND p.activo = TRUE
+             ORDER BY c.nombre, p.iniciales'
+        );
+        $st->execute([':id' => $identidadId]);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $nombre = trim((string) $row['nombre'] . ' ' . (string) $row['apellidos']);
+            $out[] = [
+                'persona_id' => (int) $row['persona_id'],
+                'iniciales' => (string) $row['iniciales'],
+                'nombre_completo' => $nombre,
+                'centro_id' => (int) $row['centro_id'],
+                'centro_nombre' => (string) $row['centro_nombre'],
+                'centro_codigo' => (string) $row['centro_codigo'],
+                'anio' => isset($row['anio']) && $row['anio'] !== null ? (int) $row['anio'] : null,
+            ];
+        }
+
+        return $out;
     }
 
     public function vincularCentro(int $identidadId, int $centroId, string $rol): void
@@ -150,14 +179,54 @@ final class PdoIdentidadRepository implements IdentidadRepository
         $st->execute([':i' => $identidadId, ':c' => $centroId, ':r' => $rol]);
     }
 
-    public function vincularPersona(int $identidadId, int $personaId): void
+    public function vincularPersona(int $identidadId, int $personaId, ?int $anio = null): void
     {
         $st = $this->pdo->prepare(
-            'INSERT INTO identidad_persona (identidad_id, persona_id)
-             VALUES (:i, :p)
-             ON CONFLICT (identidad_id, persona_id) DO NOTHING'
+            'INSERT INTO identidad_persona (identidad_id, persona_id, anio)
+             VALUES (:i, :p, :a)
+             ON CONFLICT (identidad_id, persona_id) DO UPDATE SET anio = excluded.anio'
+        );
+        $st->execute([':i' => $identidadId, ':p' => $personaId, ':a' => $anio]);
+    }
+
+    public function tienePersonaEnCentro(int $identidadId, int $centroId): bool
+    {
+        $st = $this->pdo->prepare(
+            'SELECT 1 FROM identidad_persona ip
+             INNER JOIN personas p ON p.id = ip.persona_id
+             WHERE ip.identidad_id = :i AND p.centro_id = :c AND p.activo = TRUE
+             LIMIT 1'
+        );
+        $st->execute([':i' => $identidadId, ':c' => $centroId]);
+
+        return (bool) $st->fetchColumn();
+    }
+
+    public function tienePersonaEnAlgunCentro(int $identidadId): bool
+    {
+        $st = $this->pdo->prepare(
+            'SELECT 1 FROM identidad_persona ip
+             INNER JOIN personas p ON p.id = ip.persona_id
+             WHERE ip.identidad_id = :i AND p.centro_id IS NOT NULL AND p.activo = TRUE
+             LIMIT 1'
+        );
+        $st->execute([':i' => $identidadId]);
+
+        return (bool) $st->fetchColumn();
+    }
+
+    public function anioVinculoPersona(int $identidadId, int $personaId): ?int
+    {
+        $st = $this->pdo->prepare(
+            'SELECT anio FROM identidad_persona WHERE identidad_id = :i AND persona_id = :p'
         );
         $st->execute([':i' => $identidadId, ':p' => $personaId]);
+        $val = $st->fetchColumn();
+        if ($val === false || $val === null) {
+            return null;
+        }
+
+        return (int) $val;
     }
 
     public function desvincularPersona(int $personaId): void
@@ -284,6 +353,42 @@ final class PdoIdentidadRepository implements IdentidadRepository
             'UPDATE identidad_recovery SET usado_at = :c WHERE id = :id'
         );
         $st->execute([':c' => $cuando->format('c'), ':id' => $id]);
+    }
+
+    public function layoutDe(int $identidadId): string
+    {
+        $st = $this->pdo->prepare('SELECT layout FROM identidades WHERE id = :id');
+        $st->execute([':id' => $identidadId]);
+        $v = $st->fetchColumn();
+        if (!is_string($v) || $v === '') {
+            return 'excel';
+        }
+
+        return $v;
+    }
+
+    public function guardarLayout(int $identidadId, string $layout): void
+    {
+        $st = $this->pdo->prepare('UPDATE identidades SET layout = :l WHERE id = :id');
+        $st->execute([':l' => $layout, ':id' => $identidadId]);
+    }
+
+    public function idiomaDe(int $identidadId): string
+    {
+        $st = $this->pdo->prepare('SELECT idioma FROM identidades WHERE id = :id');
+        $st->execute([':id' => $identidadId]);
+        $v = $st->fetchColumn();
+        if (!is_string($v) || $v === '') {
+            return 'es';
+        }
+
+        return $v;
+    }
+
+    public function guardarIdioma(int $identidadId, string $idioma): void
+    {
+        $st = $this->pdo->prepare('UPDATE identidades SET idioma = :i WHERE id = :id');
+        $st->execute([':i' => $idioma, ':id' => $identidadId]);
     }
 
     /** @param array<string, mixed> $row */

@@ -11,6 +11,8 @@ use src\importacion\application\ImportarExcelSecretario;
 use src\personal\infrastructure\persistence\Nivel1Seeder;
 use src\shared\infrastructure\Kernel;
 use src\shared\infrastructure\persistence\MigrationRunner;
+use src\shared\infrastructure\persistence\PostgresDumper;
+use src\shared\infrastructure\persistence\RutasCopiasSeguridad;
 use src\shared\infrastructure\persistence\SchemaInstaller;
 
 $root = dirname(__DIR__);
@@ -155,10 +157,82 @@ if ($cmd === 'asientos:convertir') {
     exit(0);
 }
 
+if ($cmd === 'db:backup') {
+    $output = RutasCopiasSeguridad::directorio() . '/secretario_' . date('Ymd_His') . '.sql';
+    for ($i = 2; $i < count($argv); $i++) {
+        $arg = $argv[$i];
+        if (!is_string($arg)) {
+            continue;
+        }
+        if (str_starts_with($arg, '--output=')) {
+            $output = substr($arg, strlen('--output='));
+            continue;
+        }
+        if ($arg === '--help' || $arg === '-h') {
+            fwrite(STDOUT, "Uso: php bin/console.php db:backup [--output=ruta.dump]\n");
+            exit(0);
+        }
+        if (str_starts_with($arg, '--')) {
+            fwrite(STDERR, "Opción desconocida: $arg\n");
+            exit(1);
+        }
+    }
+    $dumper = PostgresDumper::fromEnv($pdo);
+    $dumper->backup($output);
+    fwrite(STDOUT, "Copia de seguridad: $output\n");
+    exit(0);
+}
+
+if ($cmd === 'db:restore') {
+    $file = null;
+    $force = false;
+    for ($i = 2; $i < count($argv); $i++) {
+        $arg = $argv[$i];
+        if (!is_string($arg)) {
+            continue;
+        }
+        if (str_starts_with($arg, '--file=')) {
+            $file = substr($arg, strlen('--file='));
+            continue;
+        }
+        if ($arg === '--force') {
+            $force = true;
+            continue;
+        }
+        if ($arg === '--help' || $arg === '-h') {
+            fwrite(STDOUT, "Uso: php bin/console.php db:restore --file=ruta.dump [--force]\n");
+            exit(0);
+        }
+        if (str_starts_with($arg, '--')) {
+            fwrite(STDERR, "Opción desconocida: $arg\n");
+            exit(1);
+        }
+        if ($file === null) {
+            $file = $arg;
+        }
+    }
+    if ($file === null || $file === '') {
+        fwrite(STDERR, "Indica el fichero con --file=ruta.dump\n");
+        exit(1);
+    }
+    $dumper = PostgresDumper::fromEnv($pdo);
+    if (!$force) {
+        fwrite(STDERR, "La restauración sobrescribe la base " . $dumper->database() . ".\n");
+        fwrite(STDERR, "Vuelve a ejecutar con --force para confirmar.\n");
+        exit(1);
+    }
+    $dumper->restore($file);
+    fwrite(STDOUT, "Restauración completada sobre " . $dumper->database() . ".\n");
+    fwrite(STDOUT, "Comprueba el esquema: php bin/console.php db:status\n");
+    exit(0);
+}
+
 fwrite(STDOUT, "Uso:\n"
     . "  php bin/console.php db:migrate\n"
     . "  php bin/console.php db:status\n"
     . "  php bin/console.php db:install\n"
+    . "  php bin/console.php db:backup [--output=ruta.dump]\n"
+    . "  php bin/console.php db:restore --file=ruta.dump [--force]\n"
     . "  php bin/console.php import:excel [fichero.xlsm] [--dry-run] [--centro=CODIGO] [--ejercicio=ETIQUETA]\n"
     . "  php bin/console.php asientos:convertir\n");
 exit(1);

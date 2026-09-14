@@ -104,7 +104,7 @@ final class GoldenMasterTest extends TestCase
 
         $this->compararOActualizar('importacion', $resultadoImportacion);
         $this->compararOActualizar('configuracion', (new ObtenerConfiguracion($configRepo))->ejecutar());
-        $this->compararOActualizar('personas', (new ListarPersonas($personaRepo))->ejecutar());
+        $this->compararOActualizar('personas', (new ListarPersonas($personaRepo, $centroRepo))->ejecutar());
         $this->compararOActualizar('conceptos_p', (new ListarConceptos($conceptoRepo))->ejecutar('P'));
         $this->compararOActualizar('conceptos_g', (new ListarConceptos($conceptoRepo))->ejecutar('G'));
         $this->compararOActualizar('presupuesto_p', $this->dumpPresupuesto($presupuestoRepo, 'P'));

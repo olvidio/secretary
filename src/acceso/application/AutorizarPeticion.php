@@ -40,6 +40,9 @@ final class AutorizarPeticion
     ): DecisionAcceso {
         $ambito = $this->rutas->ambitoDe($clase, $metodoPhp);
         if ($ambito === null) {
+            $ambito = CatalogoRutas::ambitoDe($clase, $metodoPhp);
+        }
+        if ($ambito === null) {
             return $this->denegar($esApi, 'No autorizado', 401, '/login');
         }
         $mutacion = in_array($httpMethod, ['POST', 'PUT', 'PATCH', 'DELETE'], true);
@@ -90,7 +93,7 @@ final class AutorizarPeticion
                 return $this->denegar($esApi, 'Esta área es personal', 403, '/');
             }
             if ($personaId === null) {
-                return $this->denegar($esApi, 'Sesión de persona incompleta', 401, '/login');
+                return $this->denegar($esApi, 'Seleccione una persona', 401, '/elegir-persona');
             }
 
             return new DecisionAcceso(true);

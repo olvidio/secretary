@@ -338,6 +338,79 @@ operación** y **fecha de imputación**.
 
 Detalle: `docs/dev/periodificacion.md`.
 
+### D14 — Adscripción de personas al centro por ejercicio
+
+*Decisión del usuario (2026-09-14).* Un centro tiene una **plantilla de personas por
+ejercicio** (no una lista única atemporal). Casi todos repiten de un año al otro; las
+excepciones (altas, bajas, exenciones de meses) son pocas. Conviene conservar al menos
+**dos ejercicios** de plantilla e histórico para presupuestar el ejercicio nuevo.
+
+**Separación de conceptos:**
+
+| Concepto | Qué es | Dónde vive |
+| --- | --- | --- |
+| **Persona** (`personas`) | Nombre estable del centro: iniciales, CC, libro X, cuentas | Una fila por `(centro, iniciales)`; **no se borra** al cambiar de año |
+| **Adscripción** | ¿Participa en el centro en ese ejercicio? ¿En qué meses? | Nueva tabla `persona_ejercicio` (ver DDL abajo) |
+| **Identidad** (`identidad_persona`) | Cuenta de login del libro personal | Puede vincularse a la persona del centro; solicitud + aprobación (ya implementado parcialmente) |
+| **Libro X** | Contabilidad personal totalmente independiente | Por `persona_id`; no se mueve al cambiar ejercicio del centro |
+| **Remesa** | Agregado mensual X → P del centro | El **centro destino** se resuelve por adscripción en **ese mes**, no solo por la sesión actual |
+
+**Herencia automática (caso normal):**
+
+Al crear un ejercicio contiguo al anterior cerrado (`CrearEjercicio`, junto a D12):
+
+1. Copiar todas las filas `persona_ejercicio` del ejercicio anterior al nuevo.
+2. **Exenciones en blanco** en la copia (participación todo el año salvo que el secretario
+   indique lo contrario). *Nota de implementación:* hoy `mes_exento_*` vive en `personas`
+   y se repite cada año; al implementar D14 migrar esos campos a `persona_ejercicio`.
+3. Quien **no continúa** se marca `activo = false` en la adscripción del nuevo ejercicio
+   (no se borra la fila `personas` ni su histórico X/remesas antiguas).
+4. **Altas** en el nuevo ejercicio: nombre nuevo en Nombres, o solicitud aprobada desde
+   `/yo` con el **año/ejercicio** indicado (flujo ya existente; el `anio` de
+   `identidad_persona` pasa a alinearse con la adscripción).
+
+**Exención de meses:**
+
+- Define en qué meses del ejercicio la persona **no está adscrita** (llegada a mitad de
+  año, salida, etc.).
+- La usa el **cierre de vivienda**, **Comprobaciones** y la **expectativa de remesa**
+  del centro para ese mes.
+- Es **por ejercicio**, no global: la misma persona puede estar exenta enero-junio en 2025
+  y todo el año en 2026.
+
+**Remesas y cambio de centro:**
+
+- En el momento del envío, la remesa del mes `(anio, mes)` debe ir al **centro adscrito
+  en ese mes** según `persona_ejercicio` (y exención).
+- Solo hay **un centro activo «presente»** por persona, pero con retraso es posible enviar
+  la remesa de marzo al centro antiguo y la de abril al nuevo: la adscripción histórica
+  por mes lo resuelve sin cambiar manualmente la «persona activa» de sesión.
+- Si el mes está exento o no hay adscripción, **no se puede enviar** remesa de ese mes
+  (o el centro no la espera en su bandeja).
+
+**UI (secretario):**
+
+- **Nombres** filtrado por ejercicio abierto (o selector de ejercicio para consultar
+  histórico y presupuesto).
+- Acciones puntuales: baja en este ejercicio, alta, editar exención. No reescribir la
+  lista cada enero.
+- Sin botón «Borrar» destructivo como vía habitual: baja = `activo = false` en la
+  adscripción; borrar físico solo en casos excepcionales sin histórico.
+
+**Presupuesto:**
+
+- Comparar ejercicio N con N−1 usando las adscripciones y movimientos de cada uno.
+- La plantilla heredada de N−1 es la base del presupuesto de N.
+
+*Alternativa descartada:* mantener una sola fila `personas` con exención global (estado
+actual): no distingue 2025 de 2026 y obliga a reeditar Nombres cada cambio de año.
+
+*Punto de enganche:* `CrearEjercicio` (tras `GenerarApertura`), análogo a D12.
+Servicio de dominio `HeredarPlantillaPersonas` + `ResolverAdscripcionPersona(centro,
+persona, fecha)` usado por remesas, cierre y comprobaciones.
+
+Detalle operativo: `docs/dev/personal.md` (remesas) y `docs/dev/acceso.md` (vínculos).
+
 ---
 
 ## 3. Modelo de datos objetivo
@@ -404,7 +477,19 @@ identidades(id, email UNIQUE, password_hash, nombre, activo,
 identidad_totp(identidad_id PK FK, secret_cifrado, confirmado_at)
 identidad_recovery(id, identidad_id FK, code_hash, usado_at NULL)
 identidad_centro(identidad_id FK, centro_id FK, rol, PRIMARY KEY(identidad_id, centro_id))
-identidad_persona(identidad_id FK, persona_id FK, PRIMARY KEY(identidad_id, persona_id))
+identidad_persona(identidad_id FK, persona_id FK, anio INT NULL,
+                  PRIMARY KEY(identidad_id, persona_id))
+
+-- Adscripción al centro por ejercicio (D14) --------------------------------
+persona_ejercicio(persona_id FK, ejercicio_id FK,
+                  activo BOOL NOT NULL DEFAULT TRUE,
+                  mes_exento_inicio SMALLINT NULL, mes_exento_fin SMALLINT NULL,
+                  mes_exento2_inicio SMALLINT NULL, mes_exento2_fin SMALLINT NULL,
+                  importe_vivienda_fijo BIGINT NULL,   -- céntimos; NULL = reparto igual
+                  vivienda_aporta_generales BOOL NOT NULL DEFAULT TRUE,
+                  PRIMARY KEY(persona_id, ejercicio_id))
+-- Herencia automática al crear ejercicio contiguo (D14, junto a D12).
+-- Cierre, Comprobaciones y remesas consultan adscripción + exención del ejercicio.
 
 -- Nivel 1 → nivel 2 --------------------------------------------------------
 remesas(id, persona_id FK, centro_id FK, ejercicio_id FK, anio, mes, version,
@@ -633,12 +718,25 @@ copia del plan maestro. Opcional: informe consolidado entre centros.
 *Aceptación:* dos centros con datos reales conviven sin fuga de datos entre ámbitos
 (test explícito de aislamiento).
 
+### Fase 9b — Adscripción de personas por ejercicio (D14)
+**Agente:** `claude`, modelo `sonnet`. 2-3 jornadas. Depende de: F4b + F8 + F9 (parcial).
+
+Migración `persona_ejercicio`; backfill desde `personas` + ejercicio abierto. En
+`CrearEjercicio`, heredar plantilla del ejercicio anterior (junto a `GenerarApertura`).
+Mover exención/vivienda-aporta de `personas` a `persona_ejercicio`. Nombres filtrado por
+ejercicio; baja = desactivar adscripción. `ResolverAdscripcionPersona` en remesas, cierre
+y comprobaciones. Remesa: centro destino según mes enviado.
+
+*Aceptación:* abrir ejercicio 2027 copia plantilla 2026; marcar baja en 2027 no borra
+histórico ni impide consultar 2026; remesa de un mes exento falla o no se espera; remesa
+tardía tras cambio de centro va al centro adscrito en ese mes (test con dos centros).
+
 ### Orden y paralelismo
 
 ```
 F0 ─ F1 ─ F2 ─┬─ F3 ─┬─ F4 ─ F4b ─ F4c ─ F5 ─┐
               │      └─ F7 ─ F8 ─────────────┤
-              └─ F6 ─────────────────────────┴─ F9
+              └─ F6 ─────────────────────────┴─ F9 ─ F9b
 ```
 
 F6 (autenticación) puede ir en paralelo a F3/F4/F5 con agentes distintos: no comparten
@@ -680,6 +778,8 @@ esos ficheros, o `Explore` en `haiku` si solo se quiere el inventario.
 | 6 | Bancos por libro o compartidos | **Cuentas físicas compartidas** entre P y G, con desglose por libro | D10 |
 | 8 | Cuadre estricto | **Sí**, sin cuenta de ajuste; la UI construye el asiento por detrás | D1 |
 | — | Arrastre entre ejercicios | **Apertura automática** desde el cierre del anterior | D12 |
+| — | Plantilla de personas año a año | **Herencia automática** al abrir ejercicio; excepciones manuales | D14 |
+| — | Centro destino de la remesa | Por **adscripción del mes** enviado, no solo sesión | D14 |
 
 ### Pendientes
 
@@ -698,7 +798,9 @@ Ninguna bloquea las Fases 0-6. Conviene resolverlas antes de la Fase 7.
 5. **Ejercicio y remesas.** Si el centro lleva ejercicio junio-mayo y la persona quiere el
    suyo enero-diciembre, ¿se permite? Supuesto: la remesa es mensual, así que basta con
    que el mes caiga dentro de un ejercicio abierto en cada lado; pero conviene confirmarlo
-   antes de la Fase 8.
+   antes de la Fase 8. El **centro destino por mes** queda resuelto en D14.
+6. **Adscripción por ejercicio.** Resuelto en D14 (herencia automática + excepciones).
+   Pendiente de implementación; ver Fase 9b.
 
 ---
 
@@ -707,7 +809,7 @@ Ninguna bloquea las Fases 0-6. Conviene resolverlas antes de la Fase 7.
 Encargo literal para el siguiente agente:
 
 > Lee `docs/dev/plan_ampliaciones.md`. Implementa la **Fase N** completa, respetando las
-> decisiones D1-D13 sin reabrirlas (si crees que una está mal, párate y dilo antes de
+> decisiones D1-D14 sin reabrirlas (si crees que una está mal, párate y dilo antes de
 > escribir código). Cumple `AGENTS.md`: dominio sin I/O, application sin SQL ni HTML,
 > infraestructura con PDO/HTTP/Excel. Al terminar, `composer test` y `composer phpstan` en
 > verde, el golden master de la Fase 0 intacto (o las diferencias documentadas y
@@ -730,4 +832,5 @@ Encargo literal para el siguiente agente:
 | 6 Autenticación | hecha | cursor-grok | 2026-09-09 | D7. Migración `0008_identidades.sql`. Login por email/alias, TOTP RFC 6238 obligatorio en centro, recovery, bloqueo 5/15 min, CSRF, sesión HttpOnly+SameSite=Lax, `rutas_acceso` (default deny). `scl` → identidad de centro. Tests `AutenticacionTest` + TOTP/CSRF/catálogo. Detalle en `docs/dev/acceso.md`. |
 | 7 Nivel 1 personal | hecha | cursor-grok | 2026-09-09 | D5. Libro `X` por persona, plan P sin el 9 + CAJA/BANCO propias + periodificación. Entrada ingreso/gasto/traspaso con D13. Pantallas `/yo` estilo Monefy. Identidad demo `yo`. Aislamiento: saldos/613/listado del centro ignoran X. Tests `Nivel1Test`, `CatalogoMaestroPersonalTest`, `ConstructorAsientoPersonalTest`. Migración `0009_libro_personal.sql` (índices). Sin remesas (Fase 8). Detalle en `docs/dev/personal.md`. |
 | 8 Remesas | hecha | cursor-grok | 2026-09-09 | D6. Tablas `remesas`/`remesa_lineas`/`remesa_solicitudes_detalle`, FK `asientos.remesa_id` (`0010_remesas.sql`). Envío mensual X→P, versionado, aceptar sustituye asientos en transacción, detalle bajo petición. UNIQUE incluye `anio` (ejercicio D11 largo). Tests `RemesaTest`, `HashRemesaTest`, `AgregadorRemesaPersonalTest`, `ConstructorAsientoRemesaTest`. Pantallas `/yo/remesas` y `/remesas`. Detalle en `docs/dev/remesas.md`. |
-| 9 Multicentro | parcial | cursor-grok | 2026-09-09 | Vínculo usuario↔centro. Migración `0011_vinculo_usuario_centro.sql`. Alta de centro en `/centros` con secretario propio (`scl2` no ve el libro de `scl`). Correo en Nombres → identidad personal de esa persona/centro. `listarDeCentro` en nombres, apuntes, 613, E37, cierre, remesas e importación. Importación Excel aislada (`--centro` / UI `/centros`) sin pisar `configuracion`; vaciado temporal de asientos del centro para recargar. Test `MulticentroAccesoTest`. Pendiente: presupuesto/config por centro, informe consolidado. |
+| 9 Multicentro | parcial | cursor-grok | 2026-09-09 | Vínculo usuario↔centro. Migración `0011_vinculo_usuario_centro.sql`. Alta de centro en `/centros` con secretario propio (`scl2` no ve el libro de `scl`). Correo en Nombres → identidad personal de esa persona/centro. `listarDeCentro` en nombres, apuntes, 613, E37, cierre, remesas e importación. Importación Excel aislada (`--centro` / UI `/centros`) sin pisar `configuracion`; vaciado temporal de asientos del centro para recargar. Test `MulticentroAccesoTest`. Pendiente: presupuesto/config por centro, informe consolidado. Solicitudes de vínculo centro (`0028`), selector persona activa en `/yo`. |
+| 9b Adscripción por ejercicio | pendiente | — | — | D14. Tabla `persona_ejercicio`, herencia en `CrearEjercicio`, remesa por adscripción del mes, Nombres por ejercicio. Ver § Fase 9b. |

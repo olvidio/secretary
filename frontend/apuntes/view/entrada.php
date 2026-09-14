@@ -40,7 +40,7 @@
                     <select id="sel-concepto" required></select>
                 </td>
                 <td class="col-fimp">
-                    <input id="inp-fimp" type="date" tabindex="-1" title="Vacío = la misma. Solo caja/banco.">
+                    <input id="inp-fimp" type="date" tabindex="-1" title="Vacío = la misma fecha de cabecera.">
                 </td>
                 <td class="col-cant">
                     <input id="inp-cant" required inputmode="decimal">
@@ -61,7 +61,7 @@
         <button type="button" id="btn-cuadrar" hidden>Cuadrar (111)</button>
     </div>
     <p id="plantilla-preview" class="muted plantilla-preview" hidden></p>
-    <p class="muted entrada-hint">F. imputación vacía = la misma fecha de cabecera. Solo caja/banco; el tabulador la salta (de concepto a cantidad).
+    <p class="muted entrada-hint">F. imputación vacía = la misma fecha de cabecera. Si difiere, el gasto/ingreso se imputa en ese día y la contrapartida (caja, banco o personal) en la fecha de cabecera; el tabulador la salta (de concepto a cantidad).
         Las <a href="/plantillas-<?= strtolower($cuenta) ?>">plantillas</a> recurrentes aparecen en el desplegable de concepto.<?php if ($cuenta === 'G'): ?> Gasto con iniciales: P/111 → P/21 → G/11 → el gasto.<?php endif; ?></p>
 </div>
 

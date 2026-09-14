@@ -50,6 +50,17 @@ use src\apuntes\infrastructure\http\PlantillaApunteController;
 use src\apuntes\infrastructure\persistence\PdoApunteRepository;
 use src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository;
 use src\arqueo\application\BuscarCapuchinos;
+use src\ayuda\application\ListarTemasAyuda;
+use src\ayuda\application\ResponderPreguntaAyuda;
+use src\ayuda\domain\contracts\RegistroConsultasAyuda;
+use src\ayuda\domain\contracts\RepositorioDocumentacion;
+use src\ayuda\domain\services\BuscadorDocumentacion;
+use src\ayuda\domain\services\ConstructorPromptAyuda;
+use src\ayuda\domain\services\InterpreteRespuestaIA;
+use src\ayuda\infrastructure\http\AyudaController;
+use src\ayuda\infrastructure\llm\ClienteChatCompatibleOpenAI;
+use src\ayuda\infrastructure\persistence\DocumentacionEnDisco;
+use src\ayuda\infrastructure\persistence\PdoRegistroConsultasAyuda;
 use src\arqueo\application\GuardarArqueo;
 use src\arqueo\domain\contracts\ArqueoRepository;
 use src\arqueo\domain\services\DetectarCapuchinos;
@@ -99,9 +110,19 @@ use src\plan\infrastructure\http\PartidaLaboresController;
 use src\plan\infrastructure\persistence\PdoPlanContableRepository;
 use src\acceso\application\AsegurarIdentidadCentro;
 use src\acceso\application\AutorizarPeticion;
+use src\acceso\application\CambiarCentroUsuario;
+use src\acceso\application\CambiarPersonaUsuario;
+use src\acceso\application\CambiarPasswordUsuario;
+use src\acceso\application\CambiarTipoUsuario;
 use src\acceso\application\ConfirmarTotp;
+use src\acceso\application\GuardarEmailUsuario;
+use src\acceso\application\GuardarIdiomaUsuario;
+use src\acceso\application\GuardarLayoutUsuario;
 use src\acceso\application\IniciarSesion;
+use src\acceso\application\ResolverPersonaActiva;
+use src\acceso\application\ObtenerPreferenciasUsuario;
 use src\acceso\application\PrepararTotp;
+use src\acceso\application\RegistrarUsuario;
 use src\acceso\application\VerificarSegundoFactor;
 use src\acceso\application\VincularEmailPersona;
 use src\acceso\domain\contracts\AccesoRutaRepository;
@@ -109,17 +130,38 @@ use src\acceso\domain\contracts\CifradorSecretos as CifradorSecretosContrato;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\infrastructure\crypto\CifradorSecretos as CifradorSecretosInfra;
 use src\acceso\infrastructure\http\AuthController;
+use src\acceso\infrastructure\http\PreferenciaController;
 use src\acceso\infrastructure\persistence\PdoAccesoRutaRepository;
 use src\acceso\infrastructure\persistence\PdoIdentidadRepository;
 use src\personal\application\AsegurarPlanPersonal;
 use src\personal\application\BorrarMovimientoPersonal;
+use src\personal\application\CategorizarMovimientoBanco;
 use src\personal\application\CrearSubcuentaPersonal;
+use src\personal\application\ImportarCsvBanco;
 use src\personal\application\ListarCategoriasPersonales;
+use src\personal\application\BorrarCopiaPersonal;
+use src\personal\application\CrearCopiaPersonal;
+use src\personal\application\ListarCopiasPersonal;
+use src\personal\application\ListarConceptosGenerales;
+use src\personal\application\RestaurarCopiaPersonal;
 use src\personal\application\ListarMovimientosPersonales;
+use src\personal\application\ListarPendientesBanco;
 use src\personal\application\RegistrarMovimientoPersonal;
 use src\personal\application\ResolverPersonaActual;
 use src\personal\application\ResumenMensualPersonal;
+use src\personal\application\BorrarCierrePersonalMes;
+use src\personal\application\GuardarCierrePersonalDefecto;
+use src\personal\application\GuardarCierrePersonalMes;
+use src\personal\application\ResolverPeriodoPersonal;
+use src\personal\domain\contracts\BancoImportRepository;
+use src\personal\domain\contracts\CopiaPersonalRepository;
+use src\personal\domain\contracts\PersonalCierreRepository;
+use src\personal\infrastructure\http\BancoPersonalController;
+use src\personal\infrastructure\http\CopiaPersonalController;
 use src\personal\infrastructure\http\PersonalController;
+use src\personal\infrastructure\persistence\PdoCopiaPersonalRepository;
+use src\personal\infrastructure\persistence\PdoBancoImportRepository;
+use src\personal\infrastructure\persistence\PdoPersonalCierreRepository;
 use src\remesas\application\AceptarRemesa;
 use src\remesas\application\EnviarRemesa;
 use src\remesas\application\ListarRemesasCentro;
@@ -128,6 +170,7 @@ use src\remesas\application\ObtenerDetalleRemesa;
 use src\remesas\application\ObtenerRemesaCentro;
 use src\remesas\application\ObtenerRemesaPersonal;
 use src\remesas\application\PrevisualizarRemesa;
+use src\remesas\application\RegistrarGastosGeneralesDeRemesa;
 use src\remesas\application\RechazarRemesa;
 use src\remesas\application\ResolverMesRemesa;
 use src\remesas\application\ResolverSolicitudDetalle;
@@ -135,7 +178,15 @@ use src\remesas\application\SolicitarDetalleRemesa;
 use src\remesas\domain\contracts\RemesaRepository;
 use src\remesas\infrastructure\http\RemesaController;
 use src\remesas\infrastructure\persistence\PdoRemesaRepository;
+use src\shared\application\BorrarCopiaSeguridad;
+use src\shared\application\CrearCopiaSeguridad;
+use src\shared\application\ListarCopiasSeguridad;
+use src\shared\application\RestaurarCopiaSeguridad;
+use src\shared\infrastructure\http\CopiaSeguridadController;
+use src\shared\infrastructure\persistence\AlmacenCopiasSeguridad;
 use src\shared\infrastructure\persistence\ConnectionFactory;
+use src\shared\infrastructure\persistence\PostgresDumper;
+use src\shared\infrastructure\persistence\RutasCopiasSeguridad;
 use function DI\autowire;
 use function DI\factory;
 
@@ -188,9 +239,18 @@ return [
         return new ResolverPersonaActual($identidades, $personas, $ejercicios, $asegurar, $identidadId, $personaId);
     }),
     IdentidadRepository::class => autowire(PdoIdentidadRepository::class),
+    BancoImportRepository::class => autowire(PdoBancoImportRepository::class),
+    PersonalCierreRepository::class => autowire(PdoPersonalCierreRepository::class),
+    ResolverPeriodoPersonal::class => autowire(),
+    GuardarCierrePersonalDefecto::class => autowire(),
+    GuardarCierrePersonalMes::class => autowire(),
+    BorrarCierrePersonalMes::class => autowire(),
     AccesoRutaRepository::class => autowire(PdoAccesoRutaRepository::class),
     CifradorSecretosContrato::class => factory([CifradorSecretosInfra::class, 'desdeEntorno']),
     IniciarSesion::class => autowire(),
+    ResolverPersonaActiva::class => autowire(),
+    CambiarPersonaUsuario::class => autowire(),
+    RegistrarUsuario::class => autowire(),
     PrepararTotp::class => autowire(),
     ConfirmarTotp::class => factory(static function (
         IdentidadRepository $identidades,
@@ -201,10 +261,24 @@ return [
     VerificarSegundoFactor::class => factory(static function (
         IdentidadRepository $identidades,
         CifradorSecretosContrato $cifrador,
+        ResolverPersonaActiva $resolverPersona,
     ): VerificarSegundoFactor {
-        return new VerificarSegundoFactor($identidades, $cifrador, CifradorSecretosInfra::pimiento());
+        return new VerificarSegundoFactor(
+            $identidades,
+            $cifrador,
+            $resolverPersona,
+            CifradorSecretosInfra::pimiento(),
+        );
     }),
     AutorizarPeticion::class => autowire(),
+    GuardarLayoutUsuario::class => autowire(),
+    CambiarPasswordUsuario::class => autowire(),
+    GuardarEmailUsuario::class => autowire(),
+    GuardarIdiomaUsuario::class => autowire(),
+    CambiarCentroUsuario::class => autowire(),
+    CambiarTipoUsuario::class => autowire(),
+    ObtenerPreferenciasUsuario::class => autowire(),
+    PreferenciaController::class => autowire(),
     ContextoActual::class => factory(static function (ResolverAmbitoActual $resolver): ContextoActual {
         return $resolver->ejecutar();
     }),
@@ -248,6 +322,17 @@ return [
     RegistrarPrestamoEntreLibros::class => autowire(),
     ConfiguracionController::class => autowire(),
     PersonaController::class => autowire(),
+    src\personas\domain\contracts\SolicitudVinculoCentroRepository::class => autowire(
+        src\personas\infrastructure\persistence\PdoSolicitudVinculoCentroRepository::class,
+    ),
+    src\personas\application\SolicitarVinculoCentro::class => autowire(),
+    src\personas\application\ListarVinculosPersona::class => autowire(),
+    src\personas\application\ListarCentrosDisponiblesPersona::class => autowire(),
+    src\personas\application\ListarSolicitudesVinculoCentro::class => autowire(),
+    src\personas\application\ListarCandidatosVinculoCentro::class => autowire(),
+    src\personas\application\AprobarSolicitudVinculoCentro::class => autowire(),
+    src\personas\application\RechazarSolicitudVinculoCentro::class => autowire(),
+    src\personas\infrastructure\http\VinculoCentroController::class => autowire(),
     ConceptoController::class => autowire(),
     ApunteController::class => autowire(),
     PlantillaApunteController::class => autowire(),
@@ -269,8 +354,20 @@ return [
     BorrarMovimientoPersonal::class => autowire(),
     ResumenMensualPersonal::class => autowire(),
     ListarCategoriasPersonales::class => autowire(),
+    ListarConceptosGenerales::class => autowire(),
+    RegistrarGastosGeneralesDeRemesa::class => autowire(),
     CrearSubcuentaPersonal::class => autowire(),
+    ImportarCsvBanco::class => autowire(),
+    ListarPendientesBanco::class => autowire(),
+    CategorizarMovimientoBanco::class => autowire(),
     PersonalController::class => autowire(),
+    CopiaPersonalRepository::class => autowire(PdoCopiaPersonalRepository::class),
+    CrearCopiaPersonal::class => autowire(),
+    ListarCopiasPersonal::class => autowire(),
+    RestaurarCopiaPersonal::class => autowire(),
+    BorrarCopiaPersonal::class => autowire(),
+    CopiaPersonalController::class => autowire(),
+    BancoPersonalController::class => autowire(),
     ResolverMesRemesa::class => autowire(),
     PrevisualizarRemesa::class => autowire(),
     EnviarRemesa::class => autowire(),
@@ -293,4 +390,34 @@ return [
     RemesaController::class => autowire(),
     frontend\shared\http\PageController::class => autowire(),
     src\importacion\application\ImportarExcelSecretario::class => autowire(),
+    PostgresDumper::class => factory(static fn (PDO $pdo): PostgresDumper => PostgresDumper::fromEnv($pdo)),
+    AlmacenCopiasSeguridad::class => factory(static fn (PDO $pdo): AlmacenCopiasSeguridad => new AlmacenCopiasSeguridad(
+        RutasCopiasSeguridad::directorio(),
+        PostgresDumper::fromEnv($pdo),
+    )),
+    CrearCopiaSeguridad::class => autowire(),
+    ListarCopiasSeguridad::class => autowire(),
+    RestaurarCopiaSeguridad::class => autowire(),
+    BorrarCopiaSeguridad::class => autowire(),
+    CopiaSeguridadController::class => autowire(),
+    RepositorioDocumentacion::class => factory([DocumentacionEnDisco::class, 'porDefecto']),
+    RegistroConsultasAyuda::class => autowire(PdoRegistroConsultasAyuda::class),
+    // El proveedor sale del entorno: con AYUDA_IA_CLAVE usa Gemini Flash-Lite
+    // (gratuito) por defecto; sin clave, la ayuda responde con apartados del manual.
+    ResponderPreguntaAyuda::class => factory(static function (
+        RepositorioDocumentacion $documentacion,
+        RegistroConsultasAyuda $registro,
+    ): ResponderPreguntaAyuda {
+        return new ResponderPreguntaAyuda(
+            $documentacion,
+            $registro,
+            new ConstructorPromptAyuda(),
+            new InterpreteRespuestaIA(),
+            new BuscadorDocumentacion(),
+            ClienteChatCompatibleOpenAI::desdeEntorno(),
+            ClienteChatCompatibleOpenAI::limiteDiario(),
+        );
+    }),
+    ListarTemasAyuda::class => autowire(),
+    AyudaController::class => autowire(),
 ];

@@ -36,6 +36,8 @@
     "db:migrate": "php bin/console.php db:migrate",
     "db:status": "php bin/console.php db:status",
     "db:install": "php bin/console.php db:install",
+    "db:backup": "php bin/console.php db:backup",
+    "db:restore": "php bin/console.php db:restore",
     "import": "php bin/console.php import:excel",
     "serve": "php -S 127.0.0.1:8088 -t public public/router.php"
   },

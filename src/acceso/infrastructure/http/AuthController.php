@@ -7,6 +7,8 @@ namespace src\acceso\infrastructure\http;
 use src\acceso\application\ConfirmarTotp;
 use src\acceso\application\IniciarSesion;
 use src\acceso\application\PrepararTotp;
+use src\acceso\application\RegistrarUsuario;
+use src\acceso\application\ResolverPersonaActiva;
 use src\acceso\application\ResultadoLogin;
 use src\acceso\application\VerificarSegundoFactor;
 use src\acceso\domain\contracts\IdentidadRepository;
@@ -22,6 +24,8 @@ final class AuthController
         private readonly ConfirmarTotp $confirmarTotp,
         private readonly VerificarSegundoFactor $verificarTotp,
         private readonly IdentidadRepository $identidades,
+        private readonly RegistrarUsuario $registrar,
+        private readonly ResolverPersonaActiva $resolverPersona,
     ) {
     }
 
@@ -35,8 +39,11 @@ final class AuthController
         $user = trim((string) $request->input('usuario', $request->input('email', '')));
         $pass = (string) $request->input('password', '');
         $res = $this->iniciar->ejecutar($user, $pass);
+        if ($res->desconocido()) {
+            return $this->invitarRegistro($request, $user, $res->mensaje);
+        }
         if (!$res->ok()) {
-            return $this->falloLogin($request, $res->mensaje);
+            return $this->falloLogin($request, $res->mensaje, $user);
         }
         $this->limpiarSesionParcial();
         session_regenerate_id(true);
@@ -100,8 +107,7 @@ final class AuthController
         $nivel = (string) ($_SESSION['pending_nivel'] ?? 'centro');
         $personaId = isset($_SESSION['pending_persona_id']) ? (int) $_SESSION['pending_persona_id'] : null;
         if ($nivel === 'persona' && ($personaId === null || $personaId === 0)) {
-            $personas = $this->identidades->personasDe($id);
-            $personaId = $personas[0] ?? null;
+            $personaId = $this->resolverPersona->ejecutar($id, null)['persona_id'];
         }
         $this->completarSesion(new ResultadoLogin(
             'autenticado',
@@ -167,6 +173,72 @@ final class AuthController
         return $this->exitoLogin($request, '/');
     }
 
+    public function elegirPersona(Request $request, array $vars = []): Response
+    {
+        $id = isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : null;
+        if ($id === null) {
+            return Response::redirect('/login');
+        }
+        $personaId = (int) $request->input('persona_id', 0);
+        $ok = false;
+        foreach ($this->personasVinculoDeIdentidad($id) as $p) {
+            if ($p['persona_id'] === $personaId) {
+                $ok = true;
+                break;
+            }
+        }
+        if (!$ok) {
+            if ($this->esJson($request)) {
+                return ContestarJson::error('Persona no permitida', 403);
+            }
+            $_SESSION['login_error'] = 'Persona no permitida';
+
+            return Response::redirect('/elegir-persona');
+        }
+        $_SESSION['persona_id'] = $personaId;
+
+        return $this->exitoLogin($request, '/yo');
+    }
+
+    public function registro(Request $request, array $vars = []): Response
+    {
+        $alias = trim((string) $request->input('usuario', $request->input('alias', '')));
+        $email = trim((string) $request->input('email', ''));
+        $nombre = trim((string) $request->input('nombre', ''));
+        $pass = (string) $request->input('password', '');
+        $confirm = (string) $request->input('password_confirm', $request->input('password2', ''));
+        $centroRaw = $request->input('centro_id', null);
+        $centroId = $centroRaw === null || $centroRaw === '' ? null : (int) $centroRaw;
+        try {
+            $alta = $this->registrar->ejecutar($alias, $email, $pass, $confirm, $nombre, $centroId);
+        } catch (\InvalidArgumentException $e) {
+            return $this->falloRegistro($request, $e->getMessage(), $alias, $email, $nombre, $centroId);
+        }
+        $res = $this->iniciar->ejecutar($alta['identidad']->alias ?? $alias, $pass);
+        if (!$res->ok()) {
+            return $this->falloLogin($request, $res->mensaje, $alias);
+        }
+        $this->limpiarSesionParcial();
+        session_regenerate_id(true);
+        ProteccionCsrf::asegurarToken();
+        $_SESSION['pending_identidad_id'] = $res->identidadId;
+        $_SESSION['usuario'] = $res->nombre !== '' ? $res->nombre : $res->email;
+        $_SESSION['pending_centros'] = $res->centros;
+        $_SESSION['pending_nivel'] = $res->nivel;
+        $_SESSION['pending_email'] = $res->email;
+        $_SESSION['pending_persona_id'] = $res->personaId;
+        if ($res->estado === 'autenticado') {
+            $this->completarSesion($res);
+
+            return $this->exitoLogin($request, $this->siguienteTrasAuth($res));
+        }
+        if ($res->estado === 'pendiente_activar') {
+            return $this->exitoLogin($request, '/totp-activar');
+        }
+
+        return $this->exitoLogin($request, '/totp-verificar');
+    }
+
     public function logout(Request $request, array $vars = []): Response
     {
         $_SESSION = [];
@@ -197,15 +269,24 @@ final class AuthController
         $_SESSION['usuario'] = $res->nombre !== '' ? $res->nombre : $res->email;
         $_SESSION['nivel'] = $res->nivel;
         $_SESSION['centros'] = $res->centros;
+        if ($res->identidadId !== null) {
+            $_SESSION['layout'] = $this->identidades->layoutDe($res->identidadId);
+            $_SESSION['idioma'] = $this->identidades->idiomaDe($res->identidadId);
+        }
         if ($res->nivel === 'centro' && count($res->centros) === 1) {
             $_SESSION['centro_id'] = $res->centros[0]['centro_id'];
         } else {
             unset($_SESSION['centro_id']);
         }
-        if ($res->nivel === 'persona' && $res->personaId !== null) {
-            $_SESSION['persona_id'] = $res->personaId;
+        if ($res->nivel === 'persona') {
+            $_SESSION['personas_vinculo'] = $this->personasVinculoDeIdentidad($res->identidadId ?? 0);
+            if ($res->personaId !== null) {
+                $_SESSION['persona_id'] = $res->personaId;
+            } else {
+                unset($_SESSION['persona_id']);
+            }
         } else {
-            unset($_SESSION['persona_id']);
+            unset($_SESSION['persona_id'], $_SESSION['personas_vinculo']);
         }
         ProteccionCsrf::asegurarToken();
     }
@@ -213,6 +294,11 @@ final class AuthController
     private function siguienteTrasAuth(ResultadoLogin $res): string
     {
         if ($res->nivel === 'persona') {
+            $vinculos = $this->personasVinculoDeIdentidad($res->identidadId ?? 0);
+            if (count($vinculos) > 1 && ($res->personaId === null || empty($_SESSION['persona_id']))) {
+                return '/elegir-persona';
+            }
+
             return '/yo';
         }
         if ($res->nivel === 'centro' && count($res->centros) > 1 && empty($_SESSION['centro_id'])) {
@@ -220,6 +306,16 @@ final class AuthController
         }
 
         return '/';
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function personasVinculoDeIdentidad(int $identidadId): array
+    {
+        if ($identidadId <= 0) {
+            return [];
+        }
+
+        return $this->identidades->personasVinculoDe($identidadId);
     }
 
     /** @return list<array{centro_id:int, codigo:string, nombre:string, rol:string}> */
@@ -245,21 +341,65 @@ final class AuthController
             $_SESSION['pending_identidad_id'],
             $_SESSION['centro_id'],
             $_SESSION['persona_id'],
+            $_SESSION['personas_vinculo'],
             $_SESSION['pending_persona_id'],
             $_SESSION['nivel'],
             $_SESSION['centros'],
+            $_SESSION['layout'],
+            $_SESSION['idioma'],
             $_SESSION['recovery_codes'],
         );
     }
 
-    private function falloLogin(Request $request, string $mensaje): Response
+    private function falloLogin(Request $request, string $mensaje, string $usuario = ''): Response
     {
         if ($this->esJson($request)) {
             return ContestarJson::error($mensaje, 401);
         }
         $_SESSION['login_error'] = $mensaje;
+        if ($usuario !== '') {
+            $_SESSION['login_usuario'] = $usuario;
+        }
 
         return Response::redirect('/login');
+    }
+
+    private function invitarRegistro(Request $request, string $usuario, string $mensaje): Response
+    {
+        if ($this->esJson($request)) {
+            return Response::json([
+                'ok' => false,
+                'error' => $mensaje,
+                'siguiente' => '/registro',
+                'usuario' => $usuario,
+            ], 401);
+        }
+        $_SESSION['login_error'] = $mensaje;
+        $qs = $usuario !== '' ? '?usuario=' . rawurlencode($usuario) : '';
+
+        return Response::redirect('/registro' . $qs);
+    }
+
+    private function falloRegistro(
+        Request $request,
+        string $mensaje,
+        string $alias,
+        string $email,
+        string $nombre,
+        ?int $centroId,
+    ): Response {
+        if ($this->esJson($request)) {
+            return ContestarJson::error($mensaje, 400);
+        }
+        $_SESSION['login_error'] = $mensaje;
+        $_SESSION['registro'] = [
+            'usuario' => $alias,
+            'email' => $email,
+            'nombre' => $nombre,
+            'centro_id' => $centroId,
+        ];
+
+        return Response::redirect('/registro');
     }
 
     private function exitoLogin(Request $request, string $destino): Response

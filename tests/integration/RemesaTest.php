@@ -14,15 +14,25 @@ use src\ambito\infrastructure\persistence\AmbitoSeeder;
 use src\ambito\infrastructure\persistence\PdoCentroRepository;
 use src\ambito\infrastructure\persistence\PdoCuentaRepository;
 use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
+use src\ambito\infrastructure\persistence\PdoCuentaFisicaRepository;
 use src\apuntes\application\BorrarApunte;
+use src\apuntes\application\CrearApunte;
+use src\apuntes\application\CrearApuntesDeEntrada;
+use src\apuntes\domain\services\ContrapartidasGastoGeneral;
+use src\asientos\domain\services\ProyectorAsientoAFilaExcel;
+use src\asientos\domain\services\TraductorApuntesAAsientos;
+use src\cierre\application\GenerarApertura;
+use src\conceptos\infrastructure\persistence\PdoConceptoRepository;
 use src\asientos\infrastructure\persistence\PdoAsientoRepository;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\informes\application\CalcularSaldos;
 use src\personal\application\AsegurarPlanPersonal;
 use src\personal\application\CrearSubcuentaPersonal;
 use src\personal\application\RegistrarMovimientoPersonal;
+use src\personal\application\ResolverPeriodoPersonal;
 use src\personal\application\ResolverPersonaActual;
 use src\personal\infrastructure\persistence\Nivel1Seeder;
+use src\personal\infrastructure\persistence\PdoPersonalCierreRepository;
 use src\personas\domain\entity\Persona;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\remesas\application\AceptarRemesa;
@@ -30,6 +40,7 @@ use src\remesas\application\EnviarRemesa;
 use src\remesas\application\ObtenerDetalleRemesa;
 use src\remesas\application\PrevisualizarRemesa;
 use src\remesas\application\RechazarRemesa;
+use src\remesas\application\RegistrarGastosGeneralesDeRemesa;
 use src\remesas\application\ResolverMesRemesa;
 use src\remesas\application\ResolverSolicitudDetalle;
 use src\remesas\application\SolicitarDetalleRemesa;
@@ -247,7 +258,19 @@ final class RemesaTest extends TestCase
             $yo->id,
             $persona->id,
         );
-        $mes = new ResolverMesRemesa($resolver, $ejercicios, $asientos, $cuentas);
+        $cierres = new PdoPersonalCierreRepository($this->pdo);
+        $periodoPersonal = new ResolverPeriodoPersonal($cierres);
+        $mes = new ResolverMesRemesa($resolver, $ejercicios, $asientos, $cuentas, $periodoPersonal);
+        $conceptos = new PdoConceptoRepository($this->pdo);
+        $gastosGenerales = $this->gastosGeneralesDeRemesa(
+            $asientos,
+            $conceptos,
+            $personas,
+            $config,
+            $cuentas,
+            $ambitoCentro,
+            $ejercicios,
+        );
 
         return [
             'centroId' => $centroId,
@@ -257,11 +280,20 @@ final class RemesaTest extends TestCase
             'cuentas' => $cuentas,
             'asientos' => $asientos,
             'remesas' => $remesas,
-            'registrar' => new RegistrarMovimientoPersonal($resolver, $cuentas, $ejercicios, $asientos),
+            'registrar' => new RegistrarMovimientoPersonal($resolver, $cuentas, $ejercicios, $asientos, $personas),
             'subcuenta' => new CrearSubcuentaPersonal($resolver, $cuentas),
-            'preview' => new PrevisualizarRemesa($mes, $remesas, $personas),
+            'preview' => new PrevisualizarRemesa($mes, $remesas, $personas, $periodoPersonal),
             'enviar' => new EnviarRemesa($mes, $remesas),
-            'aceptar' => new AceptarRemesa($ambitoCentro, $remesas, $asientos, $cuentas, $ejercicios, $personas),
+            'aceptar' => new AceptarRemesa(
+                $ambitoCentro,
+                $remesas,
+                $asientos,
+                $cuentas,
+                $ejercicios,
+                $personas,
+                $periodoPersonal,
+                $gastosGenerales,
+            ),
             'rechazar' => new RechazarRemesa($ambitoCentro, $remesas, $asientos),
             'solicitar' => new SolicitarDetalleRemesa($ambitoCentro, $remesas, $scl->id),
             'resolverSol' => new ResolverSolicitudDetalle($resolver, $remesas),
@@ -269,5 +301,36 @@ final class RemesaTest extends TestCase
             'borrar' => new BorrarApunte($asientos),
             'saldos' => new CalcularSaldos($asientos, $config, $personas, $ambitoCentro),
         ];
+    }
+
+    private function gastosGeneralesDeRemesa(
+        PdoAsientoRepository $asientos,
+        PdoConceptoRepository $conceptos,
+        PdoPersonaRepository $personas,
+        PdoConfiguracionRepository $config,
+        PdoCuentaRepository $cuentas,
+        ResolverAmbitoActual $ambito,
+        PdoEjercicioRepository $ejercicios,
+    ): RegistrarGastosGeneralesDeRemesa {
+        $crear = new CrearApuntesDeEntrada(
+            new CrearApunte(
+                $asientos,
+                $conceptos,
+                $personas,
+                $config,
+                $cuentas,
+                new PdoCuentaFisicaRepository($this->pdo),
+                new TraductorApuntesAAsientos(),
+                new ProyectorAsientoAFilaExcel(),
+                $ambito,
+                $ejercicios,
+                new GenerarApertura($ejercicios, $asientos, $cuentas),
+            ),
+            $conceptos,
+            $personas,
+            new ContrapartidasGastoGeneral(),
+        );
+
+        return new RegistrarGastosGeneralesDeRemesa($crear, $personas);
     }
 }

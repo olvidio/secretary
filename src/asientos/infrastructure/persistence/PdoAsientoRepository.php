@@ -37,8 +37,10 @@ final class PdoAsientoRepository implements AsientoRepository
             $fechaOperacion = (new ConverterDate('date', $asiento->fechaOperacion()))->toPg();
 
             $st = $this->pdo->prepare(
-                'INSERT INTO asientos (ejercicio_id, libro, numero, fecha, fecha_operacion, glosa, tipo, origen, persona_id, asiento_par_id, remesa_id)
-                 VALUES (:ej, :lib, :num, :fecha, :fecha_op, :glosa, :tipo, :origen, :persona, :par, :remesa)
+                'INSERT INTO asientos (ejercicio_id, libro, numero, fecha, fecha_operacion, glosa, tipo, origen,
+                    persona_id, asiento_par_id, remesa_id, gasto_generales, concepto_generales)
+                 VALUES (:ej, :lib, :num, :fecha, :fecha_op, :glosa, :tipo, :origen, :persona, :par, :remesa,
+                    :gen, :concepto_g)
                  RETURNING id'
             );
             $st->execute([
@@ -53,6 +55,8 @@ final class PdoAsientoRepository implements AsientoRepository
                 ':persona' => $asiento->personaId,
                 ':par' => $asiento->asientoParId,
                 ':remesa' => $asiento->remesaId,
+                ':gen' => $asiento->gastoGenerales ? 1 : 0,
+                ':concepto_g' => $asiento->conceptoGenerales,
             ]);
             $asientoId = (int) $st->fetchColumn();
 
@@ -100,6 +104,8 @@ final class PdoAsientoRepository implements AsientoRepository
                 $asiento->asientoParId,
                 $asiento->fechaOperacion(),
                 $asiento->remesaId,
+                $asiento->gastoGenerales,
+                $asiento->conceptoGenerales,
             );
         } catch (AsientoDescuadrado $e) {
             if ($transaccionPropia) {
@@ -831,6 +837,10 @@ final class PdoAsientoRepository implements AsientoRepository
             isset($row['asiento_par_id']) ? (int) $row['asiento_par_id'] : null,
             $fechaOperacion,
             isset($row['remesa_id']) ? (int) $row['remesa_id'] : null,
+            !empty($row['gasto_generales']),
+            isset($row['concepto_generales']) && $row['concepto_generales'] !== ''
+                ? (string) $row['concepto_generales']
+                : null,
         );
     }
 }

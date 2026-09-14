@@ -11,6 +11,7 @@
     <input type="date" name="hasta">
     <button type="submit">Filtrar</button>
 </form>
+<p class="muted print-hide">Orden y filtros por fecha de imputación (613 e informes). Si la operación fue otro día, se indica entre paréntesis.</p>
 <p id="apuntes-cuadre-ayuda" class="muted" hidden>
     Gasto suma, ingreso resta. El saldo de cada fecha debería ser 0; las fechas que no cuadran se marcan para localizar el desajuste.
 </p>
@@ -115,10 +116,22 @@ function mostrarVolver() {
   wrap.hidden = true;
 }
 
+function fechaImputacion(a) {
+  return a.fecha_imputacion || a.fecha || '';
+}
+
+function fechaImputacionEs(a) {
+  return a.fecha_imputacion_es || a.fecha_es || fechaImputacion(a);
+}
+
+function fechasDistintas(a) {
+  return !!(a.fecha_imputacion && a.fecha_imputacion !== a.fecha);
+}
+
 function candidatoSugerencia(saldoDia, fecha, apuntesG, natG) {
   const objetivo = Math.abs(saldoDia);
   if (cents(objetivo) === 0) return null;
-  const delDia = (apuntesG || []).filter((a) => a.fecha === fecha);
+  const delDia = (apuntesG || []).filter((a) => fechaImputacion(a) === fecha);
   const exactos = delDia.filter((a) => mismaCantidad(a, objetivo));
   const gastos = exactos.filter((a) => (natG[a.concepto_codigo] || '') === 'gasto');
   const candidatos = (gastos.length ? gastos : exactos).slice();
@@ -232,9 +245,9 @@ async function aceptarSugerencia111(a) {
 function agruparPorFecha(apuntes) {
   const grupos = [];
   apuntes.forEach((a) => {
-    const f = a.fecha || '';
+    const f = fechaImputacion(a);
     if (!grupos.length || grupos[grupos.length - 1].fecha !== f) {
-      grupos.push({ fecha: f, fecha_es: a.fecha_es || f, apuntes: [] });
+      grupos.push({ fecha: f, fecha_es: fechaImputacionEs(a), apuntes: [] });
     }
     grupos[grupos.length - 1].apuntes.push(a);
   });
@@ -364,8 +377,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadApuntes();
 });
 function fechaCelda(a) {
-  if (a.fecha_imputacion_es) {
-    return esc(a.fecha_es) + ' <span class="muted">(imp. ' + esc(a.fecha_imputacion_es) + ')</span>';
+  if (fechasDistintas(a)) {
+    return esc(fechaImputacionEs(a)) + ' <span class="muted">(op. ' + esc(a.fecha_es) + ')</span>';
   }
   return esc(a.fecha_es);
 }

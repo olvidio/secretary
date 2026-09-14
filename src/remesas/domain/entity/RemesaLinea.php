@@ -25,13 +25,26 @@ final class RemesaLinea
     {
         $detalle = [];
         foreach ($this->detalle as $item) {
-            $detalle[] = [
+            $fila = [
                 'codigo' => $item['codigo'],
                 'nombre' => $item['nombre'],
                 'cents' => $item['cents'],
                 'importe' => Dinero::fromCents($item['cents'])->toString(),
                 'importe_es' => Dinero::fromCents($item['cents'])->formatEs(),
             ];
+            if (!empty($item['generales']) && is_array($item['generales'])) {
+                $generales = [];
+                foreach ($item['generales'] as $gen) {
+                    $cents = (int) ($gen['cents'] ?? 0);
+                    $generales[] = [
+                        'concepto' => (string) ($gen['concepto'] ?? ''),
+                        'cents' => $cents,
+                        'importe_es' => Dinero::fromCents(abs($cents))->formatEs(),
+                    ];
+                }
+                $fila['generales'] = $generales;
+            }
+            $detalle[] = $fila;
         }
 
         return [

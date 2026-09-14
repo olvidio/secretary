@@ -10,6 +10,7 @@ use src\asientos\domain\contracts\AsientoRepository;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\informes\domain\services\CalculadoraE37;
 use src\personas\domain\contracts\PersonaRepository;
+use src\shared\domain\value_objects\Dinero;
 
 final class ObtenerE37
 {
@@ -94,6 +95,21 @@ final class ObtenerE37
                 $totArr[$k] = $d->toString();
                 $totArr[$k . '_es'] = $d->formatEs();
             }
+
+            $p = $this->personas->porInicialesDeCentro($contexto->centroId, $iniciales);
+            $out = [
+                'config' => $cfg->toArray(),
+                'iniciales' => $iniciales,
+                'apuntes' => $apuntes,
+                'totales' => $totArr,
+                'persona' => $p !== null
+                    ? ['iniciales' => $p->iniciales, 'nombre' => $p->nombreCompleto()]
+                    : ['iniciales' => $iniciales, 'nombre' => $iniciales],
+                'columnas' => CalculadoraE37::columnasHoja(),
+                'filas' => self::filasHoja($apuntes),
+            ];
+
+            return $out;
         }
 
         return [
@@ -102,6 +118,30 @@ final class ObtenerE37
             'apuntes' => $apuntes,
             'totales' => $totArr,
         ];
+    }
+
+    /**
+     * @param list<array<string, mixed>> $apuntes
+     * @return list<array<string, mixed>>
+     */
+    private static function filasHoja(array $apuntes): array
+    {
+        $filas = [];
+        foreach ($apuntes as $a) {
+            $importe = new Dinero((string) $a['cantidad']);
+            $celdas = [];
+            foreach (CalculadoraE37::celdasDeMovimiento((string) $a['concepto_codigo'], $importe) as $k => $d) {
+                $celdas[$k] = $d->toString();
+                $celdas[$k . '_es'] = $d->formatEs();
+            }
+            $filas[] = [
+                'fecha' => $a['fecha'] ?? '',
+                'concepto' => (string) ($a['observaciones'] ?? ''),
+                'celdas' => $celdas,
+            ];
+        }
+
+        return $filas;
     }
 
     /** @return array<string, int> iniciales => saldo_cc cents */

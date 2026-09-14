@@ -16,9 +16,12 @@ final class View
     public function page(string $viewFile, array $data = []): string
     {
         $data['contentView'] = $this->root . '/' . $viewFile;
+        $layoutFile = (($data['layout'] ?? '') === 'burger')
+            ? 'layout_burger.php'
+            : 'layout.php';
         extract($data, EXTR_SKIP);
         ob_start();
-        include $this->root . '/shared/view/layout.php';
+        include $this->root . '/shared/view/' . $layoutFile;
         return (string) ob_get_clean();
     }
 

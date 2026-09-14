@@ -24,6 +24,8 @@ use src\cierre\application\CerrarEjercicio;
 use src\cierre\application\GenerarApertura;
 use src\conceptos\infrastructure\persistence\PdoConceptoRepository;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
+use src\ambito\application\AsegurarCuentaCorrientePersona;
+use src\personas\domain\entity\Persona;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\shared\infrastructure\persistence\SchemaInstaller;
 use Tests\Soporte\BaseDeDatosAislada;
@@ -128,12 +130,11 @@ final class PeriodificacionTest extends TestCase
         self::assertSame(0, $this->contarAsientos());
     }
 
-    public function testOrigenAConImputacionDistintaSeRechaza(): void
+    public function testOrigenAConImputacionDistintaDosAsientosEnlazados(): void
     {
         $deps = $this->deps();
         $y = $this->anioAbierto($deps);
-        $this->expectException(\InvalidArgumentException::class);
-        $deps['crear']->ejecutar([
+        $filas = $deps['crear']->ejecutar([
             'fecha' => $y . '-02-08',
             'fecha_imputacion' => $y . '-01-31',
             'cuenta' => 'G',
@@ -141,6 +142,47 @@ final class PeriodificacionTest extends TestCase
             'concepto_codigo' => '211',
             'cantidad' => '10.00',
         ]);
+        self::assertCount(1, $filas);
+        self::assertSame($y . '-02-08', $filas[0]->fecha->format('Y-m-d'));
+        self::assertSame($y . '-01-31', $filas[0]->fechaImputacion?->format('Y-m-d'));
+        self::assertSame('A', $filas[0]->origen);
+
+        self::assertSame(2, $this->contarAsientos());
+        $imp = $deps['asientos']->porId($filas[0]->id);
+        self::assertNotNull($imp);
+        self::assertSame('normal', $imp->tipo);
+        self::assertSame($y . '-01-31', $imp->fecha->format('Y-m-d'));
+        self::assertNotNull($imp->asientoParId);
+        $par = $deps['asientos']->porId($imp->asientoParId);
+        self::assertNotNull($par);
+        self::assertSame('periodificacion', $par->tipo);
+        self::assertSame($y . '-02-08', $par->fecha->format('Y-m-d'));
+    }
+
+    public function testOrigenAEnPConImputacionDistinta(): void
+    {
+        $deps = $this->deps();
+        $contexto = $deps['ambito']->ejecutar();
+        $personas = new PdoPersonaRepository($this->pdo);
+        $personas->guardar(new Persona(null, 'José R.', 'JRM', 'jrm', null, null, null, null, null, 1, $contexto->centroId));
+        $persona = $personas->porIniciales('jrm');
+        self::assertNotNull($persona);
+        (new AsegurarCuentaCorrientePersona($deps['cuentas']))->ejecutar($persona);
+
+        $y = $this->anioAbierto($deps);
+        $filas = $deps['crear']->ejecutar([
+            'fecha' => $y . '-02-08',
+            'fecha_imputacion' => $y . '-01-31',
+            'cuenta' => 'P',
+            'origen' => 'A',
+            'iniciales' => 'jrm',
+            'concepto_codigo' => '22',
+            'cantidad' => '15.00',
+        ]);
+        self::assertCount(1, $filas);
+        self::assertSame('A', $filas[0]->origen);
+        self::assertSame($y . '-01-31', $filas[0]->fechaImputacion?->format('Y-m-d'));
+        self::assertSame(2, $this->contarAsientos());
     }
 
     public function testOperacionTrasFechaFinSeAparcaYPasaAlEjercicioSiguiente(): void

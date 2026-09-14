@@ -29,7 +29,7 @@ final class PdoPersonaRepository implements PersonaRepository
     public function listarDeCentro(int $centroId): array
     {
         $st = $this->pdo->prepare(
-            'SELECT * FROM personas WHERE centro_id = :c ORDER BY orden, id'
+            'SELECT * FROM personas WHERE centro_id = :c AND activo = TRUE ORDER BY orden, id'
         );
         $st->execute([':c' => $centroId]);
         $out = [];
@@ -67,6 +67,34 @@ final class PdoPersonaRepository implements PersonaRepository
         $row = $st->fetch();
 
         return is_array($row) ? $this->hydrate($row) : null;
+    }
+
+    public function buscarPorNombreEnCentro(int $centroId, string $termino): array
+    {
+        $termino = trim($termino);
+        if ($termino === '') {
+            return [];
+        }
+        $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], mb_strtolower($termino)) . '%';
+        $st = $this->pdo->prepare(
+            'SELECT * FROM personas
+             WHERE centro_id = :c AND activo = TRUE
+               AND (
+                    lower(nombre) LIKE :t ESCAPE \'\\\'
+                    OR lower(apellidos) LIKE :t ESCAPE \'\\\'
+                    OR lower(trim(nombre || \' \' || apellidos)) LIKE :t ESCAPE \'\\\'
+                    OR lower(iniciales) LIKE :t ESCAPE \'\\\'
+               )
+             ORDER BY orden, id
+             LIMIT 20'
+        );
+        $st->execute([':c' => $centroId, ':t' => $like]);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $out[] = $this->hydrate($row);
+        }
+
+        return $out;
     }
 
     public function porEmail(string $email): ?Persona

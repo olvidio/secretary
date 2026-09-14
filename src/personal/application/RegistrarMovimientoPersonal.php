@@ -12,8 +12,10 @@ use src\ambito\domain\entity\Cuenta;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\asientos\domain\entity\Asiento;
 use src\asientos\domain\services\ConstructorAsientoPeriodificado;
+use src\conceptos\domain\services\CatalogoConceptos;
 use src\personal\domain\services\ConstructorAsientoPersonal;
 use src\personal\domain\value_objects\ContextoPersonal;
+use src\personas\domain\contracts\PersonaRepository;
 use src\shared\domain\value_objects\Dinero;
 
 final class RegistrarMovimientoPersonal
@@ -23,6 +25,7 @@ final class RegistrarMovimientoPersonal
         private readonly CuentaRepository $cuentas,
         private readonly EjercicioRepository $ejercicios,
         private readonly AsientoRepository $asientos,
+        private readonly PersonaRepository $personas,
     ) {
     }
 
@@ -65,6 +68,7 @@ final class RegistrarMovimientoPersonal
         }
 
         $categoria = $this->categoria($ctx, (int) ($datos['cuenta_id'] ?? 0));
+        [$gastoGenerales, $conceptoGenerales] = $this->resolverGenerales($ctx, $sentido, $datos);
         $tesoreria = $this->tesoreria($ctx->centroId, $ctx->personaId, (string) ($datos['tesoreria'] ?? 'CAJA'));
         $ejercicioImp = $this->ejercicios->deCentroEnFecha($ctx->centroId, $fechaImputacion);
         $ejercicioOp = $this->ejercicios->deCentroEnFecha($ctx->centroId, $fechaOperacion);
@@ -89,6 +93,9 @@ final class RegistrarMovimientoPersonal
             $cents,
             $categoria->codigo,
             $fechaOperacion,
+            'manual',
+            $gastoGenerales,
+            $conceptoGenerales,
         );
 
         if ($fechaImputacion->format('Y-m-d') === $fechaOperacion->format('Y-m-d')) {
@@ -136,6 +143,41 @@ final class RegistrarMovimientoPersonal
         }
 
         return $cuenta;
+    }
+
+    /**
+     * @param array<string, mixed> $datos
+     * @return array{0:bool,1:?string}
+     */
+    private function resolverGenerales(ContextoPersonal $ctx, string $sentido, array $datos): array
+    {
+        if ($sentido !== 'gasto') {
+            return [false, null];
+        }
+        $flag = !empty($datos['gasto_generales']);
+        if (!$flag) {
+            return [false, null];
+        }
+        $concepto = trim((string) ($datos['concepto_generales'] ?? ''));
+        if ($concepto === '') {
+            throw new InvalidArgumentException('Indique el concepto de generales (p. ej. 204 Gas)');
+        }
+        $valido = false;
+        foreach (CatalogoConceptos::todos() as $c) {
+            if ($c['cuenta'] === 'G' && $c['naturaleza'] === 'gasto' && $c['codigo'] === $concepto) {
+                $valido = true;
+                break;
+            }
+        }
+        if (!$valido) {
+            throw new InvalidArgumentException('Concepto de generales no válido');
+        }
+        $persona = $this->personas->porId($ctx->personaId);
+        if ($persona !== null && !$persona->viviendaAportaGenerales) {
+            throw new InvalidArgumentException('Su ficha no está marcada como «aporta a generales»');
+        }
+
+        return [true, $concepto];
     }
 
     private function parseFecha(string $raw): DateTimeImmutable

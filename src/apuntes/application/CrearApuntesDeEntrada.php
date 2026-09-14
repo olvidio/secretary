@@ -51,6 +51,9 @@ final class CrearApuntesDeEntrada
                     $payload['cuenta_fisica_id'] = $datos['cuenta_fisica_id'];
                 }
             }
+            if (!empty($datos['remesa_id'])) {
+                $payload['remesa_id'] = (int) $datos['remesa_id'];
+            }
             foreach ($this->crear->ejecutar($payload) as $fila) {
                 $out[] = $fila;
             }

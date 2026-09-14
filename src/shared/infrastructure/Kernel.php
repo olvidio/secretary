@@ -11,6 +11,7 @@ use frontend\shared\view\View;
 use PDO;
 use src\acceso\application\AutorizarPeticion;
 use src\acceso\infrastructure\http\ProteccionCsrf;
+use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
 use function FastRoute\simpleDispatcher;
@@ -80,7 +81,14 @@ final class Kernel
                 }
                 [$class, $method] = $handler;
                 $controller = $this->container->get($class);
-                return $controller->{$method}($request, $vars);
+                try {
+                    return $controller->{$method}($request, $vars);
+                } catch (\PDOException $e) {
+                    if (str_starts_with($request->path, '/api/')) {
+                        return ContestarJson::errorPdo($e);
+                    }
+                    throw $e;
+                }
         }
 
         return new Response('Error', 500);
@@ -134,6 +142,7 @@ final class Kernel
             '/totp-activar', '/api/totp/confirmar' => '/totp-activar',
             '/totp-verificar', '/api/totp/verificar' => '/totp-verificar',
             '/elegir-centro', '/api/centros/elegir' => '/elegir-centro',
+            '/elegir-persona', '/api/personas/elegir' => '/elegir-persona',
             default => '/login',
         };
     }

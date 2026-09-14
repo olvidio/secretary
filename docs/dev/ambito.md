@@ -265,8 +265,8 @@ los informes que este dato movía (613 P, saldos, E37) está documentado en
 
 ## 6. UI de alta de ejercicios
 
-`frontend/ambito/view/ejercicios.php`, ruta `/ejercicios` (enlace en el grupo
-"Utilidades" del nav, `frontend/shared/view/layout.php`). Formulario mínimo:
+`frontend/ambito/view/ejercicios.php`, ruta `/ejercicios` (en layout excel: grupo
+"Utilidades"; en burger: "Parámetros". Catálogo: `frontend/shared/config/CatalogoMenus.php`). Formulario mínimo:
 `etiqueta`, `fecha_inicio`, `fecha_fin`, `fecha_corte` (los tres últimos como
 `<input type="date">` libres, sin enum `Año`/`Curso`), que llama a
 `POST /api/ejercicios` (`EjercicioController::create` →

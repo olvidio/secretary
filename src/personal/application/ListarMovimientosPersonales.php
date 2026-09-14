@@ -56,6 +56,8 @@ final class ListarMovimientosPersonales
     {
         $categoria = null;
         $tesoreria = null;
+        $tesoreriaOrigen = null;
+        $tesoreriaDestino = null;
         foreach ($asiento->movimientos as $mov) {
             $cuenta = $nombres[$mov->cuentaId] ?? null;
             if ($cuenta === null) {
@@ -65,7 +67,16 @@ final class ListarMovimientosPersonales
                 $categoria = $cuenta;
             }
             if ($cuenta->tipo === 'tesoreria') {
-                $tesoreria = $cuenta;
+                if ($asiento->tipo === 'traspaso') {
+                    if ($mov->haberCents > 0) {
+                        $tesoreriaOrigen = $cuenta;
+                    }
+                    if ($mov->debeCents > 0) {
+                        $tesoreriaDestino = $cuenta;
+                    }
+                } else {
+                    $tesoreria = $cuenta;
+                }
             }
         }
         $cents = 0;
@@ -98,7 +109,11 @@ final class ListarMovimientosPersonales
             'categoria' => $categoria?->nombre,
             'categoria_codigo' => $categoria?->codigo,
             'tesoreria' => $tesoreria?->codigoMaestro,
+            'tesoreria_origen' => $tesoreriaOrigen?->codigoMaestro,
+            'tesoreria_destino' => $tesoreriaDestino?->codigoMaestro,
             'par_id' => $asiento->asientoParId,
+            'gasto_generales' => $asiento->gastoGenerales,
+            'concepto_generales' => $asiento->conceptoGenerales,
         ];
     }
 }

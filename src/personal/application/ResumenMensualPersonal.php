@@ -47,6 +47,9 @@ final class ResumenMensualPersonal
             $codigo = (string) ($fila['categoria_codigo'] ?? '');
             $nombre = (string) ($fila['categoria'] ?? '');
             if ($fila['sentido'] === 'ingreso') {
+                if (AsegurarPlanPersonal::esOtra($codigo)) {
+                    continue;
+                }
                 $ingresos += $cents;
                 if ($codigo !== '') {
                     $ingresosCat[$codigo] = [
@@ -56,6 +59,9 @@ final class ResumenMensualPersonal
                     ];
                 }
             } elseif ($fila['sentido'] === 'gasto') {
+                if (AsegurarPlanPersonal::esOtra($codigo)) {
+                    continue;
+                }
                 $gastos += $cents;
                 if ($codigo !== '') {
                     $gastosCat[$codigo] = [

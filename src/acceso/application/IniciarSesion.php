@@ -11,17 +11,29 @@ final class IniciarSesion
 {
     private const HASH_FALSO = '$2y$10$usesomesillystringfore7hnbRJHxMlgAzqm/YiwKgm.nN4jSPHi';
 
-    public function __construct(private readonly IdentidadRepository $identidades)
-    {
+    public function __construct(
+        private readonly IdentidadRepository $identidades,
+        private readonly ResolverPersonaActiva $resolverPersona,
+    ) {
     }
 
     public function ejecutar(string $identificador, string $password, ?DateTimeImmutable $ahora = null): ResultadoLogin
     {
         $ahora ??= new DateTimeImmutable();
+        $identificador = trim($identificador);
+        if ($identificador === '') {
+            return new ResultadoLogin('fallo', 'Usuario o contraseña incorrectos');
+        }
         $identidad = $this->identidades->porEmailOAlias($identificador);
         $hash = $identidad !== null ? $identidad->passwordHash : self::HASH_FALSO;
         $passwordOk = password_verify($password, $hash);
-        if ($identidad === null || $identidad->id === null || !$identidad->activo) {
+        if ($identidad === null || $identidad->id === null) {
+            return new ResultadoLogin(
+                'desconocido',
+                'No hay cuenta con ese usuario. Puede registrarse.',
+            );
+        }
+        if (!$identidad->activo) {
             return new ResultadoLogin('fallo', 'Usuario o contraseña incorrectos');
         }
         if ($identidad->estaBloqueada($ahora)) {
@@ -63,7 +75,7 @@ final class IniciarSesion
             );
         }
 
-        $personaId = $personas[0];
+        $personaId = $this->resolverPersona->ejecutar($identidad->id, null)['persona_id'];
         if ($totpOk) {
             return new ResultadoLogin(
                 'pendiente_verificar',

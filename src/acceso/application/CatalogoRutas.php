@@ -20,33 +20,70 @@ final class CatalogoRutas
         $a = 'src\\acceso\\infrastructure\\http\\AuthController';
         $filas = [
             [$p, 'login', 'publico'],
+            [$p, 'registro', 'publico'],
             [$a, 'login', 'publico'],
+            [$a, 'registro', 'publico'],
             [$a, 'csrf', 'publico'],
             [$a, 'logout', 'pendiente'],
             [$a, 'totpActivar', 'pendiente'],
             [$a, 'totpConfirmar', 'pendiente'],
             [$a, 'totpVerificar', 'pendiente'],
             [$a, 'elegirCentro', 'autenticado'],
+            [$a, 'elegirPersona', 'autenticado'],
+            ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'get', 'autenticado'],
+            ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'guardarLayout', 'autenticado'],
+            ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'guardarMail', 'autenticado'],
+            ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'guardarPassword', 'autenticado'],
+            ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'totpPreparar', 'autenticado'],
+            ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'totpConfirmar', 'autenticado'],
+            ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'guardarIdioma', 'autenticado'],
+            ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'guardarCentro', 'autenticado'],
+            ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'guardarPersona', 'autenticado'],
+            ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'guardarTipo', 'autenticado'],
+            [$p, 'cuenta', 'autenticado'],
             [$p, 'totpActivar', 'pendiente'],
             [$p, 'totpVerificar', 'pendiente'],
             [$p, 'elegirCentro', 'autenticado'],
+            [$p, 'elegirPersona', 'autenticado'],
             [$p, 'totpCodigos', 'autenticado'],
             [$p, 'page', 'centro'],
             [$p, 'yo', 'persona'],
             [$p, 'yoMovimientos', 'persona'],
             [$p, 'yoCategorias', 'persona'],
+            [$p, 'yoBanco', 'persona'],
             ['src\\personal\\infrastructure\\http\\PersonalController', 'resumen', 'persona'],
             ['src\\personal\\infrastructure\\http\\PersonalController', 'movimientos', 'persona'],
             ['src\\personal\\infrastructure\\http\\PersonalController', 'crear', 'persona'],
+            ['src\\personal\\infrastructure\\http\\PersonalController', 'actualizarMovimiento', 'persona'],
+            ['src\\personal\\infrastructure\\http\\PersonalController', 'desdoblarMovimiento', 'persona'],
             ['src\\personal\\infrastructure\\http\\PersonalController', 'borrarMovimiento', 'persona'],
             ['src\\personal\\infrastructure\\http\\PersonalController', 'listarCategorias', 'persona'],
+            ['src\\personal\\infrastructure\\http\\PersonalController', 'listarConceptosGenerales', 'persona'],
+            ['src\\personal\\infrastructure\\http\\CopiaPersonalController', 'list', 'persona'],
+            ['src\\personal\\infrastructure\\http\\CopiaPersonalController', 'backup', 'persona'],
+            ['src\\personal\\infrastructure\\http\\CopiaPersonalController', 'descargar', 'persona'],
+            ['src\\personal\\infrastructure\\http\\CopiaPersonalController', 'restore', 'persona'],
+            ['src\\personal\\infrastructure\\http\\CopiaPersonalController', 'borrar', 'persona'],
             ['src\\personal\\infrastructure\\http\\PersonalController', 'crearCategoria', 'persona'],
+            ['src\\personal\\infrastructure\\http\\PersonalController', 'cierre', 'persona'],
+            ['src\\personal\\infrastructure\\http\\PersonalController', 'guardarCierreDefecto', 'persona'],
+            ['src\\personal\\infrastructure\\http\\PersonalController', 'guardarCierreMes', 'persona'],
+            ['src\\personal\\infrastructure\\http\\PersonalController', 'borrarCierreMes', 'persona'],
+            ['src\\personal\\infrastructure\\http\\BancoPersonalController', 'bancos', 'persona'],
+            ['src\\personal\\infrastructure\\http\\BancoPersonalController', 'pendientes', 'persona'],
+            ['src\\personal\\infrastructure\\http\\BancoPersonalController', 'importar', 'persona'],
+            ['src\\personal\\infrastructure\\http\\BancoPersonalController', 'categorizar', 'persona'],
             ['src\\remesas\\infrastructure\\http\\RemesaController', 'previsualizar', 'persona'],
             ['src\\remesas\\infrastructure\\http\\RemesaController', 'enviar', 'persona'],
             ['src\\remesas\\infrastructure\\http\\RemesaController', 'verPersonal', 'persona'],
             ['src\\remesas\\infrastructure\\http\\RemesaController', 'solicitudesPersona', 'persona'],
             ['src\\remesas\\infrastructure\\http\\RemesaController', 'resolverSolicitud', 'persona'],
             [$p, 'yoRemesas', 'persona'],
+            [$p, 'yoCierre', 'persona'],
+            [$p, 'yoCentros', 'persona'],
+            [$p, 'yoAyuda', 'persona'],
+            ['src\\ayuda\\infrastructure\\http\\AyudaController', 'listarTemas', 'autenticado'],
+            ['src\\ayuda\\infrastructure\\http\\AyudaController', 'preguntar', 'autenticado'],
             ['src\\configuracion\\infrastructure\\http\\ConfiguracionController', 'get', 'centro'],
             ['src\\configuracion\\infrastructure\\http\\ConfiguracionController', 'save', 'centro'],
             ['src\\ambito\\infrastructure\\http\\CentroController', 'get', 'centro'],
@@ -59,6 +96,13 @@ final class CatalogoRutas
             ['src\\personas\\infrastructure\\http\\PersonaController', 'list', 'centro'],
             ['src\\personas\\infrastructure\\http\\PersonaController', 'save', 'centro'],
             ['src\\personas\\infrastructure\\http\\PersonaController', 'delete', 'centro'],
+            ['src\\personas\\infrastructure\\http\\VinculoCentroController', 'listarCentro', 'centro'],
+            ['src\\personas\\infrastructure\\http\\VinculoCentroController', 'candidatos', 'centro'],
+            ['src\\personas\\infrastructure\\http\\VinculoCentroController', 'aprobar', 'centro'],
+            ['src\\personas\\infrastructure\\http\\VinculoCentroController', 'rechazar', 'centro'],
+            ['src\\personas\\infrastructure\\http\\VinculoCentroController', 'listarYo', 'persona'],
+            ['src\\personas\\infrastructure\\http\\VinculoCentroController', 'centrosDisponibles', 'persona'],
+            ['src\\personas\\infrastructure\\http\\VinculoCentroController', 'solicitarYo', 'persona'],
             ['src\\conceptos\\infrastructure\\http\\ConceptoController', 'list', 'centro'],
             ['src\\apuntes\\infrastructure\\http\\ApunteController', 'list', 'centro'],
             ['src\\apuntes\\infrastructure\\http\\ApunteController', 'sugerencias', 'centro'],
@@ -102,6 +146,11 @@ final class CatalogoRutas
             ['src\\remesas\\infrastructure\\http\\RemesaController', 'rechazar', 'centro'],
             ['src\\remesas\\infrastructure\\http\\RemesaController', 'solicitarDetalle', 'centro'],
             ['src\\remesas\\infrastructure\\http\\RemesaController', 'detalleLinea', 'centro'],
+            ['src\\shared\\infrastructure\\http\\CopiaSeguridadController', 'list', 'centro'],
+            ['src\\shared\\infrastructure\\http\\CopiaSeguridadController', 'backup', 'centro'],
+            ['src\\shared\\infrastructure\\http\\CopiaSeguridadController', 'descargar', 'centro'],
+            ['src\\shared\\infrastructure\\http\\CopiaSeguridadController', 'restore', 'centro'],
+            ['src\\shared\\infrastructure\\http\\CopiaSeguridadController', 'borrar', 'centro'],
         ];
         $out = [];
         foreach ($filas as $fila) {
@@ -109,5 +158,16 @@ final class CatalogoRutas
         }
 
         return $out;
+    }
+
+    public static function ambitoDe(string $clase, string $metodoPhp): ?string
+    {
+        foreach (self::todas() as $fila) {
+            if ($fila['clase'] === $clase && $fila['metodo'] === $metodoPhp) {
+                return $fila['ambito'];
+            }
+        }
+
+        return null;
     }
 }
