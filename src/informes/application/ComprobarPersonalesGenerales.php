@@ -53,8 +53,14 @@ final class ComprobarPersonalesGenerales
         }
 
         $rango = ['desde' => $desde, 'hasta' => $hastaStr, 'origen' => 'A'];
+        $apuntesPVivienda = [];
+        foreach (CuadreViviendaGenerales::conceptosPViviendaGeneral() as $concepto) {
+            foreach ($this->listar->ejecutar($rango + ['cuenta' => 'P', 'concepto' => $concepto]) as $fila) {
+                $apuntesPVivienda[] = $fila;
+            }
+        }
         $vivienda = $this->cuadreVivienda->ejecutar(
-            $this->listar->ejecutar($rango + ['cuenta' => 'P', 'concepto' => '21']),
+            $apuntesPVivienda,
             $this->listar->ejecutar($rango + ['cuenta' => 'G', 'concepto' => '11']),
             $personasVivienda,
         );
@@ -78,9 +84,9 @@ final class ComprobarPersonalesGenerales
                     : 'Las salidas P/21 de quienes aportan son ' . $vivienda['total_p21_es']
                         . ' € y las entradas G/11 ' . $vivienda['total_g11_es']
                         . ' € (diferencia ' . $vivienda['diferencia_es'] . ' €).',
-                'ayuda' => 'Quien tiene «vivienda aporta a generales» en Nombres debe tener '
-                    . 'el mismo importe en apuntes A de P/21 y de G/11. Si no aporta, el 21 '
-                    . 'es solo personal y no debe haber G/11 a su nombre.',
+                'ayuda' => 'P/21 es la vivienda general (cierre y gastos imputados a generales desde el personal). '
+                    . 'Debe cuadrar con G/11. P/212 (vivienda personal) es un gasto propio, como ordinarios, '
+                    . 'y no entra aquí.',
                 'totales' => [
                     'p21_es' => $vivienda['total_p21_es'],
                     'g11_es' => $vivienda['total_g11_es'],

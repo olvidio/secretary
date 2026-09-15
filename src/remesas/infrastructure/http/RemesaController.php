@@ -103,7 +103,7 @@ final class RemesaController
     public function aceptar(Request $request, array $vars = []): Response
     {
         try {
-            $remesa = $this->aceptar->ejecutar((int) ($vars['id'] ?? 0));
+            $remesa = $this->aceptar->ejecutar((int) ($vars['id'] ?? 0), $request->json());
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage(), 400);
         }

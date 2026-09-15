@@ -19,7 +19,7 @@ final class PdoPartidaLaboresRepository implements PartidaLaboresRepository
     public function paraCentro(int $centroId): array
     {
         $st = $this->pdo->prepare(
-            'SELECT codigo, etiqueta, orden FROM centro_partidas_labores
+            'SELECT codigo, etiqueta, orden, desgrava FROM centro_partidas_labores
              WHERE centro_id = :c AND activo = TRUE
              ORDER BY orden, codigo'
         );
@@ -30,6 +30,11 @@ final class PdoPartidaLaboresRepository implements PartidaLaboresRepository
         }
 
         self::sembrarLegacy($this->pdo, $centroId);
+        $st->execute([':c' => $centroId]);
+        $rows = $st->fetchAll();
+        if ($rows !== []) {
+            return array_map($this->mapRow(...), $rows);
+        }
 
         return CatalogoPlanesContables::partidasLaboresLegacy();
     }
@@ -45,7 +50,7 @@ final class PdoPartidaLaboresRepository implements PartidaLaboresRepository
     }
 
     /**
-     * @param list<array{codigo:string,etiqueta:string,orden:int}> $partidas
+     * @param list<array{codigo:string,etiqueta:string,orden:int,desgrava?:bool}> $partidas
      */
     private static function insertarPartidas(PDO $pdo, int $centroId, array $partidas): void
     {
@@ -58,8 +63,8 @@ final class PdoPartidaLaboresRepository implements PartidaLaboresRepository
         }
 
         $ins = $pdo->prepare(
-            'INSERT INTO centro_partidas_labores (centro_id, codigo, etiqueta, orden, activo)
-             VALUES (:c, :codigo, :etiqueta, :orden, TRUE)'
+            'INSERT INTO centro_partidas_labores (centro_id, codigo, etiqueta, orden, activo, desgrava)
+             VALUES (:c, :codigo, :etiqueta, :orden, TRUE, :desgrava)'
         );
         foreach ($partidas as $p) {
             $ins->execute([
@@ -67,6 +72,7 @@ final class PdoPartidaLaboresRepository implements PartidaLaboresRepository
                 ':codigo' => $p['codigo'],
                 ':etiqueta' => $p['etiqueta'],
                 ':orden' => $p['orden'],
+                ':desgrava' => !empty($p['desgrava']) ? 1 : 0,
             ]);
         }
     }
@@ -89,8 +95,8 @@ final class PdoPartidaLaboresRepository implements PartidaLaboresRepository
             $del->execute([':c' => $centroId]);
 
             $ins = $this->pdo->prepare(
-                'INSERT INTO centro_partidas_labores (centro_id, codigo, etiqueta, orden, activo)
-                 VALUES (:c, :codigo, :etiqueta, :orden, TRUE)'
+                'INSERT INTO centro_partidas_labores (centro_id, codigo, etiqueta, orden, activo, desgrava)
+                 VALUES (:c, :codigo, :etiqueta, :orden, TRUE, :desgrava)'
             );
             foreach ($partidas as $p) {
                 $ins->execute([
@@ -98,6 +104,7 @@ final class PdoPartidaLaboresRepository implements PartidaLaboresRepository
                     ':codigo' => $p['codigo'],
                     ':etiqueta' => $p['etiqueta'],
                     ':orden' => $p['orden'],
+                    ':desgrava' => !empty($p['desgrava']) ? 1 : 0,
                 ]);
             }
 
@@ -246,6 +253,7 @@ final class PdoPartidaLaboresRepository implements PartidaLaboresRepository
             'codigo' => (string) $row['codigo'],
             'etiqueta' => (string) $row['etiqueta'],
             'orden' => (int) $row['orden'],
+            'desgrava' => !empty($row['desgrava']),
         ];
     }
 }

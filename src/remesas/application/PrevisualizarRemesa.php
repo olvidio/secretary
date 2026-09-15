@@ -10,6 +10,7 @@ use src\remesas\domain\contracts\RemesaRepository;
 use src\remesas\domain\entity\Remesa;
 use src\remesas\domain\services\AgregadorRemesaPersonal;
 use src\remesas\domain\services\DiffRemesa;
+use src\shared\domain\value_objects\Dinero;
 
 final class PrevisualizarRemesa
 {
@@ -50,6 +51,9 @@ final class PrevisualizarRemesa
             'iniciales' => $persona?->iniciales,
             'lineas' => $this->lineasConNombre($lineas),
             'vacia' => $lineas === [],
+            'saldo_tesoreria_cents' => $datos['tesoreria_cents'],
+            'saldo_tesoreria' => Dinero::fromCents($datos['tesoreria_cents'])->toString(),
+            'saldo_tesoreria_es' => Dinero::fromCents($datos['tesoreria_cents'])->formatEs(),
             'historial' => array_map(static fn (Remesa $r) => $r->toArray(), $historial),
             'enviada' => $enviada?->toArray(),
             'aceptada' => $aceptada?->toArray(),

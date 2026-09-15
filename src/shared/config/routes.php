@@ -25,6 +25,7 @@ use src\personal\infrastructure\http\BancoPersonalController;
 use src\personal\infrastructure\http\CopiaPersonalController;
 use src\personal\infrastructure\http\PersonalController;
 use src\remesas\infrastructure\http\RemesaController;
+use src\disponible\infrastructure\http\DisponibleController;
 use src\shared\infrastructure\http\CopiaSeguridadController;
 
 return static function (RouteCollector $r): void {
@@ -159,6 +160,14 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/remesas/{id:\d+}/rechazar', [RemesaController::class, 'rechazar']);
     $r->addRoute('POST', '/api/remesas/{id:\d+}/lineas/{lineaId:\d+}/solicitar', [RemesaController::class, 'solicitarDetalle']);
     $r->addRoute('GET', '/api/remesas/{id:\d+}/lineas/{lineaId:\d+}/detalle', [RemesaController::class, 'detalleLinea']);
+
+    $r->addRoute('GET', '/api/disponible', [DisponibleController::class, 'listar']);
+    $r->addRoute('POST', '/api/disponible/ajustar', [DisponibleController::class, 'ajustar']);
+    $r->addRoute('POST', '/api/disponible/proponer', [DisponibleController::class, 'proponer']);
+    $r->addRoute('POST', '/api/disponible/asignaciones/{id:\d+}/confirmar', [DisponibleController::class, 'confirmar']);
+    $r->addRoute('GET', '/api/desgravacion-tramos', [DisponibleController::class, 'tramos']);
+    $r->addRoute('POST', '/api/desgravacion-tramos', [DisponibleController::class, 'guardarTramos']);
+    $r->addRoute('GET', '/api/yo/asignaciones', [DisponibleController::class, 'yoAsignaciones']);
 
     $r->addRoute('GET', '/api/ayuda/temas', [AyudaController::class, 'listarTemas']);
     $r->addRoute('POST', '/api/ayuda/preguntar', [AyudaController::class, 'preguntar']);

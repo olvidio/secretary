@@ -11,22 +11,42 @@
 </form>
 <script>
 const CUENTA = <?= json_encode($cuenta) ?>;
-document.addEventListener('DOMContentLoaded', async () => {
-  const r = await api('/api/presupuestos/' + CUENTA);
+
+function pintarLineasPresu(lineas) {
   const tb = document.querySelector('#form-presu tbody');
-  (r.lineas || []).forEach(l => {
+  tb.innerHTML = '';
+  (lineas || []).forEach((l) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${esc(l.concepto_codigo)} ${esc(l.nombre || '')}</td>
-      <td class="num"><input name="${esc(l.concepto_codigo)}" value="${esc(l.previsto)}"></td>`;
+    const inp = document.createElement('input');
+    inp.name = l.concepto_codigo;
+    inp.value = fmtImporteEs(l.previsto_es ?? l.previsto);
+    inp.className = 'num';
+    inp.addEventListener('blur', () => {
+      if (inp.value.trim()) inp.value = fmtImporteEs(inp.value);
+    });
+    tr.innerHTML = `<td>${esc(l.concepto_codigo)} ${esc(l.nombre || '')}</td>`;
+    const td = document.createElement('td');
+    td.className = 'num';
+    td.appendChild(inp);
+    tr.appendChild(td);
     tb.appendChild(tr);
   });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const r = await api('/api/presupuestos/' + CUENTA);
+  if (!r.ok) return alert(r.error || 'No se pudo cargar el presupuesto');
+  pintarLineasPresu(r.lineas);
   document.getElementById('form-presu').onsubmit = async (ev) => {
     ev.preventDefault();
     const lineas = {};
-    ev.target.querySelectorAll('input[name]').forEach(i => { lineas[i.name] = i.value; });
-    const s = await api('/api/presupuestos/' + CUENTA, {method:'POST', body:{lineas}});
+    ev.target.querySelectorAll('input[name]').forEach((i) => {
+      lineas[i.name] = i.value.trim() ? fmtImporteEs(i.value) : '';
+    });
+    const s = await api('/api/presupuestos/' + CUENTA, { method: 'POST', body: { lineas } });
     document.getElementById('msg').hidden = !s.ok;
-    if (!s.ok) alert(s.error);
+    if (!s.ok) return alert(s.error);
+    pintarLineasPresu(s.lineas);
   };
 });
 </script>

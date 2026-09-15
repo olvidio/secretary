@@ -29,11 +29,6 @@ final class RegistrarGastosGeneralesDeRemesa
         if ($persona === null) {
             throw new InvalidArgumentException('Persona no encontrada');
         }
-        if (!$persona->viviendaAportaGenerales) {
-            throw new InvalidArgumentException(
-                'Esta persona no aporta a generales; no puede enviar gastos marcados como generales'
-            );
-        }
         $iniciales = strtoupper($persona->iniciales);
         $glosaBase = sprintf('Remesa %s %02d/%d v%d', $iniciales, $remesa->mes, $remesa->anio, $remesa->version);
 

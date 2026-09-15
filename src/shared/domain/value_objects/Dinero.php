@@ -22,9 +22,12 @@ final class Dinero
     public static function fromInput(string $raw): self
     {
         $raw = trim(str_replace([' ', "\u{00A0}"], '', $raw));
-        $raw = str_replace(',', '.', $raw);
         if ($raw === '' || $raw === '.') {
             throw new InvalidArgumentException('Falta la cantidad');
+        }
+        if (str_contains($raw, ',')) {
+            $raw = str_replace('.', '', $raw);
+            $raw = str_replace(',', '.', $raw);
         }
         if (!is_numeric($raw)) {
             throw new InvalidArgumentException('La cantidad debe ser numérica');

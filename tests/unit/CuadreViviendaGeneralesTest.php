@@ -32,7 +32,7 @@ final class CuadreViviendaGeneralesTest extends TestCase
         self::assertFalse($r['por_persona'][0]['ok']);
     }
 
-    public function testQuienNoAportaNoDebeTenerG11(): void
+    public function testQuienNoAportaCuadra21Con11PorRemesa(): void
     {
         $r = (new CuadreViviendaGenerales())->ejecutar(
             [
@@ -46,9 +46,9 @@ final class CuadreViviendaGeneralesTest extends TestCase
             ],
         );
 
-        self::assertFalse($r['ok']);
+        self::assertTrue($r['ok']);
         self::assertSame('0,00', $r['total_p21_es']);
-        self::assertNotSame([], $r['avisos']);
+        self::assertSame([], $r['avisos']);
     }
 
     public function testCuadraSiLosImportesCoinciden(): void

@@ -17,6 +17,7 @@ Conviene repasarla al empezar, porque la entrada de apuntes, el resumen mensual 
 3. Poner la fecha de inicio y la fecha de cierre.
 4. Elegir el tipo de cierre y, si se quiere, el número de residentes.
 5. Pulsar «Guardar»; aparece el aviso «Guardado».
+6. En «Tramos de desgravación» se editan los tramos (p. ej. 250 € al 80 % y el resto al 40 %) y se pulsa «Guardar tramos». Sirven al proponer destinos 7.
 
 ## Reglas que conviene saber
 
@@ -25,6 +26,7 @@ Conviene repasarla al empezar, porque la entrada de apuntes, el resumen mensual 
 - El **tipo de cierre** decide qué conceptos usa el reparto mensual de los gastos generales. «Vivienda» carga el gasto 21 en el libro personal y el ingreso 11 en el general. «Necesidades» usa el 6 y el 14.
 - El tipo de cierre marca además el valor por defecto de «vivienda aporta a generales» al dar de alta un nombre: sí en los centros de vivienda, no en los de necesidades.
 - El número de residentes es informativo: el reparto del cierre se calcula con los nombres que aportan a generales, no con este número.
+- Los tramos de desgravación se pueden cambiar; el primero se llena entre varias personas antes de subir el importe de una sola.
 
 ## Problemas frecuentes
 

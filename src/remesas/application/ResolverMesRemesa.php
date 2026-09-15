@@ -33,7 +33,9 @@ final class ResolverMesRemesa
      *   ejercicio: Ejercicio,
      *   anio: int,
      *   mes: int,
-     *   lineas: list<RemesaLinea>
+     *   lineas: list<RemesaLinea>,
+     *   tesoreria_cents: int,
+     *   hasta: string
      * }
      */
     public function ejecutar(int $anio, int $mes): array
@@ -68,6 +70,21 @@ final class ResolverMesRemesa
             'hasta' => $periodo['hasta'],
         ]);
         $lineas = AgregadorRemesaPersonal::agregar($asientos, $cuentas);
+        $tesoreria = 0;
+        foreach ($this->asientos->saldosPorCuenta(
+            $ctx->centroId,
+            (int) $ejercicio->id,
+            null,
+            $periodo['hasta'],
+            'X',
+        ) as $row) {
+            if ((int) $row['persona_id'] !== $ctx->personaId) {
+                continue;
+            }
+            if ($row['tipo'] === 'tesoreria' && in_array($row['codigo_maestro'], ['CAJA', 'BANCO'], true)) {
+                $tesoreria += (int) $row['saldo_cents'];
+            }
+        }
 
         return [
             'ctx' => $ctx,
@@ -75,6 +92,8 @@ final class ResolverMesRemesa
             'anio' => $anio,
             'mes' => $mes,
             'lineas' => $lineas,
+            'tesoreria_cents' => $tesoreria,
+            'hasta' => $periodo['hasta'],
         ];
     }
 }

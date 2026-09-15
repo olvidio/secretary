@@ -13,18 +13,19 @@ Es la bandeja donde llega lo que cada persona envía al cerrar su mes: sus ingre
 1. Al entrar se ven las **Enviadas**, las pendientes. El desplegable **Estado** muestra también aceptadas, rechazadas, sustituidas o todas.
 2. La tabla da el mes, la persona, la versión, el estado, el importe y la fecha de envío.
 3. Pulsar **Ver** en una fila: abajo se abre el detalle, con una línea por concepto. Si hay versión anterior, se indica qué conceptos han cambiado.
-4. Pulsar **Aceptar** o, escribiendo antes el motivo en «Nota al rechazar», **Rechazar**. Las dos piden confirmación.
-5. Para ver cómo ha repartido la persona un concepto, pulsar **Solicitar detalle**. Queda pendiente hasta que ella autorice; entonces el botón pasa a **Ver detalle**.
+4. Pulsar **Aceptar** o, escribiendo antes el motivo en «Nota al rechazar», **Rechazar**. Las dos piden confirmación. Si la persona envió el saldo de su caja y banco, aparece la casilla **Sustituir el disponible por esa tesorería**.
+5. Para ver cómo ha repartido la persona un concepto, pulsar **Solicitar detalle**. Queda pendiente hasta que ella autorice; entonces el botón pasa a **Ver detalle** y el desglose aparece en un panel debajo de la tabla (subcuentas, importes y gastos marcados como generales).
 
 ## Reglas que conviene saber
 
-- Aceptar anota los importes en el libro personal del centro, contra la cuenta personal de esa persona, con fecha del último día del mes.
+- Aceptar anota los importes en el libro personal del centro, contra la cuenta personal de esa persona, con fecha del último día del mes. El sobrante (ingresos menos gastos) se aparca para dejar esa cuenta a cero y suma al **disponible** (salvo si se sustituye por la tesorería enviada).
 - Si ya se había aceptado otra versión del mismo mes, lo anotado por ella se borra y queda «sustituida». No se duplica nada.
-- Rechazar una remesa enviada no deja rastro. Rechazar una ya aceptada borra lo que hubiera anotado.
+- Rechazar una remesa enviada no deja rastro. Rechazar una ya aceptada borra lo que hubiera anotado y deshace el disponible de esa remesa.
 - Los gastos que la persona marque como generales generan además los apuntes del libro general.
 - Los apuntes que vienen de una remesa no se editan ni se borran a mano: se corrigen pidiendo a la persona que reenvíe el mes.
-- La caja y el banco propios de la persona no viajan al centro; solo ingresos y gastos.
+- La caja y el banco propios de la persona no viajan como movimientos; sí puede enviarse el saldo de tesorería.
 - Lo aceptado sale en el 613 P y en Cuentas personales, cortado por la fecha de cierre.
+- Las 7 que la persona ya hizo viajan en la remesa. Las de la propuesta de Disponible se apuntaron al confirmar y no se vuelven a cargar.
 
 ## Problemas frecuentes
 

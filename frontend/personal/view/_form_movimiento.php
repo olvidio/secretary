@@ -19,7 +19,7 @@
                     <option value="">— Elija —</option>
                 </select>
             </label>
-            <p class="muted">Al aceptar la remesa, el centro cargará vivienda (P/21), ingreso G/11 y este gasto en generales.</p>
+            <p class="muted">Al aceptar la remesa, el centro cargará vivienda general (P/21), ingreso G/11 y este gasto en generales. La vivienda personal (P/212) es otra categoría, como ordinarios.</p>
         </div>
         <fieldset class="yo-tesoreria">
             <label><span>Caja</span><input type="radio" name="tesoreria" value="CAJA" checked></label>

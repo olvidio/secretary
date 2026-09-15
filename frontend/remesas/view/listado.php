@@ -30,12 +30,27 @@
 <section id="remesa-detalle" hidden>
     <h2 id="remesa-detalle-titulo">Detalle</h2>
     <p id="remesa-detalle-meta" class="muted"></p>
+    <p id="remesa-tesoreria" class="muted" hidden></p>
+    <label id="remesa-sustituir-wrap" hidden>
+        <input type="checkbox" id="remesa-sustituir"> Sustituir el disponible por esa tesorería
+    </label>
     <table id="tabla-remesa-lineas">
         <thead>
         <tr><th>Concepto</th><th class="num">Importe</th><th>Detalle</th></tr>
         </thead>
         <tbody></tbody>
     </table>
+    <div id="remesa-linea-detalle" class="remesa-linea-detalle" hidden>
+        <h3 id="remesa-linea-detalle-titulo">Desglose autorizado</h3>
+        <p class="muted">Subcuentas del libro personal que suman la línea. Solo lectura; no crea cuentas en el centro.</p>
+        <table id="tabla-remesa-linea-detalle">
+            <thead>
+            <tr><th>Subcuenta</th><th>Nombre</th><th class="num">Importe</th><th>Generales</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <p id="remesa-linea-detalle-vacio" class="muted" hidden>Sin subcuentas en el desglose.</p>
+    </div>
     <div id="remesa-diff" hidden>
         <h3>Diferencia respecto a la versión anterior</h3>
         <ul id="remesa-diff-list"></ul>

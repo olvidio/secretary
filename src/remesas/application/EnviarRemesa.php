@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use src\remesas\domain\contracts\RemesaRepository;
 use src\remesas\domain\entity\Remesa;
 use src\remesas\domain\services\HashRemesa;
+use src\shared\domain\value_objects\Dinero;
 
 final class EnviarRemesa
 {
@@ -30,14 +31,17 @@ final class EnviarRemesa
         }
         $ctx = $preview['ctx'];
         $lineas = $preview['lineas'];
-        $hash = HashRemesa::deLineas($lineas);
+        $tesoreria = array_key_exists('saldo_tesoreria', $datos) && $datos['saldo_tesoreria'] !== '' && $datos['saldo_tesoreria'] !== null
+            ? Dinero::fromInput((string) $datos['saldo_tesoreria'])->toCents()
+            : (int) $preview['tesoreria_cents'];
+        $hash = HashRemesa::deLineas($lineas, $tesoreria);
         $enviada = $this->remesas->enviadaDe($ctx->personaId, $ejercicio->id, $anio, $mes);
         if ($enviada !== null && $enviada->hashContenido === $hash) {
             return $enviada;
         }
         $notaFinal = $nota !== '' ? $nota : null;
 
-        return $this->remesas->enTransaccion(function () use ($ctx, $ejercicio, $anio, $mes, $lineas, $hash, $notaFinal, $enviada): Remesa {
+        return $this->remesas->enTransaccion(function () use ($ctx, $ejercicio, $anio, $mes, $lineas, $hash, $notaFinal, $enviada, $tesoreria): Remesa {
             if ($enviada !== null && $enviada->id !== null) {
                 $this->remesas->marcarEstado($enviada->id, 'sustituida', true);
             }
@@ -57,6 +61,7 @@ final class EnviarRemesa
                 null,
                 $notaFinal,
                 $lineas,
+                $tesoreria,
             ));
         });
     }

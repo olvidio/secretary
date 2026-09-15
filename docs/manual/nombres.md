@@ -15,9 +15,10 @@ Desde aquí se abre también el libro personal de cada una, con solo poner su co
 1. Rellenar nombre, apellidos e iniciales, y pulsar «Guardar».
 2. Si esa persona va a llevar su propio libro, escribir su correo. Cuando el correo es nuevo, la pantalla muestra una contraseña inicial: hay que comunicársela en ese momento, porque no se vuelve a mostrar.
 3. Indicar si su aportación de vivienda tiene contrapartida en el libro general y, si procede, un importe fijo.
-4. Si llega o se va a mitad de año, marcar los meses en que no paga. Hay dos intervalos.
-5. «Editar» recupera una fila en el formulario, «Borrar» la quita previa confirmación y «Nuevo» lo vacía.
-6. En «Solicitudes de acceso personal», cada petición se resuelve creando un nombre nuevo, vinculándola a uno que ya existe o rechazándola.
+4. Indicar si **puede desgravar** donativos. Quien no puede, al proponer destinos 7 recibe solo partidas que no desgravan.
+5. Si llega o se va a mitad de año, marcar los meses en que no paga. Hay dos intervalos.
+6. «Editar» recupera una fila en el formulario, «Borrar» la quita previa confirmación y «Nuevo» lo vacía.
+7. En «Solicitudes de acceso personal», cada petición se resuelve creando un nombre nuevo, vinculándola a uno que ya existe o rechazándola.
 
 ## Reglas que conviene saber
 
@@ -27,6 +28,7 @@ Desde aquí se abre también el libro personal de cada una, con solo poner su co
 - La exención deja fuera esos meses: no se le pide movimiento ni entra en el reparto del cierre.
 - Con importe fijo de vivienda, esa persona paga siempre esa cantidad en el cierre.
 - Borrar el correo deja el nombre en la lista, pero le quita el acceso a su libro personal.
+- «Puede desgravar» condiciona la pantalla Disponible: si está en no, todo el disponible va a partidas 7 que no desgravan.
 
 ## Problemas frecuentes
 

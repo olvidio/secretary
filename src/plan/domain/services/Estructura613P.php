@@ -21,6 +21,7 @@ final class Estructura613P
             ['codigo' => '113', 'etiqueta' => '3. Varios', 'codigos' => ['113']],
             ['codigo' => '12', 'etiqueta' => '2. Extraordinarios', 'codigos' => ['12']],
             ['codigo' => '21', 'etiqueta' => 'Vivienda', 'codigos' => ['21']],
+            ['codigo' => '212', 'etiqueta' => 'Vivienda personal', 'codigos' => ['212']],
             ['codigo' => '22', 'etiqueta' => 'Ordinarios', 'codigos' => ['22']],
             ['codigo' => '23', 'etiqueta' => 'Ropa', 'codigos' => ['23']],
             ['codigo' => '24', 'etiqueta' => 'ca, crt, cv', 'codigos' => ['24']],

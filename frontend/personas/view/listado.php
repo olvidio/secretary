@@ -1,5 +1,5 @@
 <h1>Nombres</h1>
-<p class="muted">El correo convierte a esa persona en usuario del libro personal de <em>este</em> centro. Si el correo es nuevo, se muestra una contraseña inicial para comunicársela una vez. «Vivienda aporta a generales» indica si un gasto P/21 debe tener la entrada G/11 (típico de n); si no, el 21 es solo personal (típico de agd). La exención de meses es para quien llega o se va a mitad de año (no se le pide movimiento ni entra en el cierre de vivienda esos meses). Quien no aporta a G debe dejarla vacía, para que Comprobaciones avise si no anota el mes.</p>
+<p class="muted">El correo convierte a esa persona en usuario del libro personal de <em>este</em> centro. Si el correo es nuevo, se muestra una contraseña inicial para comunicársela una vez. «Vivienda aporta a generales» indica si entra en el cierre automático de P/21 (típico de n); quien no aporta puede igualmente imputar gastos de casa a generales desde su libro personal. P/212 (vivienda personal) es un gasto propio, como ordinarios. La exención de meses es para quien llega o se va a mitad de año (no se le pide movimiento ni entra en el cierre esos meses).</p>
 <form id="form-persona" class="grid-form">
     <input type="hidden" name="id">
     <label>Nombre <input name="nombre" required></label>
@@ -17,6 +17,12 @@
             <option value="0">No — vivienda solo personal</option>
         </select>
     </label>
+    <label>Puede desgravar donativos
+        <select name="puede_desgravar">
+            <option value="1">Sí</option>
+            <option value="0">No — las 7 van a partidas que no desgravan</option>
+        </select>
+    </label>
     <button type="submit">Guardar</button>
     <button type="button" id="btn-nuevo">Nuevo</button>
 </form>
@@ -26,7 +32,7 @@
     <thead>
     <tr>
         <th>#</th><th>Centro</th><th>Nombre</th><th>Apellidos</th><th>Iniciales</th><th>Correo</th>
-        <th>Exención</th><th>Vivienda fija</th><th>Aporta a G</th><th></th>
+        <th>Exención</th><th>Vivienda fija</th><th>Aporta a G</th><th>Desgrava</th><th></th>
     </tr>
     </thead>
     <tbody></tbody>
@@ -43,11 +49,13 @@ async function loadPersonas() {
       <td>${p.mes_exento_inicio || ''}–${p.mes_exento_fin || ''} ${p.mes_exento2_inicio || ''}–${p.mes_exento2_fin || ''}</td>
       <td>${p.importe_vivienda_fijo || ''}</td>
       <td>${p.vivienda_aporta_generales ? 'sí' : 'no'}</td>
+      <td>${p.puede_desgravar ? 'sí' : 'no'}</td>
       <td><button data-id="${p.id}">Editar</button> <button data-del="${p.id}">Borrar</button></td>`;
     tr.querySelector('[data-id]').onclick = () => {
       const form = document.getElementById('form-persona');
       fillForm(form, p);
       form.querySelector('[name=vivienda_aporta_generales]').value = p.vivienda_aporta_generales ? '1' : '0';
+      form.querySelector('[name=puede_desgravar]').value = p.puede_desgravar ? '1' : '0';
     };
     tr.querySelector('[data-del]').onclick = async () => {
       if (!confirm('¿Borrar ' + p.iniciales + '?')) return;
@@ -67,9 +75,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-nuevo').onclick = () => {
     document.getElementById('form-persona').reset();
     document.querySelector('[name=vivienda_aporta_generales]').value = aportaDefault;
+    document.querySelector('[name=puede_desgravar]').value = '1';
     document.getElementById('msg-password').hidden = true;
   };
   document.querySelector('[name=vivienda_aporta_generales]').value = aportaDefault;
+  document.querySelector('[name=puede_desgravar]').value = '1';
   document.getElementById('form-persona').onsubmit = async (ev) => {
     ev.preventDefault();
     const s = await api('/api/personas', {method:'POST', body: formObj(ev.target)});

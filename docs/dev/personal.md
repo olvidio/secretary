@@ -5,7 +5,8 @@ el ámbito de sesión (`nivel=persona`, `persona_id`) y el libro: **`X`**.
 
 La persona cierra el mes y envía una **remesa** al centro (`/yo/remesas`). Ver
 `docs/dev/remesas.md`. Hasta que el centro acepta, el libro P del centro no
-cambia. La tesorería del nivel 1 no viaja.
+cambia. La tesorería del nivel 1 no viaja como movimientos; el saldo de
+caja+banco sí puede enviarse para el disponible (`docs/dev/disponible.md`).
 
 ## Cuentas
 
@@ -29,7 +30,8 @@ Fecha de imputación opcional (D13); un traspaso caja↔banco no admite fechas d
 
 En un **gasto**, la pill «Personal / Generales» marca el movimiento para que,
 al aceptar la remesa, el centro anote también P/21, G/11 y el gasto G elegido
-(p. ej. 204 Gas). Requiere «vivienda aporta a generales» en Nombres.
+(p. ej. 204 Gas). Disponible para todas las personas. P/212 (vivienda personal) es un gasto
+propio, como ordinarios, y no cuadra con generales.
 Columnas `asientos.gasto_generales` y `concepto_generales` (`0027_gasto_generales.sql`).
 API `GET /api/yo/conceptos-generales`.
 

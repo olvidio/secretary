@@ -7,6 +7,7 @@ namespace src\personas\application;
 use InvalidArgumentException;
 use src\acceso\application\VincularEmailPersona;
 use src\ambito\application\AsegurarCuentaCorrientePersona;
+use src\ambito\application\AsegurarCuentaDisponiblePersona;
 use src\ambito\application\ResolverAmbitoActual;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\personal\application\AsegurarPlanPersonal;
@@ -21,6 +22,7 @@ final class GuardarPersona
         private readonly ResolverAmbitoActual $ambito,
         private readonly VincularEmailPersona $vincularEmail,
         private readonly AsegurarCuentaCorrientePersona $cuentaCorriente,
+        private readonly AsegurarCuentaDisponiblePersona $cuentaDisponible,
         private readonly AsegurarPlanPersonal $planPersonal,
         private readonly ConfiguracionRepository $config,
     ) {
@@ -75,6 +77,10 @@ final class GuardarPersona
             ? $existente->viviendaAportaGenerales
             : $this->aportaPorDefectoCentro();
         $aporta = self::boolFlag($datos['vivienda_aporta_generales'] ?? null, $aportaDefault);
+        $puedeDesgravar = self::boolFlag(
+            $datos['puede_desgravar'] ?? null,
+            $existente !== null ? $existente->puedeDesgravar : true,
+        );
         $persona = new Persona(
             $id,
             $nombre,
@@ -90,9 +96,11 @@ final class GuardarPersona
             $activo,
             $emailPersona,
             $aporta,
+            $puedeDesgravar,
         );
         $guardada = $this->repo->guardar($persona);
         $this->cuentaCorriente->ejecutar($guardada);
+        $this->cuentaDisponible->ejecutar($guardada);
         if ($guardada->id !== null && $guardada->centroId !== null) {
             $this->planPersonal->ejecutar($guardada->centroId, $guardada->id);
         }

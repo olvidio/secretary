@@ -45,6 +45,21 @@ function fmtFecha(iso) {
   return `${d}/${m}/${y}`;
 }
 
+/** Importe en formato es-ES (1.234,56). Acepta entrada con coma o punto decimal. */
+function fmtImporteEs(valor) {
+  if (valor === null || valor === undefined || String(valor).trim() === '') return '';
+  const s = String(valor).trim().replace(/\s/g, '');
+  const n = s.includes(',')
+    ? Number(s.replace(/\./g, '').replace(',', '.'))
+    : Number(s.replace(',', '.'));
+  if (!Number.isFinite(n)) return String(valor);
+  return n.toLocaleString('es-ES', {
+    useGrouping: true,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 document.addEventListener('click', (ev) => {
   document.querySelectorAll('details.user-menu[open]').forEach((d) => {
     if (!d.contains(ev.target)) d.removeAttribute('open');

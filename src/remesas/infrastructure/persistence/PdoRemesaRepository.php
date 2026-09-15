@@ -25,8 +25,8 @@ final class PdoRemesaRepository implements RemesaRepository
         }
         $st = $this->pdo->prepare(
             'INSERT INTO remesas (persona_id, centro_id, ejercicio_id, anio, mes, version, estado,
-                hash_contenido, enviada_at, resuelta_at, nota)
-             VALUES (:persona, :centro, :ej, :anio, :mes, :ver, :estado, :hash, now(), NULL, :nota)
+                hash_contenido, enviada_at, resuelta_at, nota, saldo_tesoreria_cents)
+             VALUES (:persona, :centro, :ej, :anio, :mes, :ver, :estado, :hash, now(), NULL, :nota, :tes)
              RETURNING id, enviada_at'
         );
         $st->execute([
@@ -39,6 +39,7 @@ final class PdoRemesaRepository implements RemesaRepository
             ':estado' => $remesa->estado,
             ':hash' => $remesa->hashContenido,
             ':nota' => $remesa->nota,
+            ':tes' => $remesa->saldoTesoreriaCents,
         ]);
         $row = $st->fetch();
         if (!is_array($row)) {
@@ -302,6 +303,9 @@ final class PdoRemesaRepository implements RemesaRepository
             $this->ts($row['resuelta_at'] ?? null),
             isset($row['nota']) ? (string) $row['nota'] : null,
             $lineas,
+            isset($row['saldo_tesoreria_cents']) && $row['saldo_tesoreria_cents'] !== null
+                ? (int) $row['saldo_tesoreria_cents']
+                : null,
         );
     }
 

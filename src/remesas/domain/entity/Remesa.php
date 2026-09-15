@@ -29,6 +29,7 @@ final class Remesa
         public readonly ?DateTimeImmutable $resueltaAt,
         public readonly ?string $nota,
         public readonly array $lineas = [],
+        public readonly ?int $saldoTesoreriaCents = null,
     ) {
         if ($this->mes < 1 || $this->mes > 12) {
             throw new InvalidArgumentException('El mes debe estar entre 1 y 12');
@@ -68,6 +69,7 @@ final class Remesa
             $this->resueltaAt,
             $this->nota,
             $lineas,
+            $this->saldoTesoreriaCents,
         );
     }
 
@@ -94,6 +96,13 @@ final class Remesa
             'enviada_at' => $this->enviadaAt?->format('c'),
             'resuelta_at' => $this->resueltaAt?->format('c'),
             'nota' => $this->nota,
+            'saldo_tesoreria_cents' => $this->saldoTesoreriaCents,
+            'saldo_tesoreria' => $this->saldoTesoreriaCents !== null
+                ? Dinero::fromCents($this->saldoTesoreriaCents)->toString()
+                : null,
+            'saldo_tesoreria_es' => $this->saldoTesoreriaCents !== null
+                ? Dinero::fromCents($this->saldoTesoreriaCents)->formatEs()
+                : null,
             'total_cents' => $total,
             'total' => Dinero::fromCents($total)->toString(),
             'total_es' => Dinero::fromCents($total)->formatEs(),

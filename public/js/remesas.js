@@ -5,7 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const err = document.getElementById('remesas-err');
   const tb = document.querySelector('#tabla-remesas tbody');
   const detalle = document.getElementById('remesa-detalle');
+  const panelDetLinea = document.getElementById('remesa-linea-detalle');
   let actualId = null;
+  let lineaDetalleAbierta = null;
 
   function mostrarError(msg) {
     err.textContent = msg || '';
@@ -36,7 +38,54 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function ocultarDetalleLinea() {
+    lineaDetalleAbierta = null;
+    if (panelDetLinea) panelDetLinea.hidden = true;
+  }
+
+  function textoGenerales(item) {
+    return (item.generales || []).map((g) =>
+      'G/' + esc(g.concepto) + ' ' + esc(g.importe_es || '')
+    ).join(', ');
+  }
+
+  async function mostrarDetalleLinea(remesaId, lineaId, etiqueta) {
+    mostrarError('');
+    const d = await api('/api/remesas/' + remesaId + '/lineas/' + lineaId + '/detalle');
+    if (!d.ok) {
+      mostrarError(d.error || 'Sin detalle');
+      return;
+    }
+    const items = (d.detalle && d.detalle.detalle) || [];
+    lineaDetalleAbierta = lineaId;
+    if (!panelDetLinea) return;
+    panelDetLinea.hidden = false;
+    document.getElementById('remesa-linea-detalle-titulo').textContent =
+      'Desglose: ' + (etiqueta || d.detalle.codigo_maestro || '');
+    const tbDet = document.querySelector('#tabla-remesa-linea-detalle tbody');
+    const vacio = document.getElementById('remesa-linea-detalle-vacio');
+    tbDet.innerHTML = '';
+    if (items.length === 0) {
+      vacio.hidden = false;
+      document.getElementById('tabla-remesa-linea-detalle').hidden = true;
+      return;
+    }
+    vacio.hidden = true;
+    document.getElementById('tabla-remesa-linea-detalle').hidden = false;
+    items.forEach((x) => {
+      const tr = document.createElement('tr');
+      const gen = textoGenerales(x);
+      tr.innerHTML = '<td>' + esc(x.codigo || '') + '</td>'
+        + '<td>' + esc(x.nombre || '') + '</td>'
+        + '<td class="num">' + esc(x.importe_es || '') + '</td>'
+        + '<td>' + (gen ? gen : '<span class="muted">—</span>') + '</td>';
+      tbDet.appendChild(tr);
+    });
+    panelDetLinea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
   async function abrir(id) {
+    if (actualId !== null && actualId !== id) ocultarDetalleLinea();
     actualId = id;
     const r = await api('/api/remesas/' + id);
     if (!r.ok) {
@@ -49,6 +98,18 @@ document.addEventListener('DOMContentLoaded', () => {
       'Remesa ' + (m.iniciales || '') + ' · ' + MESES[(m.mes || 1) - 1] + ' ' + m.anio + ' v' + m.version;
     document.getElementById('remesa-detalle-meta').textContent = 'Estado: ' + m.estado
       + (m.nota ? ' · ' + m.nota : '');
+    const tes = document.getElementById('remesa-tesoreria');
+    const wrapSust = document.getElementById('remesa-sustituir-wrap');
+    if (m.saldo_tesoreria_es != null) {
+      tes.hidden = false;
+      tes.textContent = 'Tesorería enviada (caja+banco personal a la fecha de cierre): '
+        + m.saldo_tesoreria_es + ' €';
+      wrapSust.hidden = m.estado !== 'enviada';
+      document.getElementById('remesa-sustituir').checked = false;
+    } else {
+      tes.hidden = true;
+      wrapSust.hidden = true;
+    }
     const tbL = document.querySelector('#tabla-remesa-lineas tbody');
     tbL.innerHTML = '';
     (m.lineas || []).forEach((l) => {
@@ -56,7 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const sol = l.solicitud;
       let det = '';
       if (sol && sol.estado === 'autorizada') {
-        det = '<button type="button" data-ver="' + l.id + '">Ver detalle</button>';
+        const abierta = lineaDetalleAbierta === l.id;
+        det = '<button type="button" data-ver="' + l.id + '">'
+          + (abierta ? 'Ocultar detalle' : 'Ver detalle') + '</button>';
       } else if (sol && sol.estado === 'pendiente') {
         det = '<span class="muted">Pendiente de la persona</span>';
       } else {
@@ -74,11 +137,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const btnVer = tr.querySelector('[data-ver]');
       if (btnVer) {
+        const etiqueta = (l.codigo_maestro || '') + ' · ' + (l.nombre || '');
         btnVer.onclick = async () => {
-          const d = await api('/api/remesas/' + id + '/lineas/' + l.id + '/detalle');
-          if (!d.ok) { mostrarError(d.error || 'Sin detalle'); return; }
-          const items = (d.detalle && d.detalle.detalle) || [];
-          alert(items.map((x) => x.codigo + ' ' + x.nombre + ': ' + x.importe_es).join('\n') || 'Sin desglose');
+          if (lineaDetalleAbierta === l.id) {
+            ocultarDetalleLinea();
+            btnVer.textContent = 'Ver detalle';
+            return;
+          }
+          await mostrarDetalleLinea(id, l.id, etiqueta);
+          tbL.querySelectorAll('[data-ver]').forEach((b) => {
+            b.textContent = b.getAttribute('data-ver') === String(l.id)
+              ? 'Ocultar detalle' : 'Ver detalle';
+          });
         };
       }
       tbL.appendChild(tr);
@@ -99,7 +169,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('remesa-aceptar').onclick = async () => {
     if (actualId == null) return;
     if (!confirm('¿Aceptar esta remesa? Sustituye los asientos de la versión aceptada anterior.')) return;
-    const r = await api('/api/remesas/' + actualId + '/aceptar', { method: 'POST', body: {} });
+    const r = await api('/api/remesas/' + actualId + '/aceptar', {
+      method: 'POST',
+      body: { sustituir_disponible: !!document.getElementById('remesa-sustituir')?.checked },
+    });
     if (!r.ok) { mostrarError(r.error || 'No se pudo aceptar'); return; }
     await cargarLista();
     abrir(actualId);

@@ -37,7 +37,7 @@
         <p class="muted" id="labores-ayuda">Partidas del capítulo VII en el plan H16n. Aparecen en el 613 P y como conceptos de gasto en P.</p>
         <table id="tabla-labores">
             <thead>
-            <tr><th>Código</th><th>Etiqueta</th><th></th></tr>
+            <tr><th>Código</th><th>Etiqueta</th><th>Desgrava</th><th></th></tr>
             </thead>
             <tbody></tbody>
         </table>
@@ -82,6 +82,7 @@ function filaLabor(p = {}) {
     '<td><input name="codigo" required pattern="7\\d{1,2}" maxlength="3" ' +
     'placeholder="71" value="' + esc(p.codigo || '') + '"></td>' +
     '<td><input name="etiqueta" required value="' + esc(p.etiqueta || '') + '"></td>' +
+    '<td><label><input type="checkbox" name="desgrava"' + (p.desgrava ? ' checked' : '') + '> Sí</label></td>' +
     '<td><button type="button" class="btn-quitar">Quitar</button></td>';
   tr.querySelector('.btn-quitar')?.addEventListener('click', () => tr.remove());
   return tr;
@@ -91,6 +92,7 @@ function partidasDelFormulario() {
   return [...document.querySelectorAll('#tabla-labores tbody tr')].map((tr) => ({
     codigo: tr.querySelector('[name=codigo]').value.trim(),
     etiqueta: tr.querySelector('[name=etiqueta]').value.trim(),
+    desgrava: tr.querySelector('[name=desgrava]').checked,
   }));
 }
 

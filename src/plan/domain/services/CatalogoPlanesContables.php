@@ -34,27 +34,27 @@ final class CatalogoPlanesContables
     /**
      * Catálogo de referencia para las partidas del cap. VII (71–79).
      *
-     * @return list<array{codigo:string,etiqueta:string,orden:int}>
+     * @return list<array{codigo:string,etiqueta:string,orden:int,desgrava:bool}>
      */
     public static function partidasLaboresReferencia(): array
     {
         return [
-            ['codigo' => '71', 'etiqueta' => 'Necesidades generales', 'orden' => 10],
-            ['codigo' => '72', 'etiqueta' => 'Fundació Montseny', 'orden' => 20],
-            ['codigo' => '73', 'etiqueta' => 'Fundació Proas', 'orden' => 30],
-            ['codigo' => '74', 'etiqueta' => 'Prelatura', 'orden' => 40],
-            ['codigo' => '75', 'etiqueta' => 'Associació Montroig', 'orden' => 50],
-            ['codigo' => '76', 'etiqueta' => 'Associació Assitència i Salut', 'orden' => 60],
-            ['codigo' => '77', 'etiqueta' => 'Proico', 'orden' => 70],
-            ['codigo' => '78', 'etiqueta' => 'Casa Escrivá', 'orden' => 80],
-            ['codigo' => '79', 'etiqueta' => 'Otras labores', 'orden' => 90],
+            ['codigo' => '71', 'etiqueta' => 'Necesidades generales', 'orden' => 10, 'desgrava' => false],
+            ['codigo' => '72', 'etiqueta' => 'Fundació Montseny', 'orden' => 20, 'desgrava' => true],
+            ['codigo' => '73', 'etiqueta' => 'Fundació Proas', 'orden' => 30, 'desgrava' => true],
+            ['codigo' => '74', 'etiqueta' => 'Prelatura', 'orden' => 40, 'desgrava' => false],
+            ['codigo' => '75', 'etiqueta' => 'Associació Montroig', 'orden' => 50, 'desgrava' => true],
+            ['codigo' => '76', 'etiqueta' => 'Associació Assitència i Salut', 'orden' => 60, 'desgrava' => true],
+            ['codigo' => '77', 'etiqueta' => 'Proico', 'orden' => 70, 'desgrava' => false],
+            ['codigo' => '78', 'etiqueta' => 'Casa Escrivá', 'orden' => 80, 'desgrava' => false],
+            ['codigo' => '79', 'etiqueta' => 'Otras labores', 'orden' => 90, 'desgrava' => false],
         ];
     }
 
     /**
      * Semilla por defecto en centros nuevos: las seis primeras (71–76).
      *
-     * @return list<array{codigo:string,etiqueta:string,orden:int}>
+     * @return list<array{codigo:string,etiqueta:string,orden:int,desgrava:bool}>
      */
     public static function partidasLaboresPorDefecto(): array
     {
@@ -64,7 +64,7 @@ final class CatalogoPlanesContables
     /**
      * Backfill de centros ya existentes antes de H16n: las nueve partidas (71–79).
      *
-     * @return list<array{codigo:string,etiqueta:string,orden:int}>
+     * @return list<array{codigo:string,etiqueta:string,orden:int,desgrava:bool}>
      */
     public static function partidasLaboresLegacy(): array
     {

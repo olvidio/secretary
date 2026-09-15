@@ -547,19 +547,22 @@ body.e37-hoja main { max-width: none; }
 body.yo {
   background: #f3f1ee;
   min-height: 100vh;
-  padding-bottom: 4.5rem;
+  padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
   overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 .yo-top {
   display: flex;
   align-items: center;
   gap: .75rem;
-  padding: .7rem 1rem;
+  padding: .75rem 1rem;
   background: #0f766e;
   color: #fff;
   position: sticky;
   top: 0;
   z-index: 5;
+  font-size: 1.05rem;
 }
 .yo-top .user-menu { margin-left: auto; }
 .yo-top a { color: #fff; }
@@ -567,9 +570,15 @@ body.yo {
   max-width: min(480px, 100%);
   width: 100%;
   margin: 0 auto;
-  padding: 1rem 1rem 2rem;
+  padding: 1rem clamp(.85rem, 4vw, 1.25rem) 2rem;
   overflow-x: hidden;
 }
+.yo-main h1 { font-size: clamp(1.2rem, 4.5vw, 1.4rem); }
+.yo-main h2 { font-size: clamp(1rem, 4vw, 1.15rem); }
+.yo-main section { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.yo-main table { font-size: .92rem; }
+.yo-main table th,
+.yo-main table td { padding: .45rem .55rem; }
 .yo-copias-table {
   table-layout: fixed;
   width: 100%;
@@ -618,13 +627,15 @@ body.yo {
   justify-content: space-between;
   margin-bottom: .75rem;
 }
-.yo-month h1 { margin: 0; font-size: 1.15rem; text-align: center; flex: 1; }
+.yo-month h1 { margin: 0; font-size: clamp(1.15rem, 4.5vw, 1.35rem); text-align: center; flex: 1; }
 .yo-month button {
   background: transparent;
   color: #0f766e;
-  font-size: 1.6rem;
+  font-size: 1.75rem;
   line-height: 1;
-  padding: .2rem .6rem;
+  padding: .35rem .75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
 }
 .yo-hero {
   background: #fff;
@@ -634,9 +645,9 @@ body.yo {
 }
 .yo-chart-wrap {
   position: relative;
-  width: 220px;
-  height: 220px;
-  margin: 0 auto .75rem;
+  width: min(280px, 78vw);
+  height: min(280px, 78vw);
+  margin: 0 auto .85rem;
 }
 .yo-chart {
   width: 100%;
@@ -653,8 +664,8 @@ body.yo {
   place-content: center;
   text-align: center;
 }
-.yo-chart-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: #64748b; }
-.yo-chart-center strong { font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+.yo-chart-label { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: #64748b; }
+.yo-chart-center strong { font-size: clamp(1.4rem, 6vw, 1.65rem); font-variant-numeric: tabular-nums; }
 .yo-saldos, .yo-flujo {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -665,7 +676,8 @@ body.yo {
   border-radius: 10px;
   padding: .55rem .7rem;
 }
-.yo-saldos span, .yo-flujo span { display: block; font-size: .75rem; color: #64748b; }
+.yo-saldos span, .yo-flujo span { display: block; font-size: .85rem; color: #64748b; }
+.yo-saldos strong, .yo-flujo strong { font-size: 1.05rem; }
 .yo-flujo .ing strong { color: #15803d; }
 .yo-flujo .gas strong { color: #b91c1c; }
 .yo-fabs {
@@ -677,9 +689,10 @@ body.yo {
 .yo-fab {
   border: 0;
   border-radius: 999px;
-  padding: .75rem 1rem;
+  padding: .85rem 1rem;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.05rem;
+  min-height: 3rem;
 }
 .yo-fab.ing { background: #15803d; }
 .yo-fab.gas { background: #dc2626; }
@@ -790,19 +803,29 @@ body.yo {
   bottom: 0;
   left: 0;
   right: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
   background: #fff;
   border-top: 1px solid var(--line);
-  padding: .35rem .5rem calc(.35rem + env(safe-area-inset-bottom));
+  padding: .4rem .35rem calc(.4rem + env(safe-area-inset-bottom));
+  gap: .15rem;
 }
+.yo-tabbar::-webkit-scrollbar { display: none; }
 .yo-tabbar a {
+  flex: 1 0 auto;
+  min-width: 4.1rem;
   text-align: center;
-  padding: .55rem .3rem;
+  padding: .6rem .55rem;
   text-decoration: none;
   color: #64748b;
-  font-size: .85rem;
+  font-size: clamp(.78rem, 2.8vw, .88rem);
+  line-height: 1.15;
   border-radius: 8px;
+  white-space: nowrap;
 }
 .yo-tabbar a.on { color: #0f766e; font-weight: 700; background: #ccfbf1; }
 .yo-modal {
@@ -836,28 +859,30 @@ body.yo {
   flex: none;
 }
 .yo-importe-grande input {
-  font-size: 2rem;
+  font-size: clamp(2rem, 8vw, 2.35rem);
   font-variant-numeric: tabular-nums;
   text-align: center;
   border: 0;
   border-bottom: 2px solid #0f766e;
   border-radius: 0;
-  padding: .3rem;
+  padding: .35rem;
+  width: 100%;
 }
 .yo-cats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: .45rem;
-  max-height: 11rem;
+  grid-template-columns: repeat(auto-fill, minmax(4.75rem, 1fr));
+  gap: .5rem;
+  max-height: 13rem;
   overflow: auto;
 }
 .yo-cats-grid button {
   background: #f1f5f9;
   color: #1e293b;
   border-radius: 12px;
-  padding: .45rem .2rem;
-  font-size: .7rem;
+  padding: .55rem .3rem;
+  font-size: .82rem;
   line-height: 1.2;
+  min-height: 2.75rem;
 }
 .yo-cats-grid button.on { outline: 2px solid #0f766e; background: #ccfbf1; }
 .yo-tesoreria {
@@ -919,7 +944,6 @@ body.yo {
   gap: .5rem;
 }
 .yo-cat-list small { color: #64748b; }
-.yo-tabbar a { font-size: .75rem; padding: .55rem .1rem; }
 .yo-con-ayuda { margin: 0 0 1rem; }
 .yo-con-ayuda > h1,
 .yo-con-ayuda > h2 {
@@ -986,7 +1010,35 @@ body.yo {
 }
 .yo-banco-obs-clear:hover { background: #e2e8f0; color: #0f172a; }
 .yo-remesa-resumen { margin: .75rem 0 1rem; }
-#yo-remesa-enviar { width: 100%; padding: .7rem; font-size: 1rem; }
+#yo-remesa-enviar { width: 100%; padding: .85rem; font-size: 1.05rem; min-height: 3rem; }
+@media (max-width: 480px) {
+  body.yo { font-size: 16px; }
+  .yo-main { padding-bottom: 2.5rem; }
+  .yo-hero { padding: 1.35rem 1.1rem 1.15rem; }
+  .yo-saldos div, .yo-flujo div { padding: .7rem .85rem; }
+  .yo-leyenda li { padding: .6rem .8rem; font-size: .95rem; }
+  .yo-lista li { padding: .75rem .85rem; gap: .65rem; }
+  .yo-chip { width: 2.5rem; height: 2.5rem; font-size: .88rem; }
+  .yo-lista .imp { font-size: 1.05rem; }
+  .yo-sheet { padding: 1.1rem 1.1rem 1.35rem; }
+  .yo-sheet label { font-size: .95rem; }
+  .yo-sheet button { min-height: 2.75rem; padding: .55rem .75rem; }
+  .yo-banco-form button,
+  .yo-cat-form button,
+  .yo-cierre .grid-form button { min-height: 2.75rem; padding: .55rem .85rem; }
+  .yo-banco-pend-row { flex-wrap: wrap; }
+  .yo-banco-pend-row select { max-width: none; flex: 1 1 100%; }
+  .yo-banco-obs-wrap { width: 100%; }
+}
+.remesa-linea-detalle {
+  margin: 1rem 0 1.25rem;
+  padding: .75rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+}
+.remesa-linea-detalle h3 { margin: 0 0 .35rem; font-size: 1rem; }
+.remesa-linea-detalle .muted { margin: 0 0 .65rem; }
 .ok-btn { background: #15803d; }
 
 .dlg-apunte {

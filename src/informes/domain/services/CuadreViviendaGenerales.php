@@ -7,10 +7,13 @@ namespace src\informes\domain\services;
 use src\shared\domain\value_objects\Dinero;
 
 /**
- * Contrapartida P/21 ↔ G/11 para quienes aportan vivienda a generales.
+ * Contrapartida P/21 ↔ G/11 (vivienda general). P/212 (vivienda personal) no interviene.
  */
 final class CuadreViviendaGenerales
 {
+    /** @var list<string> */
+    private const CONCEPTOS_P_VIVIENDA_GENERAL = ['21', '211'];
+
     /**
      * @param list<array<string, mixed>> $apuntesP21
      * @param list<array<string, mixed>> $apuntesG11
@@ -42,13 +45,15 @@ final class CuadreViviendaGenerales
                 }
                 $porPersona[] = $this->filaPersona($p, $p21, $g11, $dif, $filaOk);
             } else {
-                if ($g11 !== 0) {
+                if ($p21 !== $g11) {
                     $ok = false;
-                    $avisos[] = $p['nombre'] . ' (' . $p['iniciales'] . ') no aporta vivienda a generales '
-                        . 'pero tiene entradas G/11 de ' . $this->fmtEs($g11) . ' €.';
+                    if ($g11 !== 0 || $p21 !== 0) {
+                        $avisos[] = $p['nombre'] . ' (' . $p['iniciales'] . ') no aporta al cierre automático: '
+                            . 'P/21 ' . $this->fmtEs($p21) . ' €, G/11 ' . $this->fmtEs($g11) . ' €.';
+                    }
                 }
                 if ($p21 !== 0 || $g11 !== 0) {
-                    $porPersona[] = $this->filaPersona($p, $p21, $g11, $p21 - $g11, $g11 === 0);
+                    $porPersona[] = $this->filaPersona($p, $p21, $g11, $p21 - $g11, $p21 === $g11);
                 }
             }
         }
@@ -60,7 +65,7 @@ final class CuadreViviendaGenerales
             $ok = false;
             $etiqueta = $ini === '' ? 'sin iniciales' : $ini;
             $avisos[] = 'Hay G/11 de ' . $this->fmtEs($g11) . ' € a nombre de ' . $etiqueta
-                . ' sin persona que aporte vivienda a generales.';
+                . ' sin persona en Nombres.';
             $p21 = $sumP[$ini] ?? 0;
             unset($sumP[$ini]);
             $porPersona[] = $this->filaPersona(
@@ -91,6 +96,12 @@ final class CuadreViviendaGenerales
             'por_persona' => $porPersona,
             'avisos' => $avisos,
         ];
+    }
+
+    /** @return list<string> */
+    public static function conceptosPViviendaGeneral(): array
+    {
+        return self::CONCEPTOS_P_VIVIENDA_GENERAL;
     }
 
     /**

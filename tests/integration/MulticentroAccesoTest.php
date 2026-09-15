@@ -12,6 +12,7 @@ use src\acceso\application\IniciarSesion;
 use src\acceso\application\VincularEmailPersona;
 use src\acceso\infrastructure\persistence\PdoIdentidadRepository;
 use src\ambito\application\AsegurarCuentaCorrientePersona;
+use src\ambito\application\AsegurarCuentaDisponiblePersona;
 use src\ambito\application\CrearCentro;
 use src\ambito\application\CrearEjercicio;
 use src\ambito\application\ResolverAmbitoActual;
@@ -231,6 +232,7 @@ final class MulticentroAccesoTest extends TestCase
             $ambito,
             new VincularEmailPersona($identidades, $personas),
             new AsegurarCuentaCorrientePersona($cuentas),
+            new AsegurarCuentaDisponiblePersona($cuentas),
             new AsegurarPlanPersonal($cuentas),
             $config,
         );

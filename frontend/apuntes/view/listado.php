@@ -40,7 +40,11 @@ function parseImporte(raw) {
 }
 
 function fmtEuro(n) {
-  return n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return n.toLocaleString('es-ES', {
+    useGrouping: true,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 function aplicarFiltrosUrl(form) {

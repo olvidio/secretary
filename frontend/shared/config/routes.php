@@ -66,6 +66,7 @@ return static function (RouteCollector $r): void {
         ['/tesoreria', 'ambito/view/tesoreria.php', 'tesoreria'],
         ['/traspasos', 'asientos/view/traspasos.php', 'traspasos'],
         ['/remesas', 'remesas/view/listado.php', 'remesas'],
+        ['/disponible', 'disponible/view/listado.php', 'disponible'],
     ];
     foreach ($pages as [$path, $view, $nav]) {
         $extra = ['view' => $view, 'nav' => $nav];

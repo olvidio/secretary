@@ -18,7 +18,7 @@ final class GuardarPartidasLabores
 
     /**
      * @param array<string, mixed> $datos
-     * @return list<array{codigo:string,etiqueta:string,orden:int}>
+     * @return list<array{codigo:string,etiqueta:string,orden:int,desgrava?:bool}>
      */
     public function ejecutar(array $datos): array
     {
@@ -36,7 +36,7 @@ final class GuardarPartidasLabores
 
     /**
      * @param list<mixed> $raw
-     * @return list<array{codigo:string,etiqueta:string,orden:int}>
+     * @return list<array{codigo:string,etiqueta:string,orden:int,desgrava:bool}>
      */
     private function normalizar(array $raw): array
     {
@@ -69,7 +69,8 @@ final class GuardarPartidasLabores
                 throw new InvalidArgumentException('Código duplicado: ' . $codigo);
             }
             $codigos[$codigo] = true;
-            $out[] = ['codigo' => $codigo, 'etiqueta' => $etiqueta, 'orden' => $orden];
+            $desgrava = !empty($fila['desgrava']);
+            $out[] = ['codigo' => $codigo, 'etiqueta' => $etiqueta, 'orden' => $orden, 'desgrava' => $desgrava];
             $orden += 10;
         }
 

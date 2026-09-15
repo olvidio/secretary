@@ -46,6 +46,9 @@ interface CuentaRepository
     /** Cuenta corriente personal (libro P) de una persona. */
     public function personalDe(int $centroId, int $personaId): ?Cuenta;
 
+    /** Aparcamiento del sobrante de remesa (`DISP.<INICIALES>`). */
+    public function disponibleDe(int $centroId, int $personaId): ?Cuenta;
+
     /** Cuenta colectiva de deudores por vivienda (libro G). */
     public function deudoresVivienda(int $centroId): ?Cuenta;
 

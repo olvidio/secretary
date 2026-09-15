@@ -17,7 +17,6 @@ final class ContrapartidasGastoGeneralTest extends TestCase
             '201',
             'gasto',
             'ac',
-            true,
             'agua',
         );
 
@@ -32,10 +31,9 @@ final class ContrapartidasGastoGeneralTest extends TestCase
     public function testNoExpandeSinInicialesNiEnPNiIngreso(): void
     {
         $svc = new ContrapartidasGastoGeneral();
-        self::assertNull($svc->lineas('G', 'A', '201', 'gasto', '', true, null));
-        self::assertNull($svc->lineas('P', 'A', '22', 'gasto', 'ac', true, null));
-        self::assertNull($svc->lineas('G', 'A', '11', 'ingreso', 'ac', true, null));
-        self::assertNull($svc->lineas('G', 'A', '201', 'gasto', 'ac', false, null));
+        self::assertNull($svc->lineas('G', 'A', '201', 'gasto', '', null));
+        self::assertNull($svc->lineas('P', 'A', '22', 'gasto', 'ac', null));
+        self::assertNull($svc->lineas('G', 'A', '11', 'ingreso', 'ac', null));
     }
 
     /** @param array{cuenta:string,origen:string,concepto_codigo:string,observaciones:?string} $linea */

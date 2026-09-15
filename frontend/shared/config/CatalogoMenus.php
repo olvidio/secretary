@@ -36,6 +36,7 @@ final class CatalogoMenus
             ['nav' => 'cierre', 'href' => '/cierre', 'label' => 'Cierre de mes'],
             ['nav' => 'apuntes', 'href' => '/apuntes', 'label' => 'Apuntes'],
             ['nav' => 'remesas', 'href' => '/remesas', 'label' => 'Remesas'],
+            ['nav' => 'disponible', 'href' => '/disponible', 'label' => 'Disponible'],
             ['nav' => '613-p', 'href' => '/613-p', 'label' => '613 P'],
             ['nav' => '613-g', 'href' => '/613-g', 'label' => '613 G'],
             ['nav' => 'e37', 'href' => '/e37', 'label' => 'Cuentas personales'],
@@ -150,7 +151,7 @@ final class CatalogoMenus
             [
                 'id' => 'personales',
                 'label' => 'Personales',
-                'items' => ['entrada-p', '613-p', 'e37', 'e37-resumen', 'remesas'],
+                'items' => ['entrada-p', '613-p', 'e37', 'e37-resumen', 'remesas', 'disponible'],
             ],
             [
                 'id' => 'generales',
@@ -206,6 +207,7 @@ final class CatalogoMenus
                     'cierre',
                     'apuntes',
                     'remesas',
+                    'disponible',
                 ],
             ],
             [

@@ -15,13 +15,13 @@ Cada centro tiene sus propias cuentas, sus propios nombres y su propio secretari
 1. En «Este centro» se ven el nombre del centro y los usuarios que pueden llevarlo.
 2. Para dar acceso a otra persona, rellenar «Añadir usuario de este centro» (alias, correo y contraseña de al menos seis caracteres) y pulsar «Vincular».
 3. Para cargar el libro de Excel, elegir el fichero en «Excel de este centro» y pulsar «Importar Excel». Al acabar se indica cuántos nombres y apuntes se han cargado.
-4. En «VII. Otras labores apostólicas» se añaden o quitan partidas y se pulsa «Guardar partidas».
+4. En «VII. Otras labores apostólicas» se añaden o quitan partidas, se marca si **desgravan** y se pulsa «Guardar partidas».
 5. Para crear una entidad nueva, rellenar «Nuevo centro»: código, nombre, fechas del ejercicio y datos del secretario que la llevará. El Excel es opcional.
 
 ## Reglas que conviene saber
 
 - Quien crea un centro nuevo **no** queda vinculado a él: solo el secretario indicado, que tendrá que activar su código de verificación al entrar.
-- Las partidas del capítulo VII llevan código que empieza por 7 (71, 791…), etiqueta obligatoria y como máximo doce. Salen en el resumen 613 del libro personal y como conceptos de gasto de ese libro.
+- Las partidas del capítulo VII llevan código que empieza por 7 (71, 791…), etiqueta obligatoria y como máximo doce. Salen en el resumen 613 del libro personal y como conceptos de gasto de ese libro. La casilla «Desgrava» decide si entran en el primer tramo de donativos al proponer destinos.
 - «Vaciar datos» es para las pruebas: borra los apuntes, las remesas y los arqueos de este centro para poder recargar el Excel. El centro, los usuarios y los nombres se conservan. Pide confirmación.
 
 ## Problemas frecuentes

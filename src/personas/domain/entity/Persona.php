@@ -38,6 +38,7 @@ final class Persona
         public readonly ?string $email = null,
         /** Si el gasto P/21 debe tener entrada G/11. Independiente del tipo de centro. */
         public readonly bool $viviendaAportaGenerales = true,
+        public readonly bool $puedeDesgravar = true,
     ) {
     }
 

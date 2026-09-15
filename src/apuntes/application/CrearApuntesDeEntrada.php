@@ -84,7 +84,6 @@ final class CrearApuntesDeEntrada
             $codigo,
             $concepto?->naturaleza ?? '',
             $iniciales,
-            $persona?->viviendaAportaGenerales ?? true,
             $obsRaw === '' ? null : $obsRaw,
         );
     }

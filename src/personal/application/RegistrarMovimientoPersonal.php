@@ -172,11 +172,6 @@ final class RegistrarMovimientoPersonal
         if (!$valido) {
             throw new InvalidArgumentException('Concepto de generales no válido');
         }
-        $persona = $this->personas->porId($ctx->personaId);
-        if ($persona !== null && !$persona->viviendaAportaGenerales) {
-            throw new InvalidArgumentException('Su ficha no está marcada como «aporta a generales»');
-        }
-
         return [true, $concepto];
     }
 

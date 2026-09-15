@@ -56,7 +56,12 @@ final class CalcularSaldos
             if ($row['tipo'] === 'tesoreria' && $row['codigo_maestro'] === 'BANCO' && $row['libro'] !== 'X') {
                 $banco = $banco->add($saldo);
             }
-            if ($row['tipo'] === 'personal' && $row['libro'] === 'P' && $row['persona_id'] !== null) {
+            if (
+                $row['tipo'] === 'personal'
+                && $row['libro'] === 'P'
+                && $row['persona_id'] !== null
+                && $row['codigo_maestro'] === '9'
+            ) {
                 $persona = $personasPorId[$row['persona_id']] ?? null;
                 if ($persona !== null) {
                     $porPersonaMap[$persona->iniciales] = $saldo;

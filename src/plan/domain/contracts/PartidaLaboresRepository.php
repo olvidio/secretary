@@ -9,7 +9,7 @@ interface PartidaLaboresRepository
     /**
      * Partidas del cap. VII para el 613 P del centro.
      *
-     * @return list<array{codigo:string,etiqueta:string,orden:int}>
+     * @return list<array{codigo:string,etiqueta:string,orden:int,desgrava:bool}>
      */
     public function paraCentro(int $centroId): array;
 
@@ -19,7 +19,7 @@ interface PartidaLaboresRepository
     /**
      * Sustituye las partidas del cap. VII y sincroniza las cuentas P del plan maestro.
      *
-     * @param list<array{codigo:string,etiqueta:string,orden:int}> $partidas
+     * @param list<array{codigo:string,etiqueta:string,orden:int,desgrava?:bool}> $partidas
      */
     public function guardar(int $centroId, array $partidas): void;
 }

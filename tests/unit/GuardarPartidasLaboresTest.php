@@ -51,8 +51,8 @@ final class GuardarPartidasLaboresTest extends TestCase
         ]);
 
         self::assertSame([
-            ['codigo' => '71', 'etiqueta' => 'Uno', 'orden' => 10],
-            ['codigo' => '72', 'etiqueta' => 'Dos', 'orden' => 20],
+            ['codigo' => '71', 'etiqueta' => 'Uno', 'orden' => 10, 'desgrava' => false],
+            ['codigo' => '72', 'etiqueta' => 'Dos', 'orden' => 20, 'desgrava' => false],
         ], $guardadas);
     }
 

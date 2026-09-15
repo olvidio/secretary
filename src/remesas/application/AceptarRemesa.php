@@ -9,6 +9,8 @@ use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\domain\contracts\CuentaRepository;
 use src\ambito\domain\contracts\EjercicioRepository;
 use src\asientos\domain\contracts\AsientoRepository;
+use src\disponible\application\AplicarDisponibleDeRemesa;
+use src\disponible\domain\services\SobranteRemesa;
 use src\personal\application\ResolverPeriodoPersonal;
 use src\personal\domain\services\PeriodoPersonal;
 use src\personas\domain\contracts\PersonaRepository;
@@ -27,10 +29,14 @@ final class AceptarRemesa
         private readonly PersonaRepository $personas,
         private readonly ResolverPeriodoPersonal $periodoPersonal,
         private readonly RegistrarGastosGeneralesDeRemesa $gastosGenerales,
+        private readonly AplicarDisponibleDeRemesa $disponible,
     ) {
     }
 
-    public function ejecutar(int $id): Remesa
+    /**
+     * @param array<string, mixed> $datos
+     */
+    public function ejecutar(int $id, array $datos = []): Remesa
     {
         $remesa = $this->remesas->porId($id);
         $ctx = $this->ambito->ejecutar();
@@ -65,6 +71,7 @@ final class AceptarRemesa
             $remesa->anio,
             $remesa->mes,
         );
+        $sustituir = self::boolFlag($datos['sustituir_disponible'] ?? false);
 
         $generales = $this->gastosGenerales;
         $this->remesas->enTransaccion(function () use (
@@ -76,11 +83,15 @@ final class AceptarRemesa
             $cc,
             $lineasAsiento,
             $generales,
+            $sustituir,
         ): void {
             if ($previa !== null && $previa->id !== null && $previa->id !== $remesa->id) {
+                $this->disponible->revertir((int) $previa->id);
                 $this->asientos->borrarPorRemesaId($previa->id);
                 $this->remesas->marcarEstado($previa->id, 'sustituida', true);
             }
+            $filtradas = $this->disponible->filtrarLineas($remesa, $lineasAsiento);
+            $sobrante = SobranteRemesa::cents($filtradas);
             $asiento = ConstructorAsientoRemesa::construir(
                 (int) $ejercicio->id,
                 $remesa->personaId,
@@ -88,12 +99,20 @@ final class AceptarRemesa
                 $glosa,
                 (int) $remesa->id,
                 (int) $cc->id,
-                $lineasAsiento,
+                $filtradas,
             );
             if ($asiento !== null) {
                 $this->asientos->guardar($asiento);
             }
             $generales->ejecutar($remesa, $fecha, (int) $remesa->id);
+            $this->disponible->ejecutar(
+                $remesa,
+                $fecha,
+                (int) $cc->id,
+                (int) $ejercicio->id,
+                $sustituir,
+                $sobrante,
+            );
             $this->remesas->marcarEstado((int) $remesa->id, 'aceptada', true);
         });
         $aceptada = $this->remesas->porId((int) $remesa->id);
@@ -105,7 +124,7 @@ final class AceptarRemesa
     }
 
     /**
-     * @return list<array{cuenta_id:int, tipo:string, importe_cents:int}>
+     * @return list<array{cuenta_id:int, tipo:string, importe_cents:int, codigo_maestro:string}>
      */
     private function lineasAsiento(Remesa $remesa): array
     {
@@ -124,9 +143,20 @@ final class AceptarRemesa
                 'cuenta_id' => $cuenta->id,
                 'tipo' => $cuenta->tipo,
                 'importe_cents' => $linea->importeCents,
+                'codigo_maestro' => $linea->codigoMaestro,
             ];
         }
 
         return $out;
+    }
+
+    private static function boolFlag(mixed $v): bool
+    {
+        if (is_bool($v)) {
+            return $v;
+        }
+        $s = strtolower(trim((string) $v));
+
+        return in_array($s, ['1', 'true', 'si', 'sí', 'on'], true);
     }
 }

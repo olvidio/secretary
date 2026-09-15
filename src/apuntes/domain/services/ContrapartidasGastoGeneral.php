@@ -6,6 +6,7 @@ namespace src\apuntes\domain\services;
 
 /**
  * Gasto de generales atribuido a una persona: P/111, P/21, G/11 y el gasto anotado.
+ * P/21 es vivienda general (cuadra con G/11); P/212 es vivienda personal y no interviene aquí.
  */
 final class ContrapartidasGastoGeneral
 {
@@ -18,7 +19,6 @@ final class ContrapartidasGastoGeneral
         string $conceptoCodigo,
         string $naturaleza,
         string $iniciales,
-        bool $aportaVivienda,
         ?string $observaciones,
     ): ?array {
         if (strtoupper($cuenta) !== 'G') {
@@ -32,9 +32,6 @@ final class ContrapartidasGastoGeneral
         }
         $conceptoCodigo = trim($conceptoCodigo);
         if ($conceptoCodigo === '') {
-            return null;
-        }
-        if (!$aportaVivienda) {
             return null;
         }
         $origen = strtoupper($origen);

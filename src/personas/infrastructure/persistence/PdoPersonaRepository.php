@@ -117,14 +117,15 @@ final class PdoPersonaRepository implements PersonaRepository
             // backfilleará en el siguiente db:migrate (ver comentario en Persona::centroId).
             $sql = 'INSERT INTO personas (nombre, apellidos, iniciales, mes_exento_inicio, mes_exento_fin,
                     mes_exento2_inicio, mes_exento2_fin, importe_vivienda_fijo, orden, centro_id, email,
-                    vivienda_aporta_generales)
-                 VALUES (:n, :a, :i, :e1, :e2, :e3, :e4, :imp, :o, :cid, :email, :aporta)';
+                    vivienda_aporta_generales, puede_desgravar)
+                 VALUES (:n, :a, :i, :e1, :e2, :e3, :e4, :imp, :o, :cid, :email, :aporta, :desgrava)';
             $params = $this->params($persona);
             $params[':cid'] = $persona->centroId;
             $params[':email'] = $persona->email !== null && $persona->email !== ''
                 ? strtolower($persona->email)
                 : null;
             $params[':aporta'] = $persona->viviendaAportaGenerales ? 1 : 0;
+            $params[':desgrava'] = $persona->puedeDesgravar ? 1 : 0;
             $id = $this->insertId($sql, $params);
         } else {
             // La actualización NO toca centro_id deliberadamente: el formulario de
@@ -133,7 +134,8 @@ final class PdoPersonaRepository implements PersonaRepository
             $st = $this->pdo->prepare(
                 'UPDATE personas SET nombre=:n, apellidos=:a, iniciales=:i, mes_exento_inicio=:e1,
                     mes_exento_fin=:e2, mes_exento2_inicio=:e3, mes_exento2_fin=:e4,
-                    importe_vivienda_fijo=:imp, orden=:o, vivienda_aporta_generales=:aporta
+                    importe_vivienda_fijo=:imp, orden=:o, vivienda_aporta_generales=:aporta,
+                    puede_desgravar=:desgrava
                  WHERE id = :id'
             );
             $params = $this->params($persona);
@@ -248,6 +250,7 @@ final class PdoPersonaRepository implements PersonaRepository
             ':imp' => $p->importeViviendaFijo?->toString(),
             ':o' => $p->orden,
             ':aporta' => $p->viviendaAportaGenerales ? 1 : 0,
+            ':desgrava' => $p->puedeDesgravar ? 1 : 0,
         ];
     }
 
@@ -276,6 +279,7 @@ final class PdoPersonaRepository implements PersonaRepository
                 ? strtolower((string) $row['email'])
                 : null,
             !isset($row['vivienda_aporta_generales']) || self::booleano($row['vivienda_aporta_generales']),
+            !isset($row['puede_desgravar']) || self::booleano($row['puede_desgravar']),
         );
     }
 }

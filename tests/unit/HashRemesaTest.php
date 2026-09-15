@@ -23,4 +23,10 @@ final class HashRemesaTest extends TestCase
         $b = new RemesaLinea(null, null, '22', 2250, []);
         self::assertNotSame(HashRemesa::deLineas([$a]), HashRemesa::deLineas([$b]));
     }
+
+    public function testLaTesoreriaCambiaElHash(): void
+    {
+        $a = new RemesaLinea(null, null, '22', 1250, []);
+        self::assertNotSame(HashRemesa::deLineas([$a], 1000), HashRemesa::deLineas([$a], 2000));
+    }
 }

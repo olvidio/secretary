@@ -1,6 +1,6 @@
 <?php $cuenta = $cuentaEntrada ?? 'P'; ?>
 <h1>Entrada apuntes <?= htmlspecialchars($cuenta, ENT_QUOTES) ?></h1>
-<p class="muted">Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.<?php if ($cuenta === 'G'): ?> Un gasto de G con iniciales anota también P/111, P/21 y G/11 (si esa persona aporta vivienda a generales).<?php endif; ?></p>
+<p class="muted">Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.<?php if ($cuenta === 'G'): ?> Un gasto de G con iniciales anota también P/111, P/21 y G/11.<?php endif; ?></p>
 
 <div id="entrada-apuntes">
     <div class="entrada-cabecera">
@@ -302,7 +302,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!ini || !codigo || codigo.startsWith('@plantilla:')) return null;
     const c = mapConcepto[codigo];
     if (!c || c.naturaleza !== 'gasto') return null;
-    if (!personaAporta(ini)) return null;
     const obs = inpObs.value;
     const origen = selOrigen.value || 'A';
     return [
@@ -362,7 +361,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function fmtEuro(n) {
-    return n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return n.toLocaleString('es-ES', {
+      useGrouping: true,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 
   function calcularTotales() {

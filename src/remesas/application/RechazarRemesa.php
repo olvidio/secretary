@@ -7,6 +7,7 @@ namespace src\remesas\application;
 use InvalidArgumentException;
 use src\ambito\application\ResolverAmbitoActual;
 use src\asientos\domain\contracts\AsientoRepository;
+use src\disponible\application\AplicarDisponibleDeRemesa;
 use src\remesas\domain\contracts\RemesaRepository;
 use src\remesas\domain\entity\Remesa;
 
@@ -16,6 +17,7 @@ final class RechazarRemesa
         private readonly ResolverAmbitoActual $ambito,
         private readonly RemesaRepository $remesas,
         private readonly AsientoRepository $asientos,
+        private readonly AplicarDisponibleDeRemesa $disponible,
     ) {
     }
 
@@ -33,6 +35,7 @@ final class RechazarRemesa
         $nota = trim((string) ($datos['nota'] ?? ''));
         $this->remesas->enTransaccion(function () use ($remesa, $nota): void {
             if ($remesa->estado === 'aceptada') {
+                $this->disponible->revertir((int) $remesa->id);
                 $this->asientos->borrarPorRemesaId((int) $remesa->id);
             }
             $this->remesas->marcarEstado((int) $remesa->id, 'rechazada', true);

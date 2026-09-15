@@ -157,7 +157,11 @@ final class ObtenerE37
         $saldos = $this->asientos->saldosPorCuenta($centroId, $ejercicioId, $desde, $hasta, 'P');
         $out = [];
         foreach ($saldos as $row) {
-            if ($row['tipo'] !== 'personal' || $row['persona_id'] === null) {
+            if (
+                $row['tipo'] !== 'personal'
+                || $row['persona_id'] === null
+                || $row['codigo_maestro'] !== '9'
+            ) {
                 continue;
             }
             $persona = $personasPorId[$row['persona_id']] ?? null;

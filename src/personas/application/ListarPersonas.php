@@ -42,6 +42,7 @@ final class ListarPersonas
             $fila = $p->toArray();
             $fila['email'] = $p->email ?? '';
             $fila['vivienda_aporta_generales'] = $p->viviendaAportaGenerales;
+            $fila['puede_desgravar'] = $p->puedeDesgravar;
             $fila['centro_id'] = $centroId;
             $fila['centro_nombre'] = $centroNombre;
             $fila['centro_codigo'] = $centroCodigo;

@@ -133,7 +133,7 @@ final class RemesaTest extends TestCase
         $v2 = $d['enviar']->ejecutar(['anio' => $anio, 'mes' => 1]);
         self::assertSame(2, $v2->version);
         $d['aceptar']->ejecutar((int) $v2->id);
-        self::assertSame(1, $this->contarAsientosRemesa());
+        self::assertSame(2, $this->contarAsientosRemesa());
         self::assertSame(1250, $this->realizado22($d));
         $e37 = $d['asientos']->movimientosE37PorPersona(
             $d['centroId'],
@@ -156,7 +156,7 @@ final class RemesaTest extends TestCase
         $v3 = $d['enviar']->ejecutar(['anio' => $anio, 'mes' => 1]);
         self::assertSame(3, $v3->version);
         $d['aceptar']->ejecutar((int) $v3->id);
-        self::assertSame(1, $this->contarAsientosRemesa(), 'Aceptar no puede duplicar asientos de remesa');
+        self::assertSame(2, $this->contarAsientosRemesa(), 'Aceptar no puede duplicar asientos de remesa');
         self::assertSame(2250, $this->realizado22($d));
 
         $aceptada = $d['remesas']->porId((int) $v3->id);
@@ -272,6 +272,17 @@ final class RemesaTest extends TestCase
             $ejercicios,
         );
 
+        $saldosDisp = new \src\disponible\infrastructure\persistence\PdoSaldoDisponibleRepository($this->pdo);
+        $asigRepo = new \src\disponible\infrastructure\persistence\PdoAsignacionLaboresRepository($this->pdo);
+        $disponible = new \src\disponible\application\AplicarDisponibleDeRemesa(
+            $cuentas,
+            $asientos,
+            $saldosDisp,
+            $asigRepo,
+            $personas,
+            new \src\ambito\application\AsegurarCuentaDisponiblePersona($cuentas),
+        );
+
         return [
             'centroId' => $centroId,
             'ejercicioId' => $ctx->ejercicioId,
@@ -293,8 +304,9 @@ final class RemesaTest extends TestCase
                 $personas,
                 $periodoPersonal,
                 $gastosGenerales,
+                $disponible,
             ),
-            'rechazar' => new RechazarRemesa($ambitoCentro, $remesas, $asientos),
+            'rechazar' => new RechazarRemesa($ambitoCentro, $remesas, $asientos, $disponible),
             'solicitar' => new SolicitarDetalleRemesa($ambitoCentro, $remesas, $scl->id),
             'resolverSol' => new ResolverSolicitudDetalle($resolver, $remesas),
             'detalle' => new ObtenerDetalleRemesa($ambitoCentro, $remesas),

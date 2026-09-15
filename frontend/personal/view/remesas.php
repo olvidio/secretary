@@ -3,7 +3,7 @@
     <h1 id="yo-mes-titulo">Mes</h1>
     <button type="button" id="yo-mes-sig" aria-label="Mes siguiente">›</button>
 </div>
-<p class="muted">Envío mensual al centro. La caja y el banco propios no viajan.</p>
+<p class="muted">Envío mensual al centro. La caja y el banco propios no viajan como movimientos, pero se puede enviar el saldo de tesorería para que el centro actualice el disponible.</p>
 <p id="yo-remesa-msg" class="ok" hidden></p>
 <p id="yo-remesa-err" class="error" hidden></p>
 <section class="yo-remesa-resumen">
@@ -14,6 +14,12 @@
 <p>
     <label>Nota para el centro <input id="yo-remesa-nota" maxlength="200"></label>
 </p>
+<p>
+    <label>Saldo de tu cuenta (caja+banco a la fecha de cierre)
+        <input id="yo-remesa-tesoreria" inputmode="decimal">
+    </label>
+</p>
+<p id="yo-asig" class="ok" hidden></p>
 <p>
     <button type="button" id="yo-remesa-enviar">Cerrar y enviar mes</button>
 </p>

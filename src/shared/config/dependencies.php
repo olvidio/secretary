@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use src\ambito\application\AsegurarCuentaCorrientePersona;
+use src\ambito\application\AsegurarCuentaDisponiblePersona;
 use src\ambito\application\CrearCentro;
 use src\ambito\application\VaciarDatosCentro;
 use src\ambito\application\CrearCuentaFisica;
@@ -211,6 +212,11 @@ return [
     CuentaRepository::class => autowire(PdoCuentaRepository::class),
     AsientoRepository::class => autowire(PdoAsientoRepository::class),
     RemesaRepository::class => autowire(PdoRemesaRepository::class),
+    src\disponible\domain\contracts\SaldoDisponibleRepository::class => autowire(src\disponible\infrastructure\persistence\PdoSaldoDisponibleRepository::class),
+    src\disponible\domain\contracts\AsignacionLaboresRepository::class => autowire(src\disponible\infrastructure\persistence\PdoAsignacionLaboresRepository::class),
+    src\disponible\domain\contracts\TramosDesgravacionRepository::class => autowire(src\disponible\infrastructure\persistence\PdoTramosDesgravacionRepository::class),
+    src\disponible\infrastructure\http\DisponibleController::class => autowire(),
+    AsegurarCuentaDisponiblePersona::class => autowire(),
     Informe613MesRepository::class => autowire(PdoInforme613MesRepository::class),
     TraductorApuntesAAsientos::class => autowire(),
     ProyectorAsientoAFilaExcel::class => autowire(),

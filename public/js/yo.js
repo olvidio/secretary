@@ -722,6 +722,22 @@
       const ace = r.aceptada ? ('; aceptada v' + r.aceptada.version) : '';
       estado.textContent = env + ace + (r.puede_enviar ? '' : (' · ' + (r.motivo || '')));
     }
+    const inpTes = qs('#yo-remesa-tesoreria');
+    if (inpTes && (inpTes.value === '' || inpTes.dataset.auto === '1')) {
+      inpTes.value = r.saldo_tesoreria || '';
+      inpTes.dataset.auto = '1';
+      inpTes.oninput = () => { inpTes.dataset.auto = '0'; };
+    }
+    const asigBox = qs('#yo-asig');
+    if (asigBox) {
+      const a = await api('/api/yo/asignaciones');
+      if (a.ok && a.texto) {
+        asigBox.hidden = false;
+        asigBox.textContent = a.texto;
+      } else {
+        asigBox.hidden = true;
+      }
+    }
     const lineas = r.lineas || [];
     if (vacia) vacia.hidden = lineas.length > 0;
     if (ul) {
@@ -751,9 +767,10 @@
         if (err) err.hidden = true;
         if (msg) msg.hidden = true;
         const nota = (qs('#yo-remesa-nota') || {}).value || '';
+        const tes = (qs('#yo-remesa-tesoreria') || {}).value || '';
         const envio = await api('/api/yo/remesas', {
           method: 'POST',
-          body: { anio: state.anio, mes: state.mes, nota },
+          body: { anio: state.anio, mes: state.mes, nota, saldo_tesoreria: tes },
         });
         if (!envio.ok) {
           if (err) { err.textContent = envio.error || 'No se pudo enviar'; err.hidden = false; }

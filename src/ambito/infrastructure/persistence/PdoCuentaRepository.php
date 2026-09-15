@@ -137,7 +137,19 @@ final class PdoCuentaRepository implements CuentaRepository
     {
         $st = $this->pdo->prepare(
             "SELECT * FROM cuentas WHERE centro_id = :c AND persona_id = :p
-             AND libro = 'P' AND tipo = 'personal' LIMIT 1"
+             AND libro = 'P' AND tipo = 'personal' AND codigo_maestro = '9' LIMIT 1"
+        );
+        $st->execute([':c' => $centroId, ':p' => $personaId]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
+    public function disponibleDe(int $centroId, int $personaId): ?Cuenta
+    {
+        $st = $this->pdo->prepare(
+            "SELECT * FROM cuentas WHERE centro_id = :c AND persona_id = :p
+             AND libro = 'P' AND codigo_maestro = 'DISP' LIMIT 1"
         );
         $st->execute([':c' => $centroId, ':p' => $personaId]);
         $row = $st->fetch();

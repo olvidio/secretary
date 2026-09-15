@@ -20,7 +20,35 @@
     <button type="submit">Guardar</button>
     <p class="ok" id="msg" hidden>Guardado</p>
 </form>
+<section>
+    <h2>Tramos de desgravación</h2>
+    <p class="muted">Se usan al proponer destinos 7. El primer tramo (p. ej. 250 € al 80 %) se reparte entre varias personas antes de subir el importe de una sola.</p>
+    <table id="tabla-tramos">
+        <thead><tr><th>Hasta (€, vacío = resto)</th><th>%</th><th></th></tr></thead>
+        <tbody></tbody>
+    </table>
+    <p>
+        <button type="button" id="btn-add-tramo">Añadir tramo</button>
+        <button type="button" id="btn-save-tramos">Guardar tramos</button>
+    </p>
+    <p class="ok" id="msg-tramos" hidden>Tramos guardados</p>
+</section>
 <script>
+function filaTramo(t = {}) {
+  const tr = document.createElement('tr');
+  const hasta = t.hasta_cents == null ? '' : (Number(t.hasta_cents) / 100).toFixed(2);
+  tr.innerHTML = '<td><input name="hasta" inputmode="decimal" value="' + esc(hasta) + '"></td>'
+    + '<td><input name="pct" type="number" min="0" max="100" required value="' + esc(String(t.porcentaje ?? '')) + '"></td>'
+    + '<td><button type="button" class="btn-quitar">Quitar</button></td>';
+  tr.querySelector('.btn-quitar').onclick = () => tr.remove();
+  return tr;
+}
+async function loadTramos() {
+  const r = await api('/api/desgravacion-tramos');
+  const tb = document.querySelector('#tabla-tramos tbody');
+  tb.innerHTML = '';
+  (r.tramos || []).forEach((t) => tb.appendChild(filaTramo(t)));
+}
 document.addEventListener('DOMContentLoaded', async () => {
   const r = await api('/api/configuracion');
   fillForm(document.getElementById('form-config'), r.config);
@@ -29,6 +57,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     const body = formObj(ev.target);
     const s = await api('/api/configuracion', {method:'POST', body});
     document.getElementById('msg').hidden = !s.ok;
+    if (!s.ok) alert(s.error);
+  });
+  loadTramos();
+  document.getElementById('btn-add-tramo').onclick = () => {
+    document.querySelector('#tabla-tramos tbody').appendChild(filaTramo({ porcentaje: 40 }));
+  };
+  document.getElementById('btn-save-tramos').onclick = async () => {
+    const tramos = [...document.querySelectorAll('#tabla-tramos tbody tr')].map((tr) => {
+      const hasta = tr.querySelector('[name=hasta]').value.trim();
+      const pct = Number(tr.querySelector('[name=pct]').value);
+      let hastaCents = null;
+      if (hasta !== '') {
+        const n = Number(hasta.replace(',', '.'));
+        hastaCents = Math.round(n * 100);
+      }
+      return { hasta_cents: hastaCents, porcentaje: pct };
+    });
+    const s = await api('/api/desgravacion-tramos', { method: 'POST', body: { tramos } });
+    document.getElementById('msg-tramos').hidden = !s.ok;
     if (!s.ok) alert(s.error);
   });
 });

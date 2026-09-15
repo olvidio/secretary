@@ -29,6 +29,7 @@ la pantalla, se pregunta en **Ayuda**.
 | Ver todos los apuntes de un concepto | Por concepto |
 | Consultar la lista de conceptos | Conceptos P / Conceptos G |
 | Recibir el mes que envía una persona | Remesas |
+| Ver y aplicar el disponible a labores 7 | Disponible |
 | Guardar o recuperar una copia de todo | Copias |
 | Preguntar cómo se usa el programa | Ayuda |
 

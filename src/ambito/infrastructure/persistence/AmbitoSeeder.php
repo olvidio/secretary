@@ -434,6 +434,21 @@ final class AmbitoSeeder
                 'imputable' => true,
                 'orden' => 0,
             ]);
+            self::upsertCuenta($pdo, [
+                'centro_id' => $centroId,
+                'persona_id' => (int) $p['id'],
+                'cuenta_fisica_id' => null,
+                'padre_id' => null,
+                'libro' => 'P',
+                'codigo' => 'DISP.' . $iniciales,
+                'nombre' => 'Disponible pendiente de labores de ' . $nombreCompleto,
+                'descripcion' => 'Aparcamiento del sobrante de remesa hasta asignarlo a partidas 7',
+                'tipo' => 'personal',
+                'naturaleza' => 'deudora',
+                'codigo_maestro' => 'DISP',
+                'imputable' => true,
+                'orden' => 1,
+            ]);
         }
     }
 
