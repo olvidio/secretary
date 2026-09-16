@@ -43,6 +43,11 @@ remesa, `RegistrarGastosGeneralesDeRemesa` crea los apuntes G con
 contrapartidas (P/111, P/21, G/11, G/concepto), enlazados con el mismo
 `remesa_id` para poder revertir al sustituir o rechazar.
 
+Los movimientos con **plantilla del centro** (`plantilla_apunte_id` en X) van en
+`detalle_json.plantillas` y no incrementan el importe de la línea P de remesa.
+Al aceptar, `RegistrarPlantillasDeRemesa` expande la plantilla (como en la
+entrada de apuntes del centro) con el mismo `remesa_id`.
+
 `hash_contenido` es SHA-256 del JSON canónico `(codigo, importe)` ordenado más
 la tesorería enviada. Un segundo envío con el mismo hash que la `enviada`
 pendiente no crea versión nueva.

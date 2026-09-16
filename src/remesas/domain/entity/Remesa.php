@@ -6,6 +6,7 @@ namespace src\remesas\domain\entity;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
+use src\disponible\domain\services\SobranteRemesa;
 use src\shared\domain\value_objects\Dinero;
 
 final class Remesa
@@ -82,6 +83,7 @@ final class Remesa
             $total += $linea->importeCents;
             $lineas[] = $linea->toArray();
         }
+        $sobrante = SobranteRemesa::cents($this->lineas);
 
         return [
             'id' => $this->id,
@@ -106,6 +108,9 @@ final class Remesa
             'total_cents' => $total,
             'total' => Dinero::fromCents($total)->toString(),
             'total_es' => Dinero::fromCents($total)->formatEs(),
+            'sobrante_cents' => $sobrante,
+            'sobrante' => Dinero::fromCents($sobrante)->toString(),
+            'sobrante_es' => Dinero::fromCents($sobrante)->formatEs(),
             'lineas' => $lineas,
         ];
     }

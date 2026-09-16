@@ -23,21 +23,239 @@ final class ProyectorAsientoAFilaExcel
         array $cuentasPorId,
         array $personasPorId,
     ): FilaApunteExcel {
+        $filas = $this->proyectarFilas($asiento, $cuentasPorId, $personasPorId);
+        if ($filas === []) {
+            throw new \InvalidArgumentException('El asiento no tiene líneas proyectables a apunte');
+        }
+
+        return $filas[0];
+    }
+
+    /**
+     * @param array<int, Cuenta> $cuentasPorId
+     * @param array<int, Persona> $personasPorId
+     * @return list<FilaApunteExcel>
+     */
+    public function proyectarFilas(
+        Asiento $asiento,
+        array $cuentasPorId,
+        array $personasPorId,
+    ): array {
         if ($asiento->id === null) {
             throw new \InvalidArgumentException('El asiento debe estar persistido para proyectar');
         }
 
-        $movs = $asiento->movimientos;
-        $cuentasMov = [];
-        foreach ($movs as $mov) {
-            $cuenta = $cuentasPorId[$mov->cuentaId] ?? null;
-            if ($cuenta !== null) {
-                $cuentasMov[] = ['mov' => $mov, 'cuenta' => $cuenta];
+        $cuentasMov = $this->cuentasDe($asiento, $cuentasPorId);
+        if ($asiento->tipo === 'asignacion_cc') {
+            return [];
+        }
+        if ($asiento->tipo === 'remesa' || $asiento->origen === 'remesa') {
+            return $this->proyectarFilasRemesa($asiento, $cuentasMov, $personasPorId);
+        }
+        if ($asiento->origen === 'asignacion') {
+            return $this->proyectarFilasAsignacion($asiento, $cuentasMov, $personasPorId);
+        }
+
+        return [$this->proyectarFila($asiento, $cuentasMov, $personasPorId, null)];
+    }
+
+    /**
+     * @param list<array{mov: Movimiento, cuenta: Cuenta}> $cuentasMov
+     * @return list<FilaApunteExcel>
+     */
+    private function proyectarFilasAsignacion(
+        Asiento $asiento,
+        array $cuentasMov,
+        array $personasPorId,
+    ): array {
+        $filas = [];
+        $ingreso111 = null;
+        $total111 = 0;
+        foreach ($cuentasMov as $item) {
+            $tipo = $item['cuenta']->tipo;
+            if ($tipo === 'gasto') {
+                $filas[] = $this->proyectarFila($asiento, $cuentasMov, $personasPorId, $item);
+            } elseif ($tipo === 'ingreso') {
+                $ingreso111 = $item;
+                $total111 += $item['mov']->haberCents - $item['mov']->debeCents;
+            }
+        }
+        if ($ingreso111 !== null && $total111 > 0) {
+            $filas[] = $this->proyectarFilaConCantidad(
+                $asiento,
+                $cuentasMov,
+                $personasPorId,
+                $ingreso111,
+                $total111,
+            );
+        }
+
+        return $filas;
+    }
+
+    /**
+     * @param list<array{mov: Movimiento, cuenta: Cuenta}> $cuentasMov
+     * @return list<FilaApunteExcel>
+     */
+    private function proyectarFilasRemesa(
+        Asiento $asiento,
+        array $cuentasMov,
+        array $personasPorId,
+    ): array {
+        /** @var list<array{item: array{mov: Movimiento, cuenta: Cuenta}, cents: int, codigo: string}> $gastos */
+        $gastos = [];
+        /** @var list<array{item: array{mov: Movimiento, cuenta: Cuenta}, cents: int, codigo: string}> $ingresos */
+        $ingresos = [];
+        $totalGastos = 0;
+        $totalIngresos = 0;
+        foreach ($cuentasMov as $item) {
+            $tipo = $item['cuenta']->tipo;
+            if ($tipo === 'gasto') {
+                $cents = $item['mov']->debeCents - $item['mov']->haberCents;
+                if ($cents === 0) {
+                    continue;
+                }
+                $gastos[] = ['item' => $item, 'cents' => $cents, 'codigo' => $item['cuenta']->codigoMaestro];
+                $totalGastos += $cents;
+            } elseif (in_array($tipo, ['ingreso', 'patrimonio'], true)) {
+                $cents = $item['mov']->haberCents - $item['mov']->debeCents;
+                if ($cents === 0) {
+                    continue;
+                }
+                $ingresos[] = ['item' => $item, 'cents' => $cents, 'codigo' => $item['cuenta']->codigoMaestro];
+                $totalIngresos += $cents;
             }
         }
 
+        if ($gastos === [] && $ingresos === []) {
+            return [];
+        }
+
+        $filas = [];
+        foreach ($gastos as $gasto) {
+            $filas[] = $this->proyectarFila($asiento, $cuentasMov, $personasPorId, $gasto['item']);
+        }
+
+        $exceso = $totalIngresos - $totalGastos;
+        if ($exceso <= 0) {
+            foreach ($ingresos as $ingreso) {
+                $filas[] = $this->proyectarFila($asiento, $cuentasMov, $personasPorId, $ingreso['item']);
+            }
+
+            return $filas;
+        }
+
+        usort($ingresos, static function (array $a, array $b): int {
+            if ($a['codigo'] === '111' && $b['codigo'] !== '111') {
+                return -1;
+            }
+            if ($b['codigo'] === '111' && $a['codigo'] !== '111') {
+                return 1;
+            }
+
+            return $a['codigo'] <=> $b['codigo'];
+        });
+
+        $restante = $totalGastos;
+        foreach ($ingresos as $ingreso) {
+            if ($restante <= 0) {
+                break;
+            }
+            $mostrar = min($ingreso['cents'], $restante);
+            if ($mostrar <= 0) {
+                continue;
+            }
+            $restante -= $mostrar;
+            $filas[] = $this->proyectarFilaConCantidad(
+                $asiento,
+                $cuentasMov,
+                $personasPorId,
+                $ingreso['item'],
+                $mostrar,
+            );
+        }
+
+        $filas[] = $this->proyectarSaldoCcRemesa($asiento, $cuentasMov, $personasPorId, $exceso);
+
+        return $filas;
+    }
+
+    /**
+     * @param list<array{mov: Movimiento, cuenta: Cuenta}> $cuentasMov
+     * @param array{mov: Movimiento, cuenta: Cuenta} $concepto
+     */
+    private function proyectarFilaConCantidad(
+        Asiento $asiento,
+        array $cuentasMov,
+        array $personasPorId,
+        array $concepto,
+        int $cents,
+    ): FilaApunteExcel {
         $origen = $this->deducirOrigen($asiento, $cuentasMov);
-        $concepto = $this->movimientoConcepto($cuentasMov);
+        $iniciales = null;
+        if ($asiento->personaId !== null && isset($personasPorId[$asiento->personaId])) {
+            $iniciales = $personasPorId[$asiento->personaId]->iniciales;
+        }
+
+        return new FilaApunteExcel(
+            $asiento->id,
+            $asiento->fechaOperacion(),
+            $asiento->libro,
+            $origen,
+            $iniciales,
+            $concepto['cuenta']->codigo,
+            $asiento->glosa,
+            Dinero::fromCents($cents),
+            false,
+            $asiento->fecha->format('Y-m-d') !== $asiento->fechaOperacion()->format('Y-m-d')
+                ? $asiento->fecha
+                : null,
+        );
+    }
+
+    /**
+     * @param list<array{mov: Movimiento, cuenta: Cuenta}> $cuentasMov
+     */
+    private function proyectarSaldoCcRemesa(
+        Asiento $asiento,
+        array $cuentasMov,
+        array $personasPorId,
+        int $sobranteCents,
+    ): FilaApunteExcel {
+        $origen = $this->deducirOrigen($asiento, $cuentasMov);
+        $iniciales = null;
+        if ($asiento->personaId !== null && isset($personasPorId[$asiento->personaId])) {
+            $iniciales = $personasPorId[$asiento->personaId]->iniciales;
+        }
+
+        return new FilaApunteExcel(
+            $asiento->id,
+            $asiento->fechaOperacion(),
+            $asiento->libro,
+            $origen,
+            $iniciales,
+            '9',
+            $asiento->glosa,
+            Dinero::fromCents($sobranteCents),
+            false,
+            $asiento->fecha->format('Y-m-d') !== $asiento->fechaOperacion()->format('Y-m-d')
+                ? $asiento->fecha
+                : null,
+        );
+    }
+
+    /**
+     * @param list<array{mov: Movimiento, cuenta: Cuenta}> $cuentasMov
+     * @param array{mov: Movimiento, cuenta: Cuenta}|null $conceptoForzado
+     */
+    private function proyectarFila(
+        Asiento $asiento,
+        array $cuentasMov,
+        array $personasPorId,
+        ?array $conceptoForzado,
+    ): FilaApunteExcel {
+        $origen = $this->deducirOrigen($asiento, $cuentasMov);
+        $concepto = $conceptoForzado ?? $this->movimientoConcepto($cuentasMov);
         $conceptoCodigo = $asiento->conceptoCodigo
             ?? ($concepto !== null ? $concepto['cuenta']->codigo : '');
 

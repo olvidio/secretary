@@ -79,7 +79,13 @@ En `/yo/banco` se elige el banco (hoy **N26**) y se sube el CSV. Cada fila se
 identifica por una huella (fecha, importe, beneficiario, concepto, cuenta); al
 volver a subir el mismo extracto no se duplica. Los movimientos nuevos van a
 BANCO contra **Por categorizar** (`22.pendiente` / `113.pendiente`) hasta que se
-asigna una categoría del plan o **Otra contabilidad**. Al asignar, las
+asigna una categoría del plan, **Otra contabilidad**, **Traspaso a caja**
+(desde caja en un ingreso) o una **plantilla del centro** (p. ej. Club). La
+plantilla deja un solo gasto en X (`asientos.plantilla_apunte_id`); en la remesa
+viaja en `detalle_json.plantillas` sin sumar al total P de la línea; al aceptar,
+`RegistrarPlantillasDeRemesa` crea los apuntes del centro. Al asignar traspaso,
+el asiento pasa a ser caja↔banco sin categoría de ingreso/gasto. Al asignar
+categoría u otra contabilidad, las
 observaciones salen rellenas con el concepto del extracto (se pueden editar o
 borrar). Quedan en la glosa del asiento. Si ya hubo un movimiento parecido
 (mismo beneficiario, p. ej. CAPRABO 7776 y 7851), se preselecciona esa categoría.

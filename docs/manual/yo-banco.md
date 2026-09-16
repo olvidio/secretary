@@ -10,7 +10,7 @@ Permite subir el extracto del banco y convertirlo en movimientos del libro propi
 
 ## Cómo se usa
 
-1. En «Banco», elegir el banco del que viene el fichero.
+1. En «Banco», elegir el banco del que viene el fichero. La elección se recuerda para la próxima vez.
 2. En «Fichero», elegir el extracto descargado: de N26, el CSV; de CaixaBank, el Excel (`.xls` o `.xlsx`) o un CSV.
 3. Pulsar «Importar». Un aviso indica cuántos movimientos son nuevos, cuántos ya estaban y cuántos se omiten.
 4. En «Por categorizar», elegir la categoría en el desplegable de cada línea.
@@ -25,6 +25,8 @@ En N26 el fichero se descarga desde la web: cuenta → Descargas → actividad d
 - Si antes se clasificó algo del mismo comercio, la categoría aparece preseleccionada.
 - La categoría elegida debe ser del mismo signo: un cobro no admite una categoría de gasto.
 - «Otra contabilidad» aparca un movimiento que no es propio: sigue moviendo el banco, para que el saldo cuadre con el extracto, pero no suma en ingresos ni gastos ni viaja al centro. Después se le puede poner una categoría normal.
+- «Traspaso a caja» (o «Traspaso desde caja» en un ingreso) convierte la línea en un traspaso entre banco y caja: no es ingreso ni gasto del plan, solo mueve efectivo entre tus dos tesorerías.
+- Debajo aparecen las **plantillas del centro** (p. ej. «Club»): en tu libro personal queda una sola salida; al aceptar la remesa, el centro ejecuta la plantilla completa (P y G).
 - El fichero no puede pasar de 2 MB.
 
 ## Problemas frecuentes

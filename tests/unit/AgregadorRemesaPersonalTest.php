@@ -92,4 +92,21 @@ final class AgregadorRemesaPersonalTest extends TestCase
         self::assertCount(1, $lineas[0]->detalle);
         self::assertSame([['concepto' => '204', 'cents' => 4000]], $lineas[0]->detalle[0]['generales'] ?? []);
     }
+
+    public function testPlantillaNoSumaEnImportePeroViajaEnDetalle(): void
+    {
+        $vivienda = new Cuenta(31, 1, 9, null, null, 'X', '21', 'Vivienda', '', 'gasto', 'deudora', '21', true);
+        $banco = new Cuenta(51, 1, 9, null, null, 'X', 'BANCO', 'Banco', '', 'tesoreria', 'deudora', 'BANCO', true);
+        $cuentas = [31 => $vivienda, 51 => $banco];
+        $lineas = AgregadorRemesaPersonal::agregar([
+            new Asiento(1, 1, 'X', 1, new DateTimeImmutable('2026-03-01'), 'Club', 'normal', 'banco', 9, [
+                new Movimiento(1, 1, 31, 9, 2500, 0),
+                new Movimiento(2, 2, 51, 9, 0, 2500),
+            ], '21', null, null, null, false, null, 7),
+        ], $cuentas);
+        self::assertCount(1, $lineas);
+        self::assertSame('21', $lineas[0]->codigoMaestro);
+        self::assertSame(0, $lineas[0]->importeCents);
+        self::assertSame([['plantilla_id' => 7, 'cents' => 2500]], $lineas[0]->detalle[0]['plantillas'] ?? []);
+    }
 }

@@ -31,6 +31,8 @@ interface PersonaRepository
 
     public function borrar(int $id): void;
 
+    public function desactivar(int $id): void;
+
     public function borrarTodos(): void;
 
     /**

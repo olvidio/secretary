@@ -14,6 +14,7 @@ use src\acceso\infrastructure\persistence\AccesoSeeder;
 use src\acceso\infrastructure\persistence\PdoIdentidadRepository;
 use src\personal\application\AsegurarPlanPersonal;
 use src\personal\application\DesdoblarMovimientoPersonal;
+use src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository;
 use src\personal\application\ListarMovimientosPersonales;
 use src\personal\application\RegistrarMovimientoPersonal;
 use src\personal\application\ResolverPersonaActual;
@@ -85,7 +86,17 @@ final class DesdoblarMovimientoTest extends TestCase
         self::assertNotNull($pendiente?->id);
         self::assertNotNull($cat22?->id);
 
-        $registrar = new RegistrarMovimientoPersonal($resolver, $cuentas, $ejercicios, $asientos, $personas);
+        $registrar = new RegistrarMovimientoPersonal(
+            $resolver,
+            $cuentas,
+            $ejercicios,
+            $asientos,
+            $personas,
+            new \src\personal\domain\services\ResolverCategoriaPlantillaPersonal(
+                new PdoPlantillaApunteRepository($pdo),
+                $cuentas,
+            ),
+        );
         $guardado = $registrar->ejecutar([
             'sentido' => 'gasto',
             'fecha' => $fecha,
@@ -112,7 +123,7 @@ final class DesdoblarMovimientoTest extends TestCase
         ]);
         self::assertCount(2, $partidos);
 
-        $movs = (new ListarMovimientosPersonales($resolver, $asientos, $cuentas))
+        $movs = (new ListarMovimientosPersonales($resolver, $asientos, $cuentas, new PdoPlantillaApunteRepository($pdo)))
             ->ejecutar($anio . '-08-01', $anio . '-08-31');
         self::assertCount(2, $movs);
         $importes = array_map(static fn (array $m): float => (float) $m['cantidad'], $movs);

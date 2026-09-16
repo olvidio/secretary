@@ -16,7 +16,11 @@ use src\personal\application\AsegurarPlanPersonal;
 use src\personal\application\CategorizarMovimientoBanco;
 use src\personal\application\ImportarCsvBanco;
 use src\personal\application\ListarPendientesBanco;
+use src\personal\application\PreferenciaBancoPersonal;
 use src\personal\application\ResolverPersonaActual;
+use src\personal\domain\services\ResolverCategoriaPlantillaPersonal;
+use src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository;
+use src\personal\infrastructure\persistence\PdoPersonalBancoRepository;
 use src\personal\infrastructure\persistence\PdoBancoImportRepository;
 use src\personas\domain\entity\Persona;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
@@ -88,6 +92,15 @@ final class BancoCsvTest extends TestCase
             $id->id,
             $persona->id,
         );
+        $prefBanco = new PreferenciaBancoPersonal($resolver, new PdoPersonalBancoRepository($pdo));
+        $prefBanco->guardar('caixabank');
+        self::assertSame('caixabank', $prefBanco->leer());
+        $categorizar = new CategorizarMovimientoBanco(
+            $resolver,
+            $asientos,
+            $cuentas,
+            new ResolverCategoriaPlantillaPersonal(new PdoPlantillaApunteRepository($pdo), $cuentas),
+        );
         $importar = new ImportarCsvBanco(
             $pdo,
             $resolver,
@@ -121,7 +134,7 @@ final class BancoCsvTest extends TestCase
         self::assertNotNull($gasto);
         $cat22 = $cuentas->buscar($centroId, $persona->id, 'X', '22');
         self::assertNotNull($cat22?->id);
-        (new CategorizarMovimientoBanco($resolver, $asientos, $cuentas))
+        $categorizar
             ->ejecutar((int) $gasto['asiento_id'], $cat22->id, 'Compra del sábado');
         $asientoGasto = $asientos->porId((int) $gasto['asiento_id']);
         self::assertNotNull($asientoGasto);
@@ -133,14 +146,14 @@ final class BancoCsvTest extends TestCase
         $otraIng = $cuentas->buscar($centroId, $persona->id, 'X', AsegurarPlanPersonal::CODIGO_OTRA_INGRESO);
         self::assertNotNull($otraIng?->id);
         $listar = new ListarPendientesBanco($resolver, $filas, $plan);
-        (new CategorizarMovimientoBanco($resolver, $asientos, $cuentas))
+        $categorizar
             ->ejecutar((int) $ingresoPend['asiento_id'], $otraIng->id);
         self::assertCount(0, $listar->ejecutar());
         $enOtra = $listar->otras();
         self::assertCount(1, $enOtra);
         $cat111 = $cuentas->buscar($centroId, $persona->id, 'X', '111');
         self::assertNotNull($cat111?->id);
-        (new CategorizarMovimientoBanco($resolver, $asientos, $cuentas))
+        $categorizar
             ->ejecutar((int) $enOtra[0]['asiento_id'], $cat111->id);
         self::assertCount(0, $listar->otras());
 
@@ -150,11 +163,36 @@ final class BancoCsvTest extends TestCase
         $importar->ejecutar('n26', $csvCaprabo);
         $cap = $listar->ejecutar();
         self::assertCount(2, $cap);
-        (new CategorizarMovimientoBanco($resolver, $asientos, $cuentas))
+        $categorizar
             ->ejecutar((int) $cap[0]['asiento_id'], $cat22->id);
         $resto = $listar->ejecutar();
         self::assertCount(1, $resto);
         self::assertSame($cat22->id, $resto[0]['sugerida_id']);
         self::assertSame('gasto', $resto[0]['sentido']);
+
+        $categorizar
+            ->ejecutar((int) $resto[0]['asiento_id'], $cat22->id);
+        $csvCajero = "Date,Payee,Account number,Transaction type,Payment reference,Amount (EUR)\n"
+            . $anio . "-09-01,CAJERO,DE00,ATM,,-50.00\n";
+        $importar->ejecutar('n26', $csvCajero);
+        $cajero = $listar->ejecutar();
+        self::assertCount(1, $cajero);
+        $categorizar
+            ->traspasoACaja((int) $cajero[0]['asiento_id'], 'Sacar efectivo');
+        self::assertCount(0, $listar->ejecutar());
+        $asientoTraspaso = $asientos->porId((int) $cajero[0]['asiento_id']);
+        self::assertNotNull($asientoTraspaso);
+        self::assertSame('traspaso', $asientoTraspaso->tipo);
+        self::assertSame('Sacar efectivo', $asientoTraspaso->glosa);
+        $caja = $cuentas->buscar($centroId, $persona->id, 'X', 'CAJA');
+        $banco = $cuentas->buscar($centroId, $persona->id, 'X', 'BANCO');
+        self::assertNotNull($caja?->id);
+        self::assertNotNull($banco?->id);
+        $porCuenta = [];
+        foreach ($asientoTraspaso->movimientos as $mov) {
+            $porCuenta[$mov->cuentaId] = $mov;
+        }
+        self::assertSame(5000, $porCuenta[$caja->id]->debeCents - $porCuenta[$caja->id]->haberCents);
+        self::assertSame(-5000, $porCuenta[$banco->id]->debeCents - $porCuenta[$banco->id]->haberCents);
     }
 }

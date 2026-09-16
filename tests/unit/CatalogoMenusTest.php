@@ -48,7 +48,7 @@ final class CatalogoMenusTest extends TestCase
     {
         $ids = array_column(CatalogoMenus::grupos('burger'), 'id');
         self::assertSame(
-            ['parametros', 'presupuestos', 'entradas', 'resumenes', 'plan-contable', 'ayuda'],
+            ['parametros', 'presupuestos', 'movimientos', 'resumenes', 'plan-contable', 'ayuda'],
             $ids
         );
     }

@@ -27,6 +27,7 @@
     <button type="button" id="btn-nuevo">Nuevo</button>
 </form>
 <p class="ok" id="msg-password" hidden></p>
+<p class="ok" id="msg-personas" hidden></p>
 <?php include __DIR__ . '/_solicitudes_vinculo.php'; ?>
 <table id="tabla-personas">
     <thead>
@@ -58,8 +59,16 @@ async function loadPersonas() {
       form.querySelector('[name=puede_desgravar]').value = p.puede_desgravar ? '1' : '0';
     };
     tr.querySelector('[data-del]').onclick = async () => {
-      if (!confirm('¿Borrar ' + p.iniciales + '?')) return;
-      await api('/api/personas/' + p.id, {method:'DELETE'});
+      if (!confirm('¿Quitar ' + p.iniciales + ' del listado?')) return;
+      const s = await api('/api/personas/' + p.id, {method:'DELETE'});
+      if (!s.ok) return alert(s.error || 'Error');
+      const msg = document.getElementById('msg-personas');
+      if (s.mensaje) {
+        msg.hidden = false;
+        msg.textContent = s.mensaje;
+      } else {
+        msg.hidden = true;
+      }
       loadPersonas();
     };
     tb.appendChild(tr);

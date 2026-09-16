@@ -26,6 +26,7 @@ use src\personal\infrastructure\http\CopiaPersonalController;
 use src\personal\infrastructure\http\PersonalController;
 use src\remesas\infrastructure\http\RemesaController;
 use src\disponible\infrastructure\http\DisponibleController;
+use src\envio_dl\infrastructure\http\EnvioDlController;
 use src\shared\infrastructure\http\CopiaSeguridadController;
 
 return static function (RouteCollector $r): void {
@@ -93,6 +94,7 @@ return static function (RouteCollector $r): void {
 
     $r->addRoute('GET', '/api/cierre', [CierreController::class, 'preview']);
     $r->addRoute('POST', '/api/cierre', [CierreController::class, 'run']);
+    $r->addRoute('POST', '/api/cierre/regularizar', [CierreController::class, 'regularizar']);
 
     $r->addRoute('GET', '/api/informes/613/{cuenta:P|G}', [InformeController::class, 'resumen613']);
     $r->addRoute('POST', '/api/informes/613/{cuenta:P|G}/manual', [InformeController::class, 'guardarManual613']);
@@ -144,6 +146,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/yo/cierre/mes', [PersonalController::class, 'guardarCierreMes']);
     $r->addRoute('POST', '/api/yo/cierre/mes/borrar', [PersonalController::class, 'borrarCierreMes']);
     $r->addRoute('GET', '/api/yo/banco/bancos', [BancoPersonalController::class, 'bancos']);
+    $r->addRoute('POST', '/api/yo/banco/preferencia', [BancoPersonalController::class, 'guardarPreferencia']);
     $r->addRoute('GET', '/api/yo/banco/pendientes', [BancoPersonalController::class, 'pendientes']);
     $r->addRoute('POST', '/api/yo/banco/csv', [BancoPersonalController::class, 'importar']);
     $r->addRoute('POST', '/api/yo/banco/categorizar', [BancoPersonalController::class, 'categorizar']);
@@ -168,6 +171,9 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/desgravacion-tramos', [DisponibleController::class, 'tramos']);
     $r->addRoute('POST', '/api/desgravacion-tramos', [DisponibleController::class, 'guardarTramos']);
     $r->addRoute('GET', '/api/yo/asignaciones', [DisponibleController::class, 'yoAsignaciones']);
+
+    $r->addRoute('POST', '/api/envio-dl/proponer', [EnvioDlController::class, 'proponer']);
+    $r->addRoute('POST', '/api/envio-dl/{id:\d+}/confirmar', [EnvioDlController::class, 'confirmar']);
 
     $r->addRoute('GET', '/api/ayuda/temas', [AyudaController::class, 'listarTemas']);
     $r->addRoute('POST', '/api/ayuda/preguntar', [AyudaController::class, 'preguntar']);

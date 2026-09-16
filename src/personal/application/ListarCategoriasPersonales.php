@@ -12,11 +12,16 @@ final class ListarCategoriasPersonales
         private readonly ResolverPersonaActual $ambito,
         private readonly CuentaRepository $cuentas,
         private readonly AsegurarPlanPersonal $asegurar,
+        private readonly ListarPlantillasCentroPersonal $plantillasCentro,
     ) {
     }
 
     /**
-     * @return array{categorias: list<array<string, mixed>>, tesoreria: list<array<string, mixed>>}
+     * @return array{
+     *     categorias: list<array<string, mixed>>,
+     *     tesoreria: list<array<string, mixed>>,
+     *     plantillas: list<array<string, mixed>>
+     * }
      */
     public function ejecutar(): array
     {
@@ -44,6 +49,10 @@ final class ListarCategoriasPersonales
             }
         }
 
-        return ['categorias' => $categorias, 'tesoreria' => $tesoreria];
+        return [
+            'categorias' => $categorias,
+            'tesoreria' => $tesoreria,
+            'plantillas' => $this->plantillasCentro->ejecutar(),
+        ];
     }
 }

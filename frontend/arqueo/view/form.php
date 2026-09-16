@@ -26,7 +26,8 @@
         <button type="button" id="btn-capuchinos" class="arqueo-capuchinos-btn" hidden>Buscar capuchinos</button>
         <span class="arqueo-total-detalle" id="total-detalle"></span>
     </p>
-    <button type="submit">Guardar arqueo</button>
+    <button type="submit" id="btn-guardar-arqueo">Guardar arqueo</button>
+    <p id="arqueo-msg" class="ok print-hide" hidden aria-live="polite"></p>
 </form>
 <div id="capuchinos-res" class="arqueo-capuchinos" hidden></div>
 <script>
@@ -194,6 +195,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   form.onsubmit = async (ev) => {
     ev.preventDefault();
+    const btn = document.getElementById('btn-guardar-arqueo');
+    const msg = document.getElementById('arqueo-msg');
+    if (btn) btn.disabled = true;
+    if (msg) msg.hidden = true;
     const fd = formObj(ev.target);
     const desglose = {
       billetes: BILS.map((_,i) => fd['b'+i] || 0),
@@ -204,7 +209,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const body = {fecha: fd.fecha, desglose};
     if (fisicaId) body.cuenta_fisica_id = fisicaId;
     const s = await api('/api/arqueos/' + CUENTA, {method:'POST', body});
-    if (!s.ok) return alert(s.error);
+    if (btn) btn.disabled = false;
+    if (!s.ok) return alert(s.error || 'No se pudo guardar el arqueo');
+    if (msg) {
+      const total = s.arqueo?.total_es || s.arqueo?.total || '';
+      msg.textContent = total
+        ? 'Arqueo guardado (' + total + ' €).'
+        : 'Arqueo guardado.';
+      msg.hidden = false;
+    }
     mostrarTotal(form);
   };
 });

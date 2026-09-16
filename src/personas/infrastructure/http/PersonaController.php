@@ -6,9 +6,9 @@ namespace src\personas\infrastructure\http;
 
 use InvalidArgumentException;
 use src\ambito\application\ResolverAmbitoActual;
+use src\personas\application\BorrarPersona;
 use src\personas\application\GuardarPersona;
 use src\personas\application\ListarPersonas;
-use src\personas\domain\contracts\PersonaRepository;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
@@ -18,7 +18,7 @@ final class PersonaController
     public function __construct(
         private readonly ListarPersonas $listar,
         private readonly GuardarPersona $guardar,
-        private readonly PersonaRepository $repo,
+        private readonly BorrarPersona $borrar,
         private readonly ResolverAmbitoActual $ambito,
     ) {
     }
@@ -51,14 +51,13 @@ final class PersonaController
 
     public function delete(Request $request, array $vars): Response
     {
-        $id = (int) $vars['id'];
-        $persona = $this->repo->porId($id);
-        $centroId = $this->ambito->ejecutar()->centroId;
-        if ($persona === null || $persona->centroId !== $centroId) {
-            return ContestarJson::error('Persona no encontrada en este centro', 404);
-        }
-        $this->repo->borrar($id);
+        try {
+            $centroId = $this->ambito->ejecutar()->centroId;
+            $resultado = $this->borrar->ejecutar((int) $vars['id'], $centroId);
 
-        return ContestarJson::ok();
+            return ContestarJson::ok($resultado);
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage(), 404);
+        }
     }
 }

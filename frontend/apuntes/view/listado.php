@@ -5,7 +5,7 @@
 <form id="filtros" class="filters">
     <select name="cuenta"><option value="">P y G</option><option>P</option><option>G</option></select>
     <select name="origen"><option value="">A/B/C</option><option>A</option><option>B</option><option>C</option></select>
-    <input name="iniciales" placeholder="Iniciales">
+    <select name="iniciales"><option value="">Iniciales</option></select>
     <input name="concepto" placeholder="Concepto">
     <input type="date" name="desde">
     <input type="date" name="hasta">
@@ -369,8 +369,21 @@ async function loadApuntes() {
     + (okTotal ? ' (cuadrado).' : ' · ' + nFail + ' fecha(s) sin cuadrar.');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+async function cargarPersonasFiltro(form) {
+  const sel = form.querySelector('[name=iniciales]');
+  const r = await api('/api/personas');
+  if (!r.ok) return alert(r.error || 'Error');
+  (r.personas || []).forEach((p) => {
+    const o = document.createElement('option');
+    o.value = p.iniciales;
+    o.textContent = (p.nombre_completo || p.nombre || p.iniciales) + ' (' + p.iniciales + ')';
+    sel.appendChild(o);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('filtros');
+  await cargarPersonasFiltro(form);
   aplicarFiltrosUrl(form);
   mostrarVolver();
   form.onsubmit = (ev) => {

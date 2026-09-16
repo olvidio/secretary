@@ -57,7 +57,15 @@ final class ObtenerE37
             $filas[] = $fila;
         }
 
-        return ['config' => $cfg->toArray(), 'filas' => $filas];
+        $aviso = null;
+        foreach ($filas as $fila) {
+            if (Dinero::fromInput((string) ($fila['saldo_cc'] ?? '0'))->isNegative()) {
+                $aviso = CalculadoraE37::avisoSaldoCcNegativo();
+                break;
+            }
+        }
+
+        return ['config' => $cfg->toArray(), 'filas' => $filas, 'aviso_saldo_cc' => $aviso];
     }
 
     /** @return array<string, mixed> */
@@ -97,11 +105,16 @@ final class ObtenerE37
             }
 
             $p = $this->personas->porInicialesDeCentro($contexto->centroId, $iniciales);
+            $aviso = null;
+            if (Dinero::fromInput((string) ($totArr['saldo_cc'] ?? '0'))->isNegative()) {
+                $aviso = CalculadoraE37::avisoSaldoCcNegativo();
+            }
             $out = [
                 'config' => $cfg->toArray(),
                 'iniciales' => $iniciales,
                 'apuntes' => $apuntes,
                 'totales' => $totArr,
+                'aviso_saldo_cc' => $aviso,
                 'persona' => $p !== null
                     ? ['iniciales' => $p->iniciales, 'nombre' => $p->nombreCompleto()]
                     : ['iniciales' => $iniciales, 'nombre' => $iniciales],

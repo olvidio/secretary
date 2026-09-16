@@ -9,7 +9,13 @@ use src\shared\domain\value_objects\Dinero;
 final class RemesaLinea
 {
     /**
-     * @param list<array{codigo:string,nombre:string,cents:int}> $detalle
+     * @param list<array{
+     *     codigo:string,
+     *     nombre:string,
+     *     cents:int,
+     *     generales?:list<array{concepto:string,cents:int}>,
+     *     plantillas?:list<array{plantilla_id:int,cents:int,nombre?:string}>
+     * }> $detalle
      */
     public function __construct(
         public readonly ?int $id,
@@ -35,6 +41,9 @@ final class RemesaLinea
             if (!empty($item['generales']) && is_array($item['generales'])) {
                 $generales = [];
                 foreach ($item['generales'] as $gen) {
+                    if (!is_array($gen)) {
+                        continue;
+                    }
                     $cents = (int) ($gen['cents'] ?? 0);
                     $generales[] = [
                         'concepto' => (string) ($gen['concepto'] ?? ''),
@@ -42,7 +51,30 @@ final class RemesaLinea
                         'importe_es' => Dinero::fromCents(abs($cents))->formatEs(),
                     ];
                 }
-                $fila['generales'] = $generales;
+                if ($generales !== []) {
+                    $fila['generales'] = $generales;
+                }
+            }
+            if (!empty($item['plantillas']) && is_array($item['plantillas'])) {
+                $plantillas = [];
+                foreach ($item['plantillas'] as $pl) {
+                    if (!is_array($pl)) {
+                        continue;
+                    }
+                    $cents = (int) ($pl['cents'] ?? 0);
+                    $entry = [
+                        'plantilla_id' => (int) ($pl['plantilla_id'] ?? 0),
+                        'cents' => $cents,
+                        'importe_es' => Dinero::fromCents(abs($cents))->formatEs(),
+                    ];
+                    if (!empty($pl['nombre'])) {
+                        $entry['nombre'] = (string) $pl['nombre'];
+                    }
+                    $plantillas[] = $entry;
+                }
+                if ($plantillas !== []) {
+                    $fila['plantillas'] = $plantillas;
+                }
             }
             $detalle[] = $fila;
         }

@@ -29,6 +29,7 @@ final class AceptarRemesa
         private readonly PersonaRepository $personas,
         private readonly ResolverPeriodoPersonal $periodoPersonal,
         private readonly RegistrarGastosGeneralesDeRemesa $gastosGenerales,
+        private readonly RegistrarPlantillasDeRemesa $plantillasDeRemesa,
         private readonly AplicarDisponibleDeRemesa $disponible,
     ) {
     }
@@ -74,6 +75,7 @@ final class AceptarRemesa
         $sustituir = self::boolFlag($datos['sustituir_disponible'] ?? false);
 
         $generales = $this->gastosGenerales;
+        $plantillas = $this->plantillasDeRemesa;
         $this->remesas->enTransaccion(function () use (
             $remesa,
             $previa,
@@ -83,6 +85,7 @@ final class AceptarRemesa
             $cc,
             $lineasAsiento,
             $generales,
+            $plantillas,
             $sustituir,
         ): void {
             if ($previa !== null && $previa->id !== null && $previa->id !== $remesa->id) {
@@ -105,6 +108,7 @@ final class AceptarRemesa
                 $this->asientos->guardar($asiento);
             }
             $generales->ejecutar($remesa, $fecha, (int) $remesa->id);
+            $plantillas->ejecutar($remesa, $fecha, (int) $remesa->id);
             $this->disponible->ejecutar(
                 $remesa,
                 $fecha,

@@ -6,13 +6,14 @@ namespace src\disponible\application;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
-use src\ambito\application\AsegurarCuentaDisponiblePersona;
+use src\ambito\application\AsegurarCuentaCorrientePersona;
 use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\domain\contracts\CuentaRepository;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\disponible\domain\contracts\AsignacionLaboresRepository;
 use src\disponible\domain\contracts\SaldoDisponibleRepository;
 use src\disponible\domain\services\ConstructorAsientoAsignacion;
+use src\disponible\domain\services\ConstructorAsientoLiquidacionCc;
 use src\personas\domain\contracts\PersonaRepository;
 use src\remesas\domain\contracts\RemesaRepository;
 use src\shared\domain\value_objects\Dinero;
@@ -26,7 +27,7 @@ final class ConfirmarAsignacionLabores
         private readonly CuentaRepository $cuentas,
         private readonly AsientoRepository $asientos,
         private readonly PersonaRepository $personas,
-        private readonly AsegurarCuentaDisponiblePersona $asegurarDisp,
+        private readonly AsegurarCuentaCorrientePersona $asegurarCc,
         private readonly RemesaRepository $remesas,
     ) {
     }
@@ -53,10 +54,14 @@ final class ConfirmarAsignacionLabores
                 if ($persona === null) {
                     continue;
                 }
-                $this->asegurarDisp->ejecutar($persona);
-                $disp = $this->cuentas->disponibleDe($ctx->centroId, $personaId);
-                if ($disp === null || $disp->id === null) {
-                    throw new InvalidArgumentException('Falta la cuenta DISP de ' . $persona->iniciales);
+                $this->asegurarCc->ejecutar($persona);
+                $cc = $this->cuentas->personalDe($ctx->centroId, $personaId);
+                if ($cc === null || $cc->id === null) {
+                    throw new InvalidArgumentException('Falta la cuenta CC de ' . $persona->iniciales);
+                }
+                $cuenta111 = $this->cuentas->buscar($ctx->centroId, null, 'P', '111');
+                if ($cuenta111 === null || $cuenta111->id === null) {
+                    throw new InvalidArgumentException('Falta la cuenta 111 en el plan P del centro');
                 }
                 $lineasAsiento = [];
                 $total = 0;
@@ -69,21 +74,31 @@ final class ConfirmarAsignacionLabores
                     $lineasAsiento[] = ['cuenta_id' => $cuenta->id, 'importe_cents' => $cents];
                     $total += $cents;
                 }
-                $glosa = sprintf(
-                    'Asignación labores %s %s',
-                    strtoupper($persona->iniciales),
-                    $fecha->format('Y-m-d'),
-                );
-                $asiento = ConstructorAsientoAsignacion::construir(
+                $iniciales = strtoupper($persona->iniciales);
+                $glosaLabores = sprintf('Asignación labores %s %s', $iniciales, $fecha->format('Y-m-d'));
+                $asientoLabores = ConstructorAsientoAsignacion::construir(
                     $ctx->ejercicioId,
                     $personaId,
                     $fecha,
-                    (int) $disp->id,
+                    (int) $cuenta111->id,
                     $lineasAsiento,
-                    $glosa,
+                    $glosaLabores,
                 );
-                if ($asiento !== null) {
-                    $this->asientos->guardar($asiento);
+                if ($asientoLabores !== null) {
+                    $this->asientos->guardar($asientoLabores);
+                }
+                $glosaCc = sprintf('Liquidación saldo CC %s %s', $iniciales, $fecha->format('Y-m-d'));
+                $asientoCc = ConstructorAsientoLiquidacionCc::construir(
+                    $ctx->ejercicioId,
+                    $personaId,
+                    $fecha,
+                    (int) $cuenta111->id,
+                    (int) $cc->id,
+                    $total,
+                    $glosaCc,
+                );
+                if ($asientoCc !== null) {
+                    $this->asientos->guardar($asientoCc);
                 }
                 if ($total !== 0) {
                     $this->saldos->aplicar(

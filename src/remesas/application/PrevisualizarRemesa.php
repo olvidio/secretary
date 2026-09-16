@@ -19,6 +19,7 @@ final class PrevisualizarRemesa
         private readonly RemesaRepository $remesas,
         private readonly PersonaRepository $personas,
         private readonly ResolverPeriodoPersonal $periodoPersonal,
+        private readonly EnriquecerLineasRemesa $enriquecerLineas,
     ) {
     }
 
@@ -49,7 +50,10 @@ final class PrevisualizarRemesa
             'ejercicio_abierto' => $abierto,
             'persona' => $persona?->nombreCompleto(),
             'iniciales' => $persona?->iniciales,
-            'lineas' => $this->lineasConNombre($lineas),
+            'lineas' => $this->enriquecerLineas->ejecutar(
+                $ctx->centroId,
+                $this->lineasConNombre($lineas),
+            ),
             'vacia' => $lineas === [],
             'saldo_tesoreria_cents' => $datos['tesoreria_cents'],
             'saldo_tesoreria' => Dinero::fromCents($datos['tesoreria_cents'])->toString(),

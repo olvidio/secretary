@@ -1,7 +1,7 @@
 # Fecha de cierre
 
 - Ruta: `/fecha-cierre`
-- Menú: Utilidades → Fecha cierre
+- Menú: Resúmenes → Fecha cierre
 - Quién: secretario del centro
 
 ## Para qué sirve

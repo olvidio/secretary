@@ -18,16 +18,17 @@ final class DiffRemesa
     {
         $mapA = [];
         foreach ($anterior as $linea) {
-            $mapA[$linea->codigoMaestro] = $linea->importeCents;
+            $mapA[(string) $linea->codigoMaestro] = $linea->importeCents;
         }
         $mapB = [];
         foreach ($actual as $linea) {
-            $mapB[$linea->codigoMaestro] = $linea->importeCents;
+            $mapB[(string) $linea->codigoMaestro] = $linea->importeCents;
         }
         $codigos = array_values(array_unique(array_merge(array_keys($mapA), array_keys($mapB))));
         sort($codigos, SORT_STRING);
         $out = [];
         foreach ($codigos as $codigo) {
+            $codigo = (string) $codigo;
             $prev = $mapA[$codigo] ?? 0;
             $now = $mapB[$codigo] ?? 0;
             if ($prev === $now) {

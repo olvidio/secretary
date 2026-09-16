@@ -42,4 +42,11 @@ final class CalculadoraE37Test extends TestCase
             'at_lab', 'nec_sede', 'lab_ap', 'saldo_final', 'saldo_cc',
         ], $claves);
     }
+
+    public function testAvisoSaldoCcNegativoExplicaElRetraso(): void
+    {
+        $t = CalculadoraE37::avisoSaldoCcNegativo();
+        self::assertStringContainsString('negativo', $t);
+        self::assertStringContainsString('mes siguiente', $t);
+    }
 }

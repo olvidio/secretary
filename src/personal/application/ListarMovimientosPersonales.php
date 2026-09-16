@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace src\personal\application;
 
 use src\ambito\domain\contracts\CuentaRepository;
+use src\ambito\domain\entity\Cuenta;
+use src\apuntes\domain\contracts\PlantillaApunteRepository;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\asientos\domain\entity\Asiento;
 use src\shared\domain\value_objects\Dinero;
@@ -15,6 +17,7 @@ final class ListarMovimientosPersonales
         private readonly ResolverPersonaActual $ambito,
         private readonly AsientoRepository $asientos,
         private readonly CuentaRepository $cuentas,
+        private readonly PlantillaApunteRepository $plantillas,
     ) {
     }
 
@@ -32,17 +35,30 @@ final class ListarMovimientosPersonales
             $filtros['hasta'] = $hasta;
         }
         $nombres = [];
+        $porCodigo = [];
         foreach ($this->cuentas->listarDePersona($ctx->centroId, $ctx->personaId, 'X') as $c) {
             if ($c->id !== null) {
                 $nombres[$c->id] = $c;
+                $porCodigo[$c->codigo] = $c;
             }
         }
-        $out = [];
+        $codigoPorId = [];
+        foreach ($this->cuentas->listarDeCentro($ctx->centroId) as $c) {
+            if ($c->id !== null) {
+                $codigoPorId[$c->id] = $c->codigo;
+            }
+        }
+        $asientos = [];
         foreach ($this->asientos->listar($ctx->ejercicioId, $filtros) as $asiento) {
             if ($asiento->tipo === 'periodificacion') {
                 continue;
             }
-            $out[] = $this->fila($asiento, $nombres);
+            $asientos[] = $asiento;
+        }
+        $nombresPlantilla = $this->nombresPlantilla($ctx->centroId, $asientos);
+        $out = [];
+        foreach ($asientos as $asiento) {
+            $out[] = $this->fila($asiento, $nombres, $porCodigo, $codigoPorId, $nombresPlantilla);
         }
 
         return $out;
@@ -50,16 +66,24 @@ final class ListarMovimientosPersonales
 
     /**
      * @param array<int, \src\ambito\domain\entity\Cuenta> $nombres
+     * @param array<string, \src\ambito\domain\entity\Cuenta> $porCodigo
+     * @param array<int, string> $codigoPorId
+     * @param array<int, string> $nombresPlantilla
      * @return array<string, mixed>
      */
-    private function fila(Asiento $asiento, array $nombres): array
-    {
+    private function fila(
+        Asiento $asiento,
+        array $nombres,
+        array $porCodigo,
+        array $codigoPorId,
+        array $nombresPlantilla,
+    ): array {
         $categoria = null;
         $tesoreria = null;
         $tesoreriaOrigen = null;
         $tesoreriaDestino = null;
         foreach ($asiento->movimientos as $mov) {
-            $cuenta = $nombres[$mov->cuentaId] ?? null;
+            $cuenta = $this->resolverCuenta($mov->cuentaId, $nombres, $porCodigo, $codigoPorId);
             if ($cuenta === null) {
                 continue;
             }
@@ -81,7 +105,7 @@ final class ListarMovimientosPersonales
         }
         $cents = 0;
         foreach ($asiento->movimientos as $mov) {
-            $cuenta = $nombres[$mov->cuentaId] ?? null;
+            $cuenta = $this->resolverCuenta($mov->cuentaId, $nombres, $porCodigo, $codigoPorId);
             if ($cuenta !== null && $cuenta->tipo === 'tesoreria') {
                 $cents = $mov->debeCents - $mov->haberCents;
                 break;
@@ -89,13 +113,24 @@ final class ListarMovimientosPersonales
         }
         if ($cents === 0 && $categoria !== null) {
             foreach ($asiento->movimientos as $mov) {
-                if ($mov->cuentaId === $categoria->id) {
+                $cuenta = $this->resolverCuenta($mov->cuentaId, $nombres, $porCodigo, $codigoPorId);
+                if ($cuenta !== null && $cuenta->id === $categoria->id) {
                     $cents = $mov->haberCents - $mov->debeCents;
                     break;
                 }
             }
         }
-        $sentido = $asiento->tipo === 'traspaso' ? 'traspaso' : ($cents >= 0 ? 'ingreso' : 'gasto');
+        if ($asiento->tipo === 'traspaso') {
+            $sentido = 'traspaso';
+        } elseif ($cents === 0 && $categoria !== null) {
+            $sentido = $categoria->tipo === 'gasto' ? 'gasto' : 'ingreso';
+        } else {
+            $sentido = $cents >= 0 ? 'ingreso' : 'gasto';
+        }
+
+        $plantillaId = $asiento->plantillaApunteId;
+        $plantillaNombre = $plantillaId !== null ? ($nombresPlantilla[$plantillaId] ?? null) : null;
+        $categoriaVisible = $plantillaNombre ?? $categoria?->nombre;
 
         return [
             'id' => $asiento->id,
@@ -106,8 +141,10 @@ final class ListarMovimientosPersonales
             'cantidad_es' => Dinero::fromCents(abs($cents))->formatEs(),
             'nota' => $asiento->glosa,
             'categoria_id' => $categoria?->id,
-            'categoria' => $categoria?->nombre,
+            'categoria' => $categoriaVisible,
             'categoria_codigo' => $categoria?->codigo,
+            'plantilla_apunte_id' => $plantillaId,
+            'plantilla_nombre' => $plantillaNombre,
             'tesoreria' => $tesoreria?->codigoMaestro,
             'tesoreria_origen' => $tesoreriaOrigen?->codigoMaestro,
             'tesoreria_destino' => $tesoreriaDestino?->codigoMaestro,
@@ -115,5 +152,49 @@ final class ListarMovimientosPersonales
             'gasto_generales' => $asiento->gastoGenerales,
             'concepto_generales' => $asiento->conceptoGenerales,
         ];
+    }
+
+    /**
+     * Tras fusiones o restauraciones, un asiento puede referenciar cuentas de otra persona
+     * con el mismo código; se resuelven contra el plan del titular del movimiento.
+     *
+     * @param array<int, \src\ambito\domain\entity\Cuenta> $nombres
+     * @param array<string, \src\ambito\domain\entity\Cuenta> $porCodigo
+     * @param array<int, string> $codigoPorId
+     */
+    private function resolverCuenta(int $cuentaId, array $nombres, array $porCodigo, array $codigoPorId): ?Cuenta
+    {
+        if (isset($nombres[$cuentaId])) {
+            return $nombres[$cuentaId];
+        }
+        $codigo = $codigoPorId[$cuentaId] ?? null;
+        if ($codigo === null) {
+            return null;
+        }
+
+        return $porCodigo[$codigo] ?? null;
+    }
+
+    /**
+     * @param list<Asiento> $asientos
+     * @return array<int, string>
+     */
+    private function nombresPlantilla(int $centroId, array $asientos): array
+    {
+        $ids = [];
+        foreach ($asientos as $asiento) {
+            if ($asiento->plantillaApunteId !== null) {
+                $ids[$asiento->plantillaApunteId] = true;
+            }
+        }
+        $out = [];
+        foreach (array_keys($ids) as $id) {
+            $plantilla = $this->plantillas->porId($centroId, $id);
+            if ($plantilla !== null) {
+                $out[$id] = $plantilla->nombre;
+            }
+        }
+
+        return $out;
     }
 }

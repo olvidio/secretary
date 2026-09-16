@@ -10,7 +10,7 @@ use src\asientos\domain\entity\Asiento;
 use src\asientos\domain\entity\Movimiento;
 
 /**
- * Asiento P al confirmar la propuesta: gastos 7 contra DISP.
+ * Asiento P al confirmar la propuesta: gastos 7 contra 111 (apuntes A cuadrados).
  *
  * @phpstan-type Linea array{cuenta_id:int, importe_cents:int}
  */
@@ -23,28 +23,28 @@ final class ConstructorAsientoAsignacion
         int $ejercicioId,
         int $personaId,
         DateTimeImmutable $fecha,
-        int $dispId,
+        int $cuenta111Id,
         array $lineas,
         string $glosa,
     ): ?Asiento {
-        if ($dispId <= 0) {
-            throw new InvalidArgumentException('Falta la cuenta DISP');
+        if ($cuenta111Id <= 0) {
+            throw new InvalidArgumentException('Falta la cuenta 111 del plan P');
         }
         $movimientos = [];
         $orden = 1;
-        $haberDisp = 0;
+        $haber111 = 0;
         foreach ($lineas as $linea) {
             $cents = (int) $linea['importe_cents'];
             if ($cents <= 0) {
                 continue;
             }
             $movimientos[] = new Movimiento(null, $orden++, (int) $linea['cuenta_id'], $personaId, $cents, 0);
-            $haberDisp += $cents;
+            $haber111 += $cents;
         }
-        if ($haberDisp === 0) {
+        if ($haber111 === 0) {
             return null;
         }
-        $movimientos[] = new Movimiento(null, $orden, $dispId, $personaId, 0, $haberDisp);
+        $movimientos[] = new Movimiento(null, $orden, $cuenta111Id, $personaId, 0, $haber111);
 
         return new Asiento(
             null,

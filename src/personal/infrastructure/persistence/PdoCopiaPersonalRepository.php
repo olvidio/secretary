@@ -16,6 +16,7 @@ use src\asientos\domain\entity\Asiento;
 use src\asientos\domain\entity\Movimiento;
 use src\personal\application\AsegurarPlanPersonal;
 use src\personal\domain\contracts\CopiaPersonalRepository;
+use src\personal\domain\contracts\PersonalBancoRepository;
 use src\personal\domain\contracts\PersonalCierreRepository;
 use src\shared\infrastructure\persistence\ConverterDate;
 
@@ -29,6 +30,7 @@ final class PdoCopiaPersonalRepository implements CopiaPersonalRepository
         private readonly EjercicioRepository $ejercicios,
         private readonly AsientoRepository $asientos,
         private readonly PersonalCierreRepository $cierres,
+        private readonly PersonalBancoRepository $bancoPref,
         private readonly AsegurarPlanPersonal $asegurar,
     ) {
     }
@@ -147,6 +149,7 @@ final class PdoCopiaPersonalRepository implements CopiaPersonalRepository
                 'dia_habil' => $cierre['dia_habil'],
                 'meses' => $meses,
             ],
+            'banco_csv' => $this->bancoPref->dePersona($personaId),
             'subcuentas' => $subcuentas,
             'asientos' => $asientos,
             'banco' => $banco,
@@ -171,6 +174,7 @@ final class PdoCopiaPersonalRepository implements CopiaPersonalRepository
         try {
             $this->borrarMovimientos($personaId);
             $this->restaurarCierre($personaId, $datos['cierre'] ?? []);
+            $this->restaurarBancoCsv($personaId, $datos['banco_csv'] ?? null);
             $this->restaurarSubcuentas($centroId, $personaId, $datos['subcuentas'] ?? []);
             $mapa = $this->restaurarAsientos($centroId, $personaId, $datos['asientos'] ?? []);
             $this->restaurarBanco($personaId, $datos['banco'] ?? [], $mapa);
@@ -219,6 +223,14 @@ final class PdoCopiaPersonalRepository implements CopiaPersonalRepository
             }
             $this->cierres->guardarMes($personaId, $anio, $m, $fecha);
         }
+    }
+
+    private function restaurarBancoCsv(int $personaId, mixed $banco): void
+    {
+        if (!is_string($banco) || trim($banco) === '') {
+            return;
+        }
+        $this->bancoPref->guardar($personaId, trim($banco));
     }
 
     /** @param list<array<string, mixed>> $subcuentas */

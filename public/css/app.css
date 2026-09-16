@@ -146,6 +146,10 @@ button.yo-pill.on:hover { background: #1e3a8a; border-color: #1e3a8a; }
 }
 .yo-generales-campos select { max-width: 100%; }
 .yo-sheet.yo-es-generales .yo-generales-campos { display: block; }
+.yo-plantillas-wrap { margin: .35rem 0 .75rem; }
+.yo-plantillas-label { margin: 0 0 .35rem; font-size: .78rem; }
+.yo-plantillas-grid button { background: #faf5ff; }
+.yo-plantillas-grid button.on { outline-color: #7c3aed; background: #ede9fe; }
 .yo-lista-generales { font-size: .7rem; color: #1e40af; margin-left: .35rem; }
 .arqueo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .5rem; }
 .arqueo-fecha input[type=date] { width: 10.5rem; max-width: 100%; }
@@ -194,6 +198,24 @@ button[type="button"].arqueo-capuchinos-btn {
 }
 .comprobacion-item.ok { border-left: 4px solid #38a169; }
 .comprobacion-item.fail { border-left: 4px solid var(--err); }
+.aviso-cierre {
+  background: #fffbeb;
+  border: 1px solid #f6e05e;
+  border-left: 4px solid #d69e2e;
+  border-radius: 6px;
+  padding: .85rem 1rem;
+  margin: 1rem 0;
+  max-width: 900px;
+}
+.aviso-cierre p { margin: 0 0 .65rem; }
+.aviso-cierre p:last-child { margin-bottom: 0; }
+.aviso-saldo-cc {
+  max-width: 70ch;
+  margin: .85rem 0 0;
+  font-size: .9rem;
+  color: #4a5568;
+}
+td.saldo-cc-neg { color: var(--err); font-weight: 600; }
 .comprobacion-item h3 { margin: 0 0 .35rem; font-size: 1rem; }
 .comprobacion-estado { font-weight: normal; color: #666; }
 .comprobacion-ayuda { font-size: .85rem; color: #4a5568; margin: .5rem 0 0; }
@@ -720,9 +742,29 @@ body.yo {
   padding: .65rem .7rem;
   min-width: 0;
 }
+.yo-lista li.yo-mov-caja {
+  background: #fefce8;
+  border: 1px solid #fde68a;
+}
+.yo-lista li.yo-mov-caja .yo-mov-menu > summary {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
+}
+.yo-lista li.yo-mov-caja .yo-mov-menu > summary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
 #yo-banco-pend li,
 #yo-banco-otra li {
   grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  box-sizing: border-box;
+}
+#yo-banco-pend li > span:first-child,
+#yo-banco-otra li > span:first-child {
+  display: block;
+  min-width: 0;
 }
 .yo-chip {
   width: 2.2rem;
@@ -972,19 +1014,70 @@ body.yo {
 .yo-ayuda-cuerpo p:last-child { margin-bottom: 0; }
 .yo-banco-form { display: grid; gap: .7rem; margin: 1rem 0; }
 .yo-banco-form select, .yo-banco-form input[type=file] { width: 100%; }
-.yo-banco-pend-acc { display: grid; gap: .35rem; margin-top: .35rem; min-width: 0; }
-.yo-banco-pend-row { display: flex; gap: .4rem; align-items: center; min-width: 0; }
-.yo-banco-pend-row select {
-  flex: 1 1 0;
-  width: 0;
+.yo-banco-pend-acc {
+  display: grid;
+  gap: .45rem;
+  margin-top: .4rem;
   min-width: 0;
-  max-width: 10.5rem;
+  width: 100%;
+}
+.yo-banco-pend-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .45rem;
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+}
+.yo-banco-cat-wrap {
+  position: relative;
+  min-width: 0;
+  width: 100%;
+}
+.yo-banco-pend-row select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.yo-banco-asignar { flex: none; }
-.yo-banco-obs-wrap { position: relative; width: 10.5rem; max-width: 100%; min-width: 0; }
+.yo-banco-asignar {
+  flex: none;
+  white-space: nowrap;
+  align-self: stretch;
+  min-height: 2.25rem;
+}
+.yo-banco-has-tip .yo-banco-tip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + .35rem);
+  left: 0;
+  z-index: 30;
+  min-width: min(18rem, 92vw);
+  max-width: min(22rem, 96vw);
+  padding: .5rem .65rem;
+  background: #1e293b;
+  color: #fff;
+  border-radius: 8px;
+  font-size: .88rem;
+  line-height: 1.35;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, .22);
+  pointer-events: none;
+}
+.yo-banco-has-tip.yo-banco-tip-on:hover .yo-banco-tip,
+.yo-banco-has-tip.yo-banco-tip-on:focus-within .yo-banco-tip {
+  display: block;
+}
+.yo-banco-tip-prin { display: block; }
+.yo-banco-tip-det {
+  display: block;
+  margin-top: .3rem;
+  font-size: .78rem;
+  line-height: 1.3;
+  opacity: .9;
+}
+.yo-banco-obs-wrap { position: relative; width: 100%; min-width: 0; }
 .yo-banco-obs {
   width: 100%;
   min-width: 0;
@@ -993,7 +1086,7 @@ body.yo {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.yo-banco-obs-clear {
+.yo-banco-obs-wrap button.yo-banco-obs-clear[type="button"] {
   position: absolute;
   right: .15rem;
   top: 50%;
@@ -1001,14 +1094,19 @@ body.yo {
   width: 1.7rem;
   height: 1.7rem;
   padding: 0;
-  border: 0;
-  background: transparent;
-  color: #64748b;
-  font-size: 1.2rem;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+  font-size: 1.15rem;
+  font-weight: 600;
   line-height: 1;
   border-radius: 999px;
 }
-.yo-banco-obs-clear:hover { background: #e2e8f0; color: #0f172a; }
+.yo-banco-obs-wrap button.yo-banco-obs-clear[type="button"]:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
 .yo-remesa-resumen { margin: .75rem 0 1rem; }
 #yo-remesa-enviar { width: 100%; padding: .85rem; font-size: 1.05rem; min-height: 3rem; }
 @media (max-width: 480px) {
@@ -1026,9 +1124,10 @@ body.yo {
   .yo-banco-form button,
   .yo-cat-form button,
   .yo-cierre .grid-form button { min-height: 2.75rem; padding: .55rem .85rem; }
-  .yo-banco-pend-row { flex-wrap: wrap; }
-  .yo-banco-pend-row select { max-width: none; flex: 1 1 100%; }
-  .yo-banco-obs-wrap { width: 100%; }
+  .yo-banco-pend-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .yo-banco-asignar { min-height: 2.75rem; padding: .55rem .85rem; }
 }
 .remesa-linea-detalle {
   margin: 1rem 0 1.25rem;

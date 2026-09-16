@@ -145,16 +145,15 @@
     return out.join('');
   }
 
-  function renderResumenG(r, arqueoResp) {
+  function renderResumenG(r) {
     const el = document.getElementById('informe-613-resumen-g');
     if (!el) return;
-    const arqueo = arqueoResp?.arqueo;
     document.getElementById('rg-personas').textContent = enteroEs(r.num_personas);
     document.getElementById('rg-gasto-viv').textContent = enteroEs(r.gasto_vivienda_persona_mes);
-    const saldoCaja = Math.round(Number(r.saldo_caja || 0));
-    const arqueoTotal = arqueo?.total ? Math.round(Number(arqueo.total)) : null;
     document.getElementById('rg-arqueo').textContent =
-      arqueoTotal !== null ? enteroEs(arqueoTotal - saldoCaja) : '';
+      r.arqueo_diferencia != null && r.arqueo_diferencia !== ''
+        ? enteroEs(Math.round(Number(String(r.arqueo_diferencia).replace(',', '.'))))
+        : '';
     document.getElementById('rg-caja').textContent = decimalEs(r.saldo_caja);
     document.getElementById('rg-banco').textContent = decimalEs(r.saldo_banco);
   }
@@ -227,10 +226,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    const [r, arqueoG] = await Promise.all([
-      api('/api/informes/613/' + CUENTA),
-      CUENTA === 'G' ? api('/api/arqueos/G') : Promise.resolve(null),
-    ]);
+    const r = await api('/api/informes/613/' + CUENTA);
     window.__resumen613 = r;
 
     document.getElementById('ctr-nombre').textContent = r.config.centro;
@@ -241,7 +237,7 @@
     const tb = document.getElementById('informe-613-body');
     tb.innerHTML = CUENTA === 'P' ? bloquesP(r) : bloquesG(r);
 
-    if (CUENTA === 'G') renderResumenG(r, arqueoG);
+    if (CUENTA === 'G') renderResumenG(r);
 
     const obs = document.getElementById('obs-print');
     const scc = document.getElementById('saldo-cc-personales');
@@ -258,8 +254,8 @@
     if (cocinaMes) cocinaMes.value = r.media_cocina_mes ? decimalEs(r.media_cocina_mes) : '';
     if (cocinaAcum) cocinaAcum.value = r.media_cocina_acum ? decimalEs(r.media_cocina_acum) : '';
     if (dineroCaja) {
-      const rawCaja = r.dinero_arqueo_caja || arqueoG?.arqueo?.total_es || '';
-      dineroCaja.value = rawCaja ? decimalEs(rawCaja, { vacio: '' }) : '';
+      dineroCaja.value = r.dinero_arqueo_caja
+        ? decimalEs(r.dinero_arqueo_caja, { vacio: '' }) : '';
     }
     if (dineroBanco) {
       dineroBanco.value = r.dinero_arqueo_banco

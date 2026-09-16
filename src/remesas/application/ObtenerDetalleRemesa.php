@@ -14,6 +14,7 @@ final class ObtenerDetalleRemesa
     public function __construct(
         private readonly ResolverAmbitoActual $ambito,
         private readonly RemesaRepository $remesas,
+        private readonly EnriquecerLineasRemesa $enriquecerLineas,
     ) {
     }
 
@@ -42,7 +43,8 @@ final class ObtenerDetalleRemesa
         $fila = $linea->toArray();
         $fila['nombre'] = AgregadorRemesaPersonal::nombreMaestro($linea->codigoMaestro);
         $fila['solicitud'] = $solicitud->toArray();
+        $enriquecida = $this->enriquecerLineas->ejecutar($remesa->centroId, [$fila]);
 
-        return $fila;
+        return $enriquecida[0];
     }
 }

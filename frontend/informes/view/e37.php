@@ -33,6 +33,7 @@
                 <tfoot id="e37-foot"></tfoot>
             </table>
         </div>
+        <p id="e37-aviso-saldo" class="aviso-saldo-cc" hidden></p>
     </article>
 </div>
 
@@ -132,9 +133,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     const trTot = document.createElement('tr');
     trTot.className = 'informe-e37-total';
     trTot.innerHTML = `<td colspan="2">${esc(nombre)}</td>`
-      + cols.map(c => celdaNum(t[c.clave + '_es'])).join('');
+      + cols.map(c => {
+          const es = t[c.clave + '_es'];
+          if (c.clave === 'saldo_cc' && r.aviso_saldo_cc) {
+            const txt = fmtHoja(es);
+            return `<td class="num saldo-cc-neg">${txt ? esc(txt) : ''}</td>`;
+          }
+          return celdaNum(es);
+        }).join('');
     document.getElementById('e37-foot').innerHTML = '';
     document.getElementById('e37-foot').appendChild(trTot);
+
+    const avisoEl = document.getElementById('e37-aviso-saldo');
+    if (r.aviso_saldo_cc) {
+      avisoEl.hidden = false;
+      avisoEl.textContent = r.aviso_saldo_cc;
+    } else {
+      avisoEl.hidden = true;
+      avisoEl.textContent = '';
+    }
   }
 
   async function load() {

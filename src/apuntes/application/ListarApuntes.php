@@ -52,22 +52,24 @@ final class ListarApuntes
                     continue;
                 }
                 $vistosPar[$clave] = true;
-                $fila = $this->proyector->proyectarPar(
+                $filas = [$this->proyector->proyectarPar(
                     $par['imputacion'],
                     $par['tesoreria'],
                     $mapaCuentas,
                     $mapaPersonas,
-                );
+                )];
             } else {
-                $fila = $this->proyector->proyectar($asiento, $mapaCuentas, $mapaPersonas);
+                $filas = $this->proyector->proyectarFilas($asiento, $mapaCuentas, $mapaPersonas);
             }
-            if (!empty($filtros['origen']) && $fila->origen !== strtoupper((string) $filtros['origen'])) {
-                continue;
+            foreach ($filas as $fila) {
+                if (!empty($filtros['origen']) && $fila->origen !== strtoupper((string) $filtros['origen'])) {
+                    continue;
+                }
+                if (!empty($filtros['concepto']) && $fila->conceptoCodigo !== $filtros['concepto']) {
+                    continue;
+                }
+                $out[] = $fila->toArray();
             }
-            if (!empty($filtros['concepto']) && $fila->conceptoCodigo !== $filtros['concepto']) {
-                continue;
-            }
-            $out[] = $fila->toArray();
         }
 
         return $out;

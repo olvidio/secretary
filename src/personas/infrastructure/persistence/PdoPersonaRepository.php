@@ -192,6 +192,12 @@ final class PdoPersonaRepository implements PersonaRepository
         $st->execute([':id' => $id]);
     }
 
+    public function desactivar(int $id): void
+    {
+        $st = $this->pdo->prepare('UPDATE personas SET activo = FALSE WHERE id = :id');
+        $st->execute([':id' => $id]);
+    }
+
     public function borrarTodos(): void
     {
         $this->pdo->exec('DELETE FROM personas');

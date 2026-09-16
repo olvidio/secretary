@@ -16,7 +16,6 @@
             <option value="necesidades">Necesidades (agd/sss+) — P 6 / G 14</option>
         </select>
     </label>
-    <label>Número de residentes <input name="num_residentes" type="number"></label>
     <button type="submit">Guardar</button>
     <p class="ok" id="msg" hidden>Guardado</p>
 </form>

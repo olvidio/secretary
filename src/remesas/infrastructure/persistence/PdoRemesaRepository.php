@@ -325,11 +325,7 @@ final class PdoRemesaRepository implements RemesaRepository
             if (!is_array($item)) {
                 continue;
             }
-            $items[] = [
-                'codigo' => (string) ($item['codigo'] ?? ''),
-                'nombre' => (string) ($item['nombre'] ?? ''),
-                'cents' => (int) ($item['cents'] ?? 0),
-            ];
+            $items[] = $this->hydrateDetalleItem($item);
         }
 
         return new RemesaLinea(
@@ -359,6 +355,55 @@ final class PdoRemesaRepository implements RemesaRepository
             (int) $row['mes'],
             (int) $row['version'],
         );
+    }
+
+    /** @param array<string, mixed> $item */
+    private function hydrateDetalleItem(array $item): array
+    {
+        $fila = [
+            'codigo' => (string) ($item['codigo'] ?? ''),
+            'nombre' => (string) ($item['nombre'] ?? ''),
+            'cents' => (int) ($item['cents'] ?? 0),
+        ];
+        if (!empty($item['generales']) && is_array($item['generales'])) {
+            $generales = [];
+            foreach ($item['generales'] as $gen) {
+                if (!is_array($gen)) {
+                    continue;
+                }
+                $generales[] = [
+                    'concepto' => (string) ($gen['concepto'] ?? ''),
+                    'cents' => (int) ($gen['cents'] ?? 0),
+                ];
+            }
+            if ($generales !== []) {
+                $fila['generales'] = $generales;
+            }
+        }
+        if (!empty($item['plantillas']) && is_array($item['plantillas'])) {
+            $plantillas = [];
+            foreach ($item['plantillas'] as $pl) {
+                if (!is_array($pl)) {
+                    continue;
+                }
+                $plantillas[] = [
+                    'plantilla_id' => (int) ($pl['plantilla_id'] ?? 0),
+                    'cents' => (int) ($pl['cents'] ?? 0),
+                    'nombre' => isset($pl['nombre']) ? (string) $pl['nombre'] : null,
+                ];
+            }
+            if ($plantillas !== []) {
+                $fila['plantillas'] = array_map(static function (array $pl): array {
+                    if ($pl['nombre'] === null) {
+                        unset($pl['nombre']);
+                    }
+
+                    return $pl;
+                }, $plantillas);
+            }
+        }
+
+        return $fila;
     }
 
     private function ts(mixed $valor): ?DateTimeImmutable

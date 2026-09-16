@@ -41,10 +41,12 @@ final class AgregadorRemesaPersonal
                 $cents = $cuenta->tipo === 'gasto'
                     ? $mov->debeCents - $mov->haberCents
                     : $mov->haberCents - $mov->debeCents;
+                if ($cents === 0) {
+                    continue;
+                }
                 if (!isset($porMaestro[$maestro])) {
                     $porMaestro[$maestro] = ['importe' => 0, 'detalle' => []];
                 }
-                $porMaestro[$maestro]['importe'] += $cents;
                 $clave = $cuenta->codigo;
                 if (!isset($porMaestro[$maestro]['detalle'][$clave])) {
                     $porMaestro[$maestro]['detalle'][$clave] = [
@@ -52,8 +54,21 @@ final class AgregadorRemesaPersonal
                         'nombre' => $cuenta->nombre,
                         'cents' => 0,
                         'generales' => [],
+                        'plantillas' => [],
                     ];
                 }
+                if ($asiento->plantillaApunteId !== null && $cuenta->tipo === 'gasto') {
+                    $pid = $asiento->plantillaApunteId;
+                    if (!isset($porMaestro[$maestro]['detalle'][$clave]['plantillas'][$pid])) {
+                        $porMaestro[$maestro]['detalle'][$clave]['plantillas'][$pid] = [
+                            'plantilla_id' => $pid,
+                            'cents' => 0,
+                        ];
+                    }
+                    $porMaestro[$maestro]['detalle'][$clave]['plantillas'][$pid]['cents'] += $cents;
+                    continue;
+                }
+                $porMaestro[$maestro]['importe'] += $cents;
                 $porMaestro[$maestro]['detalle'][$clave]['cents'] += $cents;
                 if ($asiento->gastoGenerales && $asiento->conceptoGenerales !== null
                     && $cuenta->tipo === 'gasto' && $cents !== 0) {
@@ -72,13 +87,15 @@ final class AgregadorRemesaPersonal
         ksort($porMaestro, SORT_STRING);
         $lineas = [];
         foreach ($porMaestro as $maestro => $datos) {
-            if ($datos['importe'] === 0) {
+            if ($datos['importe'] === 0 && !self::detalleTienePlantillas($datos['detalle'])) {
                 continue;
             }
             $detalle = [];
             foreach ($datos['detalle'] as $item) {
                 $generales = array_values($item['generales'] ?? []);
                 usort($generales, static fn (array $a, array $b): int => $a['concepto'] <=> $b['concepto']);
+                $plantillas = array_values($item['plantillas'] ?? []);
+                usort($plantillas, static fn (array $a, array $b): int => $a['plantilla_id'] <=> $b['plantilla_id']);
                 $fila = [
                     'codigo' => $item['codigo'],
                     'nombre' => $item['nombre'],
@@ -86,6 +103,9 @@ final class AgregadorRemesaPersonal
                 ];
                 if ($generales !== []) {
                     $fila['generales'] = $generales;
+                }
+                if ($plantillas !== []) {
+                    $fila['plantillas'] = $plantillas;
                 }
                 $detalle[] = $fila;
             }
@@ -105,5 +125,19 @@ final class AgregadorRemesaPersonal
         }
 
         return $codigo;
+    }
+
+    /**
+     * @param array<string, array<string, mixed>> $detalle
+     */
+    private static function detalleTienePlantillas(array $detalle): bool
+    {
+        foreach ($detalle as $item) {
+            if (!empty($item['plantillas'])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

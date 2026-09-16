@@ -70,6 +70,7 @@ use src\arqueo\infrastructure\persistence\PdoArqueoRepository;
 use src\ambito\application\SincronizarConfiguracionConEjercicio;
 use src\cierre\application\CerrarEjercicio;
 use src\cierre\application\CerrarMes;
+use src\cierre\domain\services\MesesSinCierre;
 use src\cierre\application\GenerarApertura;
 use src\cierre\application\ReabrirEjercicio;
 use src\cierre\infrastructure\http\CierreController;
@@ -93,6 +94,7 @@ use src\informes\domain\services\CuadreViviendaGenerales;
 use src\informes\domain\services\MesesSinMovimiento;
 use src\informes\infrastructure\http\InformeController;
 use src\informes\infrastructure\persistence\PdoInforme613MesRepository;
+use src\personas\application\BorrarPersona;
 use src\personas\application\GuardarPersona;
 use src\personas\application\ListarPersonas;
 use src\personas\domain\contracts\PersonaRepository;
@@ -156,12 +158,14 @@ use src\personal\application\GuardarCierrePersonalMes;
 use src\personal\application\ResolverPeriodoPersonal;
 use src\personal\domain\contracts\BancoImportRepository;
 use src\personal\domain\contracts\CopiaPersonalRepository;
+use src\personal\domain\contracts\PersonalBancoRepository;
 use src\personal\domain\contracts\PersonalCierreRepository;
 use src\personal\infrastructure\http\BancoPersonalController;
 use src\personal\infrastructure\http\CopiaPersonalController;
 use src\personal\infrastructure\http\PersonalController;
 use src\personal\infrastructure\persistence\PdoCopiaPersonalRepository;
 use src\personal\infrastructure\persistence\PdoBancoImportRepository;
+use src\personal\infrastructure\persistence\PdoPersonalBancoRepository;
 use src\personal\infrastructure\persistence\PdoPersonalCierreRepository;
 use src\remesas\application\AceptarRemesa;
 use src\remesas\application\EnviarRemesa;
@@ -216,6 +220,8 @@ return [
     src\disponible\domain\contracts\AsignacionLaboresRepository::class => autowire(src\disponible\infrastructure\persistence\PdoAsignacionLaboresRepository::class),
     src\disponible\domain\contracts\TramosDesgravacionRepository::class => autowire(src\disponible\infrastructure\persistence\PdoTramosDesgravacionRepository::class),
     src\disponible\infrastructure\http\DisponibleController::class => autowire(),
+    src\envio_dl\domain\contracts\EnvioDlRepository::class => autowire(src\envio_dl\infrastructure\persistence\PdoEnvioDlRepository::class),
+    src\envio_dl\infrastructure\http\EnvioDlController::class => autowire(),
     AsegurarCuentaDisponiblePersona::class => autowire(),
     Informe613MesRepository::class => autowire(PdoInforme613MesRepository::class),
     TraductorApuntesAAsientos::class => autowire(),
@@ -247,6 +253,7 @@ return [
     IdentidadRepository::class => autowire(PdoIdentidadRepository::class),
     BancoImportRepository::class => autowire(PdoBancoImportRepository::class),
     PersonalCierreRepository::class => autowire(PdoPersonalCierreRepository::class),
+    PersonalBancoRepository::class => autowire(PdoPersonalBancoRepository::class),
     ResolverPeriodoPersonal::class => autowire(),
     GuardarCierrePersonalDefecto::class => autowire(),
     GuardarCierrePersonalMes::class => autowire(),
@@ -292,6 +299,7 @@ return [
     GuardarConfiguracion::class => autowire(),
     ListarPersonas::class => autowire(),
     GuardarPersona::class => autowire(),
+    BorrarPersona::class => autowire(),
     VincularEmailPersona::class => autowire(),
     AsegurarIdentidadCentro::class => autowire(),
     AsegurarCuentaCorrientePersona::class => autowire(),
@@ -305,6 +313,7 @@ return [
     CrearApuntesDeEntrada::class => autowire(),
     ContrapartidasGastoGeneral::class => autowire(),
     BorrarApunte::class => autowire(),
+    MesesSinCierre::class => autowire(),
     CerrarMes::class => autowire(),
     CerrarEjercicio::class => autowire(),
     ReabrirEjercicio::class => autowire(),

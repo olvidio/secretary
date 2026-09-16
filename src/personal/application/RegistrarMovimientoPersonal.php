@@ -14,6 +14,7 @@ use src\asientos\domain\entity\Asiento;
 use src\asientos\domain\services\ConstructorAsientoPeriodificado;
 use src\conceptos\domain\services\CatalogoConceptos;
 use src\personal\domain\services\ConstructorAsientoPersonal;
+use src\personal\domain\services\ResolverCategoriaPlantillaPersonal;
 use src\personal\domain\value_objects\ContextoPersonal;
 use src\personas\domain\contracts\PersonaRepository;
 use src\shared\domain\value_objects\Dinero;
@@ -26,6 +27,7 @@ final class RegistrarMovimientoPersonal
         private readonly EjercicioRepository $ejercicios,
         private readonly AsientoRepository $asientos,
         private readonly PersonaRepository $personas,
+        private readonly ResolverCategoriaPlantillaPersonal $categoriaPlantilla,
     ) {
     }
 
@@ -67,8 +69,19 @@ final class RegistrarMovimientoPersonal
             return [$this->asientos->guardar($asiento)];
         }
 
-        $categoria = $this->categoria($ctx, (int) ($datos['cuenta_id'] ?? 0));
-        [$gastoGenerales, $conceptoGenerales] = $this->resolverGenerales($ctx, $sentido, $datos);
+        $plantillaId = (int) ($datos['plantilla_id'] ?? 0);
+        if ($plantillaId > 0) {
+            if ($sentido !== 'gasto') {
+                throw new InvalidArgumentException('Las plantillas del centro solo aplican a gastos');
+            }
+            $categoria = $this->categoriaPlantilla->ejecutar($ctx->centroId, $ctx->personaId, $plantillaId);
+            $gastoGenerales = false;
+            $conceptoGenerales = null;
+        } else {
+            $plantillaId = null;
+            $categoria = $this->categoria($ctx, (int) ($datos['cuenta_id'] ?? 0));
+            [$gastoGenerales, $conceptoGenerales] = $this->resolverGenerales($ctx, $sentido, $datos);
+        }
         $tesoreria = $this->tesoreria($ctx->centroId, $ctx->personaId, (string) ($datos['tesoreria'] ?? 'CAJA'));
         $ejercicioImp = $this->ejercicios->deCentroEnFecha($ctx->centroId, $fechaImputacion);
         $ejercicioOp = $this->ejercicios->deCentroEnFecha($ctx->centroId, $fechaOperacion);
@@ -82,7 +95,7 @@ final class RegistrarMovimientoPersonal
             throw new InvalidArgumentException('El ejercicio de la fecha de operación está cerrado');
         }
 
-        $asiento = ConstructorAsientoPersonal::movimiento(
+        $asiento = $this->conPlantilla(ConstructorAsientoPersonal::movimiento(
             $ejercicioImp->id,
             $ctx->personaId,
             $fechaImputacion,
@@ -96,7 +109,7 @@ final class RegistrarMovimientoPersonal
             'manual',
             $gastoGenerales,
             $conceptoGenerales,
-        );
+        ), $plantillaId);
 
         if ($fechaImputacion->format('Y-m-d') === $fechaOperacion->format('Y-m-d')) {
             return [$this->asientos->guardar($asiento)];
@@ -173,6 +186,33 @@ final class RegistrarMovimientoPersonal
             throw new InvalidArgumentException('Concepto de generales no válido');
         }
         return [true, $concepto];
+    }
+
+    private function conPlantilla(Asiento $asiento, ?int $plantillaId): Asiento
+    {
+        if ($plantillaId === null) {
+            return $asiento;
+        }
+
+        return new Asiento(
+            $asiento->id,
+            $asiento->ejercicioId,
+            $asiento->libro,
+            $asiento->numero,
+            $asiento->fecha,
+            $asiento->glosa,
+            $asiento->tipo,
+            $asiento->origen,
+            $asiento->personaId,
+            $asiento->movimientos,
+            $asiento->conceptoCodigo,
+            $asiento->asientoParId,
+            $asiento->fechaOperacion(),
+            $asiento->remesaId,
+            $asiento->gastoGenerales,
+            $asiento->conceptoGenerales,
+            $plantillaId,
+        );
     }
 
     private function parseFecha(string $raw): DateTimeImmutable

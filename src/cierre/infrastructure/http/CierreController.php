@@ -24,4 +24,16 @@ final class CierreController
     {
         return ContestarJson::ok($this->cerrar->ejecutar(true));
     }
+
+    public function regularizar(Request $request, array $vars = []): Response
+    {
+        try {
+            $body = $request->json();
+            $meses = isset($body['meses']) && is_array($body['meses']) ? $body['meses'] : null;
+
+            return ContestarJson::ok($this->cerrar->regularizar($meses));
+        } catch (\InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+    }
 }

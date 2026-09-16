@@ -17,7 +17,7 @@ Desde aquí se abre también el libro personal de cada una, con solo poner su co
 3. Indicar si su aportación de vivienda tiene contrapartida en el libro general y, si procede, un importe fijo.
 4. Indicar si **puede desgravar** donativos. Quien no puede, al proponer destinos 7 recibe solo partidas que no desgravan.
 5. Si llega o se va a mitad de año, marcar los meses en que no paga. Hay dos intervalos.
-6. «Editar» recupera una fila en el formulario, «Borrar» la quita previa confirmación y «Nuevo» lo vacía.
+6. «Editar» recupera una fila en el formulario, «Borrar» la quita del listado previa confirmación y «Nuevo» vacía el formulario. Si la persona tiene apuntes o remesas, no se borra del todo: se da de baja y deja de salir aquí, pero el histórico se conserva.
 7. En «Solicitudes de acceso personal», cada petición se resuelve creando un nombre nuevo, vinculándola a uno que ya existe o rechazándola.
 
 ## Reglas que conviene saber

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace src\arqueo\infrastructure\http;
 
 use InvalidArgumentException;
+use RuntimeException;
 use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\domain\contracts\CuentaFisicaRepository;
 use src\arqueo\application\BuscarCapuchinos;
@@ -82,6 +83,8 @@ final class ArqueoController
             $arqueo = $this->guardar->ejecutar($cuenta, $fecha, $body['desglose'] ?? [], $fisicaId);
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
+        } catch (RuntimeException $e) {
+            return ContestarJson::error($e->getMessage());
         }
 
         return ContestarJson::ok(['arqueo' => $arqueo->toArray()]);
@@ -120,6 +123,8 @@ final class ArqueoController
         try {
             $arqueo = $this->guardar->ejecutar($cuentaLegado, $fecha, $body['desglose'] ?? [], $fisicaId);
         } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        } catch (RuntimeException $e) {
             return ContestarJson::error($e->getMessage());
         }
 

@@ -85,6 +85,13 @@ final class CalculadoraE37
         return $out;
     }
 
+    public static function avisoSaldoCcNegativo(): string
+    {
+        return 'Un saldo c/c negativo suele ser el cierre automático de vivienda de un mes '
+            . 'que no iba en la remesa. Aportar de más el mes siguiente no lo cancela: ese extra '
+            . 'cubre los gastos de ese mes, no la c/c anterior. No es un agujero de caja.';
+    }
+
     public static function claveDeCodigo(string $codigo): ?string
     {
         foreach (self::mapaImportes() as $clave => $codigos) {

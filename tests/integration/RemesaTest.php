@@ -17,6 +17,7 @@ use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
 use src\ambito\infrastructure\persistence\PdoCuentaFisicaRepository;
 use src\apuntes\application\BorrarApunte;
 use src\apuntes\application\CrearApunte;
+use src\apuntes\application\ListarApuntes;
 use src\apuntes\application\CrearApuntesDeEntrada;
 use src\apuntes\domain\services\ContrapartidasGastoGeneral;
 use src\asientos\domain\services\ProyectorAsientoAFilaExcel;
@@ -41,6 +42,7 @@ use src\remesas\application\ObtenerDetalleRemesa;
 use src\remesas\application\PrevisualizarRemesa;
 use src\remesas\application\RechazarRemesa;
 use src\remesas\application\RegistrarGastosGeneralesDeRemesa;
+use src\remesas\application\RegistrarPlantillasDeRemesa;
 use src\remesas\application\ResolverMesRemesa;
 use src\remesas\application\ResolverSolicitudDetalle;
 use src\remesas\application\SolicitarDetalleRemesa;
@@ -133,8 +135,20 @@ final class RemesaTest extends TestCase
         $v2 = $d['enviar']->ejecutar(['anio' => $anio, 'mes' => 1]);
         self::assertSame(2, $v2->version);
         $d['aceptar']->ejecutar((int) $v2->id);
-        self::assertSame(2, $this->contarAsientosRemesa());
+        self::assertSame(1, $this->contarAsientosRemesa());
         self::assertSame(1250, $this->realizado22($d));
+        $apuntesRemesa = array_values(array_filter(
+            $d['listar']->ejecutar(['iniciales' => 'aa']),
+            static fn (array $a): bool => str_starts_with((string) ($a['observaciones'] ?? ''), 'Remesa '),
+        ));
+        self::assertCount(3, $apuntesRemesa);
+        self::assertEqualsCanonicalizing(['111', '22', '9'], array_column($apuntesRemesa, 'concepto_codigo'));
+        $porConcepto = [];
+        foreach ($apuntesRemesa as $a) {
+            $porConcepto[$a['concepto_codigo']] = $a['cantidad'];
+        }
+        self::assertSame('12.50', $porConcepto['111']);
+        self::assertSame('37.50', $porConcepto['9']);
         $e37 = $d['asientos']->movimientosE37PorPersona(
             $d['centroId'],
             $d['ejercicioId'],
@@ -156,7 +170,7 @@ final class RemesaTest extends TestCase
         $v3 = $d['enviar']->ejecutar(['anio' => $anio, 'mes' => 1]);
         self::assertSame(3, $v3->version);
         $d['aceptar']->ejecutar((int) $v3->id);
-        self::assertSame(2, $this->contarAsientosRemesa(), 'Aceptar no puede duplicar asientos de remesa');
+        self::assertSame(1, $this->contarAsientosRemesa(), 'Aceptar no puede duplicar asientos de remesa');
         self::assertSame(2250, $this->realizado22($d));
 
         $aceptada = $d['remesas']->porId((int) $v3->id);
@@ -291,9 +305,27 @@ final class RemesaTest extends TestCase
             'cuentas' => $cuentas,
             'asientos' => $asientos,
             'remesas' => $remesas,
-            'registrar' => new RegistrarMovimientoPersonal($resolver, $cuentas, $ejercicios, $asientos, $personas),
+            'registrar' => new RegistrarMovimientoPersonal(
+                $resolver,
+                $cuentas,
+                $ejercicios,
+                $asientos,
+                $personas,
+                new \src\personal\domain\services\ResolverCategoriaPlantillaPersonal(
+                    new \src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository($this->pdo),
+                    $cuentas,
+                ),
+            ),
             'subcuenta' => new CrearSubcuentaPersonal($resolver, $cuentas),
-            'preview' => new PrevisualizarRemesa($mes, $remesas, $personas, $periodoPersonal),
+            'preview' => new PrevisualizarRemesa(
+                $mes,
+                $remesas,
+                $personas,
+                $periodoPersonal,
+                new \src\remesas\application\EnriquecerLineasRemesa(
+                    new \src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository($this->pdo),
+                ),
+            ),
             'enviar' => new EnviarRemesa($mes, $remesas),
             'aceptar' => new AceptarRemesa(
                 $ambitoCentro,
@@ -304,13 +336,27 @@ final class RemesaTest extends TestCase
                 $personas,
                 $periodoPersonal,
                 $gastosGenerales,
+                $this->plantillasDeRemesa($asientos, $conceptos, $personas, $config, $cuentas, $ambitoCentro, $ejercicios),
                 $disponible,
             ),
             'rechazar' => new RechazarRemesa($ambitoCentro, $remesas, $asientos, $disponible),
             'solicitar' => new SolicitarDetalleRemesa($ambitoCentro, $remesas, $scl->id),
             'resolverSol' => new ResolverSolicitudDetalle($resolver, $remesas),
-            'detalle' => new ObtenerDetalleRemesa($ambitoCentro, $remesas),
+            'detalle' => new ObtenerDetalleRemesa(
+                $ambitoCentro,
+                $remesas,
+                new \src\remesas\application\EnriquecerLineasRemesa(
+                    new \src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository($this->pdo),
+                ),
+            ),
             'borrar' => new BorrarApunte($asientos),
+            'listar' => new ListarApuntes(
+                $asientos,
+                $cuentas,
+                $personas,
+                new ProyectorAsientoAFilaExcel(),
+                $ambitoCentro,
+            ),
             'saldos' => new CalcularSaldos($asientos, $config, $personas, $ambitoCentro),
         ];
     }
@@ -344,5 +390,35 @@ final class RemesaTest extends TestCase
         );
 
         return new RegistrarGastosGeneralesDeRemesa($crear, $personas);
+    }
+
+    private function plantillasDeRemesa(
+        PdoAsientoRepository $asientos,
+        PdoConceptoRepository $conceptos,
+        PdoPersonaRepository $personas,
+        PdoConfiguracionRepository $config,
+        PdoCuentaRepository $cuentas,
+        ResolverAmbitoActual $ambito,
+        PdoEjercicioRepository $ejercicios,
+    ): RegistrarPlantillasDeRemesa {
+        $crearApunte = new CrearApunte(
+            $asientos,
+            $conceptos,
+            $personas,
+            $config,
+            $cuentas,
+            new PdoCuentaFisicaRepository($this->pdo),
+            new TraductorApuntesAAsientos(),
+            new ProyectorAsientoAFilaExcel(),
+            $ambito,
+            $ejercicios,
+            new GenerarApertura($ejercicios, $asientos, $cuentas),
+        );
+
+        return new RegistrarPlantillasDeRemesa(
+            $crearApunte,
+            new \src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository($this->pdo),
+            $personas,
+        );
     }
 }

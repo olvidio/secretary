@@ -22,7 +22,8 @@ Sirve para contar el dinero que hay de verdad en la caja y compararlo con lo que
 - El recuento se compara con el saldo físico de esa caja, que es la suma de lo que le corresponde en el libro personal y en el general: el dinero es el mismo, aunque la contabilidad lo reparta en dos libros.
 - El total es el dinero contado más los vales y cheques, desglosados debajo.
 - Guardar el arqueo no crea ni corrige apuntes: solo deja constancia del recuento. El descuadre se arregla corrigiendo apuntes.
-- El bloque final del 613 G usa el último arqueo guardado para proponer el dinero de caja.
+- El bloque final del 613 G propone **Dinero y vales de Caja** con el total del último arqueo guardado hasta la fecha de cierre (Arqueo P o Arqueo G; si no había ya un valor manual en el 613).
+- Tras **Guardar arqueo** aparece un mensaje de confirmación con el total.
 - Si la diferencia no es cero pero es múltiplo de nueve, aparece **Buscar capuchinos**: eso suele pasar al escribir dos cifras al revés o al correr la coma. Se listan los apuntes de caja que, cambiados así, explicarían el descuadre, con el importe **Anotado**, el que tendría que ser en **Si fuera** y un enlace al apunte.
 
 ## Problemas frecuentes

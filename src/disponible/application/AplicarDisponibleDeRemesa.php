@@ -10,12 +10,11 @@ use src\ambito\domain\contracts\CuentaRepository;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\disponible\domain\contracts\AsignacionLaboresRepository;
 use src\disponible\domain\contracts\SaldoDisponibleRepository;
-use src\disponible\domain\services\ConstructorAsientoAparcamiento;
 use src\disponible\domain\services\ConsumidorAsignacionesRemesa;
 use src\personas\domain\contracts\PersonaRepository;
 use src\remesas\domain\entity\Remesa;
 
-/** Al aceptar: consume 7x ya confirmadas, aparca el sobrante en DISP y actualiza la tabla. */
+/** Al aceptar: consume 7x ya confirmadas y suma el sobrante al disponible (saldo CC en P). */
 final class AplicarDisponibleDeRemesa
 {
     public function __construct(
@@ -59,22 +58,6 @@ final class AplicarDisponibleDeRemesa
         if ($disp === null || $disp->id === null) {
             return;
         }
-        $iniciales = $persona !== null ? strtoupper($persona->iniciales) : '';
-        $glosa = sprintf('Aparcar sobrante %s %02d/%d v%d', $iniciales, $remesa->mes, $remesa->anio, $remesa->version);
-        $asiento = ConstructorAsientoAparcamiento::construir(
-            $ejercicioId,
-            $remesa->personaId,
-            $fecha,
-            (int) $remesa->id,
-            $ccId,
-            (int) $disp->id,
-            $sobranteCents,
-            $glosa,
-        );
-        if ($asiento !== null) {
-            $this->asientos->guardar($asiento);
-        }
-
         $fechaStr = $fecha->format('Y-m-d');
         if ($sustituirPorTesoreria && $remesa->saldoTesoreriaCents !== null) {
             $actual = $this->saldos->saldoDe($remesa->centroId, $remesa->personaId);

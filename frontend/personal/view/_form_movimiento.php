@@ -10,7 +10,12 @@
             <input name="cantidad" inputmode="decimal" required placeholder="0,00" autofocus>
         </label>
         <div id="yo-cats-grid" class="yo-cats-grid"></div>
+        <div id="yo-plantillas-wrap" class="yo-plantillas-wrap" hidden>
+            <p class="yo-plantillas-label muted">Plantillas del centro</p>
+            <div id="yo-plantillas-grid" class="yo-cats-grid yo-plantillas-grid"></div>
+        </div>
         <input type="hidden" name="cuenta_id" required>
+        <input type="hidden" name="plantilla_id" value="">
         <input type="hidden" name="sentido" value="gasto">
         <input type="hidden" name="gasto_generales" value="0">
         <div id="yo-generales-campos" class="yo-generales-campos">

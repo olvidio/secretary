@@ -8,6 +8,8 @@ use InvalidArgumentException;
 use src\personal\application\CategorizarMovimientoBanco;
 use src\personal\application\ImportarCsvBanco;
 use src\personal\application\ListarPendientesBanco;
+use src\personal\application\ListarPlantillasCentroPersonal;
+use src\personal\application\PreferenciaBancoPersonal;
 use src\personal\domain\services\CatalogoBancosCsv;
 use src\personal\infrastructure\excel\ExtractoCaixaBankDesdeArchivo;
 use src\shared\infrastructure\http\ContestarJson;
@@ -20,12 +22,28 @@ final class BancoPersonalController
         private readonly ImportarCsvBanco $importar,
         private readonly ListarPendientesBanco $pendientes,
         private readonly CategorizarMovimientoBanco $categorizar,
+        private readonly PreferenciaBancoPersonal $preferenciaBanco,
+        private readonly ListarPlantillasCentroPersonal $plantillasCentro,
     ) {
     }
 
     public function bancos(Request $request, array $vars = []): Response
     {
-        return ContestarJson::ok(['bancos' => CatalogoBancosCsv::todos()]);
+        return ContestarJson::ok([
+            'bancos' => CatalogoBancosCsv::todos(),
+            'banco' => $this->preferenciaBanco->leer(),
+        ]);
+    }
+
+    public function guardarPreferencia(Request $request, array $vars = []): Response
+    {
+        try {
+            $banco = $this->preferenciaBanco->guardar((string) ($request->json()['banco'] ?? ''));
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage(), 400);
+        }
+
+        return ContestarJson::ok(['banco' => $banco]);
     }
 
     public function pendientes(Request $request, array $vars = []): Response
@@ -33,6 +51,7 @@ final class BancoPersonalController
         return ContestarJson::ok([
             'pendientes' => $this->pendientes->ejecutar(),
             'otras' => $this->pendientes->otras(),
+            'plantillas' => $this->plantillasCentro->ejecutar(),
         ]);
     }
 
@@ -54,6 +73,10 @@ final class BancoPersonalController
         } finally {
             RecibirFicheroExtractoBanco::limpiar($temporal);
         }
+        try {
+            $this->preferenciaBanco->guardar($banco);
+        } catch (InvalidArgumentException) {
+        }
 
         return ContestarJson::ok($res);
     }
@@ -62,11 +85,19 @@ final class BancoPersonalController
     {
         $datos = $request->json();
         try {
-            $asiento = $this->categorizar->ejecutar(
-                (int) ($datos['asiento_id'] ?? 0),
-                (int) ($datos['cuenta_id'] ?? 0),
-                isset($datos['observaciones']) ? (string) $datos['observaciones'] : null,
-            );
+            $obs = isset($datos['observaciones']) ? (string) $datos['observaciones'] : null;
+            $asientoId = (int) ($datos['asiento_id'] ?? 0);
+            if (!empty($datos['traspaso_caja'])) {
+                $asiento = $this->categorizar->traspasoACaja($asientoId, $obs);
+            } elseif (!empty($datos['plantilla_id'])) {
+                $asiento = $this->categorizar->conPlantilla($asientoId, (int) $datos['plantilla_id'], $obs);
+            } else {
+                $asiento = $this->categorizar->ejecutar(
+                    $asientoId,
+                    (int) ($datos['cuenta_id'] ?? 0),
+                    $obs,
+                );
+            }
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage(), 400);
         }

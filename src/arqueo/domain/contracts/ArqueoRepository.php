@@ -13,5 +13,13 @@ interface ArqueoRepository
 
     public function ultimoPorFisica(int $cuentaFisicaId): ?Arqueo;
 
+    public function ultimoEnCierre(int $ejercicioId, string $cuenta, DateTimeImmutable $fechaCierre): ?Arqueo;
+
+    public function ultimoCajaEnCierre(
+        int $ejercicioId,
+        DateTimeImmutable $fechaCierre,
+        ?int $cuentaFisicaId = null,
+    ): ?Arqueo;
+
     public function guardar(Arqueo $arqueo): Arqueo;
 }

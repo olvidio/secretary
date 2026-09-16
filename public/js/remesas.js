@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         + '<td>' + esc((m.iniciales || '') + ' · ' + (m.persona || '')) + '</td>'
         + '<td>' + esc(String(m.version)) + '</td>'
         + '<td>' + esc(m.estado) + '</td>'
-        + '<td class="num">' + esc(m.total_es) + '</td>'
+        + '<td class="num">' + esc(m.sobrante_es || '') + '</td>'
         + '<td>' + esc(enviada) + '</td>'
         + '<td><button type="button" data-id="' + m.id + '">Ver</button></td>';
       tr.querySelector('button').onclick = () => abrir(m.id);
@@ -43,10 +43,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (panelDetLinea) panelDetLinea.hidden = true;
   }
 
-  function textoGenerales(item) {
-    return (item.generales || []).map((g) =>
-      'G/' + esc(g.concepto) + ' ' + esc(g.importe_es || '')
-    ).join(', ');
+  function textoExtrasDetalle(item) {
+    const partes = [];
+    (item.generales || []).forEach((g) => {
+      partes.push('G/' + esc(g.concepto) + ' ' + esc(g.importe_es || ''));
+    });
+    (item.plantillas || []).forEach((p) => {
+      partes.push(esc(p.nombre || ('Plantilla ' + p.plantilla_id)) + ' ' + esc(p.importe_es || ''));
+    });
+    return partes.join(', ');
   }
 
   async function mostrarDetalleLinea(remesaId, lineaId, etiqueta) {
@@ -74,11 +79,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('tabla-remesa-linea-detalle').hidden = false;
     items.forEach((x) => {
       const tr = document.createElement('tr');
-      const gen = textoGenerales(x);
+      const extras = textoExtrasDetalle(x);
       tr.innerHTML = '<td>' + esc(x.codigo || '') + '</td>'
         + '<td>' + esc(x.nombre || '') + '</td>'
         + '<td class="num">' + esc(x.importe_es || '') + '</td>'
-        + '<td>' + (gen ? gen : '<span class="muted">—</span>') + '</td>';
+        + '<td>' + (extras ? extras : '<span class="muted">—</span>') + '</td>';
       tbDet.appendChild(tr);
     });
     panelDetLinea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -187,5 +192,6 @@ document.addEventListener('DOMContentLoaded', () => {
     abrir(actualId);
   };
   filtros.onsubmit = (ev) => { ev.preventDefault(); cargarLista(); };
+  filtros.querySelector('[name=estado]').addEventListener('change', () => cargarLista());
   cargarLista();
 });

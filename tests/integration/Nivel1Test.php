@@ -22,6 +22,7 @@ use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\informes\application\CalcularSaldos;
 use src\personal\application\AsegurarPlanPersonal;
 use src\personal\application\CrearSubcuentaPersonal;
+use src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository;
 use src\personal\application\ListarMovimientosPersonales;
 use src\personal\application\RegistrarMovimientoPersonal;
 use src\personal\application\ResolverPersonaActual;
@@ -250,9 +251,19 @@ final class Nivel1Test extends TestCase
             'personaB' => $personaB->id,
             'cuentas' => $cuentas,
             'identidades' => $identidades,
-            'registrarA' => new RegistrarMovimientoPersonal($resolverA, $cuentas, $ejercicios, $asientos, $personas),
-            'listarA' => new ListarMovimientosPersonales($resolverA, $asientos, $cuentas),
-            'listarB' => new ListarMovimientosPersonales($resolverB, $asientos, $cuentas),
+            'registrarA' => new RegistrarMovimientoPersonal(
+                $resolverA,
+                $cuentas,
+                $ejercicios,
+                $asientos,
+                $personas,
+                new \src\personal\domain\services\ResolverCategoriaPlantillaPersonal(
+                    new PdoPlantillaApunteRepository($this->pdo),
+                    $cuentas,
+                ),
+            ),
+            'listarA' => new ListarMovimientosPersonales($resolverA, $asientos, $cuentas, new PdoPlantillaApunteRepository($this->pdo)),
+            'listarB' => new ListarMovimientosPersonales($resolverB, $asientos, $cuentas, new PdoPlantillaApunteRepository($this->pdo)),
             'subcuentaA' => new CrearSubcuentaPersonal($resolverA, $cuentas),
             'saldos' => new CalcularSaldos($asientos, $config, $personas, $ambitoCentro),
         ];

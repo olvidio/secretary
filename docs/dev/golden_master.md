@@ -145,7 +145,7 @@ lugar de `apuntes` + `SignoTesoreria`. Diferencias esperadas documentadas en
 | `importacion.json` | Añade `asientos: 423` (conversión automática tras import). |
 | `saldos.json` | `por_persona` y `saldo_a` desde cuentas personales (libro P); corrige el bug de mezclar apuntes G con iniciales. **Caja y banco sin cambio** (2.870,00 / 2.224,44). |
 | `resumen_613_p.json` | Línea código `9`: de `0.00` a saldo CC calculado (`216.36` = suma saldos `CC.*`). |
-| `e37_resumen.json` | `saldo_cc` por persona = saldo de su cuenta `CC.*`, no apuntes concepto 9. |
+| `e37_resumen.json` | `saldo_cc` por persona = saldo de su cuenta `CC.*`, no apuntes concepto 9. Clave `aviso_saldo_cc` (null en el Excel de muestra: nadie en negativo). |
 | `e37.json` | Misma forma Excel; **ids son de asientos** (no de apuntes); importes por concepto/persona deben coincidir. |
 
 **Valores clave (`saldos.json`, persona `ac`):** `saldo_a` **−15.000,00 → 0,00**

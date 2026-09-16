@@ -10,10 +10,12 @@
     mes: new Date().getMonth() + 1,
     fechaCierre: '',
     categorias: [],
+    plantillasCentro: [],
     conceptosGenerales: [],
     tesoreria: [],
     sentido: 'gasto',
     generalesActivo: false,
+    plantillaActivaId: null,
   };
 
   function qs(sel) { return document.querySelector(sel); }
@@ -83,6 +85,7 @@
     const r = await api('/api/yo/categorias');
     state.categorias = r.categorias || [];
     state.tesoreria = r.tesoreria || [];
+    state.plantillasCentro = r.plantillas || [];
     return r;
   }
 
@@ -129,6 +132,7 @@
     const cuenta = qs('#yo-form [name="cuenta_id"]');
     const esGasto = state.sentido === 'gasto';
     const enGenerales = esGasto && state.generalesActivo;
+    const enPlantilla = esGasto && state.plantillaActivaId != null;
     if (form) form.classList.toggle('yo-es-generales', enGenerales);
     if (pill) {
       pill.hidden = !esGasto;
@@ -136,13 +140,66 @@
       pill.textContent = state.generalesActivo ? 'Generales' : 'Personal';
       pill.setAttribute('aria-pressed', state.generalesActivo ? 'true' : 'false');
     }
-    if (cuenta) cuenta.required = esGasto && !enGenerales;
+    if (cuenta) cuenta.required = esGasto && !enGenerales && !enPlantilla;
     if (hidden) hidden.value = state.generalesActivo ? '1' : '0';
     if (enGenerales) {
       fijarCategoriaGenerales();
     } else if (grid && esGasto) {
       resaltarCategoriaSeleccionada();
     }
+  }
+
+  function resetPlantilla() {
+    state.plantillaActivaId = null;
+    const hidden = qs('#yo-form [name="plantilla_id"]');
+    if (hidden) hidden.value = '';
+    resaltarPlantillaSeleccionada();
+  }
+
+  function resaltarPlantillaSeleccionada() {
+    const grid = qs('#yo-plantillas-grid');
+    if (!grid) return;
+    const id = state.plantillaActivaId ? String(state.plantillaActivaId) : '';
+    grid.querySelectorAll('button').forEach((b) => {
+      b.classList.toggle('on', b.getAttribute('data-id') === id);
+    });
+  }
+
+  function pintarGridPlantillas() {
+    const wrap = qs('#yo-plantillas-wrap');
+    const grid = qs('#yo-plantillas-grid');
+    if (!wrap || !grid) return;
+    const plantillas = state.plantillasCentro || [];
+    wrap.hidden = state.sentido !== 'gasto' || plantillas.length === 0;
+    if (wrap.hidden) return;
+    grid.innerHTML = plantillas.map((p) =>
+      '<button type="button" data-id="' + p.id + '" data-cuenta="' + p.categoria_id + '"'
+      + ' style="border-top: 3px solid #7c3aed">'
+      + esc(p.nombre || p.etiqueta || 'Plantilla') + '</button>'
+    ).join('');
+    grid.querySelectorAll('button').forEach((b) => {
+      b.onclick = () => {
+        const id = Number(b.getAttribute('data-id'));
+        const cuenta = b.getAttribute('data-cuenta');
+        const catsGrid = qs('#yo-cats-grid');
+        if (state.plantillaActivaId === id) {
+          resetPlantilla();
+          return;
+        }
+        state.plantillaActivaId = id;
+        state.generalesActivo = false;
+        if (catsGrid) catsGrid.querySelectorAll('button').forEach((x) => x.classList.remove('on'));
+        const cuentaInp = qs('#yo-form [name="cuenta_id"]');
+        if (cuentaInp) cuentaInp.value = cuenta || '';
+        const hidden = qs('#yo-form [name="plantilla_id"]');
+        if (hidden) hidden.value = String(id);
+        const selG = qs('#yo-form [name="concepto_generales"]');
+        if (selG) selG.value = '';
+        actualizarPillGenerales();
+        resaltarPlantillaSeleccionada();
+      };
+    });
+    resaltarPlantillaSeleccionada();
   }
 
   function resetGenerales() {
@@ -188,6 +245,11 @@
   function fmtCantidadInput(n) {
     if (!Number.isFinite(n) || n <= 0) return '';
     return n.toFixed(2).replace('.', ',');
+  }
+
+  function movimientoEsDeCaja(m) {
+    if (m.sentido === 'traspaso') return true;
+    return String(m.tesoreria || '').toUpperCase() === 'CAJA';
   }
 
   function menuMovimientoHtml(m) {
@@ -246,6 +308,7 @@
     ul.innerHTML = '';
     movs.slice().reverse().forEach((m) => {
       const li = document.createElement('li');
+      if (movimientoEsDeCaja(m)) li.classList.add('yo-mov-caja');
       const letra = (m.categoria || m.sentido || '?').slice(0, 1).toUpperCase();
       const cls = m.sentido === 'ingreso' ? 'ing' : (m.sentido === 'gasto' ? 'gas' : '');
       const signo = m.sentido === 'ingreso' ? '+' : (m.sentido === 'gasto' ? '−' : '');
@@ -288,25 +351,106 @@
     return acortarEtiqueta(base, max) + (sugerida ? ' · sugerido' : '');
   }
 
-  function opcionesCategoria(sentido, seleccion) {
+  function partesConceptoBanco(texto) {
+    const t = String(texto || '').trim();
+    if (!t) return null;
+    const sep = ' · ';
+    const i = t.indexOf(sep);
+    if (i === -1) return { principal: t, detalle: '' };
+    return { principal: t.slice(0, i), detalle: t.slice(i + sep.length) };
+  }
+
+  function htmlTooltipConcepto(texto) {
+    const partes = partesConceptoBanco(texto);
+    if (!partes) return '';
+    let html = '<span class="yo-banco-tip-prin">' + esc(partes.principal) + '</span>';
+    if (partes.detalle) {
+      html += '<span class="yo-banco-tip-det">' + esc(partes.detalle) + '</span>';
+    }
+    return html;
+  }
+
+  function textoTruncado(el) {
+    if (!el) return false;
+    return el.scrollWidth > el.clientWidth + 1;
+  }
+
+  function enlazarTooltip(el, wrap, texto) {
+    if (!el || !wrap) return;
+    const tip = document.createElement('span');
+    tip.className = 'yo-banco-tip';
+    tip.setAttribute('role', 'tooltip');
+    wrap.classList.add('yo-banco-has-tip');
+    wrap.appendChild(tip);
+    const actualizar = () => {
+      const valor = String(el.value || texto || '').trim();
+      if (!valor) {
+        wrap.classList.remove('yo-banco-tip-on');
+        tip.innerHTML = '';
+        wrap.removeAttribute('aria-label');
+        return;
+      }
+      tip.innerHTML = htmlTooltipConcepto(valor);
+      const partes = partesConceptoBanco(valor);
+      const activo = !!(partes && partes.detalle) || textoTruncado(el);
+      wrap.classList.toggle('yo-banco-tip-on', activo);
+      wrap.setAttribute('aria-label', activo ? valor : '');
+    };
+    actualizar();
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(actualizar);
+      ro.observe(el);
+    }
+    el.addEventListener('input', actualizar);
+  }
+
+  function tituloSelectCategoria(sel) {
+    if (!sel) return;
+    const opt = sel.options[sel.selectedIndex];
+    sel.title = opt ? (opt.getAttribute('data-nombre') || opt.textContent || '') : '';
+  }
+
+  function opcionesCategoria(sentido, seleccion, config) {
+    const vacioInicial = !!(config && config.vacioInicial);
     const cats = catsDelSentido(sentido);
     const sel = seleccion ? String(seleccion) : '';
-    let opts = cats.map((c) => {
+    let opts = '';
+    if (vacioInicial) {
+      opts += '<option value=""' + (sel === '' ? ' selected' : '') + '></option>';
+    }
+    opts += cats.map((c) => {
       const on = sel !== '' && String(c.id) === sel;
       const nombre = c.nombre || c.codigo;
       return '<option value="' + c.id + '"' + (on ? ' selected' : '')
-        + ' title="' + esc(nombre) + '">'
+        + ' data-nombre="' + esc(nombre) + '">'
         + esc(etiquetaCategoria(nombre, on)) + '</option>';
     }).join('');
     const tipo = sentido === 'ingreso' ? 'ingreso' : 'gasto';
     const otra = (state.categorias || []).find((c) => c.tipo === tipo && c.otra);
+    const traspasoSel = sel === 'traspaso_caja';
+    const traspasoNombre = sentido === 'ingreso' ? 'Traspaso desde caja' : 'Traspaso a caja';
+    opts += '<option disabled>────────</option>';
     if (otra) {
       const on = sel !== '' && String(otra.id) === sel;
       const nombre = otra.nombre || 'Otra contabilidad';
-      opts += '<option disabled>────────</option>';
       opts += '<option value="' + otra.id + '"' + (on ? ' selected' : '')
-        + ' title="' + esc(nombre) + '">'
+        + ' data-nombre="' + esc(nombre) + '">'
         + esc(etiquetaCategoria(nombre, on)) + '</option>';
+    }
+    opts += '<option value="traspaso_caja"' + (traspasoSel ? ' selected' : '')
+      + ' data-nombre="' + esc(traspasoNombre) + '">'
+      + esc(traspasoNombre) + '</option>';
+    const plantillas = sentido === 'gasto' ? (state.plantillasCentro || []) : [];
+    if (plantillas.length) {
+      opts += '<option disabled>────────</option>';
+      plantillas.forEach((p) => {
+        const val = 'plantilla:' + p.id;
+        const on = sel === val;
+        const nombre = p.nombre || p.etiqueta || 'Plantilla';
+        opts += '<option value="' + val + '"' + (on ? ' selected' : '')
+          + ' data-nombre="' + esc(nombre) + '">'
+          + esc(nombre) + '</option>';
+      });
     }
     return opts;
   }
@@ -321,6 +465,7 @@
     ).join('');
     grid.querySelectorAll('button').forEach((b) => {
       b.onclick = () => {
+        resetPlantilla();
         grid.querySelectorAll('button').forEach((x) => x.classList.remove('on'));
         b.classList.add('on');
         qs('#yo-form [name="cuenta_id"]').value = b.getAttribute('data-id');
@@ -369,6 +514,7 @@
     form.fecha.value = hoyIso();
     form.fecha_imputacion.value = '';
     resetGenerales();
+    resetPlantilla();
     const titulo = qs('#yo-form-titulo');
     if (sentido === 'traspaso') {
       if (titulo) titulo.textContent = 'Traspaso';
@@ -377,6 +523,7 @@
       if (titulo) titulo.textContent = sentido === 'ingreso' ? 'Ingreso' : 'Gasto';
       configurarFormulario(sentido);
       pintarGridCats(sentido);
+      pintarGridPlantillas();
     }
     modal.hidden = false;
   }
@@ -416,7 +563,13 @@
       if (titulo) titulo.textContent = 'Editar movimiento';
       configurarFormulario(m.sentido);
       pintarGridCats(m.sentido);
-      if (m.categoria_id && grid && !state.generalesActivo) {
+      pintarGridPlantillas();
+      if (m.plantilla_apunte_id) {
+        state.plantillaActivaId = m.plantilla_apunte_id;
+        form.plantilla_id.value = String(m.plantilla_apunte_id);
+        if (m.categoria_id) form.cuenta_id.value = String(m.categoria_id);
+        resaltarPlantillaSeleccionada();
+      } else if (m.categoria_id && grid && !state.generalesActivo) {
         form.cuenta_id.value = String(m.categoria_id);
         grid.querySelectorAll('button').forEach((b) => {
           b.classList.toggle('on', b.getAttribute('data-id') === String(m.categoria_id));
@@ -454,8 +607,8 @@
     form.asiento_id.value = String(m.id);
     const sel1 = form.cuenta_id1;
     const sel2 = form.cuenta_id2;
-    if (sel1) sel1.innerHTML = opcionesCategoria(m.sentido, m.categoria_id);
-    if (sel2) sel2.innerHTML = opcionesCategoria(m.sentido, '');
+    if (sel1) sel1.innerHTML = opcionesCategoria(m.sentido, '', { vacioInicial: true });
+    if (sel2) sel2.innerHTML = opcionesCategoria(m.sentido, '', { vacioInicial: true });
     form.nota1.value = m.nota || '';
     form.nota2.value = '';
     const resumen = qs('#yo-desdoblar-resumen');
@@ -513,6 +666,10 @@
         if (err) { err.textContent = 'Las dos partes deben sumar el total'; err.hidden = false; }
         return;
       }
+      if (!form.cuenta_id1.value || !form.cuenta_id2.value) {
+        if (err) { err.textContent = 'Elija la categoría de cada parte'; err.hidden = false; }
+        return;
+      }
       const id = form.asiento_id.value;
       const r = await api('/api/yo/movimientos/' + id + '/desdoblar', {
         method: 'POST',
@@ -549,6 +706,7 @@
       pill.onclick = () => {
         if (state.sentido !== 'gasto') return;
         state.generalesActivo = !state.generalesActivo;
+        if (state.generalesActivo) resetPlantilla();
         actualizarPillGenerales();
       };
     }
@@ -558,13 +716,20 @@
       const err = qs('#yo-form-err');
       err.hidden = true;
       const body = formObj(form);
-      body.gasto_generales = state.generalesActivo ? '1' : '0';
-      if (!state.generalesActivo) {
+      if (state.plantillaActivaId) {
+        body.plantilla_id = state.plantillaActivaId;
+        delete body.gasto_generales;
         delete body.concepto_generales;
-      } else if (!body.concepto_generales) {
-        err.textContent = 'Elija el concepto de generales (p. ej. Gas)';
-        err.hidden = false;
-        return;
+      } else {
+        body.gasto_generales = state.generalesActivo ? '1' : '0';
+        delete body.plantilla_id;
+        if (!state.generalesActivo) {
+          delete body.concepto_generales;
+        } else if (!body.concepto_generales) {
+          err.textContent = 'Elija el concepto de generales (p. ej. Gas)';
+          err.hidden = false;
+          return;
+        }
       }
       delete body.asiento_id;
       const id = form.asiento_id.value;
@@ -747,6 +912,9 @@
           (d.generales || []).forEach((g) => {
             gen += ' · G' + esc(g.concepto) + ' ' + esc(g.importe_es || '');
           });
+          (d.plantillas || []).forEach((p) => {
+            gen += ' · ' + esc(p.nombre || ('Plantilla ' + p.plantilla_id)) + ' ' + esc(p.importe_es || '');
+          });
         });
         return '<li><span class="meta"><strong>' + esc(l.codigo_maestro + ' · ' + (l.nombre || ''))
           + '</strong>' + (gen ? '<small>' + gen + '</small>' : '')
@@ -756,7 +924,7 @@
     if (hist) {
       hist.innerHTML = (r.historial || []).map((h) =>
         '<li><span class="meta"><strong>v' + esc(String(h.version)) + ' · ' + esc(h.estado)
-        + '</strong><small>' + esc(h.total_es) + '</small></span></li>'
+        + '</strong><small>' + esc(h.sobrante_es || h.total_es) + '</small></span></li>'
       ).join('');
     }
     const btn = qs('#yo-remesa-enviar');
@@ -817,11 +985,11 @@
     if (!b.ok) return alert(b.error || 'Error');
     const bancos = b.bancos || [];
     if (bancos.length) {
-      const actual = sel.value;
       sel.innerHTML = bancos.map((x) =>
         '<option value="' + esc(x.id) + '">' + esc(x.nombre) + '</option>'
       ).join('');
-      if (actual) sel.value = actual;
+      const guardado = b.banco && bancos.some((x) => x.id === b.banco) ? b.banco : '';
+      if (guardado) sel.value = guardado;
     }
     const inputFichero = qs('#yo-banco-fichero');
     function actualizarAcceptBanco() {
@@ -830,7 +998,13 @@
         ? '.csv,.xls,.xlsx,text/csv'
         : '.csv,text/csv';
     }
-    sel.onchange = actualizarAcceptBanco;
+    async function guardarPreferenciaBanco() {
+      await api('/api/yo/banco/preferencia', { method: 'POST', body: { banco: sel.value } });
+    }
+    sel.onchange = () => {
+      actualizarAcceptBanco();
+      guardarPreferenciaBanco();
+    };
     actualizarAcceptBanco();
     await cargarCategorias();
     await pintarListasBanco();
@@ -869,6 +1043,7 @@
   async function pintarListasBanco() {
     const r = await api('/api/yo/banco/pendientes');
     if (!r.ok) return alert(r.error || 'Error');
+    state.plantillasCentro = r.plantillas || [];
     pintarFilasBanco(qs('#yo-banco-pend'), qs('#yo-banco-vacio'), r.pendientes || []);
     pintarFilasBanco(qs('#yo-banco-otra'), qs('#yo-banco-otra-vacio'), r.otras || []);
   }
@@ -879,11 +1054,12 @@
     ul.innerHTML = '';
     rows.forEach((p) => {
       const li = document.createElement('li');
-      const opts = opcionesCategoria(p.sentido, p.sugerida_id);
+      const opts = opcionesCategoria(p.sentido, p.sugerida_id || '', { vacioInicial: true });
       const imp = String(p.importe || '').replace('.', ',');
       const texto = String(p.nota || p.concepto || '');
       li.innerHTML = '<span><strong>' + esc(fmtFecha(p.fecha)) + ' · ' + esc(imp) + '</strong></span>'
-        + '<div class="yo-banco-pend-acc"><div class="yo-banco-pend-row"><select>' + opts + '</select>'
+        + '<div class="yo-banco-pend-acc"><div class="yo-banco-pend-row">'
+        + '<div class="yo-banco-cat-wrap"><select>' + opts + '</select></div>'
         + '<button type="button" class="yo-banco-asignar">Asignar</button></div>'
         + '<div class="yo-banco-obs-wrap">'
         + '<input type="text" class="yo-banco-obs" placeholder="Observaciones" maxlength="250" autocomplete="off" value="' + esc(texto) + '">'
@@ -891,8 +1067,37 @@
         + '</div></div>';
       const btn = li.querySelector('.yo-banco-asignar');
       const choose = li.querySelector('select');
+      const catWrap = li.querySelector('.yo-banco-cat-wrap');
       const obs = li.querySelector('.yo-banco-obs');
+      const obsWrap = li.querySelector('.yo-banco-obs-wrap');
       const clear = li.querySelector('.yo-banco-obs-clear');
+      if (choose && catWrap) {
+        const syncCatTip = () => {
+          tituloSelectCategoria(choose);
+          const opt = choose.options[choose.selectedIndex];
+          const nombreCat = opt ? (opt.getAttribute('data-nombre') || opt.textContent || '') : '';
+          let tip = catWrap.querySelector('.yo-banco-tip');
+          if (!nombreCat) {
+            catWrap.classList.remove('yo-banco-has-tip', 'yo-banco-tip-on');
+            if (tip) tip.remove();
+            return;
+          }
+          if (!tip) {
+            tip = document.createElement('span');
+            tip.className = 'yo-banco-tip';
+            tip.setAttribute('role', 'tooltip');
+            catWrap.appendChild(tip);
+          }
+          tip.innerHTML = htmlTooltipConcepto(nombreCat);
+          catWrap.classList.add('yo-banco-has-tip');
+          catWrap.classList.toggle('yo-banco-tip-on', textoTruncado(choose) || nombreCat.length > 18);
+        };
+        choose.addEventListener('change', syncCatTip);
+        syncCatTip();
+      }
+      if (obs && obsWrap) {
+        enlazarTooltip(obs, obsWrap, texto || p.concepto || '');
+      }
       const syncClear = () => { if (clear) clear.hidden = !(obs && obs.value); };
       if (clear && obs) {
         clear.onclick = () => { obs.value = ''; syncClear(); obs.focus(); };
@@ -901,13 +1106,21 @@
       }
       if (btn && choose) {
         btn.onclick = async () => {
+          if (!choose.value) return alert('Elija una categoría del plan');
+          const body = {
+            asiento_id: p.asiento_id,
+            observaciones: obs ? obs.value : '',
+          };
+          if (choose.value === 'traspaso_caja') {
+            body.traspaso_caja = true;
+          } else if (String(choose.value).startsWith('plantilla:')) {
+            body.plantilla_id = Number(String(choose.value).slice(10));
+          } else {
+            body.cuenta_id = Number(choose.value);
+          }
           const s = await api('/api/yo/banco/categorizar', {
             method: 'POST',
-            body: {
-              asiento_id: p.asiento_id,
-              cuenta_id: Number(choose.value),
-              observaciones: obs ? obs.value : '',
-            },
+            body,
           });
           if (!s.ok) return alert(s.error || 'Error');
           await pintarListasBanco();

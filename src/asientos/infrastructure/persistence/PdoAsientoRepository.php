@@ -38,9 +38,9 @@ final class PdoAsientoRepository implements AsientoRepository
 
             $st = $this->pdo->prepare(
                 'INSERT INTO asientos (ejercicio_id, libro, numero, fecha, fecha_operacion, glosa, tipo, origen,
-                    persona_id, asiento_par_id, remesa_id, gasto_generales, concepto_generales)
+                    persona_id, asiento_par_id, remesa_id, gasto_generales, concepto_generales, plantilla_apunte_id)
                  VALUES (:ej, :lib, :num, :fecha, :fecha_op, :glosa, :tipo, :origen, :persona, :par, :remesa,
-                    :gen, :concepto_g)
+                    :gen, :concepto_g, :plantilla)
                  RETURNING id'
             );
             $st->execute([
@@ -57,6 +57,7 @@ final class PdoAsientoRepository implements AsientoRepository
                 ':remesa' => $asiento->remesaId,
                 ':gen' => $asiento->gastoGenerales ? 1 : 0,
                 ':concepto_g' => $asiento->conceptoGenerales,
+                ':plantilla' => $asiento->plantillaApunteId,
             ]);
             $asientoId = (int) $st->fetchColumn();
 
@@ -138,7 +139,8 @@ final class PdoAsientoRepository implements AsientoRepository
             $fechaOperacion = (new ConverterDate('date', $asiento->fechaOperacion()))->toPg();
             $st = $this->pdo->prepare(
                 'UPDATE asientos SET fecha = :fecha, fecha_operacion = :fecha_op, glosa = :glosa,
-                    tipo = :tipo, origen = :origen, persona_id = :persona, updated_at = now()
+                    tipo = :tipo, origen = :origen, persona_id = :persona,
+                    plantilla_apunte_id = :plantilla, updated_at = now()
                  WHERE id = :id'
             );
             $st->execute([
@@ -148,6 +150,7 @@ final class PdoAsientoRepository implements AsientoRepository
                 ':tipo' => $asiento->tipo,
                 ':origen' => $asiento->origen,
                 ':persona' => $asiento->personaId,
+                ':plantilla' => $asiento->plantillaApunteId,
                 ':id' => $asiento->id,
             ]);
 
@@ -840,6 +843,9 @@ final class PdoAsientoRepository implements AsientoRepository
             !empty($row['gasto_generales']),
             isset($row['concepto_generales']) && $row['concepto_generales'] !== ''
                 ? (string) $row['concepto_generales']
+                : null,
+            isset($row['plantilla_apunte_id']) && $row['plantilla_apunte_id'] !== null
+                ? (int) $row['plantilla_apunte_id']
                 : null,
         );
     }

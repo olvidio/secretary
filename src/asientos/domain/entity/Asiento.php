@@ -30,6 +30,7 @@ final class Asiento
         public readonly ?int $remesaId = null,
         public readonly bool $gastoGenerales = false,
         public readonly ?string $conceptoGenerales = null,
+        public readonly ?int $plantillaApunteId = null,
     ) {
         if (!in_array($libro, ['P', 'G', 'X'], true)) {
             throw new InvalidArgumentException('Libro no válido: ' . $libro);
@@ -78,6 +79,7 @@ final class Asiento
             $this->remesaId,
             $this->gastoGenerales,
             $this->conceptoGenerales,
+            $this->plantillaApunteId,
         );
     }
 
@@ -100,6 +102,7 @@ final class Asiento
             $remesaId,
             $this->gastoGenerales,
             $this->conceptoGenerales,
+            $this->plantillaApunteId,
         );
     }
 
@@ -122,6 +125,7 @@ final class Asiento
             $this->remesaId,
             $this->gastoGenerales,
             $this->conceptoGenerales,
+            $this->plantillaApunteId,
         );
     }
 
@@ -144,6 +148,7 @@ final class Asiento
             $this->remesaId,
             $this->gastoGenerales,
             $this->conceptoGenerales,
+            $this->plantillaApunteId,
         );
     }
 
@@ -166,6 +171,7 @@ final class Asiento
             $this->remesaId,
             $this->gastoGenerales,
             $this->conceptoGenerales,
+            $this->plantillaApunteId,
         );
     }
 
@@ -188,6 +194,7 @@ final class Asiento
             'remesa_id' => $this->remesaId,
             'gasto_generales' => $this->gastoGenerales,
             'concepto_generales' => $this->conceptoGenerales,
+            'plantilla_apunte_id' => $this->plantillaApunteId,
             'movimientos' => array_map(static fn (Movimiento $m) => $m->toArray(), $this->movimientos),
         ];
     }

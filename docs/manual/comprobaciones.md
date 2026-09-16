@@ -24,6 +24,6 @@ Contrasta el libro personal con el general y avisa de dos cosas que se escapan c
 
 ## Problemas frecuentes
 
-- **Alguien aparece con diferencia en vivienda**: falta uno de los dos apuntes, o los importes no coinciden. Los enlaces de la fila llevan directamente a los apuntes de cada lado.
+- **Alguien aparece con diferencia en vivienda**: falta uno de los dos apuntes, o los importes no coinciden. Los enlaces de la fila llevan directamente a los apuntes de cada lado. El cierre automático genera los dos a la vez (P/21 y G/11); si Comprobaciones cuadra y aun así la c/c está en negativo, G ya cobró esa vivienda y el desfase está en el libro personal (falta el 111 de esos automáticos). Ver Cierre de mes y E37.
 - **Alguien sale en «meses sin movimiento» y no debería**: si de verdad no estaba esos meses, hay que marcarle la exención en Nombres. Si sí estaba, faltan apuntes.
 - **Aparece un aviso con unas iniciales desconocidas**: hay apuntes a nombre de una persona que no está dada de alta en Nombres, o con las iniciales mal escritas.

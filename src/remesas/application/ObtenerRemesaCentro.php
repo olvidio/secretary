@@ -17,6 +17,7 @@ final class ObtenerRemesaCentro
         private readonly ResolverAmbitoActual $ambito,
         private readonly RemesaRepository $remesas,
         private readonly PersonaRepository $personas,
+        private readonly EnriquecerLineasRemesa $enriquecerLineas,
     ) {
     }
 
@@ -40,7 +41,7 @@ final class ObtenerRemesaCentro
             $fila['solicitud'] = $sol?->toArray();
             $lineasOut[] = $fila;
         }
-        $out['lineas'] = $lineasOut;
+        $out['lineas'] = $this->enriquecerLineas->ejecutar($remesa->centroId, $lineasOut);
         $aceptada = $this->remesas->aceptadaDe(
             $remesa->personaId,
             $remesa->ejercicioId,

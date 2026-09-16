@@ -70,6 +70,10 @@ final class ConstructorAsientoPeriodificado
             $origen->conceptoCodigo,
             null,
             $fechaOperacion,
+            $origen->remesaId,
+            $origen->gastoGenerales,
+            $origen->conceptoGenerales,
+            $origen->plantillaApunteId,
         );
 
         $tesoreria = new Asiento(
@@ -89,6 +93,7 @@ final class ConstructorAsientoPeriodificado
             $origen->conceptoCodigo,
             null,
             $fechaOperacion,
+            $origen->remesaId,
         );
 
         return ['imputacion' => $imputacion, 'tesoreria' => $tesoreria];

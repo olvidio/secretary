@@ -4,7 +4,7 @@
     <label>Estado
         <select name="estado">
             <option value="">Todas</option>
-            <option value="enviada" selected>Enviadas</option>
+            <option value="enviada" selected>Recibidas</option>
             <option value="aceptada">Aceptadas</option>
             <option value="rechazada">Rechazadas</option>
             <option value="sustituida">Sustituidas</option>
@@ -20,7 +20,7 @@
         <th>Persona</th>
         <th>V.</th>
         <th>Estado</th>
-        <th class="num">Importe</th>
+        <th class="num">Disponible</th>
         <th>Enviada</th>
         <th></th>
     </tr>
@@ -45,7 +45,7 @@
         <p class="muted">Subcuentas del libro personal que suman la línea. Solo lectura; no crea cuentas en el centro.</p>
         <table id="tabla-remesa-linea-detalle">
             <thead>
-            <tr><th>Subcuenta</th><th>Nombre</th><th class="num">Importe</th><th>Generales</th></tr>
+            <tr><th>Subcuenta</th><th>Nombre</th><th class="num">Importe</th><th>Generales / plantillas</th></tr>
             </thead>
             <tbody></tbody>
         </table>

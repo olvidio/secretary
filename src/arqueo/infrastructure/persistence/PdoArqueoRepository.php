@@ -37,6 +37,52 @@ final class PdoArqueoRepository implements ArqueoRepository
         return is_array($row) ? $this->hydrate($row) : null;
     }
 
+    public function ultimoEnCierre(int $ejercicioId, string $cuenta, \DateTimeImmutable $fechaCierre): ?Arqueo
+    {
+        $st = $this->pdo->prepare(
+            'SELECT * FROM arqueos
+             WHERE ejercicio_id = :ej AND cuenta = :c AND fecha <= :fc
+             ORDER BY fecha DESC, id DESC LIMIT 1'
+        );
+        $st->execute([
+            ':ej' => $ejercicioId,
+            ':c' => strtoupper($cuenta),
+            ':fc' => (new ConverterDate('date', $fechaCierre))->toPg(),
+        ]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
+    public function ultimoCajaEnCierre(
+        int $ejercicioId,
+        \DateTimeImmutable $fechaCierre,
+        ?int $cuentaFisicaId = null,
+    ): ?Arqueo {
+        $fechaPg = (new ConverterDate('date', $fechaCierre))->toPg();
+        if ($cuentaFisicaId !== null) {
+            $st = $this->pdo->prepare(
+                'SELECT * FROM arqueos
+                 WHERE ejercicio_id = :ej AND cuenta_fisica_id = :cf AND fecha <= :fc
+                 ORDER BY fecha DESC, id DESC LIMIT 1'
+            );
+            $st->execute([':ej' => $ejercicioId, ':cf' => $cuentaFisicaId, ':fc' => $fechaPg]);
+            $row = $st->fetch();
+            if (is_array($row)) {
+                return $this->hydrate($row);
+            }
+        }
+        $st = $this->pdo->prepare(
+            "SELECT * FROM arqueos
+             WHERE ejercicio_id = :ej AND fecha <= :fc AND cuenta IN ('P', 'G', 'C')
+             ORDER BY fecha DESC, id DESC LIMIT 1"
+        );
+        $st->execute([':ej' => $ejercicioId, ':fc' => $fechaPg]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
     public function guardar(Arqueo $arqueo): Arqueo
     {
         $sql = 'INSERT INTO arqueos (cuenta, fecha, desglose_json, total_dinero, total_vales, total,

@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace src\informes\application;
 
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\domain\contracts\CuentaFisicaRepository;
+use src\arqueo\domain\contracts\ArqueoRepository;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\informes\domain\contracts\Informe613MesRepository;
+use src\cierre\domain\services\RepartoCierre;
 use src\informes\domain\services\Calculadora613;
 use src\plan\domain\contracts\PartidaLaboresRepository;
 use src\plan\domain\services\CatalogoPlanesContables;
@@ -26,6 +29,8 @@ final class ObtenerResumen613
         private readonly ResolverAmbitoActual $ambito,
         private readonly PartidaLaboresRepository $partidasLabores,
         private readonly Informe613MesRepository $informes613Mes,
+        private readonly ArqueoRepository $arqueos,
+        private readonly CuentaFisicaRepository $fisicas,
     ) {
     }
 
@@ -167,15 +172,11 @@ final class ObtenerResumen613
             $saldoIngGastosReal = (new Dinero($ingresos['realizado']))->sub(new Dinero($gastos['realizado']));
             $dispPrev = $saldoIngGastosPrev->add(new Dinero($ini['previsto']));
             $dispReal = $saldoIngGastosReal->add(new Dinero($ini['realizado']));
-            $n = $cfg->numResidentes;
-            if ($n === null) {
-                $n = 0;
-                foreach ($this->personas->listarDeCentro($contexto->centroId) as $p) {
-                    if (!$p->exentaEnMes((int) $cfg->fechaCierre->format('n'))) {
-                        $n++;
-                    }
-                }
-            }
+            $mesCierre = (int) $cfg->fechaCierre->format('n');
+            $n = count(RepartoCierre::inicialesEnReparto(
+                $this->personas->listarDeCentro($contexto->centroId),
+                $mesCierre,
+            ));
             $meses = max(1, $periodo->mesesTranscurridos());
             $gastoViv = $n > 0 ? (new Dinero($gastos['realizado']))->divInt($n * $meses) : Dinero::zero();
             $payload['totales'] = [
@@ -202,6 +203,7 @@ final class ObtenerResumen613
             $payload['saldo_banco'] = $banco->toString();
             $payload['saldo_banco_es'] = $banco->formatEs();
             $this->aplicarCamposManuales($payload, $contexto->ejercicioId, $cfg->fechaCierre, 'G');
+            $this->aplicarArqueoCaja($payload, $contexto, $cfg->fechaCierre, $caja);
         }
 
         return $payload;
@@ -224,6 +226,30 @@ final class ObtenerResumen613
             $payload['media_cocina_acum'] = $manual?->mediaCocinaAcum;
             $payload['dinero_arqueo_caja'] = $manual?->dineroArqueoCaja;
             $payload['dinero_arqueo_banco'] = $manual?->dineroArqueoBanco;
+        }
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function aplicarArqueoCaja(
+        array &$payload,
+        \src\ambito\domain\value_objects\ContextoActual $contexto,
+        \DateTimeImmutable $fechaCierre,
+        Dinero $saldoCaja,
+    ): void {
+        $cajas = $this->fisicas->listarActivasDeCentro($contexto->centroId, 'caja');
+        $cajaFisicaId = $cajas[0]->id ?? null;
+        $arqueo = $this->arqueos->ultimoCajaEnCierre($contexto->ejercicioId, $fechaCierre, $cajaFisicaId);
+        if ($arqueo === null) {
+            return;
+        }
+        $payload['arqueo_total'] = $arqueo->total->toString();
+        $payload['arqueo_total_es'] = $arqueo->total->formatEs();
+        $dif = $arqueo->total->sub($saldoCaja);
+        $payload['arqueo_diferencia'] = $dif->toString();
+        $payload['arqueo_diferencia_es'] = $dif->formatEs();
+        $manual = trim((string) ($payload['dinero_arqueo_caja'] ?? ''));
+        if ($manual === '') {
+            $payload['dinero_arqueo_caja'] = $arqueo->total->formatEs();
         }
     }
 }

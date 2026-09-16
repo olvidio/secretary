@@ -37,8 +37,7 @@ final class GuardarConfiguracion
             $ini,
             $cie,
             $tipo,
-            isset($datos['num_residentes']) && $datos['num_residentes'] !== ''
-                ? (int) $datos['num_residentes'] : $actual->numResidentes,
+            $actual->numResidentes,
             $actual->version,
         );
         $this->repo->guardar($cfg);
