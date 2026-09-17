@@ -66,7 +66,7 @@ final class Calculadora613
 
     /**
      * @param list<array{codigo:string,etiqueta:string}>|null $partidasLabores
-     * @return list<array{codigo:string,etiqueta:string,codigos:list<string>}>
+     * @return list<array{codigo:string,etiqueta:string,codigos:list<string>,grupo:string}>
      */
     public static function estructuraP(?array $partidasLabores = null): array
     {

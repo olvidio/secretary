@@ -121,6 +121,19 @@ interface AsientoRepository
     ): array;
 
     /**
+     * Realizado del 613 por persona y código de concepto (positivo como en el Excel).
+     *
+     * @return array<int, array<string, int>> persona_id => concepto codigo => cents
+     */
+    public function realizadoPorConceptoYPersona(
+        int $centroId,
+        int $ejercicioId,
+        string $libro,
+        string $desde,
+        string $hasta,
+    ): array;
+
+    /**
      * Agregado E37 por persona y código maestro de concepto (ingreso/gasto).
      *
      * @return array<string, array<string, int>> iniciales => codigo_maestro => cents

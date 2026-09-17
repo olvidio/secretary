@@ -11,6 +11,7 @@ use src\acceso\application\ConfirmarTotp;
 use src\acceso\application\IniciarSesion;
 use src\acceso\application\ResolverPersonaActiva;
 use src\acceso\application\PrepararTotp;
+use src\acceso\application\ConfirmarEmailRegistro;
 use src\acceso\application\RegistrarUsuario;
 use src\acceso\application\VerificarSegundoFactor;
 use src\acceso\domain\entity\Identidad;
@@ -123,6 +124,7 @@ final class AutenticacionTest extends TestCase
         ));
         self::assertNotNull($id->id);
         $repo->vincularPersona($id->id, $personaId);
+        $repo->marcarEmailVerificado($id->id, new DateTimeImmutable());
 
         $resolver = new ResolverPersonaActiva($repo);
         $login = (new IniciarSesion($repo, $resolver))->ejecutar('ana@example.test', 'clave');
@@ -217,6 +219,10 @@ final class AutenticacionTest extends TestCase
         ))->ejecutar('dani', 'dani@example.test', 'secret1', 'secret1', 'Dani');
         self::assertNotNull($alta['identidad']->id);
         $resolver = new ResolverPersonaActiva($identidades);
+        $pendiente = (new IniciarSesion($identidades, $resolver))->ejecutar('dani', 'secret1');
+        self::assertSame('fallo', $pendiente->estado);
+        self::assertStringContainsString('correo', strtolower($pendiente->mensaje));
+        (new ConfirmarEmailRegistro($identidades))->ejecutar($alta['token_verificacion']);
         $login = (new IniciarSesion($identidades, $resolver))->ejecutar('dani', 'secret1');
         self::assertSame('autenticado', $login->estado);
         self::assertSame('persona', $login->nivel);

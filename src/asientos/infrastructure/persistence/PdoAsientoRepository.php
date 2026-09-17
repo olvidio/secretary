@@ -727,6 +727,52 @@ final class PdoAsientoRepository implements AsientoRepository
         return $out;
     }
 
+    public function realizadoPorConceptoYPersona(
+        int $centroId,
+        int $ejercicioId,
+        string $libro,
+        string $desde,
+        string $hasta,
+    ): array {
+        $sql = "SELECT COALESCE(m.persona_id, a.persona_id) AS persona_id,
+                       c.codigo,
+                       CASE
+                         WHEN c.tipo IN ('ingreso', 'patrimonio') THEN COALESCE(SUM(m.haber - m.debe), 0)
+                         WHEN c.tipo = 'gasto' THEN COALESCE(SUM(m.debe - m.haber), 0)
+                         ELSE 0
+                       END AS realizado_cents
+                FROM cuentas c
+                INNER JOIN movimientos m ON m.cuenta_id = c.id
+                INNER JOIN asientos a ON a.id = m.asiento_id
+                  AND a.ejercicio_id = :ej
+                  AND a.libro = :lib
+                  AND a.anulado_at IS NULL
+                  AND a.fecha >= :desde
+                  AND a.fecha <= :hasta
+                WHERE c.centro_id = :centro
+                  AND c.libro = :lib
+                  AND c.tipo IN ('ingreso', 'gasto', 'patrimonio')
+                  AND COALESCE(m.persona_id, a.persona_id) IS NOT NULL
+                GROUP BY COALESCE(m.persona_id, a.persona_id), c.codigo, c.tipo";
+
+        $st = $this->pdo->prepare($sql);
+        $st->execute([
+            ':centro' => $centroId,
+            ':ej' => $ejercicioId,
+            ':lib' => $libro,
+            ':desde' => $desde,
+            ':hasta' => $hasta,
+        ]);
+
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $pid = (int) $row['persona_id'];
+            $out[$pid][(string) $row['codigo']] = (int) $row['realizado_cents'];
+        }
+
+        return $out;
+    }
+
     public function movimientosE37PorPersona(
         int $centroId,
         int $ejercicioId,

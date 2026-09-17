@@ -6,7 +6,9 @@ namespace src\acceso\infrastructure\http;
 
 use src\acceso\application\ConfirmarTotp;
 use src\acceso\application\IniciarSesion;
+use src\acceso\application\NotificarRegistroUsuario;
 use src\acceso\application\PrepararTotp;
+use src\acceso\application\ReenviarCorreoVerificacion;
 use src\acceso\application\RegistrarUsuario;
 use src\acceso\application\ResolverPersonaActiva;
 use src\acceso\application\ResultadoLogin;
@@ -25,6 +27,8 @@ final class AuthController
         private readonly VerificarSegundoFactor $verificarTotp,
         private readonly IdentidadRepository $identidades,
         private readonly RegistrarUsuario $registrar,
+        private readonly NotificarRegistroUsuario $notificarRegistro,
+        private readonly ReenviarCorreoVerificacion $reenviarVerificacion,
         private readonly ResolverPersonaActiva $resolverPersona,
     ) {
     }
@@ -211,32 +215,50 @@ final class AuthController
         $centroId = $centroRaw === null || $centroRaw === '' ? null : (int) $centroRaw;
         try {
             $alta = $this->registrar->ejecutar($alias, $email, $pass, $confirm, $nombre, $centroId);
+            $this->notificarRegistro->ejecutar((int) $alta['identidad']->id, $alta['token_verificacion']);
         } catch (\InvalidArgumentException $e) {
             return $this->falloRegistro($request, $e->getMessage(), $alias, $email, $nombre, $centroId);
+        } catch (\Throwable $e) {
+            return $this->falloRegistro(
+                $request,
+                _('No se pudo enviar el correo de confirmación. Compruebe la configuración de correo o póngase en contacto con el administrador.'),
+                $alias,
+                $email,
+                $nombre,
+                $centroId,
+            );
         }
-        $res = $this->iniciar->ejecutar($alta['identidad']->alias ?? $alias, $pass);
-        if (!$res->ok()) {
-            return $this->falloLogin($request, $res->mensaje, $alias);
+        if ($this->esJson($request)) {
+            return ContestarJson::ok([
+                'siguiente' => '/registro-enviado',
+                'email' => strtolower(trim($email)),
+            ]);
         }
-        $this->limpiarSesionParcial();
-        session_regenerate_id(true);
-        ProteccionCsrf::asegurarToken();
-        $_SESSION['pending_identidad_id'] = $res->identidadId;
-        $_SESSION['usuario'] = $res->nombre !== '' ? $res->nombre : $res->email;
-        $_SESSION['pending_centros'] = $res->centros;
-        $_SESSION['pending_nivel'] = $res->nivel;
-        $_SESSION['pending_email'] = $res->email;
-        $_SESSION['pending_persona_id'] = $res->personaId;
-        if ($res->estado === 'autenticado') {
-            $this->completarSesion($res);
+        $_SESSION['registro_email'] = strtolower(trim($email));
 
-            return $this->exitoLogin($request, $this->siguienteTrasAuth($res));
-        }
-        if ($res->estado === 'pendiente_activar') {
-            return $this->exitoLogin($request, '/totp-activar');
-        }
+        return Response::redirect('/registro-enviado');
+    }
 
-        return $this->exitoLogin($request, '/totp-verificar');
+    public function reenviarVerificacion(Request $request, array $vars = []): Response
+    {
+        $email = trim((string) $request->input('email', ''));
+        try {
+            $this->reenviarVerificacion->ejecutar($email);
+        } catch (\InvalidArgumentException $e) {
+            if ($this->esJson($request)) {
+                return ContestarJson::error($e->getMessage(), 400);
+            }
+            $_SESSION['login_error'] = $e->getMessage();
+
+            return Response::redirect('/registro-enviado');
+        }
+        if ($this->esJson($request)) {
+            return ContestarJson::ok(['mensaje' => _('Si la cuenta existe y no está confirmada, le hemos enviado un nuevo correo.')]);
+        }
+        $_SESSION['registro_email'] = strtolower(trim($email));
+        $_SESSION['registro_ok'] = _('Si la cuenta existe y no está confirmada, le hemos enviado un nuevo correo.');
+
+        return Response::redirect('/registro-enviado');
     }
 
     public function logout(Request $request, array $vars = []): Response

@@ -2,11 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= _("Activar 2FA — Secretario") ?></title>
     <link rel="stylesheet" href="/css/app.css">
 </head>
 <body class="login">
-<form method="post" action="/totp-activar" class="login-box login-box--totp">
+<form method="post" action="/totp-activar" class="login-box">
     <h1><?= _("Segundo factor") ?></h1>
     <p><?= _("Escanea el código QR con tu aplicación de autenticación (Google Authenticator, Aegis, etc.) y confirma con un código de 6 dígitos.") ?></p>
     <?php if (!empty($error)): ?>

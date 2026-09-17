@@ -44,6 +44,12 @@ final class IniciarSesion
 
             return new ResultadoLogin('fallo', _("Usuario o contraseña incorrectos"));
         }
+        if (!$this->identidades->emailVerificado($identidad->id)) {
+            return new ResultadoLogin(
+                'fallo',
+                _("Confirme su correo antes de entrar. Revise su bandeja o solicite un nuevo enlace desde el registro."),
+            );
+        }
 
         $centros = [];
         foreach ($this->identidades->centrosDe($identidad->id) as $v) {

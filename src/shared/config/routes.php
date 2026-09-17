@@ -19,6 +19,7 @@ use src\personas\infrastructure\http\PersonaController;
 use src\personas\infrastructure\http\VinculoCentroController;
 use src\plan\infrastructure\http\PartidaLaboresController;
 use src\presupuestos\infrastructure\http\PresupuestoController;
+use src\presupuestos\infrastructure\http\PrevisionController;
 use src\acceso\infrastructure\http\AuthController;
 use src\acceso\infrastructure\http\PreferenciaController;
 use src\personal\infrastructure\http\BancoPersonalController;
@@ -34,6 +35,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/login', [AuthController::class, 'login']);
     $r->addRoute('POST', '/api/registro', [AuthController::class, 'registro']);
     $r->addRoute('POST', '/registro', [AuthController::class, 'registro']);
+    $r->addRoute('POST', '/api/registro/reenviar', [AuthController::class, 'reenviarVerificacion']);
+    $r->addRoute('POST', '/registro/reenviar', [AuthController::class, 'reenviarVerificacion']);
     $r->addRoute('GET', '/logout', [AuthController::class, 'logout']);
     $r->addRoute('GET', '/api/csrf', [AuthController::class, 'csrf']);
     $r->addRoute('POST', '/totp-activar', [AuthController::class, 'totpConfirmar']);
@@ -107,6 +110,10 @@ return static function (RouteCollector $r): void {
 
     $r->addRoute('GET', '/api/presupuestos/{cuenta:P|G}', [PresupuestoController::class, 'get']);
     $r->addRoute('POST', '/api/presupuestos/{cuenta:P|G}', [PresupuestoController::class, 'save']);
+    $r->addRoute('GET', '/api/previsiones/personal/{personaId:\d+}', [PrevisionController::class, 'getPersonal']);
+    $r->addRoute('POST', '/api/previsiones/personal/{personaId:\d+}', [PrevisionController::class, 'savePersonal']);
+    $r->addRoute('GET', '/api/previsiones', [PrevisionController::class, 'getConsolidada']);
+    $r->addRoute('POST', '/api/previsiones/aplicar-presupuesto', [PrevisionController::class, 'aplicarPresupuesto']);
 
     $r->addRoute('GET', '/api/arqueos/capuchinos', [ArqueoController::class, 'capuchinos']);
     $r->addRoute('GET', '/api/arqueos/{cuenta:P|G}', [ArqueoController::class, 'get']);

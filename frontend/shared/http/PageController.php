@@ -6,6 +6,7 @@ namespace frontend\shared\http;
 
 use frontend\shared\config\CatalogoMenus;
 use frontend\shared\view\View;
+use src\acceso\application\ConfirmarEmailRegistro;
 use src\acceso\application\PrepararTotp;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\value_objects\IdiomaUsuario;
@@ -23,6 +24,7 @@ final class PageController
         private readonly PrepararTotp $prepararTotp,
         private readonly IdentidadRepository $identidades,
         private readonly CentroRepository $centros,
+        private readonly ConfirmarEmailRegistro $confirmarEmail,
     ) {
     }
 
@@ -88,6 +90,45 @@ final class PageController
             'centros' => $centros,
             'centroId' => $centroId,
         ]));
+    }
+
+    public function registroEnviado(Request $request, array $vars = []): Response
+    {
+        $email = (string) ($_SESSION['registro_email'] ?? '');
+        unset($_SESSION['registro_email']);
+        $ok = $_SESSION['registro_ok'] ?? null;
+        unset($_SESSION['registro_ok']);
+        $error = $_SESSION['login_error'] ?? null;
+        unset($_SESSION['login_error']);
+
+        return Response::html($this->view->standalone('login/view/registro_enviado.php', [
+            'email' => $email,
+            'ok' => $ok,
+            'error' => $error,
+            'csrf' => ProteccionCsrf::renovarToken(),
+        ]));
+    }
+
+    public function confirmarEmail(Request $request, array $vars = []): Response
+    {
+        $token = trim((string) ($request->query('token', '') ?? ''));
+        if ($token !== '') {
+            try {
+                $this->confirmarEmail->ejecutar($token);
+                $ok = true;
+                $mensaje = _('Su correo está confirmado. Ya puede entrar.');
+            } catch (\InvalidArgumentException $e) {
+                $ok = false;
+                $mensaje = $e->getMessage();
+            }
+
+            return Response::html($this->view->standalone('login/view/confirmar_email.php', [
+                'ok' => $ok,
+                'mensaje' => $mensaje,
+            ]));
+        }
+
+        return Response::redirect('/login');
     }
 
     public function totpActivar(Request $request, array $vars = []): Response

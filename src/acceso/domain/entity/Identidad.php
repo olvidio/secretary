@@ -19,7 +19,13 @@ final class Identidad
         public readonly ?DateTimeImmutable $bloqueadoHasta,
         public readonly ?DateTimeImmutable $ultimoAcceso,
         public readonly ?string $alias = null,
+        public readonly ?DateTimeImmutable $emailVerificadoAt = null,
     ) {
+    }
+
+    public function emailVerificado(): bool
+    {
+        return $this->emailVerificadoAt !== null;
     }
 
     public function estaBloqueada(DateTimeImmutable $ahora): bool

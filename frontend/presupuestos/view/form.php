@@ -1,6 +1,12 @@
 <?php $cuenta = $cuentaPresupuesto ?? 'P'; ?>
 <h1><?= sprintf(_("Presupuesto %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
 <p class="muted"><?= _("Celdas de previsto anual. El 613 prorratea × meses / 12.") ?></p>
+<?php if ($cuenta === 'P'): ?>
+<p class="muted"><?= _("Para generar las cifras del libro P, use") ?>
+    <a href="/prevision-personal"><?= _("Previsión personal") ?></a>
+    <?= _("y") ?>
+    <a href="/prevision"><?= _("Previsión") ?></a>.</p>
+<?php endif; ?>
 <form id="form-presu">
 <table>
     <thead><tr><th><?= _("Concepto") ?></th><th class="num"><?= _("Previsto") ?></th></tr></thead>

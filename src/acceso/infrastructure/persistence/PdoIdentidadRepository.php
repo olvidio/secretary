@@ -391,6 +391,93 @@ final class PdoIdentidadRepository implements IdentidadRepository
         $st->execute([':i' => $idioma, ':id' => $identidadId]);
     }
 
+    public function emailVerificado(int $identidadId): bool
+    {
+        $st = $this->pdo->prepare('SELECT email_verificado_at FROM identidades WHERE id = :id');
+        $st->execute([':id' => $identidadId]);
+        $v = $st->fetchColumn();
+
+        return $v !== false && $v !== null && $v !== '';
+    }
+
+    public function guardarVerificacionEmail(int $identidadId, string $token, DateTimeImmutable $expira): void
+    {
+        $st = $this->pdo->prepare(
+            'UPDATE identidades
+             SET email_verificacion_token = :t,
+                 email_verificacion_expira = :e,
+                 email_verificado_at = NULL
+             WHERE id = :id'
+        );
+        $st->execute([
+            ':t' => $token,
+            ':e' => $expira->format('c'),
+            ':id' => $identidadId,
+        ]);
+    }
+
+    public function porTokenVerificacionEmail(string $token): ?array
+    {
+        $token = trim($token);
+        if ($token === '') {
+            return null;
+        }
+        $st = $this->pdo->prepare(
+            'SELECT id, email_verificacion_expira
+             FROM identidades
+             WHERE email_verificacion_token = :t
+             LIMIT 1'
+        );
+        $st->execute([':t' => $token]);
+        $row = $st->fetch();
+        if (!is_array($row) || empty($row['email_verificacion_expira'])) {
+            return null;
+        }
+
+        return [
+            'identidad_id' => (int) $row['id'],
+            'expira' => new DateTimeImmutable((string) $row['email_verificacion_expira']),
+        ];
+    }
+
+    public function confirmarEmail(int $identidadId, DateTimeImmutable $cuando): void
+    {
+        $st = $this->pdo->prepare(
+            'UPDATE identidades
+             SET email_verificado_at = :v,
+                 email_verificacion_token = NULL,
+                 email_verificacion_expira = NULL
+             WHERE id = :id'
+        );
+        $st->execute([':v' => $cuando->format('c'), ':id' => $identidadId]);
+    }
+
+    public function marcarEmailVerificado(int $identidadId, DateTimeImmutable $cuando): void
+    {
+        $st = $this->pdo->prepare(
+            'UPDATE identidades
+             SET email_verificado_at = :v,
+                 email_verificacion_token = NULL,
+                 email_verificacion_expira = NULL
+             WHERE id = :id'
+        );
+        $st->execute([':v' => $cuando->format('c'), ':id' => $identidadId]);
+    }
+
+    public function tokenVerificacionDe(int $identidadId): ?string
+    {
+        $st = $this->pdo->prepare(
+            'SELECT email_verificacion_token FROM identidades WHERE id = :id'
+        );
+        $st->execute([':id' => $identidadId]);
+        $v = $st->fetchColumn();
+        if (!is_string($v) || $v === '') {
+            return null;
+        }
+
+        return $v;
+    }
+
     /** @param array<string, mixed> $row */
     private function hydrate(array $row): Identidad
     {
@@ -401,6 +488,10 @@ final class PdoIdentidadRepository implements IdentidadRepository
         $ultimo = null;
         if (!empty($row['ultimo_acceso'])) {
             $ultimo = new DateTimeImmutable((string) $row['ultimo_acceso']);
+        }
+        $emailVerificado = null;
+        if (!empty($row['email_verificado_at'])) {
+            $emailVerificado = new DateTimeImmutable((string) $row['email_verificado_at']);
         }
 
         return new Identidad(
@@ -415,6 +506,7 @@ final class PdoIdentidadRepository implements IdentidadRepository
             is_string($row['alias'] ?? null) && $row['alias'] !== ''
                 ? (string) $row['alias']
                 : null,
+            $emailVerificado,
         );
     }
 

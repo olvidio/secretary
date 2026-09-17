@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace src\acceso\application;
 
+use DateTimeImmutable;
 use InvalidArgumentException;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\entity\Identidad;
@@ -60,6 +61,7 @@ final class VincularEmailPersona
                     $actual->bloqueadoHasta,
                     $actual->ultimoAcceso,
                     $actual->alias,
+                    $actual->emailVerificadoAt,
                 ));
             }
             $this->personas->guardarEmail($persona->id, $email);
@@ -99,6 +101,7 @@ final class VincularEmailPersona
         if ($creada->id === null) {
             throw new InvalidArgumentException(_("No se pudo crear la cuenta personal"));
         }
+        $this->identidades->marcarEmailVerificado($creada->id, new DateTimeImmutable());
         $this->identidades->vincularPersona($creada->id, $persona->id);
         $this->personas->guardarEmail($persona->id, $email);
 

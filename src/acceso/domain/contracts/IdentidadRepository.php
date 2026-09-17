@@ -83,4 +83,17 @@ interface IdentidadRepository
     public function idiomaDe(int $identidadId): string;
 
     public function guardarIdioma(int $identidadId, string $idioma): void;
+
+    public function emailVerificado(int $identidadId): bool;
+
+    public function guardarVerificacionEmail(int $identidadId, string $token, DateTimeImmutable $expira): void;
+
+    /** @return array{identidad_id: int, expira: DateTimeImmutable}|null */
+    public function porTokenVerificacionEmail(string $token): ?array;
+
+    public function confirmarEmail(int $identidadId, DateTimeImmutable $cuando): void;
+
+    public function marcarEmailVerificado(int $identidadId, DateTimeImmutable $cuando): void;
+
+    public function tokenVerificacionDe(int $identidadId): ?string;
 }

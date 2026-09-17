@@ -45,6 +45,7 @@ final class CambiarPasswordUsuario
             $identidad->bloqueadoHasta,
             $identidad->ultimoAcceso,
             $identidad->alias,
+            $identidad->emailVerificadoAt,
         ));
     }
 }

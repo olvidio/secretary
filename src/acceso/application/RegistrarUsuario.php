@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace src\acceso\application;
 
+use DateTimeImmutable;
 use InvalidArgumentException;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\entity\Identidad;
+use src\acceso\domain\services\GeneradorTokenVerificacion;
 use src\ambito\application\AsegurarCuentaCorrientePersona;
 use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\entity\Centro;
@@ -30,7 +32,7 @@ final class RegistrarUsuario
     }
 
     /**
-     * @return array{identidad: Identidad, persona_id: int}
+     * @return array{identidad: Identidad, persona_id: int, token_verificacion: string}
      */
     public function ejecutar(
         string $alias,
@@ -113,7 +115,18 @@ final class RegistrarUsuario
         $this->cuentaCorriente->ejecutar($persona);
         $this->planPersonal->ejecutar($persona->centroId, $persona->id);
 
-        return ['identidad' => $creada, 'persona_id' => $persona->id];
+        $token = GeneradorTokenVerificacion::generar();
+        $this->identidades->guardarVerificacionEmail(
+            $creada->id,
+            $token,
+            (new DateTimeImmutable())->modify('+48 hours'),
+        );
+
+        return [
+            'identidad' => $this->identidades->porId($creada->id) ?? $creada,
+            'persona_id' => $persona->id,
+            'token_verificacion' => $token,
+        ];
     }
 
     private function resolverCentro(?int $centroId): Centro

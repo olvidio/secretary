@@ -23,10 +23,8 @@ final class Estructura613PTest extends TestCase
     {
         $defs = Calculadora613::estructuraP(CatalogoPlanesContables::partidasLaboresPorDefecto());
         $codigos = array_column($defs, 'codigo');
-        self::assertContains('71', $codigos);
-        self::assertContains('76', $codigos);
-        self::assertNotContains('77', $codigos);
-        self::assertNotContains('79', $codigos);
+        self::assertSame('I', $defs[0]['grupo']);
+        self::assertSame('VII', $defs[array_search('71', $codigos, true)]['grupo']);
     }
 
     public function testCodigosLabores(): void

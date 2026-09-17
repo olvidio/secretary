@@ -25,6 +25,40 @@ table { width: 100%; border-collapse: collapse; background: #fff; margin: 1rem 0
 th, td { border: 1px solid var(--line); padding: .35rem .5rem; text-align: left; }
 th { background: #edf2f7; }
 .num { text-align: right; font-variant-numeric: tabular-nums; }
+.tabla-scroll { overflow-x: auto; }
+body.prevision-hoja main { max-width: none; }
+.prevision-print-cab { display: none; }
+.prevision-print-imp { display: none; }
+.tabla-prevision {
+  width: 100%;
+  font-size: 13px;
+}
+.tabla-prevision th,
+.tabla-prevision td { white-space: nowrap; padding: .2rem .35rem; }
+.tabla-prevision .col-concepto {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 1;
+  white-space: normal;
+  min-width: 11rem;
+}
+.tabla-prevision thead .col-concepto { background: #edf2f7; z-index: 2; }
+.tabla-prevision .nombre-corto { display: none; }
+.tabla-prevision tr.prevision-padre td {
+  font-weight: 700;
+  background: #ececec;
+  border-top: 2px solid #4a5568;
+}
+.tabla-prevision tr.prevision-total td {
+  font-weight: 700;
+  background: #e2e8f0;
+  border-top: 2px solid #1a202c;
+  border-bottom: 2px solid #1a202c;
+}
+.tabla-prevision tr.prevision-hijo td.col-concepto { padding-left: 1.1rem; }
+.tabla-prevision tr.prevision-padre td.col-concepto { background: #ececec; }
+.tabla-prevision tr.prevision-total td.col-concepto { background: #e2e8f0; }
 tr.cierre { background: #fffbeb; }
 .grid-form, .filters { display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: end; margin-bottom: 1rem; }
 .entrada-cabecera {
@@ -75,6 +109,7 @@ button { background: var(--navy); color: #fff; border: 0; border-radius: 4px; cu
 button[type="button"] { background: #4a5568; }
 button.peligro, button[type="button"].peligro { background: var(--err); }
 .ok { color: var(--ok); }
+.muted { color: #4a5568; }
 .error { color: var(--err); }
 .sugerencias-wrap { position: relative; min-width: 16rem; }
 .sugerencias {
@@ -108,9 +143,9 @@ button.peligro, button[type="button"].peligro { background: var(--err); }
 .sugerencias button:hover, .sugerencias button.on { background: #edf2f7; }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; padding: 0; list-style: none; }
 .cards a { display: block; background: #fff; padding: 1rem; border: 1px solid var(--line); border-radius: 6px; text-decoration: none; }
-.login { display: grid; place-items: center; min-height: 100vh; }
-.login-box { background: #fff; padding: 2rem; border: 1px solid var(--line); width: 320px; display: grid; gap: .8rem; }
-.login-box--totp { width: min(28rem, calc(100vw - 2rem)); }
+.login { display: grid; place-items: center; min-height: 100vh; padding: 1rem; }
+.login-box { background: #fff; padding: 2rem; border: 1px solid var(--line); width: min(28rem, calc(100vw - 2rem)); display: grid; gap: .8rem; }
+.login-box input, .login-box select, .login-box button { width: 100%; }
 .login-alt { margin: 0; text-align: center; font-size: .9rem; }
 .totp-qr { display: flex; justify-content: center; padding: .5rem; background: #fff; border: 1px solid var(--line); border-radius: 6px; }
 .totp-qr img { display: block; }
@@ -559,6 +594,67 @@ body.e37-hoja main { max-width: none; }
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+  body.prevision-hoja .prevision-print-cab {
+    display: block;
+    font-size: 10pt;
+    font-weight: 700;
+    margin: 0 0 .35rem;
+  }
+  body.prevision-hoja .tabla-scroll { overflow: visible; }
+  body.prevision-hoja .tabla-prevision {
+    font-size: 7.5pt;
+    width: 100%;
+    min-width: 0;
+  }
+  body.prevision-hoja .tabla-prevision th,
+  body.prevision-hoja .tabla-prevision td {
+    padding: 1px 3px;
+  }
+  body.prevision-hoja .tabla-prevision .col-concepto {
+    position: static;
+    min-width: 0;
+    max-width: 8.2rem;
+    white-space: normal;
+    line-height: 1.15;
+  }
+  body.prevision-hoja .tabla-prevision .nombre-largo { display: none; }
+  body.prevision-hoja .tabla-prevision .nombre-corto { display: inline; }
+  body.prevision-hoja .tabla-prevision tr.prevision-padre td,
+  body.prevision-hoja .tabla-prevision tr.prevision-total td {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body.prevision-hoja .tabla-prevision thead { display: table-header-group; }
+  body.prevision-hoja .tabla-prevision tr { break-inside: avoid; }
+  body.prevision-personal-hoja .prevision-print-cab {
+    display: block;
+    font-size: 9pt;
+    font-weight: 700;
+    margin: 0 0 .25rem;
+  }
+  body.prevision-personal-hoja .detalle-acum { display: none; }
+  body.prevision-personal-hoja .prevision-print-imp { display: inline; }
+  body.prevision-personal-hoja .tabla-prevision {
+    font-size: 8pt;
+    width: 100%;
+  }
+  body.prevision-personal-hoja .tabla-prevision th,
+  body.prevision-personal-hoja .tabla-prevision td {
+    padding: 1px 3px;
+  }
+  body.prevision-personal-hoja .tabla-prevision .col-concepto {
+    position: static;
+    min-width: 0;
+    white-space: normal;
+    line-height: 1.15;
+  }
+  body.prevision-personal-hoja .tabla-prevision tr.prevision-padre td,
+  body.prevision-personal-hoja .tabla-prevision tr.prevision-total td {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body.prevision-personal-hoja .tabla-prevision thead { display: table-header-group; }
+  body.prevision-personal-hoja .tabla-prevision tr { break-inside: avoid; }
 }
 @page {
   size: A4 portrait;

@@ -88,12 +88,19 @@ final class RegistrarUsuarioTest extends TestCase
             }
         );
         $identidades->expects(self::once())->method('vincularPersona')->with(5, 10);
+        $identidades->expects(self::once())->method('guardarVerificacionEmail')->with(5, self::isType('string'), self::isInstanceOf(\DateTimeImmutable::class));
+        $identidades->method('porId')->willReturnCallback(
+            static fn (int $id): ?Identidad => $id === 5
+                ? new Identidad(5, 'dani@x.local', 'h', 'Dani', true, 0, null, null, 'dani', null)
+                : null,
+        );
 
         $out = $this->servicio($identidades, $personas, $centros)
             ->ejecutar('dani', 'dani@x.local', 'secret1', 'secret1', 'Dani');
         self::assertSame(5, $out['identidad']->id);
         self::assertSame(10, $out['persona_id']);
         self::assertSame('dani', $out['identidad']->alias);
+        self::assertNotSame('', $out['token_verificacion']);
     }
 
     public function testVariosCentrosExigenElegir(): void

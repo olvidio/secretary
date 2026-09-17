@@ -8,6 +8,8 @@ use frontend\shared\http\PageController;
 return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/login', [PageController::class, 'login']);
     $r->addRoute('GET', '/registro', [PageController::class, 'registro']);
+    $r->addRoute('GET', '/registro-enviado', [PageController::class, 'registroEnviado']);
+    $r->addRoute('GET', '/confirmar-email', [PageController::class, 'confirmarEmail']);
     $r->addRoute('GET', '/totp-activar', [PageController::class, 'totpActivar']);
     $r->addRoute('GET', '/totp-verificar', [PageController::class, 'totpVerificar']);
     $r->addRoute('GET', '/totp-codigos', [PageController::class, 'totpCodigos']);
@@ -41,6 +43,8 @@ return static function (RouteCollector $r): void {
         ['/centros', 'ambito/view/centros.php', 'centros'],
         ['/copias', 'shared/view/copias.php', 'copias'],
         ['/nombres', 'personas/view/listado.php', 'nombres'],
+        ['/prevision-personal', 'presupuestos/view/prevision_personal.php', 'prevision-personal'],
+        ['/prevision', 'presupuestos/view/prevision.php', 'prevision'],
         ['/presupuesto-p', 'presupuestos/view/form.php', 'presupuesto-p'],
         ['/presupuesto-g', 'presupuestos/view/form.php', 'presupuesto-g'],
         ['/apuntes', 'apuntes/view/listado.php', 'apuntes'],

@@ -100,10 +100,18 @@ use src\personas\application\ListarPersonas;
 use src\personas\domain\contracts\PersonaRepository;
 use src\personas\infrastructure\http\PersonaController;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
+use src\presupuestos\application\AplicarPrevisionAlPresupuesto;
+use src\presupuestos\application\ConstruirHojaPrevision;
 use src\presupuestos\application\GuardarPresupuesto;
+use src\presupuestos\application\GuardarPrevisionPersonal;
+use src\presupuestos\application\ObtenerPrevisionConsolidada;
+use src\presupuestos\application\ObtenerPrevisionPersonal;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
+use src\presupuestos\domain\contracts\PrevisionPersonalRepository;
 use src\presupuestos\infrastructure\http\PresupuestoController;
+use src\presupuestos\infrastructure\http\PrevisionController;
 use src\presupuestos\infrastructure\persistence\PdoPresupuestoRepository;
+use src\presupuestos\infrastructure\persistence\PdoPrevisionPersonalRepository;
 use src\plan\domain\contracts\PartidaLaboresRepository;
 use src\plan\domain\contracts\PlanContableRepository;
 use src\plan\infrastructure\persistence\PdoPartidaLaboresRepository;
@@ -117,7 +125,10 @@ use src\acceso\application\CambiarCentroUsuario;
 use src\acceso\application\CambiarPersonaUsuario;
 use src\acceso\application\CambiarPasswordUsuario;
 use src\acceso\application\CambiarTipoUsuario;
+use src\acceso\application\ConfirmarEmailRegistro;
 use src\acceso\application\ConfirmarTotp;
+use src\acceso\application\NotificarRegistroUsuario;
+use src\acceso\application\ReenviarCorreoVerificacion;
 use src\acceso\application\GuardarEmailUsuario;
 use src\acceso\application\GuardarIdiomaUsuario;
 use src\acceso\application\GuardarLayoutUsuario;
@@ -189,6 +200,8 @@ use src\shared\application\ListarCopiasSeguridad;
 use src\shared\application\RestaurarCopiaSeguridad;
 use src\shared\infrastructure\http\CopiaSeguridadController;
 use src\shared\infrastructure\persistence\AlmacenCopiasSeguridad;
+use src\shared\domain\contracts\EnviadorCorreo;
+use src\shared\infrastructure\mail\SmtpEnviadorCorreo;
 use src\shared\infrastructure\persistence\ConnectionFactory;
 use src\shared\infrastructure\persistence\PostgresDumper;
 use src\shared\infrastructure\persistence\RutasCopiasSeguridad;
@@ -203,6 +216,13 @@ return [
     ApunteRepository::class => autowire(PdoApunteRepository::class),
     PlantillaApunteRepository::class => autowire(PdoPlantillaApunteRepository::class),
     PresupuestoRepository::class => autowire(PdoPresupuestoRepository::class),
+    PrevisionPersonalRepository::class => autowire(PdoPrevisionPersonalRepository::class),
+    ConstruirHojaPrevision::class => autowire(),
+    ObtenerPrevisionPersonal::class => autowire(),
+    GuardarPrevisionPersonal::class => autowire(),
+    ObtenerPrevisionConsolidada::class => autowire(),
+    AplicarPrevisionAlPresupuesto::class => autowire(),
+    PrevisionController::class => autowire(),
     ArqueoRepository::class => autowire(PdoArqueoRepository::class),
     CentroRepository::class => autowire(PdoCentroRepository::class),
     PlanContableRepository::class => autowire(PdoPlanContableRepository::class),
@@ -263,7 +283,17 @@ return [
     IniciarSesion::class => autowire(),
     ResolverPersonaActiva::class => autowire(),
     CambiarPersonaUsuario::class => autowire(),
+    EnviadorCorreo::class => factory(static function (): EnviadorCorreo {
+        $host = ConnectionFactory::env('MAIL_HOST', '127.0.0.1') ?: '127.0.0.1';
+        $port = (int) (ConnectionFactory::env('MAIL_PORT', '25') ?: '25');
+        $from = ConnectionFactory::env('MAIL_FROM', 'secretario@localhost') ?: 'secretario@localhost';
+
+        return new SmtpEnviadorCorreo($host, $port, $from);
+    }),
     RegistrarUsuario::class => autowire(),
+    NotificarRegistroUsuario::class => autowire(),
+    ConfirmarEmailRegistro::class => autowire(),
+    ReenviarCorreoVerificacion::class => autowire(),
     PrepararTotp::class => autowire(),
     ConfirmarTotp::class => factory(static function (
         IdentidadRepository $identidades,

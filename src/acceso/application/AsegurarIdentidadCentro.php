@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace src\acceso\application;
 
+use DateTimeImmutable;
 use InvalidArgumentException;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\entity\Identidad;
@@ -74,6 +75,7 @@ final class AsegurarIdentidadCentro
                     $identidad->bloqueadoHasta,
                     $identidad->ultimoAcceso,
                     $identidad->alias ?? $alias,
+                    $identidad->emailVerificadoAt,
                 ));
             }
             if ($identidad->id === null) {
@@ -101,8 +103,9 @@ final class AsegurarIdentidadCentro
         if ($creada->id === null) {
             throw new InvalidArgumentException(_("No se pudo crear el usuario"));
         }
+        $this->identidades->marcarEmailVerificado($creada->id, new DateTimeImmutable());
         $this->identidades->vincularCentro($creada->id, $centroId, $rol);
 
-        return $creada;
+        return $this->identidades->porId($creada->id) ?? $creada;
     }
 }

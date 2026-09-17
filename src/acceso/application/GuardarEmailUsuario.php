@@ -41,6 +41,7 @@ final class GuardarEmailUsuario
             $identidad->bloqueadoHasta,
             $identidad->ultimoAcceso,
             $identidad->alias,
+            $identidad->emailVerificadoAt,
         ));
         foreach ($this->identidades->personasDe($identidadId) as $personaId) {
             $this->personas->guardarEmail($personaId, $email);

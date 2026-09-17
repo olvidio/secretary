@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace src\acceso\infrastructure\persistence;
 
+use DateTimeImmutable;
 use PDO;
 use src\acceso\application\CatalogoRutas;
 use src\acceso\domain\entity\Identidad;
@@ -73,6 +74,7 @@ final class AccesoSeeder
         if ($identidad->id === null) {
             return;
         }
+        $repo->marcarEmailVerificado($identidad->id, new DateTimeImmutable());
         if ($repo->centrosDe($identidad->id) !== []) {
             return;
         }
@@ -127,6 +129,7 @@ final class AccesoSeeder
         if ($identidad->id === null) {
             return;
         }
+        $repo->marcarEmailVerificado($identidad->id, new DateTimeImmutable());
         if ($repo->personasDe($identidad->id) !== []) {
             return;
         }

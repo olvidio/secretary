@@ -10,6 +10,8 @@ Anota lo previsto para el año en cada concepto. Hay dos pantallas, una para el 
 
 Estas cantidades son la columna de «previsto» con la que se compara lo realmente gastado o ingresado en el resumen mensual 613.
 
+En el libro P, las cifras se pueden generar primero en **Previsión personal** (una hoja por persona) y **Previsión** (el total del centro), y luego copiarlas aquí con «Aplicar al presupuesto P».
+
 ## Cómo se usa
 
 1. Abrir «Presupuesto P» o «Presupuesto G», según el libro que se quiera presupuestar.
@@ -23,6 +25,7 @@ Estas cantidades son la columna de «previsto» con la que se compara lo realmen
 - Una casilla vacía cuenta como cero.
 - Los importes admiten coma o punto como separador de decimales.
 - P y G son independientes: guardar uno no toca el otro.
+- En P, «Aplicar al presupuesto P» desde Previsión solo actualiza las líneas del 613 P; el resto de conceptos de esta lista se deja como está.
 
 ## Problemas frecuentes
 
