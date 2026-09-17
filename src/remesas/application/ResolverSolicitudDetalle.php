@@ -23,14 +23,14 @@ final class ResolverSolicitudDetalle
         $ctx = $this->ambito->ejecutar();
         $solicitud = $this->remesas->solicitudPorId($id);
         if ($solicitud === null || $solicitud->personaId !== $ctx->personaId) {
-            throw new InvalidArgumentException('Solicitud no encontrada');
+            throw new InvalidArgumentException(_("Solicitud no encontrada"));
         }
         if ($solicitud->estado !== 'pendiente' || $solicitud->id === null) {
-            throw new InvalidArgumentException('Esa solicitud ya está resuelta');
+            throw new InvalidArgumentException(_("Esa solicitud ya está resuelta"));
         }
         $estado = strtolower(trim((string) ($datos['estado'] ?? '')));
         if (!in_array($estado, ['autorizada', 'denegada'], true)) {
-            throw new InvalidArgumentException('Indique autorizada o denegada');
+            throw new InvalidArgumentException(_("Indique autorizada o denegada"));
         }
         $motivo = trim((string) ($datos['motivo'] ?? ''));
 

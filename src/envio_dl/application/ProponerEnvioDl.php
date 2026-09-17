@@ -28,10 +28,10 @@ final class ProponerEnvioDl
         $ctx = $this->ambito->ejecutar();
         $total = Dinero::fromInput((string) ($datos['importe'] ?? ''));
         if ($total->isZero() || $total->isNegative()) {
-            throw new InvalidArgumentException('Indica un importe positivo');
+            throw new InvalidArgumentException(_("Indica un importe positivo"));
         }
         if ($total->toCents() % 100 !== 0) {
-            throw new InvalidArgumentException('El importe debe ser un número entero de euros (sin céntimos)');
+            throw new InvalidArgumentException(_("El importe debe ser un número entero de euros (sin céntimos)"));
         }
         $mes = (int) date('n');
         $personas = $this->personas->listarDeCentro($ctx->centroId);

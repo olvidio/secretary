@@ -82,9 +82,7 @@ final class ConvertirApuntesAAsientos
     {
         $cuenta = $this->cuentas->buscar($centroId, null, $libro, $codigo);
         if ($cuenta === null) {
-            throw new InvalidArgumentException(
-                sprintf('Cuenta de concepto no encontrada: %s/%s', $libro, $codigo)
-            );
+            throw new InvalidArgumentException(sprintf(_("Cuenta de concepto no encontrada: %s/%s"), $libro, $codigo));
         }
 
         return $cuenta;
@@ -94,9 +92,7 @@ final class ConvertirApuntesAAsientos
     {
         $cuenta = $this->cuentas->tesoreria($centroId, $libro, $codigoMaestro);
         if ($cuenta === null) {
-            throw new InvalidArgumentException(
-                sprintf('Cuenta de tesorería no encontrada: %s/%s', $libro, $codigoMaestro)
-            );
+            throw new InvalidArgumentException(sprintf(_("Cuenta de tesorería no encontrada: %s/%s"), $libro, $codigoMaestro));
         }
 
         return $cuenta;
@@ -106,7 +102,7 @@ final class ConvertirApuntesAAsientos
     {
         $cuenta = $this->cuentas->personalDe($centroId, $personaId);
         if ($cuenta === null) {
-            throw new InvalidArgumentException('Cuenta personal no encontrada para persona ' . $personaId);
+            throw new InvalidArgumentException(sprintf(_("Cuenta personal no encontrada para persona %s"), $personaId));
         }
 
         return $cuenta;
@@ -116,7 +112,7 @@ final class ConvertirApuntesAAsientos
     {
         $cuenta = $this->cuentas->deudoresVivienda($centroId);
         if ($cuenta === null) {
-            throw new InvalidArgumentException('Cuenta DEUDORES.VIV no encontrada');
+            throw new InvalidArgumentException(_("Cuenta DEUDORES.VIV no encontrada"));
         }
 
         return $cuenta;

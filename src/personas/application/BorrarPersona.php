@@ -22,10 +22,10 @@ final class BorrarPersona
     {
         $persona = $this->repo->porId($id);
         if ($persona === null || $persona->centroId !== $centroId) {
-            throw new InvalidArgumentException('Persona no encontrada en este centro');
+            throw new InvalidArgumentException(_("Persona no encontrada en este centro"));
         }
         if (!$persona->activo) {
-            throw new InvalidArgumentException('La persona ya está dada de baja');
+            throw new InvalidArgumentException(_("La persona ya está dada de baja"));
         }
 
         try {
@@ -35,7 +35,7 @@ final class BorrarPersona
 
             return [
                 'eliminada' => true,
-                'mensaje' => 'Persona eliminada.',
+                'mensaje' => _("Persona eliminada."),
             ];
         } catch (PDOException $e) {
             if ($this->pdo->inTransaction()) {
@@ -50,7 +50,7 @@ final class BorrarPersona
 
         return [
             'eliminada' => false,
-            'mensaje' => 'Tiene apuntes, remesas u otros datos; se ha dado de baja y ya no sale en el listado, pero se conserva el histórico.',
+            'mensaje' => _("Tiene apuntes, remesas u otros datos; se ha dado de baja y ya no sale en el listado, pero se conserva el histórico."),
         ];
     }
 

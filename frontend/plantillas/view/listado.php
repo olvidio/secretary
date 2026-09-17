@@ -1,29 +1,38 @@
 <?php $cuenta = $cuentaEntrada ?? 'P'; ?>
-<h1>Plantillas de apuntes <?= htmlspecialchars($cuenta, ENT_QUOTES) ?></h1>
-<p class="muted">Solo define los movimientos (origen, concepto, observaciones). Al usarlas en Entrada
-    <?= htmlspecialchars($cuenta, ENT_QUOTES) ?>, las iniciales, la fecha y la cantidad salen de la cabecera del formulario.</p>
+<h1><?= sprintf(_("Plantillas de apuntes %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
+<p class="muted"><?= sprintf(_("Solo define los movimientos (origen, concepto, observaciones). Al usarlas en Entrada %s, las iniciales, la fecha y la cantidad salen de la cabecera del formulario."), htmlspecialchars($cuenta, ENT_QUOTES)) ?></p>
 
 <form id="form-plantilla" class="grid-form">
     <input type="hidden" name="cuenta" value="<?= htmlspecialchars($cuenta, ENT_QUOTES) ?>">
-    <label>Nombre <input name="nombre" required placeholder="p. ej. Club"></label>
+    <label><?= _("Nombre") ?> <input name="nombre" required placeholder="<?= htmlspecialchars(_("p. ej. Club"), ENT_QUOTES) ?>"></label>
     <fieldset class="plantilla-lineas">
-        <legend>Movimientos</legend>
+        <legend><?= _("Movimientos") ?></legend>
         <div id="lineas-form"></div>
-        <button type="button" id="btn-add-linea">Añadir movimiento</button>
+        <button type="button" id="btn-add-linea"><?= _("Añadir movimiento") ?></button>
     </fieldset>
-    <button type="submit">Guardar plantilla</button>
+    <button type="submit"><?= _("Guardar plantilla") ?></button>
 </form>
 
 <table id="tabla-plantillas">
     <thead>
-    <tr><th>Nombre</th><th>Movimientos</th><th></th></tr>
+    <tr><th><?= _("Nombre") ?></th><th><?= _("Movimientos") ?></th><th></th></tr>
     </thead>
     <tbody></tbody>
 </table>
 
 <script>
 const CUENTA = <?= json_encode($cuenta) ?>;
-const ORIGEN_OPTS = '<option value="A">Apunte</option><option value="B">Banco</option><option value="C">Caja</option>';
+const I18N_PLANTILLAS = {
+  apunte: <?= json_encode(_("Apunte"), JSON_UNESCAPED_UNICODE) ?>,
+  banco: <?= json_encode(_("Banco"), JSON_UNESCAPED_UNICODE) ?>,
+  caja: <?= json_encode(_("Caja"), JSON_UNESCAPED_UNICODE) ?>,
+  quitar: <?= json_encode(_("Quitar"), JSON_UNESCAPED_UNICODE) ?>,
+  borrar: <?= json_encode(_("Borrar"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmBorrar: <?= json_encode(_("¿Borrar plantilla «%s»?"), JSON_UNESCAPED_UNICODE) ?>,
+};
+const ORIGEN_OPTS = '<option value="A">' + esc(I18N_PLANTILLAS.apunte) + '</option>'
+  + '<option value="B">' + esc(I18N_PLANTILLAS.banco) + '</option>'
+  + '<option value="C">' + esc(I18N_PLANTILLAS.caja) + '</option>';
 
 function filaLinea(d = {}) {
   const div = document.createElement('div');
@@ -31,9 +40,9 @@ function filaLinea(d = {}) {
   div.innerHTML =
     '<label>P/G <select name="cuenta"><option>P</option><option>G</option></select></label>' +
     '<label>A/B/C <select name="origen" required>' + ORIGEN_OPTS + '</select></label>' +
-    '<label>Concepto <input name="concepto_codigo" required value="' + esc(d.concepto_codigo || '') + '"></label>' +
-    '<label>Observaciones <input name="observaciones" value="' + esc(d.observaciones || '') + '"></label>' +
-    '<button type="button" class="btn-quitar">Quitar</button>';
+    '<label><?= _("Concepto") ?> <input name="concepto_codigo" required value="' + esc(d.concepto_codigo || '') + '"></label>' +
+    '<label><?= _("Observaciones") ?> <input name="observaciones" value="' + esc(d.observaciones || '') + '"></label>' +
+    '<button type="button" class="btn-quitar">' + esc(I18N_PLANTILLAS.quitar) + '</button>';
   div.querySelector('[name=cuenta]').value = d.cuenta || CUENTA;
   div.querySelector('[name=origen]').value = d.origen || 'A';
   div.querySelector('.btn-quitar').onclick = () => div.remove();
@@ -65,9 +74,9 @@ async function loadPlantillas() {
     tr.innerHTML =
       '<td>' + esc(p.nombre) + '</td>' +
       '<td class="muted">' + esc(resumenLineas(p.lineas)) + '</td>' +
-      '<td><button type="button" data-del="' + p.id + '">Borrar</button></td>';
+      '<td><button type="button" data-del="' + p.id + '">' + esc(I18N_PLANTILLAS.borrar) + '</button></td>';
     tr.querySelector('[data-del]').onclick = async () => {
-      if (!confirm('¿Borrar plantilla «' + p.nombre + '»?')) return;
+      if (!confirm(I18N_PLANTILLAS.confirmBorrar.replace('%s', p.nombre))) return;
       const s = await api('/api/plantillas-apunte/' + p.id, { method: 'DELETE' });
       if (!s.ok) return alert(s.error);
       loadPlantillas();

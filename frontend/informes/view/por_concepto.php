@@ -1,11 +1,11 @@
-<h1>Apuntes de un concepto</h1>
+<h1><?= _("Apuntes de un concepto") ?></h1>
 <form id="form-conc" class="filters">
     <select name="cuenta"><option>P</option><option>G</option></select>
     <select name="concepto"></select>
-    <button type="submit">Ver</button>
+    <button type="submit"><?= _("Ver") ?></button>
 </form>
 <table>
-    <thead><tr><th>Fecha</th><th>P/G</th><th>A/B/C</th><th>Inic.</th><th>Observaciones</th><th class="num">Cantidad</th><th></th></tr></thead>
+    <thead><tr><th><?= _("Fecha") ?></th><th>P/G</th><th>A/B/C</th><th><?= _("Inic.") ?></th><th><?= _("Observaciones") ?></th><th class="num"><?= _("Cantidad") ?></th><th></th></tr></thead>
     <tbody id="tb"></tbody>
 </table>
 <p id="suma"></p>
@@ -23,6 +23,7 @@ async function loadConceptos() {
   });
 }
 document.addEventListener('DOMContentLoaded', async () => {
+  const sumaLabel = <?= json_encode(_("Suma: "), JSON_UNESCAPED_UNICODE) ?>;
   await loadConceptos();
   document.querySelector('[name=cuenta]').onchange = loadConceptos;
   document.getElementById('form-conc').onsubmit = async (ev) => {
@@ -43,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       enlazarAccionesApunte(tr, a, () => document.getElementById('form-conc').requestSubmit());
       tb.appendChild(tr);
     });
-    document.getElementById('suma').textContent = 'Suma: ' + s.toFixed(2);
+    document.getElementById('suma').textContent = sumaLabel + s.toFixed(2);
   };
 });
 </script>

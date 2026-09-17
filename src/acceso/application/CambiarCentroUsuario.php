@@ -21,6 +21,6 @@ final class CambiarCentroUsuario
             }
         }
 
-        throw new InvalidArgumentException('Centro no permitido');
+        throw new InvalidArgumentException(_("Centro no permitido"));
     }
 }

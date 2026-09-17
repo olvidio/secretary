@@ -29,10 +29,10 @@ final class ActualizarMovimientoPersonal
         $ctx = $this->ambito->ejecutar();
         $asiento = $this->asientos->porId($id);
         if ($asiento === null || $asiento->libro !== 'X' || $asiento->personaId !== $ctx->personaId) {
-            throw new InvalidArgumentException('Movimiento no encontrado');
+            throw new InvalidArgumentException(_("Movimiento no encontrado"));
         }
         if ($asiento->tipo === 'remesa' || $asiento->origen === 'remesa' || $asiento->remesaId !== null) {
-            throw new InvalidArgumentException('Un movimiento de remesa no se edita a mano');
+            throw new InvalidArgumentException(_("Un movimiento de remesa no se edita a mano"));
         }
 
         $this->pdo->beginTransaction();

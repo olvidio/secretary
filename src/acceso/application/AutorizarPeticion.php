@@ -43,11 +43,11 @@ final class AutorizarPeticion
             $ambito = CatalogoRutas::ambitoDe($clase, $metodoPhp);
         }
         if ($ambito === null) {
-            return $this->denegar($esApi, 'No autorizado', 401, '/login');
+            return $this->denegar($esApi, _("No autorizado"), 401, '/login');
         }
         $mutacion = in_array($httpMethod, ['POST', 'PUT', 'PATCH', 'DELETE'], true);
         if ($mutacion && !$csrfValido) {
-            return $this->denegar($esApi, 'Token CSRF inválido', 403, null);
+            return $this->denegar($esApi, _("Token CSRF inválido"), 403, null);
         }
         if ($ambito === 'publico') {
             return new DecisionAcceso(true);
@@ -57,7 +57,7 @@ final class AutorizarPeticion
         $haySesion = $identidadId !== null;
         if ($ambito === 'pendiente') {
             if (!$hayPendiente && !$haySesion) {
-                return $this->denegar($esApi, 'No autenticado', 401, '/login');
+                return $this->denegar($esApi, _("No autenticado"), 401, '/login');
             }
 
             return new DecisionAcceso(true);
@@ -67,39 +67,39 @@ final class AutorizarPeticion
                 $totp = $this->identidades->totpConfirmado($pendingId);
                 $destino = $totp ? '/totp-verificar' : '/totp-activar';
 
-                return $this->denegar($esApi, 'Falta el segundo factor', 401, $destino);
+                return $this->denegar($esApi, _("Falta el segundo factor"), 401, $destino);
             }
 
-            return $this->denegar($esApi, 'No autenticado', 401, '/login');
+            return $this->denegar($esApi, _("No autenticado"), 401, '/login');
         }
         if ($ambito === 'autenticado') {
             return new DecisionAcceso(true);
         }
         if ($ambito === 'centro') {
             if ($nivel !== 'centro') {
-                return $this->denegar($esApi, 'Esta área es del centro', 403, '/yo');
+                return $this->denegar($esApi, _("Esta área es del centro"), 403, '/yo');
             }
             if (!$this->identidades->totpConfirmado($identidadId)) {
-                return $this->denegar($esApi, 'Debe confirmar el segundo factor', 401, '/totp-activar');
+                return $this->denegar($esApi, _("Debe confirmar el segundo factor"), 401, '/totp-activar');
             }
             if ($centroId === null) {
-                return $this->denegar($esApi, 'Seleccione un centro', 401, '/elegir-centro');
+                return $this->denegar($esApi, _("Seleccione un centro"), 401, '/elegir-centro');
             }
 
             return new DecisionAcceso(true);
         }
         if ($ambito === 'persona') {
             if ($nivel !== 'persona') {
-                return $this->denegar($esApi, 'Esta área es personal', 403, '/');
+                return $this->denegar($esApi, _("Esta área es personal"), 403, '/');
             }
             if ($personaId === null) {
-                return $this->denegar($esApi, 'Seleccione una persona', 401, '/elegir-persona');
+                return $this->denegar($esApi, _("Seleccione una persona"), 401, '/elegir-persona');
             }
 
             return new DecisionAcceso(true);
         }
 
-        return $this->denegar($esApi, 'No autorizado', 401, '/login');
+        return $this->denegar($esApi, _("No autorizado"), 401, '/login');
     }
 
     private function denegar(bool $esApi, string $error, int $status, ?string $redirect): DecisionAcceso

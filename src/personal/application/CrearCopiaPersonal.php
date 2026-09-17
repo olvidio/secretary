@@ -27,7 +27,7 @@ final class CrearCopiaPersonal
         $ctx = $this->ambito->ejecutar();
         $persona = $this->personas->porId($ctx->personaId);
         if ($persona === null) {
-            throw new RuntimeException('Persona no encontrada');
+            throw new RuntimeException(_("Persona no encontrada"));
         }
         $snapshot = $this->copias->exportar($ctx->centroId, $ctx->personaId);
         $almacen = new AlmacenCopiasPersonal(

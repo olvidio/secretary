@@ -35,7 +35,7 @@ final class VinculoCentroController
     {
         $identidadId = (int) ($_SESSION['identidad_id'] ?? 0);
         if ($identidadId <= 0) {
-            return ContestarJson::error('No autenticado', 401);
+            return ContestarJson::error(_("No autenticado"), 401);
         }
 
         return ContestarJson::ok($this->listarVinculos->ejecutar($identidadId));
@@ -45,7 +45,7 @@ final class VinculoCentroController
     {
         $identidadId = (int) ($_SESSION['identidad_id'] ?? 0);
         if ($identidadId <= 0) {
-            return ContestarJson::error('No autenticado', 401);
+            return ContestarJson::error(_("No autenticado"), 401);
         }
 
         return ContestarJson::ok([
@@ -58,7 +58,7 @@ final class VinculoCentroController
         try {
             $identidadId = (int) ($_SESSION['identidad_id'] ?? 0);
             if ($identidadId <= 0) {
-                return ContestarJson::error('No autenticado', 401);
+                return ContestarJson::error(_("No autenticado"), 401);
             }
 
             return ContestarJson::ok([

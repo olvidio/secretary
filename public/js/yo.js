@@ -288,9 +288,9 @@
     if (del) {
       del.onclick = async () => {
         cerrarMenusMovimiento();
-        if (!confirm('¿Borrar este movimiento?')) return;
+        if (!confirm(t('borrar_movimiento_confirm'))) return;
         const borrado = await api('/api/yo/movimientos/' + m.id, { method: 'DELETE' });
-        if (!borrado.ok) { alert(borrado.error || 'No se pudo borrar'); return; }
+        if (!borrado.ok) { alert(borrado.error || t('no_se_pudo_borrar')); return; }
         recargar();
       };
     }
@@ -301,7 +301,7 @@
     const ul = qs('#yo-lista');
     const vacia = qs('#yo-lista-vacia');
     if (!ul) return;
-    if (!r.ok) return alert(r.error || 'Error');
+    if (!r.ok) return alert(r.error || t('error'));
     actualizarTituloMes(r.fecha_cierre);
     const movs = r.movimientos || [];
     if (vacia) vacia.hidden = movs.length > 0;
@@ -659,15 +659,15 @@
       const p1 = parseCantidadInput(form.cantidad1.value);
       const p2 = parseCantidadInput(form.cantidad2.value);
       if (p1 <= 0 || p2 <= 0) {
-        if (err) { err.textContent = 'Cada parte debe ser mayor que cero'; err.hidden = false; }
+        if (err) { err.textContent = t('cada_parte_mayor_cero'); err.hidden = false; }
         return;
       }
       if (Math.abs(p1 + p2 - state.desdoblar.total) > 0.005) {
-        if (err) { err.textContent = 'Las dos partes deben sumar el total'; err.hidden = false; }
+        if (err) { err.textContent = t('partes_deben_sumar_total'); err.hidden = false; }
         return;
       }
       if (!form.cuenta_id1.value || !form.cuenta_id2.value) {
-        if (err) { err.textContent = 'Elija la categoría de cada parte'; err.hidden = false; }
+        if (err) { err.textContent = t('elija_categoria_cada_parte'); err.hidden = false; }
         return;
       }
       const id = form.asiento_id.value;
@@ -681,7 +681,7 @@
         },
       });
       if (!r.ok) {
-        if (err) { err.textContent = r.error || 'No se pudo desdoblar'; err.hidden = false; }
+        if (err) { err.textContent = r.error || t('no_se_pudo_desdoblar'); err.hidden = false; }
         return;
       }
       cerrarModalDesdoblar();
@@ -726,7 +726,7 @@
         if (!state.generalesActivo) {
           delete body.concepto_generales;
         } else if (!body.concepto_generales) {
-          err.textContent = 'Elija el concepto de generales (p. ej. Gas)';
+          err.textContent = t('elija_concepto_generales');
           err.hidden = false;
           return;
         }
@@ -737,7 +737,7 @@
         ? await api('/api/yo/movimientos/' + id, { method: 'PUT', body })
         : await api('/api/yo/movimientos', { method: 'POST', body });
       if (!r.ok) {
-        err.textContent = r.error || 'No se pudo guardar';
+        err.textContent = r.error || t('no_se_pudo_guardar');
         err.hidden = false;
         return;
       }
@@ -772,11 +772,11 @@
       err.hidden = true;
       const r2 = await api('/api/yo/categorias', { method: 'POST', body: formObj(form) });
       if (!r2.ok) {
-        err.textContent = r2.error || 'No se pudo crear';
+        err.textContent = r2.error || t('no_se_pudo_crear');
         err.hidden = false;
         return;
       }
-      msg.textContent = 'Subcuenta creada';
+      msg.textContent = t('subcuenta_creada');
       msg.hidden = false;
       form.reset();
       pintarCategorias();
@@ -785,7 +785,7 @@
 
   async function pintarCierre() {
     const r = await api('/api/yo/cierre?' + paramsMes());
-    if (!r.ok) return alert(r.error || 'Error');
+    if (!r.ok) return alert(r.error || t('error'));
     actualizarTituloMes(r.fecha_cierre);
     const dia = qs('#form-cierre-defecto [name=dia_cierre]');
     const habil = qs('#form-cierre-defecto [name=dia_habil]');
@@ -838,7 +838,7 @@
     if (btnBorrar && !btnBorrar.dataset.bound) {
       btnBorrar.dataset.bound = '1';
       btnBorrar.addEventListener('click', async () => {
-        if (!confirm('¿Quitar la fecha concreta y volver a la regla por defecto?')) return;
+        if (!confirm(t('quitar_fecha_cierre_confirm'))) return;
         const s = await api('/api/yo/cierre/mes/borrar', {
           method: 'POST',
           body: { anio: state.anio, mes: state.mes },
@@ -879,7 +879,7 @@
     const vacia = qs('#yo-remesa-vacia');
     const hist = qs('#yo-remesa-hist');
     if (!r.ok) {
-      if (err) { err.textContent = r.error || 'No se pudo cargar'; err.hidden = false; }
+      if (err) { err.textContent = r.error || t('no_se_pudo_cargar'); err.hidden = false; }
       return;
     }
     if (estado) {
@@ -931,7 +931,7 @@
     if (btn) {
       btn.disabled = !r.puede_enviar;
       btn.onclick = async () => {
-        if (!confirm('¿Enviar este mes al centro?')) return;
+        if (!confirm(t('enviar_mes_centro_confirm'))) return;
         if (err) err.hidden = true;
         if (msg) msg.hidden = true;
         const nota = (qs('#yo-remesa-nota') || {}).value || '';
@@ -941,10 +941,10 @@
           body: { anio: state.anio, mes: state.mes, nota, saldo_tesoreria: tes },
         });
         if (!envio.ok) {
-          if (err) { err.textContent = envio.error || 'No se pudo enviar'; err.hidden = false; }
+          if (err) { err.textContent = envio.error || t('no_se_pudo_enviar'); err.hidden = false; }
           return;
         }
-        if (msg) { msg.textContent = 'Remesa enviada (v' + envio.remesa.version + ')'; msg.hidden = false; }
+        if (msg) { msg.textContent = t('remesa_enviada_v') + envio.remesa.version + ')'; msg.hidden = false; }
         pintarRemesas();
       };
     }
@@ -968,7 +968,7 @@
               method: 'POST',
               body: { estado: ok ? 'autorizada' : 'denegada' },
             });
-            if (!r2.ok) { alert(r2.error || 'No se pudo responder'); return; }
+            if (!r2.ok) { alert(r2.error || t('no_se_pudo_responder')); return; }
             pintarRemesas();
           };
         });
@@ -982,7 +982,7 @@
     const form = qs('#yo-banco-form');
     if (!sel || !form) return;
     const b = await api('/api/yo/banco/bancos');
-    if (!b.ok) return alert(b.error || 'Error');
+    if (!b.ok) return alert(b.error || t('error'));
     const bancos = b.bancos || [];
     if (bancos.length) {
       sel.innerHTML = bancos.map((x) =>
@@ -1022,9 +1022,9 @@
       if (!r.ok) {
         if (err) {
           err.hidden = false;
-          err.textContent = r.error || 'Error';
+          err.textContent = r.error || t('error');
         } else {
-          alert(r.error || 'Error');
+          alert(r.error || t('error'));
         }
         return;
       }
@@ -1042,7 +1042,7 @@
 
   async function pintarListasBanco() {
     const r = await api('/api/yo/banco/pendientes');
-    if (!r.ok) return alert(r.error || 'Error');
+    if (!r.ok) return alert(r.error || t('error'));
     state.plantillasCentro = r.plantillas || [];
     pintarFilasBanco(qs('#yo-banco-pend'), qs('#yo-banco-vacio'), r.pendientes || []);
     pintarFilasBanco(qs('#yo-banco-otra'), qs('#yo-banco-otra-vacio'), r.otras || []);
@@ -1106,7 +1106,7 @@
       }
       if (btn && choose) {
         btn.onclick = async () => {
-          if (!choose.value) return alert('Elija una categoría del plan');
+          if (!choose.value) return alert(t('elija_categoria_plan'));
           const body = {
             asiento_id: p.asiento_id,
             observaciones: obs ? obs.value : '',
@@ -1122,7 +1122,7 @@
             method: 'POST',
             body,
           });
-          if (!s.ok) return alert(s.error || 'Error');
+          if (!s.ok) return alert(s.error || t('error'));
           await pintarListasBanco();
         };
         if (obs) {

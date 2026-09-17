@@ -1,44 +1,47 @@
-<h1>Configuración</h1>
+<h1><?= _("Configuración") ?></h1>
 <form id="form-config" class="grid-form">
-    <label>Centro <input name="centro" required></label>
-    <label>Año <input name="anio" type="number" required></label>
-    <label>Ejercicio
+    <label><?= _("Centro") ?> <input name="centro" required></label>
+    <label><?= _("Año") ?> <input name="anio" type="number" required></label>
+    <label><?= _("Ejercicio") ?>
         <select name="modo_ejercicio">
-            <option>Año</option>
-            <option>Curso</option>
+            <option><?= _("Año") ?></option>
+            <option><?= _("Curso") ?></option>
         </select>
     </label>
-    <label>Fecha inicio <input name="fecha_inicio" type="date" required></label>
-    <label>Fecha cierre <input name="fecha_cierre" type="date" required></label>
-    <label>Tipo de cierre
+    <label><?= _("Fecha inicio") ?> <input name="fecha_inicio" type="date" required></label>
+    <label><?= _("Fecha cierre") ?> <input name="fecha_cierre" type="date" required></label>
+    <label><?= _("Tipo de cierre") ?>
         <select name="tipo_cierre">
-            <option value="vivienda">Vivienda (n) — P 21 / G 11</option>
-            <option value="necesidades">Necesidades (agd/sss+) — P 6 / G 14</option>
+            <option value="vivienda"><?= _("Vivienda (n) — P 21 / G 11") ?></option>
+            <option value="necesidades"><?= _("Necesidades (agd/sss+) — P 6 / G 14") ?></option>
         </select>
     </label>
-    <button type="submit">Guardar</button>
-    <p class="ok" id="msg" hidden>Guardado</p>
+    <button type="submit"><?= _("Guardar") ?></button>
+    <p class="ok" id="msg" hidden><?= _("Guardado") ?></p>
 </form>
 <section>
-    <h2>Tramos de desgravación</h2>
-    <p class="muted">Se usan al proponer destinos 7. El primer tramo (p. ej. 250 € al 80 %) se reparte entre varias personas antes de subir el importe de una sola.</p>
+    <h2><?= _("Tramos de desgravación") ?></h2>
+    <p class="muted"><?= _("Se usan al proponer destinos 7. El primer tramo (p. ej. 250 € al 80 %) se reparte entre varias personas antes de subir el importe de una sola.") ?></p>
     <table id="tabla-tramos">
-        <thead><tr><th>Hasta (€, vacío = resto)</th><th>%</th><th></th></tr></thead>
+        <thead><tr><th><?= _("Hasta (€, vacío = resto)") ?></th><th>%</th><th></th></tr></thead>
         <tbody></tbody>
     </table>
     <p>
-        <button type="button" id="btn-add-tramo">Añadir tramo</button>
-        <button type="button" id="btn-save-tramos">Guardar tramos</button>
+        <button type="button" id="btn-add-tramo"><?= _("Añadir tramo") ?></button>
+        <button type="button" id="btn-save-tramos"><?= _("Guardar tramos") ?></button>
     </p>
-    <p class="ok" id="msg-tramos" hidden>Tramos guardados</p>
+    <p class="ok" id="msg-tramos" hidden><?= _("Tramos guardados") ?></p>
 </section>
 <script>
+const I18N_CONFIG = {
+  quitar: <?= json_encode(_("Quitar"), JSON_UNESCAPED_UNICODE) ?>,
+};
 function filaTramo(t = {}) {
   const tr = document.createElement('tr');
   const hasta = t.hasta_cents == null ? '' : (Number(t.hasta_cents) / 100).toFixed(2);
   tr.innerHTML = '<td><input name="hasta" inputmode="decimal" value="' + esc(hasta) + '"></td>'
     + '<td><input name="pct" type="number" min="0" max="100" required value="' + esc(String(t.porcentaje ?? '')) + '"></td>'
-    + '<td><button type="button" class="btn-quitar">Quitar</button></td>';
+    + '<td><button type="button" class="btn-quitar">' + esc(I18N_CONFIG.quitar) + '</button></td>';
   tr.querySelector('.btn-quitar').onclick = () => tr.remove();
   return tr;
 }
@@ -76,6 +79,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const s = await api('/api/desgravacion-tramos', { method: 'POST', body: { tramos } });
     document.getElementById('msg-tramos').hidden = !s.ok;
     if (!s.ok) alert(s.error);
-  });
+  };
 });
 </script>

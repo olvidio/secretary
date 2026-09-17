@@ -28,10 +28,10 @@ final class VaciarDatosCentro
     public function ejecutar(int $centroId, bool $confirmar): array
     {
         if (!$confirmar) {
-            throw new InvalidArgumentException('Hay que confirmar el vaciado');
+            throw new InvalidArgumentException(_("Hay que confirmar el vaciado"));
         }
         if ($centroId <= 0) {
-            throw new InvalidArgumentException('Centro no válido');
+            throw new InvalidArgumentException(_("Centro no válido"));
         }
 
         $ids = [];

@@ -24,7 +24,7 @@ final class BuscarSugerenciasObservacion
     {
         $cuenta = strtoupper(trim($cuenta));
         if (!in_array($cuenta, ['P', 'G'], true)) {
-            throw new InvalidArgumentException('Cuenta P o G');
+            throw new InvalidArgumentException(_("Cuenta P o G"));
         }
         $q = trim($texto);
         $ini = trim($iniciales);

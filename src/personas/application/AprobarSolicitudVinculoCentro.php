@@ -34,19 +34,19 @@ final class AprobarSolicitudVinculoCentro
     {
         $solicitud = $this->solicitudes->porId($solicitudId);
         if ($solicitud === null || $solicitud->centroId !== $centroId || !$solicitud->esPendiente()) {
-            throw new InvalidArgumentException('Solicitud no encontrada o ya resuelta');
+            throw new InvalidArgumentException(_("Solicitud no encontrada o ya resuelta"));
         }
         if ($this->identidades->tienePersonaEnCentro($solicitud->identidadId, $centroId)) {
-            throw new InvalidArgumentException('La identidad ya está vinculada a este centro');
+            throw new InvalidArgumentException(_("La identidad ya está vinculada a este centro"));
         }
 
         $identidad = $this->identidades->porId($solicitud->identidadId);
         if ($identidad === null) {
-            throw new InvalidArgumentException('Cuenta solicitante no encontrada');
+            throw new InvalidArgumentException(_("Cuenta solicitante no encontrada"));
         }
         $centro = $this->centros->porId($centroId);
         if ($centro === null) {
-            throw new InvalidArgumentException('Centro no encontrado');
+            throw new InvalidArgumentException(_("Centro no encontrado"));
         }
 
         $personaId = isset($datos['persona_id']) && $datos['persona_id'] !== ''
@@ -56,11 +56,11 @@ final class AprobarSolicitudVinculoCentro
         if ($personaId !== null) {
             $persona = $this->personas->porId($personaId);
             if ($persona === null || $persona->centroId !== $centroId) {
-                throw new InvalidArgumentException('El nombre indicado no pertenece a este centro');
+                throw new InvalidArgumentException(_("El nombre indicado no pertenece a este centro"));
             }
             $otra = $this->identidades->identidadDePersona($personaId);
             if ($otra !== null && $otra->id !== $solicitud->identidadId) {
-                throw new InvalidArgumentException('Ese nombre ya tiene otra cuenta personal vinculada');
+                throw new InvalidArgumentException(_("Ese nombre ya tiene otra cuenta personal vinculada"));
             }
         } else {
             $persona = $this->crearPersona($identidad->nombre, $centro, $identidad->alias ?? 'usr');
@@ -68,7 +68,7 @@ final class AprobarSolicitudVinculoCentro
         }
 
         if ($personaId === null) {
-            throw new InvalidArgumentException('No se pudo resolver la persona');
+            throw new InvalidArgumentException(_("No se pudo resolver la persona"));
         }
 
         $this->identidades->vincularPersona($solicitud->identidadId, $personaId, $solicitud->anio);
@@ -93,7 +93,7 @@ final class AprobarSolicitudVinculoCentro
     private function crearPersona(string $nombre, Centro $centro, string $aliasBase): Persona
     {
         if ($centro->id === null) {
-            throw new InvalidArgumentException('Centro sin identificador');
+            throw new InvalidArgumentException(_("Centro sin identificador"));
         }
         $partes = preg_split('/\s+/', trim($nombre), 2) ?: [];
         $nom = $partes[0] ?? $nombre;
@@ -132,7 +132,7 @@ final class AprobarSolicitudVinculoCentro
             $candidato = substr($base, 0, max(1, 6 - strlen($suf))) . $suf;
             $n++;
             if ($n > 99) {
-                throw new InvalidArgumentException('No se pudieron generar iniciales únicas');
+                throw new InvalidArgumentException(_("No se pudieron generar iniciales únicas"));
             }
         }
 

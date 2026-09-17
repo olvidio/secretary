@@ -3,21 +3,21 @@ $usuarioNombre = (string) ($usuario ?? '');
 $navCuenta = (string) ($nav ?? '');
 $esLibroPersonal = (($_SESSION['nivel'] ?? '') === 'persona');
 $itemsCuenta = [
-    ['cuenta-mail', '/cuenta/mail', 'Mail'],
-    ['cuenta-password', '/cuenta/password', 'Contraseña'],
-    ['cuenta-totp', '/cuenta/totp', '2FA'],
-    ['cuenta-layout', '/cuenta/layout', 'Layout'],
-    ['cuenta-idioma', '/cuenta/idioma', 'Idioma'],
+    ['cuenta-mail', '/cuenta/mail', _('Mail')],
+    ['cuenta-password', '/cuenta/password', _('Contraseña')],
+    ['cuenta-totp', '/cuenta/totp', _('2FA')],
+    ['cuenta-layout', '/cuenta/layout', _('Layout')],
+    ['cuenta-idioma', '/cuenta/idioma', _('Idioma')],
 ];
 if ($esLibroPersonal) {
-    $itemsCuenta[] = ['cuenta-persona', '/cuenta/persona', 'Persona activa'];
-    $itemsCuenta[] = ['cuenta-copias', '/cuenta/copias', 'Copia personal'];
+    $itemsCuenta[] = ['cuenta-persona', '/cuenta/persona', _('Persona activa')];
+    $itemsCuenta[] = ['cuenta-copias', '/cuenta/copias', _('Copia personal')];
     // En el centro la ayuda ya está en el menú principal.
-    $itemsCuenta[] = ['yo-ayuda', '/yo/ayuda', 'Ayuda'];
+    $itemsCuenta[] = ['yo-ayuda', '/yo/ayuda', _('Ayuda')];
 } else {
-    $itemsCuenta[] = ['cuenta-centro', '/cuenta/centro', 'Centro'];
+    $itemsCuenta[] = ['cuenta-centro', '/cuenta/centro', _('Centro')];
 }
-$itemsCuenta[] = ['cuenta-tipo', '/cuenta/tipo', 'Tipo'];
+$itemsCuenta[] = ['cuenta-tipo', '/cuenta/tipo', _('Tipo')];
 ?>
 <details class="user-menu">
     <summary><?= htmlspecialchars($usuarioNombre, ENT_QUOTES) ?></summary>
@@ -28,6 +28,6 @@ $itemsCuenta[] = ['cuenta-tipo', '/cuenta/tipo', 'Tipo'];
                    class="<?= $navCuenta === $id ? 'on' : '' ?>"><?= htmlspecialchars($label, ENT_QUOTES) ?></a>
             </li>
         <?php endforeach; ?>
-        <li><a href="/logout">Salir</a></li>
+        <li><a href="/logout"><?= _("Salir") ?></a></li>
     </ul>
 </details>

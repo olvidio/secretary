@@ -1,33 +1,41 @@
-<h1>Ayuda</h1>
+<h1><?= _("Ayuda") ?></h1>
 <p class="muted ayuda-intro">
-    Pregunte con sus palabras. Intro envía; Mayúsculas+Intro baja de línea. La
-    respuesta sale <strong>únicamente</strong> del manual del programa: si algo no
-    está explicado, se le dirá en lugar de improvisar.
+    <?= _("Pregunte con sus palabras. Intro envía; Mayúsculas+Intro baja de línea. La respuesta sale únicamente del manual del programa: si algo no está explicado, se le dirá en lugar de improvisar.") ?>
 </p>
 <form id="form-ayuda" class="ayuda-preguntar">
     <label class="ayuda-campo">
         <textarea name="pregunta" rows="2" maxlength="400" required
-                  placeholder="Por ejemplo: ¿cómo anoto un traspaso de banco a caja?"></textarea>
+                  placeholder="<?= htmlspecialchars(_("Por ejemplo: ¿cómo anoto un traspaso de banco a caja?"), ENT_QUOTES) ?>"></textarea>
     </label>
-    <button type="submit" id="btn-preguntar">Preguntar</button>
+    <button type="submit" id="btn-preguntar"><?= _("Preguntar") ?></button>
 </form>
 <div id="ayuda-hilo" class="ayuda-hilo"></div>
 <details class="ayuda-indice">
-    <summary>Apartados del manual</summary>
+    <summary><?= _("Apartados del manual") ?></summary>
     <ul id="ayuda-temas" class="ayuda-temas"></ul>
 </details>
 <script>
+const I18N_AYUDA = {
+  segunManual: <?= json_encode(_("Según el manual: "), JSON_UNESCAPED_UNICODE) ?>,
+  yaPreguntado: <?= json_encode(_("Ya se había preguntado lo mismo."), JSON_UNESCAPED_UNICODE) ?>,
+  sinIa: <?= json_encode(_("Respuesta sin IA."), JSON_UNESCAPED_UNICODE) ?>,
+  consultando: <?= json_encode(_("Consultando…"), JSON_UNESCAPED_UNICODE) ?>,
+  preguntar: <?= json_encode(_("Preguntar"), JSON_UNESCAPED_UNICODE) ?>,
+  errorConsulta: <?= json_encode(_("No se ha podido consultar la ayuda"), JSON_UNESCAPED_UNICODE) ?>,
+  paraQueSirve: <?= json_encode(_("¿Para qué sirve %s?"), JSON_UNESCAPED_UNICODE) ?>,
+};
+
 function ayudaFuentes(fuentes) {
   if (!fuentes || !fuentes.length) return '';
   const chips = fuentes
     .map((f) => `<span class="ayuda-fuente">${esc(f.titulo)}</span>`)
     .join('');
-  return `<p class="ayuda-fuentes">Según el manual: ${chips}</p>`;
+  return `<p class="ayuda-fuentes">${esc(I18N_AYUDA.segunManual)}${chips}</p>`;
 }
 
 function ayudaNota(origen) {
-  if (origen === 'cache') return '<p class="muted ayuda-nota">Ya se había preguntado lo mismo.</p>';
-  if (origen === 'busqueda') return '<p class="ayuda-nota error">Respuesta sin IA.</p>';
+  if (origen === 'cache') return '<p class="muted ayuda-nota">' + esc(I18N_AYUDA.yaPreguntado) + '</p>';
+  if (origen === 'busqueda') return '<p class="ayuda-nota error">' + esc(I18N_AYUDA.sinIa) + '</p>';
   return '';
 }
 
@@ -57,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     lista.onclick = (ev) => {
       const tema = ev.target.closest('.ayuda-tema');
       if (!tema) return;
-      campo.value = '¿Para qué sirve ' + tema.dataset.titulo + '?';
+      campo.value = I18N_AYUDA.paraQueSirve.replace('%s', tema.dataset.titulo);
       campo.focus();
     };
   }
@@ -67,11 +75,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pregunta = campo.value.trim();
     if (!pregunta) return;
     boton.disabled = true;
-    boton.textContent = 'Consultando…';
+    boton.textContent = I18N_AYUDA.consultando;
     const r = await api('/api/ayuda/preguntar', { method: 'POST', body: { pregunta } });
     boton.disabled = false;
-    boton.textContent = 'Preguntar';
-    if (!r.ok) return alert(r.error || 'No se ha podido consultar la ayuda');
+    boton.textContent = I18N_AYUDA.preguntar;
+    if (!r.ok) return alert(r.error || I18N_AYUDA.errorConsulta);
     hilo.appendChild(ayudaTurno(pregunta, r));
     campo.value = '';
     hilo.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

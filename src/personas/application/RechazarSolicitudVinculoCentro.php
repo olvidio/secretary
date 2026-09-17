@@ -17,7 +17,7 @@ final class RechazarSolicitudVinculoCentro
     {
         $solicitud = $this->solicitudes->porId($solicitudId);
         if ($solicitud === null || $solicitud->centroId !== $centroId || !$solicitud->esPendiente()) {
-            throw new InvalidArgumentException('Solicitud no encontrada o ya resuelta');
+            throw new InvalidArgumentException(_("Solicitud no encontrada o ya resuelta"));
         }
         $this->solicitudes->marcarResuelta($solicitudId, 'rechazada', null, $resolvedBy);
     }

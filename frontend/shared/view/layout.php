@@ -4,13 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?= htmlspecialchars((string) ($csrf ?? ''), ENT_QUOTES) ?>">
-    <title>Secretario</title>
+    <title><?= _("Secretario") ?></title>
     <link rel="stylesheet" href="/css/app.css">
 </head>
 <body class="layout-excel">
 <header class="ribbon">
     <div class="ribbon-top">
-        <strong><a href="/">Secretario</a></strong>
+        <strong><a href="/"><?= _("Secretario") ?></a></strong>
         <?php if (!empty($centroNombre)): ?>
             <span class="centro"><?= htmlspecialchars((string) $centroNombre, ENT_QUOTES) ?></span>
         <?php endif; ?>
@@ -35,6 +35,7 @@ if (!empty($contentView) && is_file($contentView)) {
 }
 ?>
 </main>
+<?php include __DIR__ . '/_js_i18n.php'; ?>
 <script src="/js/app.js"></script>
 <script src="/js/editar-apunte.js"></script>
 </body>

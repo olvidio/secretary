@@ -1,17 +1,17 @@
-<h1>Centro</h1>
-<p class="muted">Centro de trabajo de esta sesión. Solo aparecen los centros de los que es secretario.</p>
+<h1><?= _("Centro") ?></h1>
+<p class="muted"><?= _("Centro de trabajo de esta sesión. Solo aparecen los centros de los que es secretario.") ?></p>
 <form id="form-centro" class="grid-form">
-    <label>Centro
+    <label><?= _("Centro") ?>
         <select name="centro_id" required></select>
     </label>
-    <button type="submit">Guardar</button>
-    <p class="ok" id="msg" hidden>Guardado</p>
-    <p class="muted" id="sin-centros" hidden>Esta cuenta no es secretario de ningún centro.</p>
+    <button type="submit"><?= _("Guardar") ?></button>
+    <p class="ok" id="msg" hidden><?= _("Guardado") ?></p>
+    <p class="muted" id="sin-centros" hidden><?= _("Esta cuenta no es secretario de ningún centro.") ?></p>
 </form>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
   const r = await api('/api/preferencias');
-  if (!r.ok) return alert(r.error || 'Error');
+  if (!r.ok) return alert(r.error || <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>);
   const sel = document.querySelector('#form-centro [name="centro_id"]');
   const centros = r.centros || [];
   const btn = document.querySelector('#form-centro button');

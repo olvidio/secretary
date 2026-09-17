@@ -38,10 +38,10 @@ final class GuardarPersona
         $apellidos = trim((string) ($datos['apellidos'] ?? ''));
         $iniciales = strtolower(trim((string) ($datos['iniciales'] ?? '')));
         if ($nombre === '' || $iniciales === '') {
-            throw new InvalidArgumentException('Nombre e iniciales son obligatorios');
+            throw new InvalidArgumentException(_("Nombre e iniciales son obligatorios"));
         }
         if (str_contains($iniciales, ' ')) {
-            throw new InvalidArgumentException('Las iniciales no deben tener espacios');
+            throw new InvalidArgumentException(_("Las iniciales no deben tener espacios"));
         }
         if (strlen($iniciales) > 6) {
             $iniciales = substr($iniciales, 0, 6);
@@ -54,18 +54,18 @@ final class GuardarPersona
         $contexto = $this->ambito->ejecutar();
         $existente = $id !== null ? $this->repo->porId($id) : null;
         if ($id !== null && $existente === null) {
-            throw new InvalidArgumentException('Persona no encontrada en este centro');
+            throw new InvalidArgumentException(_("Persona no encontrada en este centro"));
         }
         if (
             $existente !== null
             && $existente->centroId !== null
             && $existente->centroId !== $contexto->centroId
         ) {
-            throw new InvalidArgumentException('Persona no encontrada en este centro');
+            throw new InvalidArgumentException(_("Persona no encontrada en este centro"));
         }
         $otra = $this->repo->porInicialesDeCentro($contexto->centroId, $iniciales);
         if ($otra !== null && $otra->id !== $id) {
-            throw new InvalidArgumentException('Ya hay un nombre con esas iniciales en este centro');
+            throw new InvalidArgumentException(_("Ya hay un nombre con esas iniciales en este centro"));
         }
         $orden = (int) ($datos['orden'] ?? ($existente !== null ? $existente->orden : 0));
         $centroPersona = $existente !== null && $existente->centroId !== null
@@ -123,7 +123,7 @@ final class GuardarPersona
         }
         $n = (int) $v;
         if ($n < 1 || $n > 12) {
-            throw new InvalidArgumentException('El mes debe estar entre 1 y 12');
+            throw new InvalidArgumentException(_("El mes debe estar entre 1 y 12"));
         }
 
         return $n;

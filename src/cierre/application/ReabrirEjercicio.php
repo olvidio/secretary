@@ -28,10 +28,10 @@ final class ReabrirEjercicio
     {
         $ejercicio = $this->ejercicios->porId($ejercicioId);
         if ($ejercicio === null) {
-            throw new InvalidArgumentException('Ejercicio no encontrado');
+            throw new InvalidArgumentException(_("Ejercicio no encontrado"));
         }
         if ($ejercicio->estado === 'abierto') {
-            throw new InvalidArgumentException('El ejercicio ya está abierto');
+            throw new InvalidArgumentException(_("El ejercicio ya está abierto"));
         }
 
         $posterior = $this->ejercicios->posteriorConAnteriorId($ejercicio->id ?? 0);
@@ -45,11 +45,11 @@ final class ReabrirEjercicio
     private function reabrirAnterior(Ejercicio $ejercicio, Ejercicio $posterior): Ejercicio
     {
         if ($posterior->id === null) {
-            throw new InvalidArgumentException('Ejercicio posterior inválido');
+            throw new InvalidArgumentException(_("Ejercicio posterior inválido"));
         }
         if ($this->asientos->contarNoApertura($posterior->id) > 0) {
             throw new InvalidArgumentException(sprintf(
-                'El ejercicio %s ya tiene movimientos; no se puede reabrir %s',
+                _("El ejercicio %s ya tiene movimientos; no se puede reabrir %s"),
                 $posterior->etiqueta,
                 $ejercicio->etiqueta,
             ));
@@ -86,21 +86,19 @@ final class ReabrirEjercicio
     private function reabrirPosterior(Ejercicio $ejercicio): Ejercicio
     {
         if ($ejercicio->ejercicioAnteriorId === null) {
-            throw new InvalidArgumentException('Este ejercicio no se puede reabrir: no tiene ejercicio anterior');
+            throw new InvalidArgumentException(_("Este ejercicio no se puede reabrir: no tiene ejercicio anterior"));
         }
         $anterior = $this->ejercicios->porId($ejercicio->ejercicioAnteriorId);
         if ($anterior === null) {
-            throw new InvalidArgumentException('Ejercicio anterior no encontrado');
+            throw new InvalidArgumentException(_("Ejercicio anterior no encontrado"));
         }
         if ($anterior->estado !== 'cerrado') {
-            throw new InvalidArgumentException('Cierre primero el ejercicio ' . $anterior->etiqueta);
+            throw new InvalidArgumentException(sprintf(_("Cierre primero el ejercicio %s"), $anterior->etiqueta));
         }
 
         $abierto = $this->ejercicios->abiertoDe($ejercicio->centroId);
         if ($abierto !== null) {
-            throw new InvalidArgumentException(
-                'Ya hay un ejercicio abierto (' . $abierto->etiqueta . '); no puede haber dos abiertos'
-            );
+            throw new InvalidArgumentException(sprintf(_("Ya hay un ejercicio abierto (%s); no puede haber dos abiertos"), $abierto->etiqueta));
         }
 
         $reabierto = $this->ejercicios->guardar(new Ejercicio(

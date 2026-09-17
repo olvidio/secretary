@@ -1,15 +1,15 @@
-<h1>Layout</h1>
-<p class="muted">Disposición de los menús del centro (tipo excel o burger). El libro personal no cambia.</p>
+<h1><?= _("Layout") ?></h1>
+<p class="muted"><?= _("Disposición de los menús del centro (tipo excel o burger). El libro personal no cambia.") ?></p>
 <form id="form-layout" class="grid-form">
-    <label class="cuenta-tipo-op"><input type="radio" name="layout" value="excel" required> Tipo excel</label>
-    <label class="cuenta-tipo-op"><input type="radio" name="layout" value="burger"> Burger</label>
-    <button type="submit">Guardar</button>
-    <p class="ok" id="msg" hidden>Guardado</p>
+    <label class="cuenta-tipo-op"><input type="radio" name="layout" value="excel" required> <?= _("Tipo excel") ?></label>
+    <label class="cuenta-tipo-op"><input type="radio" name="layout" value="burger"> <?= _("Burger") ?></label>
+    <button type="submit"><?= _("Guardar") ?></button>
+    <p class="ok" id="msg" hidden><?= _("Guardado") ?></p>
 </form>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
   const r = await api('/api/preferencias');
-  if (!r.ok) return alert(r.error || 'Error');
+  if (!r.ok) return alert(r.error || <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>);
   const form = document.getElementById('form-layout');
   const radio = form.querySelector(`[name="layout"][value="${r.layout}"]`);
   if (radio) radio.checked = true;

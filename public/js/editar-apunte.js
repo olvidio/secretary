@@ -14,9 +14,9 @@ function enlazarAccionesApunte(tr, a, onSaved) {
   const del = tr.querySelector('[data-del]');
   if (del) {
     del.onclick = async () => {
-      if (!confirm('¿Borrar apunte?')) return;
+      if (!confirm(t('borrar_apunte_confirm'))) return;
       const s = await api('/api/apuntes/' + a.id, { method: 'DELETE' });
-      if (!s.ok) return alert(s.error || 'No se pudo borrar');
+      if (!s.ok) return alert(s.error || t('no_se_pudo_borrar'));
       onSaved();
     };
   }
@@ -176,7 +176,7 @@ async function onGuardarEdicionApunte(ev) {
     cerrarEdicionApunte();
     return;
   }
-  if (otros && !confirm('Ha modificado algún campo además de observaciones. ¿Guardar los cambios?')) {
+  if (otros && !confirm(t('guardar_cambios_obs_confirm'))) {
     return;
   }
   const body = {
@@ -192,7 +192,7 @@ async function onGuardarEdicionApunte(ev) {
   const s = await api('/api/apuntes/' + original.id, { method: 'PUT', body });
   if (!s.ok) {
     err.hidden = false;
-    err.textContent = s.error || 'No se pudo guardar';
+    err.textContent = s.error || t('no_se_pudo_guardar');
     return;
   }
   const onSaved = dlgApunteEstado.onSaved;

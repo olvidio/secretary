@@ -29,20 +29,20 @@ final class GuardarPlantillaApunte
         $ctx = $this->ambito->ejecutar();
         $cuenta = strtoupper(trim((string) ($datos['cuenta'] ?? '')));
         if (!in_array($cuenta, ['P', 'G'], true)) {
-            throw new InvalidArgumentException('Cuenta P o G');
+            throw new InvalidArgumentException(_("Cuenta P o G"));
         }
         $nombre = trim((string) ($datos['nombre'] ?? ''));
         if ($nombre === '') {
-            throw new InvalidArgumentException('Falta el nombre de la plantilla');
+            throw new InvalidArgumentException(_("Falta el nombre de la plantilla"));
         }
         $id = isset($datos['id']) ? (int) $datos['id'] : null;
         if ($this->plantillas->existeNombre($ctx->centroId, $cuenta, $nombre, $id)) {
-            throw new InvalidArgumentException('Ya existe una plantilla con ese nombre');
+            throw new InvalidArgumentException(_("Ya existe una plantilla con ese nombre"));
         }
 
         $lineasRaw = $datos['lineas'] ?? null;
         if (!is_array($lineasRaw) || $lineasRaw === []) {
-            throw new InvalidArgumentException('La plantilla necesita al menos una línea');
+            throw new InvalidArgumentException(_("La plantilla necesita al menos una línea"));
         }
 
         $lineas = [];
@@ -53,15 +53,15 @@ final class GuardarPlantillaApunte
             }
             $lineaCuenta = strtoupper(trim((string) ($raw['cuenta'] ?? $cuenta)));
             if (!in_array($lineaCuenta, ['P', 'G'], true)) {
-                throw new InvalidArgumentException('Libro P o G en cada línea');
+                throw new InvalidArgumentException(_("Libro P o G en cada línea"));
             }
             $origen = strtoupper(trim((string) ($raw['origen'] ?? 'A')));
             if (!in_array($origen, ['A', 'B', 'C'], true)) {
-                throw new InvalidArgumentException('Origen A, B o C en cada línea');
+                throw new InvalidArgumentException(_("Origen A, B o C en cada línea"));
             }
             $concepto = trim((string) ($raw['concepto_codigo'] ?? ''));
             if ($concepto === '' || $this->conceptos->buscar($lineaCuenta, $concepto) === null) {
-                throw new InvalidArgumentException('Concepto no válido: ' . $concepto);
+                throw new InvalidArgumentException(sprintf(_("Concepto no válido: %s"), $concepto));
             }
             $obs = trim((string) ($raw['observaciones'] ?? ''));
             $lineas[] = new LineaPlantillaApunte(
@@ -73,7 +73,7 @@ final class GuardarPlantillaApunte
             );
         }
         if ($lineas === []) {
-            throw new InvalidArgumentException('La plantilla necesita al menos una línea');
+            throw new InvalidArgumentException(_("La plantilla necesita al menos una línea"));
         }
 
         $guardada = $this->plantillas->guardar(new PlantillaApunte(

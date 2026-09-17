@@ -29,7 +29,7 @@ final class AjustarDisponible
         $personaId = (int) ($datos['persona_id'] ?? 0);
         $persona = $this->personas->porId($personaId);
         if ($persona === null || $persona->centroId !== $ctx->centroId) {
-            throw new InvalidArgumentException('Persona no encontrada');
+            throw new InvalidArgumentException(_("Persona no encontrada"));
         }
         $nuevo = Dinero::fromInput((string) ($datos['saldo'] ?? '0'))->toCents();
         $actual = $this->saldos->saldoDe($ctx->centroId, $personaId);

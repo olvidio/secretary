@@ -14,7 +14,7 @@ final class IdiomaUsuario
     public function __construct(public readonly string $valor)
     {
         if (!in_array($valor, self::todos(), true)) {
-            throw new InvalidArgumentException('Idioma no válido (es o ca)');
+            throw new InvalidArgumentException(_("Idioma no válido (es o ca)"));
         }
     }
 

@@ -53,44 +53,44 @@ final class CrearApunte
         $cuenta = strtoupper(trim((string) ($datos['cuenta'] ?? '')));
         $origen = strtoupper(trim((string) ($datos['origen'] ?? '')));
         if (!in_array($cuenta, ['P', 'G'], true)) {
-            throw new InvalidArgumentException('Cuenta P o G');
+            throw new InvalidArgumentException(_("Cuenta P o G"));
         }
         if (!in_array($origen, ['A', 'B', 'C'], true)) {
-            throw new InvalidArgumentException('Origen A, B o C');
+            throw new InvalidArgumentException(_("Origen A, B o C"));
         }
         $conceptoCodigo = trim((string) ($datos['concepto_codigo'] ?? $datos['concepto'] ?? ''));
         $concepto = $this->conceptos->buscar($cuenta, $conceptoCodigo);
         if ($concepto === null) {
-            throw new InvalidArgumentException('Concepto no válido para ' . $cuenta);
+            throw new InvalidArgumentException(sprintf(_("Concepto no válido para %s"), $cuenta));
         }
         $iniciales = trim((string) ($datos['iniciales'] ?? ''));
         if ($iniciales === '') {
             $iniciales = '';
         }
         if ($cuenta === 'P' && $iniciales === '' && $conceptoCodigo !== '32') {
-            throw new InvalidArgumentException('Las iniciales son obligatorias en P');
+            throw new InvalidArgumentException(_("Las iniciales son obligatorias en P"));
         }
         if ($iniciales !== '') {
             $this->config->get();
             $centroApunte = $this->ambito->ejecutar()->centroId;
             if ($this->personas->porInicialesDeCentro($centroApunte, $iniciales) === null) {
-                throw new InvalidArgumentException('Iniciales no reconocidas en este centro');
+                throw new InvalidArgumentException(_("Iniciales no reconocidas en este centro"));
             }
         }
         $obsRaw = (string) ($datos['observaciones'] ?? '');
         $obs = $obsRaw === '' ? null : $obsRaw;
         $cantidad = Dinero::fromInput((string) ($datos['cantidad'] ?? ''));
         if ($cantidad->isNegative() || $cantidad->isZero()) {
-            throw new InvalidArgumentException('La cantidad debe ser positiva');
+            throw new InvalidArgumentException(_("La cantidad debe ser positiva"));
         }
         $esCierre = !empty($datos['es_cierre']);
         $fechasDistintas = $fechaImputacion->format('Y-m-d') !== $fechaOperacion->format('Y-m-d');
         if ($fechasDistintas) {
             if (in_array($conceptoCodigo, ['41', '42'], true)) {
-                throw new InvalidArgumentException('Un traspaso caja/banco no admite fecha de imputación distinta');
+                throw new InvalidArgumentException(_("Un traspaso caja/banco no admite fecha de imputación distinta"));
             }
             if ($esCierre) {
-                throw new InvalidArgumentException('El asiento de cierre de mes no admite fecha de imputación distinta');
+                throw new InvalidArgumentException(_("El asiento de cierre de mes no admite fecha de imputación distinta"));
             }
         }
 
@@ -103,7 +103,7 @@ final class CrearApunte
             $fechaOperacion,
         );
         if ($ejercicioOperacion->id === null || $ejercicioImputacion->id === null) {
-            throw new InvalidArgumentException('Ejercicio sin identificador');
+            throw new InvalidArgumentException(_("Ejercicio sin identificador"));
         }
         $ejercicioId = $ejercicioOperacion->id;
         $cuentaFisicaId = isset($datos['cuenta_fisica_id']) && $datos['cuenta_fisica_id'] !== ''
@@ -152,7 +152,7 @@ final class CrearApunte
         );
 
         if ($resultado['asientos'] === []) {
-            throw new InvalidArgumentException('No se pudo traducir el apunte a asiento');
+            throw new InvalidArgumentException(_("No se pudo traducir el apunte a asiento"));
         }
 
         $asiento = $resultado['asientos'][0]->withFechaOperacion($fechaOperacion);
@@ -172,7 +172,7 @@ final class CrearApunte
         $tesoreriaCuentaId = $this->idCuentaContrapartida($asiento, $mapaCuentas);
         $puente = $this->cuentas->puentePeriodificacion($centroId, $asiento->libro);
         if ($puente === null || $puente->id === null) {
-            throw new InvalidArgumentException('Falta la cuenta PUENTE.PERIODIFICACION del libro ' . $asiento->libro);
+            throw new InvalidArgumentException(sprintf(_("Falta la cuenta PUENTE.PERIODIFICACION del libro %s"), $asiento->libro));
         }
 
         $par = ConstructorAsientoPeriodificado::partir(
@@ -213,9 +213,10 @@ final class CrearApunte
     ): array {
         $imputacion = $this->ejercicios->deCentroEnFecha($centroId, $fechaImputacion);
         if ($imputacion === null || $imputacion->id === null) {
-            throw new InvalidArgumentException(
-                'No hay ejercicio que cubra la fecha de imputación ' . $fechaImputacion->format('d/m/Y')
-            );
+            throw new InvalidArgumentException(sprintf(
+                _("No hay ejercicio que cubra la fecha de imputación %s"),
+                $fechaImputacion->format('d/m/Y'),
+            ));
         }
 
         $operacion = $this->ejercicios->deCentroEnFecha($centroId, $fechaOperacion);
@@ -223,27 +224,23 @@ final class CrearApunte
             if ($imputacion->estado === 'abierto' && $fechaOperacion > $imputacion->fechaFin) {
                 $operacion = $imputacion;
             } else {
-                throw new InvalidArgumentException(
-                    'No hay ejercicio que cubra la fecha de operación ' . $fechaOperacion->format('d/m/Y')
-                    . '. Cree el ejercicio siguiente o deje la imputación en el mismo período.'
-                );
+                throw new InvalidArgumentException(sprintf(
+                    _("No hay ejercicio que cubra la fecha de operación %s. Cree el ejercicio siguiente o deje la imputación en el mismo período."),
+                    $fechaOperacion->format('d/m/Y'),
+                ));
             }
         }
         if ($operacion->id === null) {
-            throw new InvalidArgumentException('Ejercicio de operación sin identificador');
+            throw new InvalidArgumentException(_("Ejercicio de operación sin identificador"));
         }
         if ($operacion->estado === 'cerrado') {
-            throw new InvalidArgumentException(
-                'El ejercicio de la fecha de operación está cerrado; reábralo o use el ejercicio abierto'
-            );
+            throw new InvalidArgumentException(_("El ejercicio de la fecha de operación está cerrado; reábralo o use el ejercicio abierto"));
         }
 
         $permiteCerradoImputacion = false;
         if ($imputacion->estado === 'cerrado') {
             if ($imputacion->id === $operacion->id) {
-                throw new InvalidArgumentException(
-                    'No se pueden registrar asientos en un ejercicio cerrado; reábralo o use el ejercicio abierto'
-                );
+                throw new InvalidArgumentException(_("No se pueden registrar asientos en un ejercicio cerrado; reábralo o use el ejercicio abierto"));
             }
             $permiteCerradoImputacion = true;
         }
@@ -266,12 +263,12 @@ final class CrearApunte
                 continue;
             }
             if ($contrapartidaId !== null) {
-                throw new InvalidArgumentException('El asiento tiene más de una contrapartida; no se periodifica');
+                throw new InvalidArgumentException(_("El asiento tiene más de una contrapartida; no se periodifica"));
             }
             $contrapartidaId = $cuenta->id;
         }
         if ($contrapartidaId === null) {
-            throw new InvalidArgumentException('No hay contrapartida que periodificar en este asiento');
+            throw new InvalidArgumentException(_("No hay contrapartida que periodificar en este asiento"));
         }
 
         return $contrapartidaId;
@@ -281,7 +278,7 @@ final class CrearApunte
     {
         $cuenta = $this->cuentas->buscar($centroId, null, $libro, $codigo);
         if ($cuenta === null) {
-            throw new InvalidArgumentException(sprintf('Cuenta de concepto no encontrada: %s/%s', $libro, $codigo));
+            throw new InvalidArgumentException(sprintf(_("Cuenta de concepto no encontrada: %s/%s"), $libro, $codigo));
         }
 
         return $cuenta;
@@ -291,7 +288,7 @@ final class CrearApunte
     {
         $cuenta = $this->cuentas->tesoreria($centroId, $libro, $codigoMaestro);
         if ($cuenta === null) {
-            throw new InvalidArgumentException(sprintf('Cuenta de tesorería no encontrada: %s/%s', $libro, $codigoMaestro));
+            throw new InvalidArgumentException(sprintf(_("Cuenta de tesorería no encontrada: %s/%s"), $libro, $codigoMaestro));
         }
 
         return $cuenta;
@@ -315,7 +312,7 @@ final class CrearApunte
         $tipoFisica = match ($origenApunte) {
             'C' => 'caja',
             'B' => 'banco',
-            default => throw new InvalidArgumentException('Origen no válido para tesorería: ' . $origenApunte),
+            default => throw new InvalidArgumentException(sprintf(_("Origen no válido para tesorería: %s"), $origenApunte)),
         };
         $maestroEsperado = $tipoFisica === 'caja' ? 'CAJA' : 'BANCO';
         if ($codigoMaestro !== $maestroEsperado) {
@@ -325,16 +322,14 @@ final class CrearApunte
         if ($cuentaFisicaId !== null) {
             $fisica = $this->fisicas->porId($cuentaFisicaId);
             if ($fisica === null || $fisica->centroId !== $centroId || !$fisica->activo) {
-                throw new InvalidArgumentException('Cuenta física no válida');
+                throw new InvalidArgumentException(_("Cuenta física no válida"));
             }
             if ($fisica->tipo !== $tipoFisica) {
-                throw new InvalidArgumentException(
-                    sprintf('La cuenta física indicada no es de tipo %s', $tipoFisica)
-                );
+                throw new InvalidArgumentException(sprintf(_("La cuenta física indicada no es de tipo %s"), $tipoFisica));
             }
             $cuenta = $this->cuentas->tesoreriaDeFisica($centroId, $libro, $cuentaFisicaId);
             if ($cuenta === null) {
-                throw new InvalidArgumentException('Cuenta de mayor de tesorería no encontrada para la física indicada');
+                throw new InvalidArgumentException(_("Cuenta de mayor de tesorería no encontrada para la física indicada"));
             }
 
             return $cuenta;
@@ -343,9 +338,7 @@ final class CrearApunte
         $activas = $this->fisicas->listarActivasDeCentro($centroId, $tipoFisica);
         if (count($activas) > 1) {
             $etiqueta = $tipoFisica === 'caja' ? 'caja' : 'banco';
-            throw new InvalidArgumentException(
-                sprintf('Hay varias %ss activas: indique cuenta_fisica_id', $etiqueta)
-            );
+            throw new InvalidArgumentException(sprintf(_("Hay varias %ss activas: indique cuenta_fisica_id"), $etiqueta));
         }
         if (count($activas) === 1 && $activas[0]->id !== null) {
             $cuenta = $this->cuentas->tesoreriaDeFisica($centroId, $libro, $activas[0]->id);
@@ -361,7 +354,7 @@ final class CrearApunte
     {
         $cuenta = $this->cuentas->personalDe($centroId, $personaId);
         if ($cuenta === null) {
-            throw new InvalidArgumentException('Cuenta personal no encontrada para persona ' . $personaId);
+            throw new InvalidArgumentException(sprintf(_("Cuenta personal no encontrada para persona %s"), $personaId));
         }
 
         return $cuenta;
@@ -371,7 +364,7 @@ final class CrearApunte
     {
         $cuenta = $this->cuentas->deudoresVivienda($centroId);
         if ($cuenta === null) {
-            throw new InvalidArgumentException('Cuenta DEUDORES.VIV no encontrada');
+            throw new InvalidArgumentException(_("Cuenta DEUDORES.VIV no encontrada"));
         }
 
         return $cuenta;
@@ -407,14 +400,14 @@ final class CrearApunte
     {
         $raw = trim($raw);
         if ($raw === '') {
-            throw new InvalidArgumentException('Falta la fecha');
+            throw new InvalidArgumentException(_("Falta la fecha"));
         }
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw) === 1) {
             return new DateTimeImmutable($raw);
         }
         $dt = DateTimeImmutable::createFromFormat('!d/m/Y', $raw);
         if ($dt === false) {
-            throw new InvalidArgumentException('Formato de fecha incorrecto');
+            throw new InvalidArgumentException(_("Formato de fecha incorrecto"));
         }
 
         return $dt;

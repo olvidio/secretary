@@ -26,21 +26,19 @@ final class ResolverPersonaActual
     public function ejecutar(): ContextoPersonal
     {
         if ($this->identidadId === null || $this->personaId === null) {
-            throw new RuntimeException('Sesión de persona incompleta');
+            throw new RuntimeException(_("Sesión de persona incompleta"));
         }
         $vinculos = $this->identidades->personasDe($this->identidadId);
         if (!in_array($this->personaId, $vinculos, true)) {
-            throw new InvalidArgumentException('Esa persona no pertenece a esta identidad');
+            throw new InvalidArgumentException(_("Esa persona no pertenece a esta identidad"));
         }
         $persona = $this->personas->porId($this->personaId);
         if ($persona === null || $persona->centroId === null) {
-            throw new InvalidArgumentException(
-                'La persona no está vinculada a un centro; no se puede abrir el libro personal'
-            );
+            throw new InvalidArgumentException(_("La persona no está vinculada a un centro; no se puede abrir el libro personal"));
         }
         $ejercicio = $this->ejercicios->abiertoDe($persona->centroId);
         if ($ejercicio === null || $ejercicio->id === null) {
-            throw new RuntimeException('El centro no tiene ningún ejercicio abierto');
+            throw new RuntimeException(_("El centro no tiene ningún ejercicio abierto"));
         }
         $this->asegurar->ejecutar($persona->centroId, $persona->id ?? $this->personaId);
 

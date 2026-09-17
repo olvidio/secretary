@@ -53,7 +53,7 @@ final class EjercicioController
     {
         $centro = $this->centroActual();
         if ($centro === null) {
-            return ContestarJson::error('No hay ningún centro dado de alta todavía');
+            return ContestarJson::error(_("No hay ningún centro dado de alta todavía"));
         }
         try {
             $datos = $request->json();

@@ -28,49 +28,41 @@ final class AsegurarIdentidadCentro
         $password = trim($password);
         $nombre = trim($nombre);
         if ($alias === '' || $email === '') {
-            throw new InvalidArgumentException('Usuario (alias) y correo son obligatorios');
+            throw new InvalidArgumentException(_("Usuario (alias) y correo son obligatorios"));
         }
         if (preg_match('/^[a-z][a-z0-9._-]{1,31}$/', $alias) !== 1) {
-            throw new InvalidArgumentException(
-                'El usuario debe empezar por letra y tener 2-32 caracteres (letras, números, punto, guion)'
-            );
+            throw new InvalidArgumentException(_("El usuario debe empezar por letra y tener 2-32 caracteres (letras, números, punto, guion)"));
         }
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-            throw new InvalidArgumentException('El correo no es válido');
+            throw new InvalidArgumentException(_("El correo no es válido"));
         }
 
         $porAlias = $this->identidades->porEmailOAlias($alias);
         $porEmail = $this->identidades->porEmailOAlias($email);
         if ($porAlias !== null && $porEmail !== null && $porAlias->id !== $porEmail->id) {
-            throw new InvalidArgumentException('El usuario y el correo pertenecen a cuentas distintas');
+            throw new InvalidArgumentException(_("El usuario y el correo pertenecen a cuentas distintas"));
         }
         $identidad = $porAlias ?? $porEmail;
 
         if ($identidad !== null && $identidad->id !== null) {
             if (strtolower($identidad->email) !== $email) {
-                throw new InvalidArgumentException(
-                    'El usuario «' . $alias . '» ya existe con otro correo'
-                );
+                throw new InvalidArgumentException(sprintf(_("El usuario «%s» ya existe con otro correo"), $alias));
             }
             if (
                 $identidad->alias !== null
                 && strtolower($identidad->alias) !== $alias
             ) {
-                throw new InvalidArgumentException(
-                    'Ese correo ya existe con el usuario «' . $identidad->alias . '»'
-                );
+                throw new InvalidArgumentException(sprintf(_("Ese correo ya existe con el usuario «%s»"), $identidad->alias));
             }
             if (
                 $this->identidades->centrosDe($identidad->id) === []
                 && $this->identidades->personasDe($identidad->id) !== []
             ) {
-                throw new InvalidArgumentException(
-                    'Ese correo o usuario ya es una cuenta personal; no puede ser secretario de un centro'
-                );
+                throw new InvalidArgumentException(_("Ese correo o usuario ya es una cuenta personal; no puede ser secretario de un centro"));
             }
             if ($password !== '') {
                 if (strlen($password) < 6) {
-                    throw new InvalidArgumentException('La contraseña debe tener al menos 6 caracteres');
+                    throw new InvalidArgumentException(_("La contraseña debe tener al menos 6 caracteres"));
                 }
                 $identidad = $this->identidades->guardar(new Identidad(
                     $identidad->id,
@@ -85,7 +77,7 @@ final class AsegurarIdentidadCentro
                 ));
             }
             if ($identidad->id === null) {
-                throw new InvalidArgumentException('No se pudo actualizar el usuario');
+                throw new InvalidArgumentException(_("No se pudo actualizar el usuario"));
             }
             $this->identidades->vincularCentro($identidad->id, $centroId, $rol);
 
@@ -93,7 +85,7 @@ final class AsegurarIdentidadCentro
         }
 
         if ($password === '' || strlen($password) < 6) {
-            throw new InvalidArgumentException('La contraseña debe tener al menos 6 caracteres');
+            throw new InvalidArgumentException(_("La contraseña debe tener al menos 6 caracteres"));
         }
         $creada = $this->identidades->guardar(new Identidad(
             null,
@@ -107,7 +99,7 @@ final class AsegurarIdentidadCentro
             $alias,
         ));
         if ($creada->id === null) {
-            throw new InvalidArgumentException('No se pudo crear el usuario');
+            throw new InvalidArgumentException(_("No se pudo crear el usuario"));
         }
         $this->identidades->vincularCentro($creada->id, $centroId, $rol);
 

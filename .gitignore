@@ -16,3 +16,4 @@
 !/var/backups/personal/.gitkeep
 /build/
 .phpunit.cache
+/tools/i18n/.venv/

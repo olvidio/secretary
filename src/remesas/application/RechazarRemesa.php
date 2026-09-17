@@ -27,10 +27,10 @@ final class RechazarRemesa
         $remesa = $this->remesas->porId($id);
         $ctx = $this->ambito->ejecutar();
         if ($remesa === null || $remesa->centroId !== $ctx->centroId || $remesa->id === null) {
-            throw new InvalidArgumentException('Remesa no encontrada');
+            throw new InvalidArgumentException(_("Remesa no encontrada"));
         }
         if (!in_array($remesa->estado, ['enviada', 'aceptada'], true)) {
-            throw new InvalidArgumentException('Solo se puede rechazar una remesa enviada o aceptada');
+            throw new InvalidArgumentException(_("Solo se puede rechazar una remesa enviada o aceptada"));
         }
         $nota = trim((string) ($datos['nota'] ?? ''));
         $this->remesas->enTransaccion(function () use ($remesa, $nota): void {
@@ -46,7 +46,7 @@ final class RechazarRemesa
         });
         $out = $this->remesas->porId((int) $remesa->id);
         if ($out === null) {
-            throw new InvalidArgumentException('No se pudo releer la remesa');
+            throw new InvalidArgumentException(_("No se pudo releer la remesa"));
         }
 
         return $out;

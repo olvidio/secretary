@@ -19,7 +19,7 @@ final class BorrarCopiaSeguridad
     {
         $nombre = trim((string) ($datos['fichero'] ?? ''));
         if ($nombre === '') {
-            throw new InvalidArgumentException('Indique el fichero a borrar');
+            throw new InvalidArgumentException(_("Indique el fichero a borrar"));
         }
         $this->almacen->borrarPorNombre($nombre);
     }

@@ -17,7 +17,7 @@ final class CambiarPersonaUsuario
     {
         $permitidas = $this->identidades->personasDe($identidadId);
         if (!in_array($personaId, $permitidas, true)) {
-            throw new InvalidArgumentException('Persona no permitida');
+            throw new InvalidArgumentException(_("Persona no permitida"));
         }
 
         return $personaId;

@@ -23,7 +23,7 @@ final class ListarCandidatosVinculoCentro
     {
         $solicitud = $this->solicitudes->porId($solicitudId);
         if ($solicitud === null || $solicitud->centroId !== $centroId || !$solicitud->esPendiente()) {
-            throw new InvalidArgumentException('Solicitud no encontrada');
+            throw new InvalidArgumentException(_("Solicitud no encontrada"));
         }
         $identidad = $this->identidades->porId($solicitud->identidadId);
         $termino = $identidad?->nombre ?? '';

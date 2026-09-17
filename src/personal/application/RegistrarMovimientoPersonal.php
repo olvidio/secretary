@@ -44,7 +44,7 @@ final class RegistrarMovimientoPersonal
         $fechaImputacion = $impRaw === '' ? $fechaOperacion : $this->parseFecha($impRaw);
         $importe = Dinero::fromInput((string) ($datos['cantidad'] ?? ''));
         if ($importe->isNegative() || $importe->isZero()) {
-            throw new InvalidArgumentException('La cantidad debe ser positiva');
+            throw new InvalidArgumentException(_("La cantidad debe ser positiva"));
         }
         $cents = $importe->toCents();
         $glosa = trim((string) ($datos['nota'] ?? $datos['glosa'] ?? ''));
@@ -54,7 +54,7 @@ final class RegistrarMovimientoPersonal
             $origen = $this->tesoreria($ctx->centroId, $ctx->personaId, (string) ($datos['tesoreria_origen'] ?? ''));
             $destino = $this->tesoreria($ctx->centroId, $ctx->personaId, (string) ($datos['tesoreria_destino'] ?? ''));
             if ($fechaImputacion->format('Y-m-d') !== $fechaOperacion->format('Y-m-d')) {
-                throw new InvalidArgumentException('Un traspaso caja/banco no admite fecha de imputación distinta');
+                throw new InvalidArgumentException(_("Un traspaso caja/banco no admite fecha de imputación distinta"));
             }
             $asiento = ConstructorAsientoPersonal::traspaso(
                 $ctx->ejercicioId,
@@ -72,7 +72,7 @@ final class RegistrarMovimientoPersonal
         $plantillaId = (int) ($datos['plantilla_id'] ?? 0);
         if ($plantillaId > 0) {
             if ($sentido !== 'gasto') {
-                throw new InvalidArgumentException('Las plantillas del centro solo aplican a gastos');
+                throw new InvalidArgumentException(_("Las plantillas del centro solo aplican a gastos"));
             }
             $categoria = $this->categoriaPlantilla->ejecutar($ctx->centroId, $ctx->personaId, $plantillaId);
             $gastoGenerales = false;
@@ -86,13 +86,13 @@ final class RegistrarMovimientoPersonal
         $ejercicioImp = $this->ejercicios->deCentroEnFecha($ctx->centroId, $fechaImputacion);
         $ejercicioOp = $this->ejercicios->deCentroEnFecha($ctx->centroId, $fechaOperacion);
         if ($ejercicioImp === null || $ejercicioImp->id === null) {
-            throw new InvalidArgumentException('No hay ejercicio que cubra la fecha de imputación');
+            throw new InvalidArgumentException(_("No hay ejercicio que cubra la fecha de imputación"));
         }
         if ($ejercicioOp === null || $ejercicioOp->id === null) {
-            throw new InvalidArgumentException('No hay ejercicio que cubra la fecha de operación');
+            throw new InvalidArgumentException(_("No hay ejercicio que cubra la fecha de operación"));
         }
         if ($ejercicioOp->estado === 'cerrado') {
-            throw new InvalidArgumentException('El ejercicio de la fecha de operación está cerrado');
+            throw new InvalidArgumentException(_("El ejercicio de la fecha de operación está cerrado"));
         }
 
         $asiento = $this->conPlantilla(ConstructorAsientoPersonal::movimiento(
@@ -117,7 +117,7 @@ final class RegistrarMovimientoPersonal
 
         $puente = $this->cuentas->buscar($ctx->centroId, $ctx->personaId, 'X', 'PUENTE.PERIODIFICACION');
         if ($puente === null || $puente->id === null) {
-            throw new InvalidArgumentException('Falta la cuenta de periodificación personal');
+            throw new InvalidArgumentException(_("Falta la cuenta de periodificación personal"));
         }
         $par = ConstructorAsientoPeriodificado::partir(
             $asiento,
@@ -141,18 +141,18 @@ final class RegistrarMovimientoPersonal
             }
         }
 
-        throw new InvalidArgumentException('Categoría no válida');
+        throw new InvalidArgumentException(_("Categoría no válida"));
     }
 
     private function tesoreria(int $centroId, int $personaId, string $maestro): Cuenta
     {
         $maestro = strtoupper(trim($maestro));
         if (!in_array($maestro, ['CAJA', 'BANCO'], true)) {
-            throw new InvalidArgumentException('Tesorería: CAJA o BANCO');
+            throw new InvalidArgumentException(_("Tesorería: CAJA o BANCO"));
         }
         $cuenta = $this->cuentas->tesoreriaDePersona($centroId, $personaId, 'X', $maestro);
         if ($cuenta === null || $cuenta->id === null) {
-            throw new InvalidArgumentException('No hay cuenta de tesorería personal ' . $maestro);
+            throw new InvalidArgumentException(sprintf(_("No hay cuenta de tesorería personal %s"), $maestro));
         }
 
         return $cuenta;
@@ -173,7 +173,7 @@ final class RegistrarMovimientoPersonal
         }
         $concepto = trim((string) ($datos['concepto_generales'] ?? ''));
         if ($concepto === '') {
-            throw new InvalidArgumentException('Indique el concepto de generales (p. ej. 204 Gas)');
+            throw new InvalidArgumentException(_("Indique el concepto de generales (p. ej. 204 Gas)"));
         }
         $valido = false;
         foreach (CatalogoConceptos::todos() as $c) {
@@ -183,7 +183,7 @@ final class RegistrarMovimientoPersonal
             }
         }
         if (!$valido) {
-            throw new InvalidArgumentException('Concepto de generales no válido');
+            throw new InvalidArgumentException(_("Concepto de generales no válido"));
         }
         return [true, $concepto];
     }
@@ -219,14 +219,14 @@ final class RegistrarMovimientoPersonal
     {
         $raw = trim($raw);
         if ($raw === '') {
-            throw new InvalidArgumentException('Falta la fecha');
+            throw new InvalidArgumentException(_("Falta la fecha"));
         }
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw) === 1) {
             return new DateTimeImmutable($raw);
         }
         $dt = DateTimeImmutable::createFromFormat('!d/m/Y', $raw);
         if ($dt === false) {
-            throw new InvalidArgumentException('Formato de fecha incorrecto');
+            throw new InvalidArgumentException(_("Formato de fecha incorrecto"));
         }
 
         return $dt;

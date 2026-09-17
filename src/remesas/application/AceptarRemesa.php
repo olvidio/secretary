@@ -42,18 +42,18 @@ final class AceptarRemesa
         $remesa = $this->remesas->porId($id);
         $ctx = $this->ambito->ejecutar();
         if ($remesa === null || $remesa->centroId !== $ctx->centroId) {
-            throw new InvalidArgumentException('Remesa no encontrada');
+            throw new InvalidArgumentException(_("Remesa no encontrada"));
         }
         if ($remesa->estado !== 'enviada' || $remesa->id === null) {
-            throw new InvalidArgumentException('Solo se puede aceptar una remesa enviada');
+            throw new InvalidArgumentException(_("Solo se puede aceptar una remesa enviada"));
         }
         $ejercicio = $this->ejercicios->porId($remesa->ejercicioId);
         if ($ejercicio === null || $ejercicio->estado !== 'abierto' || $ejercicio->id === null) {
-            throw new InvalidArgumentException('El ejercicio de la remesa está cerrado');
+            throw new InvalidArgumentException(_("El ejercicio de la remesa está cerrado"));
         }
         $cc = $this->cuentas->personalDe($remesa->centroId, $remesa->personaId);
         if ($cc === null || $cc->id === null) {
-            throw new InvalidArgumentException('Falta la cuenta personal del centro para esa persona');
+            throw new InvalidArgumentException(_("Falta la cuenta personal del centro para esa persona"));
         }
         $persona = $this->personas->porId($remesa->personaId);
         $iniciales = $persona !== null ? strtoupper($persona->iniciales) : '';
@@ -61,7 +61,7 @@ final class AceptarRemesa
         $desde = PeriodoPersonal::primerDia($remesa->anio, $remesa->mes);
         $hasta = \DateTimeImmutable::createFromFormat('!Y-m-d', $periodo['hasta']);
         if ($hasta === false) {
-            throw new InvalidArgumentException('Periodo de remesa no válido');
+            throw new InvalidArgumentException(_("Periodo de remesa no válido"));
         }
         $fecha = PeriodoPersonal::fechaAsiento($desde, $hasta, $ejercicio);
         $glosa = sprintf('Remesa %s %02d/%d v%d', $iniciales, $remesa->mes, $remesa->anio, $remesa->version);
@@ -121,7 +121,7 @@ final class AceptarRemesa
         });
         $aceptada = $this->remesas->porId((int) $remesa->id);
         if ($aceptada === null) {
-            throw new InvalidArgumentException('No se pudo releer la remesa aceptada');
+            throw new InvalidArgumentException(_("No se pudo releer la remesa aceptada"));
         }
 
         return $aceptada;
@@ -136,12 +136,10 @@ final class AceptarRemesa
         foreach ($remesa->lineas as $linea) {
             $cuenta = $this->cuentas->buscar($remesa->centroId, null, 'P', $linea->codigoMaestro);
             if ($cuenta === null || $cuenta->id === null) {
-                throw new InvalidArgumentException(
-                    'No existe en el plan P del centro el concepto ' . $linea->codigoMaestro
-                );
+                throw new InvalidArgumentException(sprintf(_("No existe en el plan P del centro el concepto %s"), $linea->codigoMaestro));
             }
             if (!in_array($cuenta->tipo, ['ingreso', 'gasto'], true)) {
-                throw new InvalidArgumentException('El concepto ' . $linea->codigoMaestro . ' no es imputable como ingreso o gasto');
+                throw new InvalidArgumentException(sprintf(_("El concepto %s no es imputable como ingreso o gasto"), $linea->codigoMaestro));
             }
             $out[] = [
                 'cuenta_id' => $cuenta->id,

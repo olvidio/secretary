@@ -34,11 +34,11 @@ final class ResolverAmbitoActual
             $centro ??= $this->centros->listar()[0] ?? null;
         }
         if ($centro === null || $centro->id === null) {
-            throw new RuntimeException('No hay ningún centro configurado; ejecute db:install o db:migrate primero.');
+            throw new RuntimeException(_("No hay ningún centro configurado; ejecute db:install o db:migrate primero."));
         }
         $ejercicio = $this->ejercicios->abiertoDe($centro->id);
         if ($ejercicio === null || $ejercicio->id === null) {
-            throw new RuntimeException('El centro no tiene ningún ejercicio abierto.');
+            throw new RuntimeException(_("El centro no tiene ningún ejercicio abierto."));
         }
 
         return new ContextoActual($centro->id, $ejercicio->id);

@@ -5,7 +5,7 @@
     if (valor === null || valor === undefined || valor === '') return '';
     const n = Math.round(Number(String(valor).replace(',', '.')));
     if (!Number.isFinite(n)) return '';
-    return n.toLocaleString('es-ES', {
+    return n.toLocaleString(secretaryLocale(), {
       useGrouping: true,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
@@ -85,7 +85,7 @@
     if (valor === null || valor === undefined || valor === '') return vacio;
     const n = parseEsNum(valor);
     if (n === null || !Number.isFinite(n)) return vacio;
-    return n.toLocaleString('es-ES', {
+    return n.toLocaleString(secretaryLocale(), {
       useGrouping: true,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -193,7 +193,7 @@
     const body = bodyConfig613();
     body.fecha_cierre = window.__resumen613?.config?.fecha_cierre;
     const s = await api('/api/informes/613/' + CUENTA + '/manual', { method: 'POST', body });
-    if (!s.ok) alert(s.error);
+    if (!s.ok) alert(s.error || t('error'));
     return s.ok;
   }
 

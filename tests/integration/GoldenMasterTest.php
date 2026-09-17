@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\infrastructure\persistence\PdoCentroRepository;
+use src\ambito\infrastructure\persistence\PdoCuentaFisicaRepository;
 use src\ambito\infrastructure\persistence\PdoCuentaRepository;
 use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
 use src\apuntes\application\ListarApuntes;
@@ -118,6 +119,8 @@ final class GoldenMasterTest extends TestCase
             $ambito,
             new PdoPartidaLaboresRepository($pdo),
             new PdoInforme613MesRepository($pdo),
+            $arqueoRepo,
+            new PdoCuentaFisicaRepository($pdo),
         );
         $this->compararOActualizar('resumen_613_p', $resumen613->ejecutar('P'));
         $this->compararOActualizar('resumen_613_g', $resumen613->ejecutar('G'));

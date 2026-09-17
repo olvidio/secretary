@@ -1,36 +1,49 @@
 <?php $cuenta = $cuentaArqueo ?? 'G'; ?>
 <p class="print-hide arqueo-volver" id="arqueo-volver" hidden>
-    <a href="/613-<?= strtolower($cuenta) ?>">← Volver al resumen 613 <?= htmlspecialchars($cuenta, ENT_QUOTES) ?></a>
+    <a href="/613-<?= strtolower($cuenta) ?>"><?= sprintf(_("← Volver al resumen 613 %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></a>
 </p>
-<h1>Arqueo <?= htmlspecialchars($cuenta, ENT_QUOTES) ?></h1>
+<h1><?= sprintf(_("Arqueo %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
 <p id="saldos" class="muted"></p>
-<label id="wrap-fisica" style="display:none">Caja física
+<label id="wrap-fisica" style="display:none"><?= _("Caja física") ?>
     <select id="sel-fisica"></select>
 </label>
 <form id="form-arq">
-    <label class="arqueo-fecha">Fecha <input type="date" name="fecha" required></label>
-    <h2>Billetes</h2>
+    <label class="arqueo-fecha"><?= _("Fecha") ?> <input type="date" name="fecha" required></label>
+    <h2><?= _("Billetes") ?></h2>
     <div class="arqueo-grid" id="billetes"></div>
-    <h2>Monedas</h2>
+    <h2><?= _("Monedas") ?></h2>
     <div class="arqueo-grid" id="monedas"></div>
-    <h2>Vales / cheques (importe)</h2>
+    <h2><?= _("Vales / cheques (importe)") ?></h2>
     <div class="arqueo-grid">
-        <label>Vale 1 <input name="vale0"></label>
-        <label>Vale 2 <input name="vale1"></label>
-        <label>Cheque 1 <input name="cheque0"></label>
-        <label>Cheque 2 <input name="cheque1"></label>
+        <label><?= _("Vale 1") ?> <input name="vale0"></label>
+        <label><?= _("Vale 2") ?> <input name="vale1"></label>
+        <label><?= _("Cheque 1") ?> <input name="cheque0"></label>
+        <label><?= _("Cheque 2") ?> <input name="cheque1"></label>
     </div>
     <p class="arqueo-total" id="totales">
-        <strong>Total:</strong> <span id="total-valor">0,00</span> €
-        <span id="total-dif" class="arqueo-dif" aria-live="polite">Diferencia: 0,00 €</span>
-        <button type="button" id="btn-capuchinos" class="arqueo-capuchinos-btn" hidden>Buscar capuchinos</button>
+        <strong><?= _("Total:") ?></strong> <span id="total-valor">0,00</span> €
+        <span id="total-dif" class="arqueo-dif" aria-live="polite"><?= _("Diferencia:") ?> 0,00 €</span>
+        <button type="button" id="btn-capuchinos" class="arqueo-capuchinos-btn" hidden><?= _("Buscar capuchinos") ?></button>
         <span class="arqueo-total-detalle" id="total-detalle"></span>
     </p>
-    <button type="submit" id="btn-guardar-arqueo">Guardar arqueo</button>
+    <button type="submit" id="btn-guardar-arqueo"><?= _("Guardar arqueo") ?></button>
     <p id="arqueo-msg" class="ok print-hide" hidden aria-live="polite"></p>
 </form>
 <div id="capuchinos-res" class="arqueo-capuchinos" hidden></div>
 <script>
+const I18N_ARQUEO = {
+  saldoContable: <?= json_encode(_("Saldo contable (P+G) %s · P: %s · G: %s"), JSON_UNESCAPED_UNICODE) ?>,
+  dineroVales: <?= json_encode(_("(dinero %s + vales %s)"), JSON_UNESCAPED_UNICODE) ?>,
+  diferencia: <?= json_encode(_("Diferencia: %s €"), JSON_UNESCAPED_UNICODE) ?>,
+  noMultiplo9: <?= json_encode(_("La diferencia no es múltiplo de 9."), JSON_UNESCAPED_UNICODE) ?>,
+  capuchinos: <?= json_encode(_("Capuchinos (cifras invertidas)"), JSON_UNESCAPED_UNICODE) ?>,
+  capuchinosAyuda: <?= json_encode(_("Si se escribieron dos cifras al revés (o se corrió la coma), la diferencia es múltiplo de 9. Apuntes de caja cuyo importe, cambiado así, explicaría el descuadre de %s €."), JSON_UNESCAPED_UNICODE) ?>,
+  ningunApunte: <?= json_encode(_("Ningún apunte de caja encaja."), JSON_UNESCAPED_UNICODE) ?>,
+  ver: <?= json_encode(_("Ver"), JSON_UNESCAPED_UNICODE) ?>,
+  guardado: <?= json_encode(_("Arqueo guardado (%s €)."), JSON_UNESCAPED_UNICODE) ?>,
+  guardadoSimple: <?= json_encode(_("Arqueo guardado."), JSON_UNESCAPED_UNICODE) ?>,
+  errorGuardar: <?= json_encode(_("No se pudo guardar el arqueo"), JSON_UNESCAPED_UNICODE) ?>,
+};
 const CUENTA = <?= json_encode($cuenta) ?>;
 const BILS = [500,200,100,50,20,10,5];
 const MON = [2,1,0.5,0.2,0.1,0.05,0.02,0.01];
@@ -74,13 +87,15 @@ function mostrarTotal(form) {
   document.getElementById('total-valor').textContent = fmtEuro(total);
   const det = document.getElementById('total-detalle');
   if (dinero || vales) {
-    det.textContent = `(dinero ${fmtEuro(dinero)} + vales ${fmtEuro(vales)})`;
+    det.textContent = I18N_ARQUEO.dineroVales
+      .replace('%s', fmtEuro(dinero))
+      .replace('%s', fmtEuro(vales));
   } else {
     det.textContent = '';
   }
   const dif = total - saldoContable;
   const elDif = document.getElementById('total-dif');
-  elDif.textContent = 'Diferencia: ' + fmtEuro(dif) + ' €';
+  elDif.textContent = I18N_ARQUEO.diferencia.replace('%s', fmtEuro(dif));
   const ok = cents(dif) === 0;
   elDif.classList.toggle('error', !ok);
   elDif.classList.toggle('ok', ok);
@@ -102,9 +117,10 @@ function grid(el, valores, prefix) {
 async function refreshSaldos() {
   const url = fisicaId ? '/api/arqueos/fisica/' + fisicaId : '/api/arqueos/' + CUENTA;
   const r = await api(url);
-  document.getElementById('saldos').textContent =
-    'Saldo contable (P+G) ' + (r.saldo_fisico_es || r.saldo_fisico) +
-    ' · P: ' + r.saldo_caja_p + ' · G: ' + r.saldo_caja_g;
+  document.getElementById('saldos').textContent = I18N_ARQUEO.saldoContable
+    .replace('%s', r.saldo_fisico_es || r.saldo_fisico)
+    .replace('%s', r.saldo_caja_p)
+    .replace('%s', r.saldo_caja_g);
   saldoContable = parseImporte(r.saldo_fisico);
   const form = document.getElementById('form-arq');
   if (form) mostrarTotal(form);
@@ -114,22 +130,20 @@ function pintarCapuchinos(s) {
   const box = document.getElementById('capuchinos-res');
   box.hidden = false;
   if (!s.aplicable) {
-    box.innerHTML = '<p class="muted">La diferencia no es múltiplo de 9.</p>';
+    box.innerHTML = '<p class="muted">' + esc(I18N_ARQUEO.noMultiplo9) + '</p>';
     return;
   }
   const apuntes = s.apuntes || [];
-  let html = '<h2>Capuchinos (cifras invertidas)</h2>'
-    + '<p class="muted">Si se escribieron dos cifras al revés (o se corrió la coma), '
-    + 'la diferencia es múltiplo de 9. Apuntes de caja cuyo importe, cambiado así, '
-    + 'explicaría el descuadre de ' + esc(s.diferencia_es || s.diferencia) + ' €.</p>';
+  let html = '<h2>' + esc(I18N_ARQUEO.capuchinos) + '</h2>'
+    + '<p class="muted">' + esc(I18N_ARQUEO.capuchinosAyuda.replace('%s', s.diferencia_es || s.diferencia)) + '</p>';
   if (!apuntes.length) {
-    html += '<p>Ningún apunte de caja encaja.</p>';
+    html += '<p>' + esc(I18N_ARQUEO.ningunApunte) + '</p>';
     box.innerHTML = html;
     return;
   }
   html += '<table><thead><tr>'
-    + '<th>Fecha</th><th>P/G</th><th>Inic.</th><th>Concepto</th>'
-    + '<th>Observaciones</th><th class="num">Anotado</th><th class="num">Si fuera</th>'
+    + '<th><?= _("Fecha") ?></th><th>P/G</th><th><?= _("Inic.") ?></th><th><?= _("Concepto") ?></th>'
+    + '<th><?= _("Observaciones") ?></th><th class="num"><?= _("Anotado") ?></th><th class="num"><?= _("Si fuera") ?></th>'
     + '<th></th></tr></thead><tbody>';
   apuntes.forEach((a) => {
     const alts = (a.alternativas || []).map((x) => x.cantidad_es || x.cantidad).join(', ');
@@ -146,7 +160,7 @@ function pintarCapuchinos(s) {
       + '<td>' + esc(a.observaciones) + '</td>'
       + '<td class="num">' + esc(a.cantidad_es || a.cantidad) + '</td>'
       + '<td class="num">' + esc(alts) + '</td>'
-      + '<td><a href="' + href + '">Ver</a></td>'
+      + '<td><a href="' + href + '">' + esc(I18N_ARQUEO.ver) + '</a></td>'
       + '</tr>';
   });
   html += '</tbody></table>';
@@ -210,12 +224,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (fisicaId) body.cuenta_fisica_id = fisicaId;
     const s = await api('/api/arqueos/' + CUENTA, {method:'POST', body});
     if (btn) btn.disabled = false;
-    if (!s.ok) return alert(s.error || 'No se pudo guardar el arqueo');
+    if (!s.ok) return alert(s.error || I18N_ARQUEO.errorGuardar);
     if (msg) {
       const total = s.arqueo?.total_es || s.arqueo?.total || '';
       msg.textContent = total
-        ? 'Arqueo guardado (' + total + ' €).'
-        : 'Arqueo guardado.';
+        ? I18N_ARQUEO.guardado.replace('%s', total)
+        : I18N_ARQUEO.guardadoSimple;
       msg.hidden = false;
     }
     mostrarTotal(form);

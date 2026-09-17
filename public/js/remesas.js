@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const r = await api('/api/remesas?' + q.toString());
     tb.innerHTML = '';
     if (!r.ok) {
-      mostrarError(r.error || 'No se pudieron cargar las remesas');
+      mostrarError(r.error || t('no_se_pudieron_cargar_remesas'));
       return;
     }
     (r.remesas || []).forEach((m) => {
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarError('');
     const d = await api('/api/remesas/' + remesaId + '/lineas/' + lineaId + '/detalle');
     if (!d.ok) {
-      mostrarError(d.error || 'Sin detalle');
+      mostrarError(d.error || t('sin_detalle'));
       return;
     }
     const items = (d.detalle && d.detalle.detalle) || [];
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     actualId = id;
     const r = await api('/api/remesas/' + id);
     if (!r.ok) {
-      mostrarError(r.error || 'No se pudo abrir');
+      mostrarError(r.error || t('no_se_pudo_abrir'));
       return;
     }
     const m = r.remesa;
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnSol) {
         btnSol.onclick = async () => {
           const s = await api('/api/remesas/' + id + '/lineas/' + l.id + '/solicitar', { method: 'POST', body: {} });
-          if (!s.ok) { mostrarError(s.error || 'No se pudo solicitar'); return; }
+          if (!s.ok) { mostrarError(s.error || t('no_se_pudo_solicitar')); return; }
           abrir(id);
         };
       }
@@ -173,21 +173,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('remesa-aceptar').onclick = async () => {
     if (actualId == null) return;
-    if (!confirm('¿Aceptar esta remesa? Sustituye los asientos de la versión aceptada anterior.')) return;
+    if (!confirm(t('aceptar_remesa_confirm'))) return;
     const r = await api('/api/remesas/' + actualId + '/aceptar', {
       method: 'POST',
       body: { sustituir_disponible: !!document.getElementById('remesa-sustituir')?.checked },
     });
-    if (!r.ok) { mostrarError(r.error || 'No se pudo aceptar'); return; }
+    if (!r.ok) { mostrarError(r.error || t('no_se_pudo_aceptar')); return; }
     await cargarLista();
     abrir(actualId);
   };
   document.getElementById('remesa-rechazar').onclick = async () => {
     if (actualId == null) return;
-    if (!confirm('¿Rechazar esta remesa? Si ya estaba aceptada, se borran sus asientos.')) return;
+    if (!confirm(t('rechazar_remesa_confirm'))) return;
     const nota = document.getElementById('remesa-nota').value;
     const r = await api('/api/remesas/' + actualId + '/rechazar', { method: 'POST', body: { nota } });
-    if (!r.ok) { mostrarError(r.error || 'No se pudo rechazar'); return; }
+    if (!r.ok) { mostrarError(r.error || t('no_se_pudo_rechazar')); return; }
     await cargarLista();
     abrir(actualId);
   };

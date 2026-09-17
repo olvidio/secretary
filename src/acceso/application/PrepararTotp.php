@@ -24,10 +24,10 @@ final class PrepararTotp
     {
         $identidad = $this->identidades->porId($identidadId);
         if ($identidad === null || $identidad->id === null) {
-            throw new InvalidArgumentException('Identidad no encontrada');
+            throw new InvalidArgumentException(_("Identidad no encontrada"));
         }
         if ($this->identidades->totpConfirmado($identidadId)) {
-            throw new InvalidArgumentException('El segundo factor ya está confirmado');
+            throw new InvalidArgumentException(_("El segundo factor ya está confirmado"));
         }
         $secreto = TotpRfc6238::secretoAleatorio();
         $this->identidades->guardarTotp($identidadId, $this->cifrador->cifrar($secreto), null);

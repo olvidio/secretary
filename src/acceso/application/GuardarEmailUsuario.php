@@ -21,15 +21,15 @@ final class GuardarEmailUsuario
     {
         $email = strtolower(trim($email));
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-            throw new InvalidArgumentException('El correo no es válido');
+            throw new InvalidArgumentException(_("El correo no es válido"));
         }
         $identidad = $this->identidades->porId($identidadId);
         if ($identidad === null || $identidad->id === null) {
-            throw new InvalidArgumentException('Sesión caducada');
+            throw new InvalidArgumentException(_("Sesión caducada"));
         }
         $otro = $this->identidades->porEmailOAlias($email);
         if ($otro !== null && $otro->id !== $identidadId) {
-            throw new InvalidArgumentException('Ese correo ya tiene una cuenta');
+            throw new InvalidArgumentException(_("Ese correo ya tiene una cuenta"));
         }
         $this->identidades->guardar(new Identidad(
             $identidad->id,

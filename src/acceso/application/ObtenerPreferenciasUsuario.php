@@ -31,7 +31,7 @@ final class ObtenerPreferenciasUsuario
     {
         $identidad = $this->identidades->porId($identidadId);
         if ($identidad === null || $identidad->id === null) {
-            throw new InvalidArgumentException('Sesión caducada');
+            throw new InvalidArgumentException(_("Sesión caducada"));
         }
         $centros = [];
         foreach ($this->identidades->centrosDe($identidadId) as $v) {

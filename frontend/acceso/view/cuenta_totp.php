@@ -1,31 +1,31 @@
-<h1>Segundo factor</h1>
-<p class="muted">Autenticación TOTP (Google Authenticator, Aegis, etc.). Obligatorio para secretarios de centro; opcional en el libro personal.</p>
-<p id="totp-estado" class="ok" hidden>El segundo factor está activo.</p>
+<h1><?= _("Segundo factor") ?></h1>
+<p class="muted"><?= _("Autenticación TOTP (Google Authenticator, Aegis, etc.). Obligatorio para secretarios de centro; opcional en el libro personal.") ?></p>
+<p id="totp-estado" class="ok" hidden><?= _("El segundo factor está activo.") ?></p>
 <div id="totp-pendiente">
-    <p id="totp-inactivo" class="muted">Todavía no tiene segundo factor en esta cuenta.</p>
-    <button type="button" id="btn-totp-preparar">Activar segundo factor</button>
+    <p id="totp-inactivo" class="muted"><?= _("Todavía no tiene segundo factor en esta cuenta.") ?></p>
+    <button type="button" id="btn-totp-preparar"><?= _("Activar segundo factor") ?></button>
     <div id="totp-setup" hidden>
-        <p>Escanea el código QR con tu aplicación de autenticación y confirma con un código de 6 dígitos.</p>
+        <p><?= _("Escanea el código QR con tu aplicación de autenticación y confirma con un código de 6 dígitos.") ?></p>
         <div id="totp-qr" class="totp-qr"></div>
         <details class="totp-manual">
-            <summary>Introducir clave manualmente</summary>
+            <summary><?= _("Introducir clave manualmente") ?></summary>
             <p class="muted totp-secret"><strong id="totp-secreto"></strong></p>
         </details>
         <form id="form-totp" class="grid-form">
-            <label>Código <input name="codigo" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="one-time-code"></label>
-            <button type="submit">Confirmar</button>
+            <label><?= _("Código") ?> <input name="codigo" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="one-time-code"></label>
+            <button type="submit"><?= _("Confirmar") ?></button>
         </form>
     </div>
 </div>
 <div id="totp-codigos" hidden>
-    <p><strong>Guarde estos códigos de recuperación.</strong> Cada uno sirve una sola vez si pierde el autenticador. No se volverán a mostrar.</p>
+    <p><strong><?= _("Guarde estos códigos de recuperación.") ?></strong> <?= _("Cada uno sirve una sola vez si pierde el autenticador. No se volverán a mostrar.") ?></p>
     <ul id="totp-codigos-lista"></ul>
 </div>
 <script src="/js/qrcode.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
   const r = await api('/api/preferencias');
-  if (!r.ok) return alert(r.error || 'Error');
+  if (!r.ok) return alert(r.error || <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>);
   if (r.totp_activo) {
     document.getElementById('totp-estado').hidden = false;
     document.getElementById('totp-pendiente').hidden = true;

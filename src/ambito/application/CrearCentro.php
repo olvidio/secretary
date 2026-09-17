@@ -41,13 +41,13 @@ final class CrearCentro
         $nombre = trim((string) ($datos['nombre'] ?? ''));
         $tipo = (string) ($datos['tipo_cierre'] ?? 'vivienda');
         if ($codigo === '' || $nombre === '') {
-            throw new InvalidArgumentException('Código y nombre del centro son obligatorios');
+            throw new InvalidArgumentException(_("Código y nombre del centro son obligatorios"));
         }
         if (!in_array($tipo, ['vivienda', 'necesidades'], true)) {
-            throw new InvalidArgumentException('Tipo de cierre: vivienda o necesidades');
+            throw new InvalidArgumentException(_("Tipo de cierre: vivienda o necesidades"));
         }
         if ($this->centros->porCodigo($codigo) !== null) {
-            throw new InvalidArgumentException('Ya existe un centro con ese código');
+            throw new InvalidArgumentException(_("Ya existe un centro con ese código"));
         }
         $this->pdo->beginTransaction();
         try {
@@ -55,7 +55,7 @@ final class CrearCentro
                 new Centro(null, $codigo, $nombre, $tipo, CatalogoPlanesContables::H16N)
             );
             if ($centro->id === null) {
-                throw new InvalidArgumentException('No se pudo crear el centro');
+                throw new InvalidArgumentException(_("No se pudo crear el centro"));
             }
             $this->partidasLabores->sembrarPorDefecto($centro->id);
             $ejercicio = $this->crearEjercicio->ejecutar([

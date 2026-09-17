@@ -31,45 +31,45 @@ final class RecibirFicheroExcel
     {
         $info = $request->file($campo);
         if ($info === null) {
-            throw new InvalidArgumentException('Falta el fichero Excel');
+            throw new InvalidArgumentException(_("Falta el fichero Excel"));
         }
         $error = (int) ($info['error'] ?? UPLOAD_ERR_NO_FILE);
         if ($error === UPLOAD_ERR_INI_SIZE || $error === UPLOAD_ERR_FORM_SIZE) {
-            throw new InvalidArgumentException('El Excel supera el tamaño máximo (32 MB)');
+            throw new InvalidArgumentException(_("El Excel supera el tamaño máximo (32 MB)"));
         }
         if ($error !== UPLOAD_ERR_OK) {
-            throw new InvalidArgumentException('No se pudo recibir el Excel');
+            throw new InvalidArgumentException(_("No se pudo recibir el Excel"));
         }
         $nombre = (string) ($info['name'] ?? '');
         $ext = strtolower(pathinfo($nombre, PATHINFO_EXTENSION));
         if (!in_array($ext, ['xlsm', 'xlsx'], true)) {
-            throw new InvalidArgumentException('El fichero debe ser .xlsm o .xlsx');
+            throw new InvalidArgumentException(_("El fichero debe ser .xlsm o .xlsx"));
         }
         $size = (int) ($info['size'] ?? 0);
         if ($size <= 0 || $size > self::MAX_BYTES) {
-            throw new InvalidArgumentException('El Excel está vacío o supera 32 MB');
+            throw new InvalidArgumentException(_("El Excel está vacío o supera 32 MB"));
         }
         $tmp = (string) ($info['tmp_name'] ?? '');
         if ($tmp === '' || !is_readable($tmp)) {
-            throw new InvalidArgumentException('No se pudo leer el Excel subido');
+            throw new InvalidArgumentException(_("No se pudo leer el Excel subido"));
         }
         $destino = tempnam(sys_get_temp_dir(), 'secxl_');
         if ($destino === false) {
-            throw new RuntimeException('No se pudo crear un temporal para el Excel');
+            throw new RuntimeException(_("No se pudo crear un temporal para el Excel"));
         }
         $conExt = $destino . '.' . $ext;
         if (!rename($destino, $conExt)) {
             unlink($destino);
-            throw new RuntimeException('No se pudo preparar el Excel');
+            throw new RuntimeException(_("No se pudo preparar el Excel"));
         }
         if (is_uploaded_file($tmp)) {
             if (!move_uploaded_file($tmp, $conExt)) {
                 unlink($conExt);
-                throw new RuntimeException('No se pudo guardar el Excel');
+                throw new RuntimeException(_("No se pudo guardar el Excel"));
             }
         } elseif (!copy($tmp, $conExt)) {
             unlink($conExt);
-            throw new RuntimeException('No se pudo copiar el Excel');
+            throw new RuntimeException(_("No se pudo copiar el Excel"));
         }
 
         return $conExt;

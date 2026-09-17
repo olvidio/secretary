@@ -46,30 +46,28 @@ final class RegistrarUsuario
         $passwordConfirm = trim($passwordConfirm);
         $nombre = trim($nombre);
         if ($alias === '' || $email === '') {
-            throw new InvalidArgumentException('Usuario y correo son obligatorios');
+            throw new InvalidArgumentException(_("Usuario y correo son obligatorios"));
         }
         if (preg_match('/^[a-z][a-z0-9._-]{1,31}$/', $alias) !== 1) {
-            throw new InvalidArgumentException(
-                'El usuario debe empezar por letra y tener 2-32 caracteres (letras, números, punto, guion)'
-            );
+            throw new InvalidArgumentException(_("El usuario debe empezar por letra y tener 2-32 caracteres (letras, números, punto, guion)"));
         }
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-            throw new InvalidArgumentException('El correo no es válido');
+            throw new InvalidArgumentException(_("El correo no es válido"));
         }
         if (strlen($password) < 6) {
-            throw new InvalidArgumentException('La contraseña debe tener al menos 6 caracteres');
+            throw new InvalidArgumentException(_("La contraseña debe tener al menos 6 caracteres"));
         }
         if ($password !== $passwordConfirm) {
-            throw new InvalidArgumentException('Las contraseñas no coinciden');
+            throw new InvalidArgumentException(_("Las contraseñas no coinciden"));
         }
         if ($this->identidades->porEmailOAlias($alias) !== null) {
-            throw new InvalidArgumentException('Ese usuario ya existe');
+            throw new InvalidArgumentException(_("Ese usuario ya existe"));
         }
         if ($this->identidades->porEmailOAlias($email) !== null) {
-            throw new InvalidArgumentException('Ese correo ya tiene una cuenta');
+            throw new InvalidArgumentException(_("Ese correo ya tiene una cuenta"));
         }
         if ($this->personas->porEmail($email) !== null) {
-            throw new InvalidArgumentException('Ese correo ya está asignado a un nombre');
+            throw new InvalidArgumentException(_("Ese correo ya está asignado a un nombre"));
         }
 
         $centro = $this->resolverCentro($centroId);
@@ -94,7 +92,7 @@ final class RegistrarUsuario
             $aporta,
         ));
         if ($persona->id === null || $persona->centroId === null) {
-            throw new InvalidArgumentException('No se pudo crear la persona');
+            throw new InvalidArgumentException(_("No se pudo crear la persona"));
         }
 
         $creada = $this->identidades->guardar(new Identidad(
@@ -109,7 +107,7 @@ final class RegistrarUsuario
             $alias,
         ));
         if ($creada->id === null) {
-            throw new InvalidArgumentException('No se pudo crear la cuenta');
+            throw new InvalidArgumentException(_("No se pudo crear la cuenta"));
         }
         $this->identidades->vincularPersona($creada->id, $persona->id);
         $this->cuentaCorriente->ejecutar($persona);
@@ -125,9 +123,7 @@ final class RegistrarUsuario
             static fn (Centro $c): bool => $c->id !== null && $c->activo,
         ));
         if ($listados === []) {
-            throw new InvalidArgumentException(
-                'Todavía no hay ningún centro. Pida a un secretario que lo cree.'
-            );
+            throw new InvalidArgumentException(_("Todavía no hay ningún centro. Pida a un secretario que lo cree."));
         }
         if ($centroId !== null && $centroId > 0) {
             foreach ($listados as $c) {
@@ -135,12 +131,12 @@ final class RegistrarUsuario
                     return $c;
                 }
             }
-            throw new InvalidArgumentException('Ese centro no existe');
+            throw new InvalidArgumentException(_("Ese centro no existe"));
         }
         if (count($listados) === 1) {
             return $listados[0];
         }
-        throw new InvalidArgumentException('Indique el centro');
+        throw new InvalidArgumentException(_("Indique el centro"));
     }
 
     private function inicialesLibres(string $alias, int $centroId): string
@@ -157,7 +153,7 @@ final class RegistrarUsuario
             $candidato = substr($base, 0, max(1, 6 - strlen($suf))) . $suf;
             $n++;
             if ($n > 99) {
-                throw new InvalidArgumentException('No se pudieron generar iniciales únicas');
+                throw new InvalidArgumentException(_("No se pudieron generar iniciales únicas"));
             }
         }
 

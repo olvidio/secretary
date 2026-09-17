@@ -22,7 +22,7 @@ final class IniciarSesion
         $ahora ??= new DateTimeImmutable();
         $identificador = trim($identificador);
         if ($identificador === '') {
-            return new ResultadoLogin('fallo', 'Usuario o contraseña incorrectos');
+            return new ResultadoLogin('fallo', _("Usuario o contraseña incorrectos"));
         }
         $identidad = $this->identidades->porEmailOAlias($identificador);
         $hash = $identidad !== null ? $identidad->passwordHash : self::HASH_FALSO;
@@ -30,19 +30,19 @@ final class IniciarSesion
         if ($identidad === null || $identidad->id === null) {
             return new ResultadoLogin(
                 'desconocido',
-                'No hay cuenta con ese usuario. Puede registrarse.',
+                _("No hay cuenta con ese usuario. Puede registrarse."),
             );
         }
         if (!$identidad->activo) {
-            return new ResultadoLogin('fallo', 'Usuario o contraseña incorrectos');
+            return new ResultadoLogin('fallo', _("Usuario o contraseña incorrectos"));
         }
         if ($identidad->estaBloqueada($ahora)) {
-            return new ResultadoLogin('fallo', 'Cuenta temporalmente bloqueada. Pruebe más tarde.');
+            return new ResultadoLogin('fallo', _("Cuenta temporalmente bloqueada. Pruebe más tarde."));
         }
         if (!$passwordOk) {
             $this->identidades->registrarFallo($identidad, $ahora);
 
-            return new ResultadoLogin('fallo', 'Usuario o contraseña incorrectos');
+            return new ResultadoLogin('fallo', _("Usuario o contraseña incorrectos"));
         }
 
         $centros = [];
@@ -56,7 +56,7 @@ final class IniciarSesion
         }
         $personas = $this->identidades->personasDe($identidad->id);
         if ($centros === [] && $personas === []) {
-            return new ResultadoLogin('fallo', 'Usuario o contraseña incorrectos');
+            return new ResultadoLogin('fallo', _("Usuario o contraseña incorrectos"));
         }
         $this->identidades->registrarExito($identidad, $ahora);
         $totpOk = $this->identidades->totpConfirmado($identidad->id);

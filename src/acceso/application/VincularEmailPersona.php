@@ -25,7 +25,7 @@ final class VincularEmailPersona
     public function ejecutar(Persona $persona, string $email): ?string
     {
         if ($persona->id === null) {
-            throw new InvalidArgumentException('La persona debe estar guardada');
+            throw new InvalidArgumentException(_("La persona debe estar guardada"));
         }
         $email = strtolower(trim($email));
         if ($email === '') {
@@ -35,12 +35,12 @@ final class VincularEmailPersona
             return null;
         }
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-            throw new InvalidArgumentException('El correo no es válido');
+            throw new InvalidArgumentException(_("El correo no es válido"));
         }
 
         $otra = $this->personas->porEmail($email);
         if ($otra !== null && $otra->id !== $persona->id) {
-            throw new InvalidArgumentException('Ese correo ya está asignado a otro nombre');
+            throw new InvalidArgumentException(_("Ese correo ya está asignado a otro nombre"));
         }
 
         $actual = $this->identidades->identidadDePersona($persona->id);
@@ -48,7 +48,7 @@ final class VincularEmailPersona
             if (strtolower($actual->email) !== $email) {
                 $conflicto = $this->identidades->porEmailOAlias($email);
                 if ($conflicto !== null && $conflicto->id !== $actual->id) {
-                    throw new InvalidArgumentException('Ese correo ya tiene una cuenta');
+                    throw new InvalidArgumentException(_("Ese correo ya tiene una cuenta"));
                 }
                 $this->identidades->guardar(new Identidad(
                     $actual->id,
@@ -70,14 +70,12 @@ final class VincularEmailPersona
         $existente = $this->identidades->porEmailOAlias($email);
         if ($existente !== null && $existente->id !== null) {
             if ($this->identidades->centrosDe($existente->id) !== []) {
-                throw new InvalidArgumentException(
-                    'Ese correo es de un usuario de centro; no puede usarse como cuenta personal'
-                );
+                throw new InvalidArgumentException(_("Ese correo es de un usuario de centro; no puede usarse como cuenta personal"));
             }
             $otras = $this->identidades->personasDe($existente->id);
             foreach ($otras as $pid) {
                 if ($pid !== $persona->id) {
-                    throw new InvalidArgumentException('Ese correo ya está vinculado a otra persona');
+                    throw new InvalidArgumentException(_("Ese correo ya está vinculado a otra persona"));
                 }
             }
             $this->identidades->vincularPersona($existente->id, $persona->id);
@@ -99,7 +97,7 @@ final class VincularEmailPersona
             null,
         ));
         if ($creada->id === null) {
-            throw new InvalidArgumentException('No se pudo crear la cuenta personal');
+            throw new InvalidArgumentException(_("No se pudo crear la cuenta personal"));
         }
         $this->identidades->vincularPersona($creada->id, $persona->id);
         $this->personas->guardarEmail($persona->id, $email);

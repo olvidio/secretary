@@ -52,13 +52,13 @@ final class CopiaPersonalController
     {
         $nombre = trim((string) ($request->query('fichero') ?? ''));
         if ($nombre === '') {
-            return ContestarJson::error('Indique el fichero a descargar', 400);
+            return ContestarJson::error(_("Indique el fichero a descargar"), 400);
         }
         try {
             $ctx = $this->ambito->ejecutar();
             $persona = $this->personas->porId($ctx->personaId);
             if ($persona === null) {
-                throw new InvalidArgumentException('Persona no encontrada');
+                throw new InvalidArgumentException(_("Persona no encontrada"));
             }
             $almacen = new AlmacenCopiasPersonal(
                 RutasCopiasPersonal::directorio(),
@@ -111,6 +111,6 @@ final class CopiaPersonalController
             return ContestarJson::error($e->getMessage());
         }
 
-        return ContestarJson::ok(['mensaje' => 'Copia borrada.']);
+        return ContestarJson::ok(['mensaje' => _("Copia borrada.")]);
     }
 }

@@ -26,12 +26,12 @@ final class RestaurarCopiaPersonal
     public function ejecutar(array $datos, ?string $rutaSubida = null): array
     {
         if (empty($datos['confirmar'])) {
-            throw new InvalidArgumentException('Confirme la restauración');
+            throw new InvalidArgumentException(_("Confirme la restauración"));
         }
         $ctx = $this->ambito->ejecutar();
         $persona = $this->personas->porId($ctx->personaId);
         if ($persona === null) {
-            throw new InvalidArgumentException('Persona no encontrada');
+            throw new InvalidArgumentException(_("Persona no encontrada"));
         }
         $almacen = new AlmacenCopiasPersonal(
             RutasCopiasPersonal::directorio(),
@@ -41,16 +41,16 @@ final class RestaurarCopiaPersonal
         if ($rutaSubida !== null) {
             $raw = file_get_contents($rutaSubida);
             if ($raw === false) {
-                throw new InvalidArgumentException('No se pudo leer la copia subida');
+                throw new InvalidArgumentException(_("No se pudo leer la copia subida"));
             }
             $snapshot = json_decode($raw, true);
             if (!is_array($snapshot)) {
-                throw new InvalidArgumentException('La copia personal no es JSON válido');
+                throw new InvalidArgumentException(_("La copia personal no es JSON válido"));
             }
         } else {
             $nombre = trim((string) ($datos['fichero'] ?? ''));
             if ($nombre === '') {
-                throw new InvalidArgumentException('Indique el fichero a restaurar');
+                throw new InvalidArgumentException(_("Indique el fichero a restaurar"));
             }
             $snapshot = $almacen->leer($nombre);
         }

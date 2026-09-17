@@ -40,7 +40,7 @@ final class ImportarCsvBanco
         $lector = CatalogoBancosCsv::lector($banco);
         if ($filas !== null) {
             if (!$lector instanceof LectorCsvCaixaBank) {
-                throw new InvalidArgumentException('Este banco solo admite CSV');
+                throw new InvalidArgumentException(_("Este banco solo admite CSV"));
             }
             $lineas = $lector->leerFilas($filas);
         } else {
@@ -50,7 +50,7 @@ final class ImportarCsvBanco
         $this->plan->ejecutar($ctx->centroId, $ctx->personaId);
         $tesoreria = $this->cuentas->tesoreriaDePersona($ctx->centroId, $ctx->personaId, 'X', 'BANCO');
         if ($tesoreria === null || $tesoreria->id === null) {
-            throw new InvalidArgumentException('No hay cuenta BANCO personal');
+            throw new InvalidArgumentException(_("No hay cuenta BANCO personal"));
         }
 
         $nuevos = 0;
@@ -104,14 +104,14 @@ final class ImportarCsvBanco
         $fecha = new DateTimeImmutable($linea->fecha);
         $ejercicio = $this->ejercicios->deCentroEnFecha($centroId, $fecha);
         if ($ejercicio === null || $ejercicio->id === null) {
-            throw new InvalidArgumentException('No hay ejercicio que cubra ' . $linea->fecha);
+            throw new InvalidArgumentException(sprintf(_("No hay ejercicio que cubra %s"), $linea->fecha));
         }
         if ($ejercicio->estado === 'cerrado') {
-            throw new InvalidArgumentException('El ejercicio de ' . $linea->fecha . ' está cerrado');
+            throw new InvalidArgumentException(sprintf(_("El ejercicio de %s está cerrado"), $linea->fecha));
         }
         $categoria = $this->plan->pendienteDe($centroId, $personaId, $linea->sentido());
         if ($categoria->id === null) {
-            throw new InvalidArgumentException('No hay cuenta pendiente');
+            throw new InvalidArgumentException(_("No hay cuenta pendiente"));
         }
         $asiento = ConstructorAsientoPersonal::movimiento(
             $ejercicio->id,
@@ -128,7 +128,7 @@ final class ImportarCsvBanco
         );
         $guardado = $this->asientos->guardar($asiento);
         if ($guardado->id === null) {
-            throw new InvalidArgumentException('No se pudo guardar el movimiento');
+            throw new InvalidArgumentException(_("No se pudo guardar el movimiento"));
         }
 
         return $guardado->id;

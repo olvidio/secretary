@@ -31,15 +31,15 @@ final class RegistrarTraspasoTesoreria
     {
         $libro = strtoupper(trim((string) ($datos['libro'] ?? '')));
         if (!in_array($libro, ['P', 'G'], true)) {
-            throw new InvalidArgumentException('Libro P o G');
+            throw new InvalidArgumentException(_("Libro P o G"));
         }
         $origenId = (int) ($datos['cuenta_fisica_origen_id'] ?? 0);
         $destinoId = (int) ($datos['cuenta_fisica_destino_id'] ?? 0);
         if ($origenId <= 0 || $destinoId <= 0) {
-            throw new InvalidArgumentException('Indique las cuentas físicas de origen y destino');
+            throw new InvalidArgumentException(_("Indique las cuentas físicas de origen y destino"));
         }
         if ($origenId === $destinoId) {
-            throw new InvalidArgumentException('Origen y destino no pueden ser la misma cuenta física');
+            throw new InvalidArgumentException(_("Origen y destino no pueden ser la misma cuenta física"));
         }
 
         $contexto = $this->ambito->ejecutar();
@@ -49,20 +49,20 @@ final class RegistrarTraspasoTesoreria
         $cuentaOrigen = $this->cuentas->tesoreriaDeFisica($contexto->centroId, $libro, $origenId);
         $cuentaDestino = $this->cuentas->tesoreriaDeFisica($contexto->centroId, $libro, $destinoId);
         if ($cuentaOrigen === null || $cuentaDestino === null) {
-            throw new InvalidArgumentException('Las cuentas de mayor de tesorería no existen para ese libro');
+            throw new InvalidArgumentException(_("Las cuentas de mayor de tesorería no existen para ese libro"));
         }
         if ($cuentaOrigen->id === null || $cuentaDestino->id === null) {
-            throw new InvalidArgumentException('Cuentas de tesorería sin identificador');
+            throw new InvalidArgumentException(_("Cuentas de tesorería sin identificador"));
         }
 
         $fecha = $this->parseFecha((string) ($datos['fecha'] ?? ''));
         if (!$this->config->get()->periodo()->contiene($fecha)) {
-            throw new InvalidArgumentException('La fecha no corresponde al ejercicio');
+            throw new InvalidArgumentException(_("La fecha no corresponde al ejercicio"));
         }
 
         $importe = Dinero::fromInput((string) ($datos['cantidad'] ?? ''));
         if ($importe->isNegative() || $importe->isZero()) {
-            throw new InvalidArgumentException('La cantidad debe ser positiva');
+            throw new InvalidArgumentException(_("La cantidad debe ser positiva"));
         }
         $cents = $importe->toCents();
         $glosa = isset($datos['glosa']) && trim((string) $datos['glosa']) !== ''
@@ -92,7 +92,7 @@ final class RegistrarTraspasoTesoreria
     {
         $fisica = $this->fisicas->porId($fisicaId);
         if ($fisica === null || $fisica->centroId !== $centroId || !$fisica->activo) {
-            throw new InvalidArgumentException('Cuenta física no válida');
+            throw new InvalidArgumentException(_("Cuenta física no válida"));
         }
     }
 
@@ -100,14 +100,14 @@ final class RegistrarTraspasoTesoreria
     {
         $raw = trim($raw);
         if ($raw === '') {
-            throw new InvalidArgumentException('Falta la fecha');
+            throw new InvalidArgumentException(_("Falta la fecha"));
         }
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw) === 1) {
             return new DateTimeImmutable($raw);
         }
         $dt = DateTimeImmutable::createFromFormat('!d/m/Y', $raw);
         if ($dt === false) {
-            throw new InvalidArgumentException('Formato de fecha incorrecto');
+            throw new InvalidArgumentException(_("Formato de fecha incorrecto"));
         }
 
         return $dt;

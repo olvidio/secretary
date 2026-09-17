@@ -27,7 +27,7 @@ final class ObtenerRemesaCentro
         $ctx = $this->ambito->ejecutar();
         $remesa = $this->remesas->porId($id);
         if ($remesa === null || $remesa->centroId !== $ctx->centroId) {
-            throw new InvalidArgumentException('Remesa no encontrada');
+            throw new InvalidArgumentException(_("Remesa no encontrada"));
         }
         $persona = $this->personas->porId($remesa->personaId);
         $out = $remesa->toArray();

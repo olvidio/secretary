@@ -1,7 +1,7 @@
 <?php $cuenta = $cuentaEntrada ?? 'P'; ?>
-<h1>Conceptos <?= htmlspecialchars($cuenta, ENT_QUOTES) ?></h1>
+<h1><?= sprintf(_("Conceptos %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
 <table id="tabla-conceptos">
-    <thead><tr><th>Código</th><th>Nombre</th><th>Descripción</th><th>Naturaleza</th></tr></thead>
+    <thead><tr><th><?= _("Código") ?></th><th><?= _("Nombre") ?></th><th><?= _("Descripción") ?></th><th><?= _("Naturaleza") ?></th></tr></thead>
     <tbody></tbody>
 </table>
 <script>

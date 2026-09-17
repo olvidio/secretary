@@ -1,13 +1,13 @@
 <?php $cuenta = $cuentaPresupuesto ?? 'P'; ?>
-<h1>Presupuesto <?= htmlspecialchars($cuenta, ENT_QUOTES) ?></h1>
-<p class="muted">Celdas de previsto anual. El 613 prorratea × meses / 12.</p>
+<h1><?= sprintf(_("Presupuesto %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
+<p class="muted"><?= _("Celdas de previsto anual. El 613 prorratea × meses / 12.") ?></p>
 <form id="form-presu">
 <table>
-    <thead><tr><th>Concepto</th><th class="num">Previsto</th></tr></thead>
+    <thead><tr><th><?= _("Concepto") ?></th><th class="num"><?= _("Previsto") ?></th></tr></thead>
     <tbody></tbody>
 </table>
-<button type="submit">Guardar</button>
-<p id="msg" class="ok" hidden>Guardado</p>
+<button type="submit"><?= _("Guardar") ?></button>
+<p id="msg" class="ok" hidden><?= _("Guardado") ?></p>
 </form>
 <script>
 const CUENTA = <?= json_encode($cuenta) ?>;
@@ -35,7 +35,7 @@ function pintarLineasPresu(lineas) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   const r = await api('/api/presupuestos/' + CUENTA);
-  if (!r.ok) return alert(r.error || 'No se pudo cargar el presupuesto');
+  if (!r.ok) return alert(r.error || <?= json_encode(_("No se pudo cargar el presupuesto"), JSON_UNESCAPED_UNICODE) ?>);
   pintarLineasPresu(r.lineas);
   document.getElementById('form-presu').onsubmit = async (ev) => {
     ev.preventDefault();

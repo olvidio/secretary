@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const r = await api('/api/disponible');
     tb.innerHTML = '';
     if (!r.ok) {
-      mostrarError(r.error || 'No se pudo cargar');
+      mostrarError(r.error || t('no_se_pudo_cargar'));
       return;
     }
     (r.personas || []).forEach((p) => {
@@ -31,14 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
         + '<td class="num">' + esc(p.saldo_es) + '</td>'
         + '<td><button type="button" data-id="' + p.persona_id + '" data-saldo="' + esc(p.saldo) + '">Ajustar</button></td>';
       tr.querySelector('button').onclick = async () => {
-        const v = prompt('Nuevo disponible de ' + p.iniciales + ' (€)', p.saldo);
+        const v = prompt(t('nuevo_disponible_de') + ' ' + p.iniciales + ' (€)', p.saldo);
         if (v === null) return;
         const s = await api('/api/disponible/ajustar', {
           method: 'POST',
           body: { persona_id: p.persona_id, saldo: v },
         });
-        if (!s.ok) return alert(s.error || 'No se pudo ajustar');
-        mostrarOk('Disponible actualizado');
+        if (!s.ok) return alert(s.error || t('no_se_pudo_ajustar'));
+        mostrarOk(t('disponible_actualizado'));
         cargar();
       };
       tb.appendChild(tr);
@@ -49,14 +49,14 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarError('');
     const r = await api('/api/disponible/proponer', { method: 'POST', body: {} });
     if (!r.ok) {
-      mostrarError(r.error || 'No se pudo proponer');
+      mostrarError(r.error || t('no_se_pudo_proponer'));
       return;
     }
     asignacionId = r.asignacion_id;
     propuesta.hidden = false;
     document.getElementById('propuesta-meta').textContent = asignacionId
-      ? 'Borrador #' + asignacionId + '. Revisar y confirmar para apuntar las 7.'
-      : 'Nadie tiene disponible que aplicar.';
+      ? t('propuesta_borrador') + asignacionId + t('propuesta_revisar_7')
+      : t('nadie_disponible_aplicar');
     const tbP = document.querySelector('#tabla-propuesta tbody');
     tbP.innerHTML = '';
     (r.personas || []).forEach((p) => {
@@ -72,16 +72,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btn-confirmar').onclick = async () => {
     if (!asignacionId) return;
-    if (!confirm('¿Confirmar y anotar las partidas 7 en el libro P?')) return;
+    if (!confirm(t('confirmar_partidas_7'))) return;
     const r = await api('/api/disponible/asignaciones/' + asignacionId + '/confirmar', {
       method: 'POST',
       body: {},
     });
     if (!r.ok) {
-      mostrarError(r.error || 'No se pudo confirmar');
+      mostrarError(r.error || t('no_se_pudo_confirmar'));
       return;
     }
-    mostrarOk('Anotado. La persona verá el texto en su remesa.');
+    mostrarOk(t('anotado_persona_remesa'));
     asignacionId = null;
     propuesta.hidden = true;
     cargar();

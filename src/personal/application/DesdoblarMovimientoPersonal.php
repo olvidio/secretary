@@ -35,16 +35,16 @@ final class DesdoblarMovimientoPersonal
         $ctx = $this->ambito->ejecutar();
         $asiento = $this->asientos->porId($id);
         if ($asiento === null || $asiento->libro !== 'X' || $asiento->personaId !== $ctx->personaId) {
-            throw new InvalidArgumentException('Movimiento no encontrado');
+            throw new InvalidArgumentException(_("Movimiento no encontrado"));
         }
         if ($asiento->tipo !== 'normal') {
-            throw new InvalidArgumentException('Solo se desdoblan ingresos o gastos');
+            throw new InvalidArgumentException(_("Solo se desdoblan ingresos o gastos"));
         }
         if ($asiento->origen === 'remesa' || $asiento->remesaId !== null) {
-            throw new InvalidArgumentException('Un movimiento de remesa no se desdobla');
+            throw new InvalidArgumentException(_("Un movimiento de remesa no se desdobla"));
         }
         if ($asiento->asientoParId !== null) {
-            throw new InvalidArgumentException('Un movimiento periodificado no se desdobla desde aquí');
+            throw new InvalidArgumentException(_("Un movimiento periodificado no se desdobla desde aquí"));
         }
 
         $cuentasMap = [];
@@ -55,23 +55,23 @@ final class DesdoblarMovimientoPersonal
         }
         $meta = $this->analizar($asiento, $cuentasMap);
         if ($meta['sentido'] === 'traspaso') {
-            throw new InvalidArgumentException('Un traspaso no se desdobla');
+            throw new InvalidArgumentException(_("Un traspaso no se desdobla"));
         }
 
         $partes = $datos['partes'] ?? null;
         if (!is_array($partes) || count($partes) !== 2) {
-            throw new InvalidArgumentException('Indique dos partes con categoría e importe');
+            throw new InvalidArgumentException(_("Indique dos partes con categoría e importe"));
         }
 
         $preparadas = [];
         $suma = 0;
         foreach ($partes as $i => $parte) {
             if (!is_array($parte)) {
-                throw new InvalidArgumentException('Parte ' . ($i + 1) . ' no válida');
+                throw new InvalidArgumentException(sprintf(_("Parte %d no válida"), $i + 1));
             }
             $importe = Dinero::fromInput((string) ($parte['cantidad'] ?? ''));
             if ($importe->isNegative() || $importe->isZero()) {
-                throw new InvalidArgumentException('La parte ' . ($i + 1) . ' debe ser mayor que cero');
+                throw new InvalidArgumentException(sprintf(_("La parte %d debe ser mayor que cero"), $i + 1));
             }
             $cents = $importe->toCents();
             $suma += $cents;
@@ -84,9 +84,10 @@ final class DesdoblarMovimientoPersonal
             ];
         }
         if ($suma !== $meta['cents']) {
-            throw new InvalidArgumentException(
-                'Las dos partes deben sumar ' . Dinero::fromCents($meta['cents'])->formatEs()
-            );
+            throw new InvalidArgumentException(sprintf(
+                _("Las dos partes deben sumar %s"),
+                Dinero::fromCents($meta['cents'])->formatEs(),
+            ));
         }
 
         $bancoFila = $this->bancoImport->porAsiento($id);
@@ -154,7 +155,7 @@ final class DesdoblarMovimientoPersonal
             break;
         }
         if ($tesoreriaId <= 0 || $cents <= 0) {
-            throw new InvalidArgumentException('No se pudo analizar el movimiento');
+            throw new InvalidArgumentException(_("No se pudo analizar el movimiento"));
         }
         $sentido = 'gasto';
         foreach ($asiento->movimientos as $mov) {
@@ -176,6 +177,6 @@ final class DesdoblarMovimientoPersonal
             }
         }
 
-        throw new InvalidArgumentException('Categoría no válida');
+        throw new InvalidArgumentException(_("Categoría no válida"));
     }
 }

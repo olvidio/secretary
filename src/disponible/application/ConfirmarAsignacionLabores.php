@@ -38,10 +38,10 @@ final class ConfirmarAsignacionLabores
         $ctx = $this->ambito->ejecutar();
         $asig = $this->asignaciones->porId($id, $ctx->centroId);
         if ($asig === null) {
-            throw new InvalidArgumentException('Propuesta no encontrada');
+            throw new InvalidArgumentException(_("Propuesta no encontrada"));
         }
         if ($asig['estado'] !== 'borrador') {
-            throw new InvalidArgumentException('Solo se puede confirmar una propuesta en borrador');
+            throw new InvalidArgumentException(_("Solo se puede confirmar una propuesta en borrador"));
         }
         $fecha = new DateTimeImmutable('today');
         $porPersona = [];
@@ -57,18 +57,18 @@ final class ConfirmarAsignacionLabores
                 $this->asegurarCc->ejecutar($persona);
                 $cc = $this->cuentas->personalDe($ctx->centroId, $personaId);
                 if ($cc === null || $cc->id === null) {
-                    throw new InvalidArgumentException('Falta la cuenta CC de ' . $persona->iniciales);
+                    throw new InvalidArgumentException(sprintf(_("Falta la cuenta CC de %s"), $persona->iniciales));
                 }
                 $cuenta111 = $this->cuentas->buscar($ctx->centroId, null, 'P', '111');
                 if ($cuenta111 === null || $cuenta111->id === null) {
-                    throw new InvalidArgumentException('Falta la cuenta 111 en el plan P del centro');
+                    throw new InvalidArgumentException(_("Falta la cuenta 111 en el plan P del centro"));
                 }
                 $lineasAsiento = [];
                 $total = 0;
                 foreach ($lineas as $l) {
                     $cuenta = $this->cuentas->buscar($ctx->centroId, null, 'P', (string) $l['codigo_maestro']);
                     if ($cuenta === null || $cuenta->id === null) {
-                        throw new InvalidArgumentException('No existe la partida ' . $l['codigo_maestro']);
+                        throw new InvalidArgumentException(sprintf(_("No existe la partida %s"), $l['codigo_maestro']));
                     }
                     $cents = (int) $l['importe_cents'];
                     $lineasAsiento[] = ['cuenta_id' => $cuenta->id, 'importe_cents' => $cents];
@@ -118,7 +118,7 @@ final class ConfirmarAsignacionLabores
         });
         $out = $this->asignaciones->porId($id, $ctx->centroId);
         if ($out === null) {
-            throw new InvalidArgumentException('No se pudo releer la propuesta');
+            throw new InvalidArgumentException(_("No se pudo releer la propuesta"));
         }
         $out['total_es'] = Dinero::fromCents(
             array_sum(array_map(static fn (array $l): int => (int) $l['importe_cents'], $out['lineas']))

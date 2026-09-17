@@ -14,7 +14,7 @@ final class LayoutPantalla
     public function __construct(public readonly string $valor)
     {
         if (!in_array($valor, self::todos(), true)) {
-            throw new InvalidArgumentException('Layout no válido (excel o burger)');
+            throw new InvalidArgumentException(_("Layout no válido (excel o burger)"));
         }
     }
 

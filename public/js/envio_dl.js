@@ -21,14 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const importe = document.getElementById('inp-importe').value.trim();
     const r = await api('/api/envio-dl/proponer', { method: 'POST', body: { importe } });
     if (!r.ok) {
-      mostrarError(r.error || 'No se pudo proponer');
+      mostrarError(r.error || t('no_se_pudo_proponer'));
       return;
     }
     envioId = r.envio_id;
     propuesta.hidden = false;
     const meta = envioId
-      ? 'Borrador #' + envioId + '. Saldos hasta ' + (r.hasta || '') + '. Revisar y confirmar para anotar P/71 desde caja.'
-      : 'Nadie entra en el reparto de este mes.';
+      ? t('propuesta_borrador_envio') + envioId + t('propuesta_saldos_hasta') + (r.hasta || '') + t('propuesta_revisar_p71')
+      : t('nadie_reparto_mes');
     document.getElementById('propuesta-envio-meta').textContent = meta;
     const tb = document.querySelector('#tabla-propuesta-envio-dl tbody');
     tb.innerHTML = '';
@@ -46,13 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btn-confirmar-envio-dl').onclick = async () => {
     if (!envioId) return;
-    if (!confirm('¿Confirmar y anotar los gastos P/71 desde caja?')) return;
+    if (!confirm(t('confirmar_gastos_p71'))) return;
     const r = await api('/api/envio-dl/' + envioId + '/confirmar', { method: 'POST', body: {} });
     if (!r.ok) {
-      mostrarError(r.error || 'No se pudo confirmar');
+      mostrarError(r.error || t('no_se_pudo_confirmar'));
       return;
     }
-    mostrarOk('Apuntado. Los movimientos aparecen en Apuntes.');
+    mostrarOk(t('apuntado_movimientos_apuntes'));
     envioId = null;
     propuesta.hidden = true;
     document.getElementById('inp-importe').value = '';

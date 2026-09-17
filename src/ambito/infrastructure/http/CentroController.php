@@ -37,7 +37,7 @@ final class CentroController
         $ctx = $this->ambito->ejecutar();
         $centro = $this->centros->porId($ctx->centroId);
         if ($centro === null) {
-            return ContestarJson::error('Centro no encontrado', 404);
+            return ContestarJson::error(_("Centro no encontrado"), 404);
         }
 
         return ContestarJson::ok([
@@ -92,7 +92,7 @@ final class CentroController
         $ctx = $this->ambito->ejecutar();
         $centro = $this->centros->porId($ctx->centroId);
         if ($centro === null) {
-            return ContestarJson::error('Centro no encontrado', 404);
+            return ContestarJson::error(_("Centro no encontrado"), 404);
         }
         $excel = null;
         try {

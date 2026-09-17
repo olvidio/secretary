@@ -20,7 +20,7 @@ final class BorrarMovimientoPersonal
         $ctx = $this->ambito->ejecutar();
         $asiento = $this->asientos->porId($id);
         if ($asiento === null || $asiento->libro !== 'X' || $asiento->personaId !== $ctx->personaId) {
-            throw new InvalidArgumentException('Movimiento no encontrado');
+            throw new InvalidArgumentException(_("Movimiento no encontrado"));
         }
         $this->asientos->borrar($id);
     }

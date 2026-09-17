@@ -25,11 +25,11 @@ final class RegistrarPlantillasDeRemesa
     public function ejecutar(Remesa $remesa, DateTimeImmutable $fecha, int $remesaId): void
     {
         if ($remesa->id === null) {
-            throw new InvalidArgumentException('Remesa sin identificador');
+            throw new InvalidArgumentException(_("Remesa sin identificador"));
         }
         $persona = $this->personas->porId($remesa->personaId);
         if ($persona === null) {
-            throw new InvalidArgumentException('Persona no encontrada');
+            throw new InvalidArgumentException(_("Persona no encontrada"));
         }
         $iniciales = strtoupper($persona->iniciales);
         $glosaBase = sprintf('Remesa %s %02d/%d v%d', $iniciales, $remesa->mes, $remesa->anio, $remesa->version);
@@ -47,7 +47,7 @@ final class RegistrarPlantillasDeRemesa
                     }
                     $plantilla = $this->plantillas->porId($remesa->centroId, $plantillaId);
                     if ($plantilla === null) {
-                        throw new InvalidArgumentException('Plantilla de remesa no encontrada');
+                        throw new InvalidArgumentException(_("Plantilla de remesa no encontrada"));
                     }
                     $cantidad = Dinero::fromCents(abs($cents))->toString();
                     foreach ($plantilla->lineas as $i => $lineaPl) {

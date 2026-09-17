@@ -28,16 +28,14 @@ final class CategorizarMovimientoBanco
         $contexto = $this->contextoAsiento($asientoId, $ctx->personaId);
         $nueva = $contexto['nombres'][$cuentaId] ?? null;
         if ($nueva === null || $nueva->id === null || !in_array($nueva->tipo, ['ingreso', 'gasto'], true)) {
-            throw new InvalidArgumentException('Categoría no válida');
+            throw new InvalidArgumentException(_("Categoría no válida"));
         }
         if (AsegurarPlanPersonal::esPendiente($nueva->codigo)) {
-            throw new InvalidArgumentException('Elija una categoría del plan');
+            throw new InvalidArgumentException(_("Elija una categoría del plan"));
         }
         $sentido = $contexto['categoriaActual']?->tipo ?? ($nueva->tipo);
         if ($nueva->tipo !== $sentido) {
-            throw new InvalidArgumentException(
-                'Esa categoría es de ' . $nueva->tipo . '; el movimiento es un ' . $sentido
-            );
+            throw new InvalidArgumentException(sprintf(_("Esa categoría es de %s; el movimiento es un %s"), $nueva->tipo, $sentido));
         }
         $glosa = $this->glosa($contexto['asiento'], $observaciones);
         $reconstruido = ConstructorAsientoPersonal::movimiento(
@@ -63,7 +61,7 @@ final class CategorizarMovimientoBanco
         $contexto = $this->contextoAsiento($asientoId, $ctx->personaId);
         $sentido = $contexto['categoriaActual']?->tipo;
         if ($sentido !== 'gasto') {
-            throw new InvalidArgumentException('Las plantillas del centro solo aplican a gastos del banco');
+            throw new InvalidArgumentException(_("Las plantillas del centro solo aplican a gastos del banco"));
         }
         $nueva = $this->categoriaPlantilla->ejecutar($ctx->centroId, $ctx->personaId, $plantillaId);
         $glosa = $this->glosa($contexto['asiento'], $observaciones);
@@ -91,7 +89,7 @@ final class CategorizarMovimientoBanco
         $caja = $this->tesoreria($contexto['nombres'], 'CAJA');
         $banco = $this->tesoreria($contexto['nombres'], 'BANCO');
         if ($contexto['tesoreria']->codigoMaestro !== 'BANCO') {
-            throw new InvalidArgumentException('Solo se puede traspasar un movimiento del banco');
+            throw new InvalidArgumentException(_("Solo se puede traspasar un movimiento del banco"));
         }
         $sentido = $contexto['categoriaActual']?->tipo;
         if ($sentido === 'gasto') {
@@ -99,7 +97,7 @@ final class CategorizarMovimientoBanco
         } elseif ($sentido === 'ingreso') {
             [$origenId, $destinoId] = [$caja->id, $banco->id];
         } else {
-            throw new InvalidArgumentException('No se puede traspasar este movimiento');
+            throw new InvalidArgumentException(_("No se puede traspasar este movimiento"));
         }
         $glosa = $this->glosa($contexto['asiento'], $observaciones);
         $reconstruido = ConstructorAsientoPersonal::traspaso(
@@ -137,7 +135,7 @@ final class CategorizarMovimientoBanco
             || $asiento->personaId !== $personaId
             || $asiento->origen !== 'banco'
         ) {
-            throw new InvalidArgumentException('Movimiento de banco no encontrado');
+            throw new InvalidArgumentException(_("Movimiento de banco no encontrado"));
         }
         $nombres = [];
         foreach ($this->cuentas->listarDePersona($ctx->centroId, $ctx->personaId, 'X') as $c) {
@@ -162,7 +160,7 @@ final class CategorizarMovimientoBanco
             }
         }
         if ($tesoreria === null || $tesoreria->id === null || $cents <= 0) {
-            throw new InvalidArgumentException('El movimiento no tiene tesorería');
+            throw new InvalidArgumentException(_("El movimiento no tiene tesorería"));
         }
 
         return [
@@ -183,7 +181,7 @@ final class CategorizarMovimientoBanco
             }
         }
 
-        throw new InvalidArgumentException('No hay cuenta de tesorería ' . $maestro);
+        throw new InvalidArgumentException(sprintf(_("No hay cuenta de tesorería %s"), $maestro));
     }
 
     private function glosa(Asiento $asiento, ?string $observaciones): ?string

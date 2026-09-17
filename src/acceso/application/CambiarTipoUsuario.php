@@ -25,7 +25,7 @@ final class CambiarTipoUsuario
     {
         $tipo = strtolower(trim($tipo));
         if (!in_array($tipo, ['centro', 'persona'], true)) {
-            throw new InvalidArgumentException('Tipo no válido (centro o persona)');
+            throw new InvalidArgumentException(_("Tipo no válido (centro o persona)"));
         }
         $centros = [];
         foreach ($this->identidades->centrosDe($identidadId) as $v) {
@@ -40,10 +40,10 @@ final class CambiarTipoUsuario
 
         if ($tipo === 'centro') {
             if ($centros === []) {
-                throw new InvalidArgumentException('Esta cuenta no es secretario de ningún centro');
+                throw new InvalidArgumentException(_("Esta cuenta no es secretario de ningún centro"));
             }
             if (!$this->identidades->totpConfirmado($identidadId)) {
-                throw new InvalidArgumentException('Debe confirmar el segundo factor para entrar como secretario');
+                throw new InvalidArgumentException(_("Debe confirmar el segundo factor para entrar como secretario"));
             }
 
             return [
@@ -54,9 +54,7 @@ final class CambiarTipoUsuario
             ];
         }
         if ($personas === []) {
-            throw new InvalidArgumentException(
-                'Esta cuenta no está vinculada a una persona. El libro personal se crea al poner el correo en Nombres.'
-            );
+            throw new InvalidArgumentException(_("Esta cuenta no está vinculada a una persona. El libro personal se crea al poner el correo en Nombres."));
         }
 
         $personaId = count($personas) === 1 ? $personas[0] : null;

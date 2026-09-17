@@ -1,9 +1,9 @@
-<h1>Fecha de cierre</h1>
-<p>Tras imprimir el 613, pase la fecha de cierre al mes siguiente. La entrada de apuntes usa este mes por defecto.</p>
+<h1><?= _("Fecha de cierre") ?></h1>
+<p><?= _("Tras imprimir el 613, pase la fecha de cierre al mes siguiente. La entrada de apuntes usa este mes por defecto.") ?></p>
 <form id="form-cierre" class="grid-form">
-    <label>Fecha cierre <input name="fecha_cierre" type="date" required></label>
-    <button type="submit">Guardar</button>
-    <p id="msg" class="ok" hidden>Guardado</p>
+    <label><?= _("Fecha cierre") ?> <input name="fecha_cierre" type="date" required></label>
+    <button type="submit"><?= _("Guardar") ?></button>
+    <p id="msg" class="ok" hidden><?= _("Guardado") ?></p>
 </form>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {

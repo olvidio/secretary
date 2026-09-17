@@ -20,7 +20,7 @@ final class BorrarPlantillaApunte
     {
         $ctx = $this->ambito->ejecutar();
         if ($this->plantillas->porId($ctx->centroId, $id) === null) {
-            throw new InvalidArgumentException('Plantilla no encontrada');
+            throw new InvalidArgumentException(_("Plantilla no encontrada"));
         }
         $this->plantillas->borrar($ctx->centroId, $id);
     }

@@ -27,11 +27,11 @@ final class ConfirmarTotp
         $ahora ??= new DateTimeImmutable();
         $cifrado = $this->identidades->totpSecretoCifrado($identidadId);
         if ($cifrado === null) {
-            throw new InvalidArgumentException('No hay un secreto TOTP pendiente de confirmar');
+            throw new InvalidArgumentException(_("No hay un secreto TOTP pendiente de confirmar"));
         }
         $secreto = $this->cifrador->descifrar($cifrado);
         if (!TotpRfc6238::verificar($secreto, $codigo)) {
-            throw new InvalidArgumentException('Código TOTP incorrecto');
+            throw new InvalidArgumentException(_("Código TOTP incorrecto"));
         }
         $this->identidades->confirmarTotp($identidadId, $ahora);
         $identidad = $this->identidades->porId($identidadId);

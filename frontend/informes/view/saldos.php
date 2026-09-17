@@ -1,33 +1,46 @@
-<h1>Saldos</h1>
+<h1><?= _("Saldos") ?></h1>
 <p class="muted saldos-ayuda">
-    El saldo de apuntes A es el de la cuenta personal (libro P) de cada residente.
-    Debería ser <strong>cero</strong>: cada gasto personal (origen A) va con su contrapartida,
-    normalmente un ingreso 111 (Trabajo).
+    <?= _("El saldo de apuntes A es el de la cuenta personal (libro P) de cada residente. Debería ser cero: cada gasto personal (origen A) va con su contrapartida, normalmente un ingreso 111 (Trabajo).") ?>
 </p>
 <form id="form-saldos" class="filters">
-    <label>Hasta <input type="date" name="hasta"></label>
-    <button type="submit">Calcular</button>
-    <button type="button" id="btn-comprobaciones">Ejecutar comprobaciones</button>
+    <label><?= _("Hasta") ?> <input type="date" name="hasta"></label>
+    <button type="submit"><?= _("Calcular") ?></button>
+    <button type="button" id="btn-comprobaciones"><?= _("Ejecutar comprobaciones") ?></button>
 </form>
 <p id="tot"></p>
-<h2>Tesorería física</h2>
+<h2><?= _("Tesorería física") ?></h2>
 <table id="tabla-tesoreria">
     <thead>
-    <tr><th>Cuenta</th><th class="num">P</th><th class="num">G</th><th class="num">Físico</th></tr>
+    <tr><th><?= _("Cuenta") ?></th><th class="num">P</th><th class="num">G</th><th class="num"><?= _("Físico") ?></th></tr>
     </thead>
     <tbody></tbody>
 </table>
-<h2>Cuentas personales (apuntes A)</h2>
+<h2><?= _("Cuentas personales (apuntes A)") ?></h2>
 <table id="tabla-saldos">
-    <thead><tr><th>Persona</th><th class="num">Saldo</th></tr></thead>
+    <thead><tr><th><?= _("Persona") ?></th><th class="num"><?= _("Saldo") ?></th></tr></thead>
     <tbody></tbody>
 </table>
 <section id="comprobaciones" class="comprobaciones-saldos" hidden>
-    <h2>Comprobaciones</h2>
+    <h2><?= _("Comprobaciones") ?></h2>
     <p id="comprobaciones-resumen" class="muted"></p>
     <div id="comprobaciones-lista"></div>
 </section>
 <script>
+const I18N_SALDOS = {
+  todoOk: <?= json_encode(_("Todo correcto a fecha %s."), JSON_UNESCAPED_UNICODE) ?>,
+  incidencias: <?= json_encode(_("Se han detectado incidencias a fecha %s."), JSON_UNESCAPED_UNICODE) ?>,
+  valor: <?= json_encode(_("Valor:"), JSON_UNESCAPED_UNICODE) ?>,
+  persona: <?= json_encode(_("Persona"), JSON_UNESCAPED_UNICODE) ?>,
+  saldoCuenta: <?= json_encode(_("Saldo cuenta"), JSON_UNESCAPED_UNICODE) ?>,
+  cuadreApuntes: <?= json_encode(_("Cuadre apuntes A"), JSON_UNESCAPED_UNICODE) ?>,
+  detalle: <?= json_encode(_("Detalle"), JSON_UNESCAPED_UNICODE) ?>,
+  apuntesSinCuadrar: <?= json_encode(_("Apuntes A sin cuadrar."), JSON_UNESCAPED_UNICODE) ?>,
+  sugerencia: <?= json_encode(_(" Sugerencia: apunte P/A concepto "), JSON_UNESCAPED_UNICODE) ?>,
+  verApuntesA: <?= json_encode(_("Ver apuntes A"), JSON_UNESCAPED_UNICODE) ?>,
+  caja: <?= json_encode(_("Caja"), JSON_UNESCAPED_UNICODE) ?>,
+  banco: <?= json_encode(_("Banco"), JSON_UNESCAPED_UNICODE) ?>,
+  saldoAGlobal: <?= json_encode(_("Saldo A global"), JSON_UNESCAPED_UNICODE) ?>,
+};
 function parseSaldoNum(es) {
   if (!es) return 0;
   const s = String(es).trim().replace(/\./g, '').replace(',', '.');
@@ -41,8 +54,8 @@ function renderComprobaciones(data) {
   const lista = document.getElementById('comprobaciones-lista');
   sec.hidden = false;
   res.textContent = data.ok
-    ? 'Todo correcto a fecha ' + fmtFecha(data.hasta) + '.'
-    : 'Se han detectado incidencias a fecha ' + fmtFecha(data.hasta) + '.';
+    ? I18N_SALDOS.todoOk.replace('%s', fmtFecha(data.hasta))
+    : I18N_SALDOS.incidencias.replace('%s', fmtFecha(data.hasta));
   lista.innerHTML = '';
   (data.comprobaciones || []).forEach((c) => {
     const art = document.createElement('article');
@@ -50,14 +63,15 @@ function renderComprobaciones(data) {
     let html = `<h3>${esc(c.titulo)} <span class="comprobacion-estado">${c.ok ? '✓' : '✗'}</span></h3>
       <p>${esc(c.mensaje)}</p>`;
     if (c.valor_es) {
-      html += `<p class="muted">Valor: ${esc(c.valor_es)} €</p>`;
+      html += `<p class="muted">${esc(I18N_SALDOS.valor)} ${esc(c.valor_es)} €</p>`;
     }
     if (c.ayuda) {
       html += `<p class="comprobacion-ayuda">${esc(c.ayuda)}</p>`;
     }
     if (c.personas && c.personas.length) {
       html += '<table class="comprobacion-personas"><thead><tr>'
-        + '<th>Persona</th><th class="num">Saldo cuenta</th><th class="num">Cuadre apuntes A</th><th>Detalle</th></tr></thead><tbody>';
+        + '<th>' + esc(I18N_SALDOS.persona) + '</th><th class="num">' + esc(I18N_SALDOS.saldoCuenta)
+        + '</th><th class="num">' + esc(I18N_SALDOS.cuadreApuntes) + '</th><th>' + esc(I18N_SALDOS.detalle) + '</th></tr></thead><tbody>';
       c.personas.forEach((p) => {
         const sug = p.cuadre?.sugerencia;
         let detalle = '';
@@ -66,9 +80,9 @@ function renderComprobaciones(data) {
         }
         if (p.cuadre && !p.cuadre.cuadrado) {
           if (detalle) detalle += ' ';
-          detalle += 'Apuntes A sin cuadrar.';
+          detalle += I18N_SALDOS.apuntesSinCuadrar;
           if (sug) {
-            detalle += ' Sugerencia: apunte P/A concepto ' + esc(sug.concepto_codigo)
+            detalle += I18N_SALDOS.sugerencia + esc(sug.concepto_codigo)
               + ' por ' + esc(sug.cantidad_es) + ' €.';
           }
           const q = new URLSearchParams({
@@ -78,7 +92,7 @@ function renderComprobaciones(data) {
           });
           if (data.hasta) q.set('hasta', data.hasta);
           q.set('from', '/saldos');
-          detalle += ` <a href="/apuntes?${q.toString()}">Ver apuntes A</a>`;
+          detalle += ` <a href="/apuntes?${q.toString()}">${esc(I18N_SALDOS.verApuntesA)}</a>`;
         }
         if (!detalle) detalle = p.coherente ? '—' : esc(p.nota || '');
         const cuadreEs = p.cuadre ? (p.cuadre.cuadrado ? '0,00' : esc(p.cuadre.saldo_apuntes_es)) : '—';
@@ -103,8 +117,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const hasta = document.querySelector('[name=hasta]').value;
     const r = await api('/api/informes/saldos?hasta=' + hasta);
     document.getElementById('tot').innerHTML =
-      `Caja <strong>${esc(r.caja_es)}</strong> · Banco <strong>${esc(r.banco_es)}</strong>`
-      + ` · Saldo A global <strong>${esc(r.saldo_a_es)}</strong>`;
+      `${esc(I18N_SALDOS.caja)} <strong>${esc(r.caja_es)}</strong> · ${esc(I18N_SALDOS.banco)} <strong>${esc(r.banco_es)}</strong>`
+      + ` · ${esc(I18N_SALDOS.saldoAGlobal)} <strong>${esc(r.saldo_a_es)}</strong>`;
     const tb = document.querySelector('#tabla-saldos tbody');
     tb.innerHTML = '';
     (r.por_persona || []).forEach(p => {

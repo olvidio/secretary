@@ -1,11 +1,11 @@
-<h1>Contraseña</h1>
-<p class="muted">Cambie la contraseña de esta cuenta. Hace falta la actual para confirmar.</p>
+<h1><?= _("Contraseña") ?></h1>
+<p class="muted"><?= _("Cambie la contraseña de esta cuenta. Hace falta la actual para confirmar.") ?></p>
 <form id="form-password" class="grid-form">
-    <label>Actual <input name="password_actual" type="password" required autocomplete="current-password"></label>
-    <label>Nueva <input name="password" type="password" required autocomplete="new-password" minlength="6"></label>
-    <label>Repetir nueva <input name="password_confirm" type="password" required autocomplete="new-password" minlength="6"></label>
-    <button type="submit">Guardar</button>
-    <p class="ok" id="msg" hidden>Contraseña actualizada</p>
+    <label><?= _("Actual") ?> <input name="password_actual" type="password" required autocomplete="current-password"></label>
+    <label><?= _("Nueva") ?> <input name="password" type="password" required autocomplete="new-password" minlength="6"></label>
+    <label><?= _("Repetir nueva") ?> <input name="password_confirm" type="password" required autocomplete="new-password" minlength="6"></label>
+    <button type="submit"><?= _("Guardar") ?></button>
+    <p class="ok" id="msg" hidden><?= _("Contraseña actualizada") ?></p>
 </form>
 <script>
 document.addEventListener('DOMContentLoaded', () => {

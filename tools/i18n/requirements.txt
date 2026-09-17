@@ -1,0 +1,4 @@
+# Dependencias del entorno Python en tools/i18n/
+polib>=1.2.0
+groq>=0.9.0
+python-dotenv>=1.0.0

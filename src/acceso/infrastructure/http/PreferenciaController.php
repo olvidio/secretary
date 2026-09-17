@@ -39,7 +39,7 @@ final class PreferenciaController
     {
         $id = $this->identidadId();
         if ($id === null) {
-            return ContestarJson::error('Sesión caducada', 401);
+            return ContestarJson::error(_("Sesión caducada"), 401);
         }
         try {
             $datos = $this->obtener->ejecutar($id);
@@ -57,7 +57,7 @@ final class PreferenciaController
     {
         $id = $this->identidadId();
         if ($id === null) {
-            return ContestarJson::error('Sesión caducada', 401);
+            return ContestarJson::error(_("Sesión caducada"), 401);
         }
         try {
             $layout = $this->guardarLayout->ejecutar($id, (string) $request->input('layout', ''));
@@ -73,7 +73,7 @@ final class PreferenciaController
     {
         $id = $this->identidadId();
         if ($id === null) {
-            return ContestarJson::error('Sesión caducada', 401);
+            return ContestarJson::error(_("Sesión caducada"), 401);
         }
         try {
             $email = $this->guardarEmail->ejecutar($id, (string) $request->input('email', ''));
@@ -88,7 +88,7 @@ final class PreferenciaController
     {
         $id = $this->identidadId();
         if ($id === null) {
-            return ContestarJson::error('Sesión caducada', 401);
+            return ContestarJson::error(_("Sesión caducada"), 401);
         }
         try {
             $idioma = $this->guardarIdioma->ejecutar($id, (string) $request->input('idioma', ''));
@@ -104,7 +104,7 @@ final class PreferenciaController
     {
         $id = $this->identidadId();
         if ($id === null) {
-            return ContestarJson::error('Sesión caducada', 401);
+            return ContestarJson::error(_("Sesión caducada"), 401);
         }
         try {
             $centroId = $this->cambiarCentro->ejecutar($id, (int) $request->input('centro_id', 0));
@@ -121,7 +121,7 @@ final class PreferenciaController
     {
         $id = $this->identidadId();
         if ($id === null) {
-            return ContestarJson::error('Sesión caducada', 401);
+            return ContestarJson::error(_("Sesión caducada"), 401);
         }
         try {
             $personaId = $this->cambiarPersona->ejecutar($id, (int) $request->input('persona_id', 0));
@@ -138,7 +138,7 @@ final class PreferenciaController
     {
         $id = $this->identidadId();
         if ($id === null) {
-            return ContestarJson::error('Sesión caducada', 401);
+            return ContestarJson::error(_("Sesión caducada"), 401);
         }
         try {
             $this->cambiarPassword->ejecutar(
@@ -158,7 +158,7 @@ final class PreferenciaController
     {
         $id = $this->identidadId();
         if ($id === null) {
-            return ContestarJson::error('Sesión caducada', 401);
+            return ContestarJson::error(_("Sesión caducada"), 401);
         }
         try {
             $datos = $this->prepararTotp->ejecutar($id);
@@ -173,7 +173,7 @@ final class PreferenciaController
     {
         $id = $this->identidadId();
         if ($id === null) {
-            return ContestarJson::error('Sesión caducada', 401);
+            return ContestarJson::error(_("Sesión caducada"), 401);
         }
         $codigo = trim((string) $request->input('codigo', ''));
         try {
@@ -189,7 +189,7 @@ final class PreferenciaController
     {
         $id = $this->identidadId();
         if ($id === null) {
-            return ContestarJson::error('Sesión caducada', 401);
+            return ContestarJson::error(_("Sesión caducada"), 401);
         }
         try {
             $cambio = $this->cambiarTipo->ejecutar($id, (string) $request->input('tipo', ''));

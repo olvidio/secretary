@@ -25,7 +25,7 @@ final class ListarCopiasPersonal
         $ctx = $this->ambito->ejecutar();
         $persona = $this->personas->porId($ctx->personaId);
         if ($persona === null) {
-            throw new RuntimeException('Persona no encontrada');
+            throw new RuntimeException(_("Persona no encontrada"));
         }
         $almacen = new AlmacenCopiasPersonal(
             RutasCopiasPersonal::directorio(),

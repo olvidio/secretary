@@ -20,20 +20,20 @@ final class CambiarPasswordUsuario
         $nueva = trim($nueva);
         $confirmacion = trim($confirmacion);
         if ($actual === '') {
-            throw new InvalidArgumentException('Indique la contraseña actual');
+            throw new InvalidArgumentException(_("Indique la contraseña actual"));
         }
         if (strlen($nueva) < 6) {
-            throw new InvalidArgumentException('La contraseña nueva debe tener al menos 6 caracteres');
+            throw new InvalidArgumentException(_("La contraseña nueva debe tener al menos 6 caracteres"));
         }
         if ($nueva !== $confirmacion) {
-            throw new InvalidArgumentException('Las contraseñas nuevas no coinciden');
+            throw new InvalidArgumentException(_("Las contraseñas nuevas no coinciden"));
         }
         $identidad = $this->identidades->porId($identidadId);
         if ($identidad === null || $identidad->id === null) {
-            throw new InvalidArgumentException('Sesión caducada');
+            throw new InvalidArgumentException(_("Sesión caducada"));
         }
         if (!password_verify($actual, $identidad->passwordHash)) {
-            throw new InvalidArgumentException('La contraseña actual no es correcta');
+            throw new InvalidArgumentException(_("La contraseña actual no es correcta"));
         }
         $this->identidades->guardar(new Identidad(
             $identidad->id,

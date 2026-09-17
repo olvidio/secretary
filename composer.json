@@ -23,7 +23,10 @@
     "psr-4": {
       "src\\": "src/",
       "frontend\\": "frontend/"
-    }
+    },
+    "files": [
+      "src/shared/infrastructure/i18n/functions.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {

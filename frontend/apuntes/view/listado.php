@@ -1,38 +1,59 @@
-<h1>Apuntes</h1>
+<h1><?= _("Apuntes") ?></h1>
 <p class="print-hide arqueo-volver" id="apuntes-volver" hidden>
-    <a href="#">← Volver</a>
+    <a href="#"><?= _("← Volver") ?></a>
 </p>
 <form id="filtros" class="filters">
-    <select name="cuenta"><option value="">P y G</option><option>P</option><option>G</option></select>
+    <select name="cuenta"><option value=""><?= _("P y G") ?></option><option>P</option><option>G</option></select>
     <select name="origen"><option value="">A/B/C</option><option>A</option><option>B</option><option>C</option></select>
-    <select name="iniciales"><option value="">Iniciales</option></select>
-    <input name="concepto" placeholder="Concepto">
+    <select name="iniciales"><option value=""><?= _("Iniciales") ?></option></select>
+    <input name="concepto" placeholder="<?= htmlspecialchars(_("Concepto"), ENT_QUOTES) ?>">
     <input type="date" name="desde">
     <input type="date" name="hasta">
-    <button type="submit">Filtrar</button>
+    <button type="submit"><?= _("Filtrar") ?></button>
 </form>
-<p class="muted print-hide">Orden y filtros por fecha de imputación (613 e informes). Si la operación fue otro día, se indica entre paréntesis.</p>
+<p class="muted print-hide"><?= _("Orden y filtros por fecha de imputación (613 e informes). Si la operación fue otro día, se indica entre paréntesis.") ?></p>
 <p id="apuntes-cuadre-ayuda" class="muted" hidden>
-    Gasto suma, ingreso resta. El saldo de cada fecha debería ser 0; las fechas que no cuadran se marcan para localizar el desajuste.
+    <?= _("Gasto suma, ingreso resta. El saldo de cada fecha debería ser 0; las fechas que no cuadran se marcan para localizar el desajuste.") ?>
 </p>
 <p id="apuntes-cuadre-total" class="apuntes-cuadre-total" hidden></p>
 <table id="tabla-apuntes">
     <thead>
     <tr>
-        <th>Fecha</th>
+        <th><?= _("Fecha") ?></th>
         <th>P/G</th>
         <th>A/B/C</th>
-        <th>Inic.</th>
-        <th>Concepto</th>
-        <th>Observaciones</th>
-        <th class="num">Cantidad</th>
-        <th class="num col-efecto" hidden>Efecto</th>
+        <th><?= _("Inic.") ?></th>
+        <th><?= _("Concepto") ?></th>
+        <th><?= _("Observaciones") ?></th>
+        <th class="num"><?= _("Cantidad") ?></th>
+        <th class="num col-efecto" hidden><?= _("Efecto") ?></th>
         <th></th>
     </tr>
     </thead>
     <tbody></tbody>
 </table>
 <script>
+const I18N_APUNTES = {
+  error: <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>,
+  verEnG: <?= json_encode(_("Ver en G"), JSON_UNESCAPED_UNICODE) ?>,
+  aceptar21: <?= json_encode(_("Aceptar (P/21 y G/11)"), JSON_UNESCAPED_UNICODE) ?>,
+  aceptar111: <?= json_encode(_("Aceptar (ingreso P/111)"), JSON_UNESCAPED_UNICODE) ?>,
+  cuadra: <?= json_encode(_("cuadra"), JSON_UNESCAPED_UNICODE) ?>,
+  noCuadra: <?= json_encode(_("no cuadra"), JSON_UNESCAPED_UNICODE) ?>,
+  saldoDia: <?= json_encode(_("· saldo del día "), JSON_UNESCAPED_UNICODE) ?>,
+  saldoA: <?= json_encode(_("Saldo A de "), JSON_UNESCAPED_UNICODE) ?>,
+  cuadrado: <?= json_encode(_(" (cuadrado)."), JSON_UNESCAPED_UNICODE) ?>,
+  fechasSinCuadrar: <?= json_encode(_(" · %s fecha(s) sin cuadrar."), JSON_UNESCAPED_UNICODE) ?>,
+  op: <?= json_encode(_("(op. "), JSON_UNESCAPED_UNICODE) ?>,
+  sugEnG: <?= json_encode(_("Sugerencia: en G hay un %s."), JSON_UNESCAPED_UNICODE) ?>,
+  sugDevolucion: <?= json_encode(_(" Es una devolución. En P sobran gastos por esa cantidad; falta un ingreso P/A 111 (el 111 de ese día no incluye este abono)."), JSON_UNESCAPED_UNICODE) ?>,
+  sugFaltaGasto: <?= json_encode(_(" Falta el gasto P/A de esa cantidad (el 111 de ese día parece incluirlo)."), JSON_UNESCAPED_UNICODE) ?>,
+  sugVivienda21: <?= json_encode(_(" Si vivienda aporta a generales, debería haber un P/21 por el mismo importe."), JSON_UNESCAPED_UNICODE) ?>,
+  sugPareja: <?= json_encode(_(" Puede faltar el apunte P/A pareja."), JSON_UNESCAPED_UNICODE) ?>,
+  confirm21: <?= json_encode(_("Se anotará un gasto P/A 21 (vivienda) de %s € el %s y, si esta persona aporta a generales, el ingreso G/A 11."), JSON_UNESCAPED_UNICODE) ?>,
+  p21g11Fallo: <?= json_encode(_("P/21 creado, pero G/11 falló: %s"), JSON_UNESCAPED_UNICODE) ?>,
+  confirm111: <?= json_encode(_("Se anotará un ingreso P/A 111 de %s € el %s (contrapartida de la devolución en G). El apunte G no se toca."), JSON_UNESCAPED_UNICODE) ?>,
+};
 function parseImporte(raw) {
   if (raw === null || raw === undefined || raw === '') return 0;
   const n = Number(String(raw).replace(',', '.'));
@@ -40,7 +61,7 @@ function parseImporte(raw) {
 }
 
 function fmtEuro(n) {
-  return n.toLocaleString('es-ES', {
+  return n.toLocaleString(secretaryLocale(), {
     useGrouping: true,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -144,16 +165,15 @@ function candidatoSugerencia(saldoDia, fecha, apuntesG, natG) {
 }
 
 function mensajeSugerencia(saldoDia, a, natG) {
-  const n = parseImporte(a.cantidad);
-  let msg = 'Sugerencia: en G hay un ' + etiquetaApunte(a, natG) + '.';
-  if ((natG[a.concepto_codigo] || '') === 'gasto' && n < 0) {
-    msg += ' Es una devolución. En P sobran gastos por esa cantidad; falta un ingreso P/A 111 (el 111 de ese día no incluye este abono).';
+  let msg = I18N_APUNTES.sugEnG.replace('%s', etiquetaApunte(a, natG));
+  if ((natG[a.concepto_codigo] || '') === 'gasto' && parseImporte(a.cantidad) < 0) {
+    msg += I18N_APUNTES.sugDevolucion;
   } else if ((natG[a.concepto_codigo] || '') === 'gasto' && saldoDia < 0) {
-    msg += ' Falta el gasto P/A de esa cantidad (el 111 de ese día parece incluirlo).';
+    msg += I18N_APUNTES.sugFaltaGasto;
   } else if ((natG[a.concepto_codigo] || '') === 'ingreso') {
-    msg += ' Si vivienda aporta a generales, debería haber un P/21 por el mismo importe.';
+    msg += I18N_APUNTES.sugVivienda21;
   } else {
-    msg += ' Puede faltar el apunte P/A pareja.';
+    msg += I18N_APUNTES.sugPareja;
   }
   return msg;
 }
@@ -192,9 +212,9 @@ async function aceptarSugerencia21(a) {
   const fecha = a.fecha;
   const ini = a.iniciales || '';
   const obs = a.observaciones || '';
-  const txt = 'Se anotará un gasto P/A 21 (vivienda) de ' + fmtEuro(parseImporte(cant))
-    + ' € el ' + (a.fecha_es || fecha)
-    + ' y, si esta persona aporta a generales, el ingreso G/A 11.';
+  const txt = I18N_APUNTES.confirm21
+    .replace('%s', fmtEuro(parseImporte(cant)))
+    .replace('%s', a.fecha_es || fecha);
   if (!confirm(txt)) return;
   const base = {
     fecha,
@@ -216,7 +236,7 @@ async function aceptarSugerencia21(a) {
       method: 'POST',
       body: Object.assign({ cuenta: 'G', concepto_codigo: '11' }, base),
     });
-    if (!g.ok) return alert('P/21 creado, pero G/11 falló: ' + g.error);
+    if (!g.ok) return alert(I18N_APUNTES.p21g11Fallo.replace('%s', g.error));
   }
   loadApuntes();
 }
@@ -226,9 +246,9 @@ async function aceptarSugerencia111(a) {
   const fecha = a.fecha;
   const ini = a.iniciales || '';
   const obs = a.observaciones || '';
-  const txt = 'Se anotará un ingreso P/A 111 de ' + fmtEuro(parseImporte(cant))
-    + ' € el ' + (a.fecha_es || fecha)
-    + ' (contrapartida de la devolución en G). El apunte G no se toca.';
+  const txt = I18N_APUNTES.confirm111
+    .replace('%s', fmtEuro(parseImporte(cant)))
+    .replace('%s', a.fecha_es || fecha);
   if (!confirm(txt)) return;
   const s = await api('/api/apuntes', {
     method: 'POST',
@@ -328,8 +348,8 @@ async function loadApuntes() {
     const td = document.createElement('td');
     td.colSpan = 9;
     td.innerHTML = `<strong>${esc(g.fecha_es)}</strong>
-      · saldo del día <span class="num">${esc(fmtEuro(saldoDia))}</span>
-      ${ok ? '<span class="ok">cuadra</span>' : '<span class="error">no cuadra</span>'}`;
+      ${esc(I18N_APUNTES.saldoDia)}<span class="num">${esc(fmtEuro(saldoDia))}</span>
+      ${ok ? '<span class="ok">' + esc(I18N_APUNTES.cuadra) + '</span>' : '<span class="error">' + esc(I18N_APUNTES.noCuadra) + '</span>'}`;
     if (cand) {
       const sug = document.createElement('span');
       sug.className = 'apuntes-dia-sug';
@@ -338,20 +358,20 @@ async function loadApuntes() {
       sug.appendChild(txt);
       const ver = document.createElement('a');
       ver.href = urlVerG(cand, g.fecha);
-      ver.textContent = 'Ver en G';
+      ver.textContent = I18N_APUNTES.verEnG;
       sug.appendChild(ver);
       if (sePuedeAceptar21(saldoDia, cand, natG)) {
         sug.appendChild(document.createTextNode(' · '));
         const acc = document.createElement('button');
         acc.type = 'button';
-        acc.textContent = 'Aceptar (P/21 y G/11)';
+        acc.textContent = I18N_APUNTES.aceptar21;
         acc.onclick = () => aceptarSugerencia21(cand);
         sug.appendChild(acc);
       } else if (sePuedeAceptar111(saldoDia, cand, natG)) {
         sug.appendChild(document.createTextNode(' · '));
         const acc = document.createElement('button');
         acc.type = 'button';
-        acc.textContent = 'Aceptar (ingreso P/111)';
+        acc.textContent = I18N_APUNTES.aceptar111;
         acc.onclick = () => aceptarSugerencia111(cand);
         sug.appendChild(acc);
       }
@@ -364,15 +384,15 @@ async function loadApuntes() {
   totalEl.hidden = false;
   const okTotal = Math.abs(total) < 0.005;
   totalEl.className = 'apuntes-cuadre-total ' + (okTotal ? 'ok' : 'error');
-  totalEl.textContent = 'Saldo A de ' + String(formObj(form).iniciales).trim()
+  totalEl.textContent = I18N_APUNTES.saldoA + String(formObj(form).iniciales).trim()
     + ': ' + fmtEuro(total)
-    + (okTotal ? ' (cuadrado).' : ' · ' + nFail + ' fecha(s) sin cuadrar.');
+    + (okTotal ? I18N_APUNTES.cuadrado : I18N_APUNTES.fechasSinCuadrar.replace('%s', nFail));
 }
 
 async function cargarPersonasFiltro(form) {
   const sel = form.querySelector('[name=iniciales]');
   const r = await api('/api/personas');
-  if (!r.ok) return alert(r.error || 'Error');
+  if (!r.ok) return alert(r.error || I18N_APUNTES.error);
   (r.personas || []).forEach((p) => {
     const o = document.createElement('option');
     o.value = p.iniciales;
@@ -395,7 +415,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 function fechaCelda(a) {
   if (fechasDistintas(a)) {
-    return esc(fechaImputacionEs(a)) + ' <span class="muted">(op. ' + esc(a.fecha_es) + ')</span>';
+    return esc(fechaImputacionEs(a)) + ' <span class="muted">' + esc(I18N_APUNTES.op) + esc(a.fecha_es) + ')</span>';
   }
   return esc(a.fecha_es);
 }

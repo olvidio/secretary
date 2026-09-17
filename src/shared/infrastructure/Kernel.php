@@ -14,6 +14,7 @@ use src\acceso\infrastructure\http\ProteccionCsrf;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
+use src\shared\infrastructure\i18n\ServicioCatalogoIdioma;
 use function FastRoute\simpleDispatcher;
 
 final class Kernel
@@ -42,6 +43,7 @@ final class Kernel
             session_start();
         }
         ProteccionCsrf::asegurarToken();
+        ServicioCatalogoIdioma::activarDesdeSesion();
         $builder = new ContainerBuilder();
         $builder->addDefinitions($root . '/src/shared/config/dependencies.php');
         $builder->addDefinitions([
@@ -65,9 +67,9 @@ final class Kernel
         $routeInfo = $dispatcher->dispatch($request->method, $request->path);
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
-                return new Response('No encontrado', 404);
+                return new Response(_("No encontrado"), 404);
             case Dispatcher::METHOD_NOT_ALLOWED:
-                return new Response('Método no permitido', 405);
+                return new Response(_("Método no permitido"), 405);
             case Dispatcher::FOUND:
                 $handler = $routeInfo[1];
                 $vars = $routeInfo[2];
@@ -91,7 +93,7 @@ final class Kernel
                 }
         }
 
-        return new Response('Error', 500);
+        return new Response(_("Error"), 500);
     }
 
     /**
@@ -123,17 +125,17 @@ final class Kernel
             return Response::redirect($decision->redirect);
         }
         if (str_starts_with($request->path, '/api/')) {
-            return Response::json(['ok' => false, 'error' => $decision->error ?? 'No autenticado'], $decision->status);
+            $error = $decision->error ?? _("No autenticado");
+            return Response::json(['ok' => false, 'error' => $error], $decision->status);
         }
-        if ($decision->error === 'Token CSRF inválido') {
-            $_SESSION['login_error'] = 'La sesión ha caducado o el navegador no guardó la cookie. '
-                . 'Recargue la página e inténtelo de nuevo.';
+        if ($decision->error === _("Token CSRF inválido")) {
+            $_SESSION['login_error'] = _("La sesión ha caducado o el navegador no guardó la cookie. Recargue la página e inténtelo de nuevo.");
             ProteccionCsrf::renovarToken();
 
             return Response::redirect($this->destinoTrasCsrfInvalido($request->path));
         }
 
-        return new Response($decision->error ?? 'No autorizado', $decision->status);
+        return new Response($decision->error ?? _("No autorizado"), $decision->status);
     }
 
     private function destinoTrasCsrfInvalido(string $path): string

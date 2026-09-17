@@ -27,11 +27,11 @@ final class CrearCuentaFisica
     {
         $tipo = strtolower(trim((string) ($datos['tipo'] ?? '')));
         if (!in_array($tipo, ['caja', 'banco'], true)) {
-            throw new InvalidArgumentException('El tipo debe ser caja o banco');
+            throw new InvalidArgumentException(_("El tipo debe ser caja o banco"));
         }
         $nombre = trim((string) ($datos['nombre'] ?? ''));
         if ($nombre === '') {
-            throw new InvalidArgumentException('El nombre es obligatorio');
+            throw new InvalidArgumentException(_("El nombre es obligatorio"));
         }
         $iban = isset($datos['iban']) && trim((string) $datos['iban']) !== ''
             ? trim((string) $datos['iban'])
@@ -45,7 +45,7 @@ final class CrearCuentaFisica
             new CuentaFisica(null, $centroId, $tipo, $nombre, $iban, $orden, true)
         );
         if ($fisica->id === null) {
-            throw new InvalidArgumentException('No se pudo crear la cuenta física');
+            throw new InvalidArgumentException(_("No se pudo crear la cuenta física"));
         }
 
         $maestro = strtoupper($tipo === 'caja' ? 'CAJA' : 'BANCO');

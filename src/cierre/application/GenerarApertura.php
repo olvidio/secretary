@@ -28,30 +28,28 @@ final class GenerarApertura
     {
         $destino = $this->ejercicios->porId($ejercicioId);
         if ($destino === null) {
-            throw new InvalidArgumentException('Ejercicio no encontrado');
+            throw new InvalidArgumentException(_("Ejercicio no encontrado"));
         }
         if ($destino->ejercicioAnteriorId === null) {
-            throw new InvalidArgumentException('Este ejercicio no tiene anterior: la apertura es manual');
+            throw new InvalidArgumentException(_("Este ejercicio no tiene anterior: la apertura es manual"));
         }
         if ($destino->estado !== 'abierto') {
-            throw new InvalidArgumentException('Solo se puede regenerar la apertura en un ejercicio abierto');
+            throw new InvalidArgumentException(_("Solo se puede regenerar la apertura en un ejercicio abierto"));
         }
         if ($destino->id === null) {
-            throw new RuntimeException('Ejercicio destino sin id');
+            throw new RuntimeException(_("Ejercicio destino sin id"));
         }
 
         $anterior = $this->ejercicios->porId($destino->ejercicioAnteriorId);
         if ($anterior === null || $anterior->id === null) {
-            throw new InvalidArgumentException('Ejercicio anterior no encontrado');
+            throw new InvalidArgumentException(_("Ejercicio anterior no encontrado"));
         }
         if ($anterior->estado !== 'cerrado') {
-            throw new InvalidArgumentException('El ejercicio anterior debe estar cerrado');
+            throw new InvalidArgumentException(_("El ejercicio anterior debe estar cerrado"));
         }
 
         if ($this->asientos->hayDescuadrados($anterior->id)) {
-            throw new InvalidArgumentException(
-                'El ejercicio anterior tiene asientos descuadrados; corríjalos antes de generar la apertura'
-            );
+            throw new InvalidArgumentException(_("El ejercicio anterior tiene asientos descuadrados; corríjalos antes de generar la apertura"));
         }
 
         $fechaFin = $anterior->fechaFin->format('Y-m-d');
@@ -66,7 +64,7 @@ final class GenerarApertura
         foreach (['P', 'G'] as $libro) {
             $patrimonio = $this->cuentaPatrimonio($destino, $libro);
             if ($patrimonio === null || $patrimonio->id === null) {
-                throw new RuntimeException('Falta cuenta de patrimonio para el libro ' . $libro);
+                throw new RuntimeException(sprintf(_("Falta cuenta de patrimonio para el libro %s"), $libro));
             }
             $movimientos = ConstructorAsientoApertura::movimientos($libro, $saldos, $patrimonio->id);
             if ($movimientos === []) {

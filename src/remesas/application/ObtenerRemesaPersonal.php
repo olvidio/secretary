@@ -24,7 +24,7 @@ final class ObtenerRemesaPersonal
         $ctx = $this->ambito->ejecutar();
         $remesa = $this->remesas->porId($id);
         if ($remesa === null || $remesa->personaId !== $ctx->personaId) {
-            throw new InvalidArgumentException('Remesa no encontrada');
+            throw new InvalidArgumentException(_("Remesa no encontrada"));
         }
         $persona = $this->personas->porId($ctx->personaId);
         $out = $remesa->toArray();

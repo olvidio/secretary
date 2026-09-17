@@ -27,7 +27,7 @@ final class EnviarRemesa
         $preview = $this->mes->ejecutar($anio, $mes);
         $ejercicio = $preview['ejercicio'];
         if ($ejercicio->estado !== 'abierto' || $ejercicio->id === null) {
-            throw new InvalidArgumentException('El ejercicio de ese mes está cerrado; no se puede enviar');
+            throw new InvalidArgumentException(_("El ejercicio de ese mes está cerrado; no se puede enviar"));
         }
         $ctx = $preview['ctx'];
         $lineas = $preview['lineas'];

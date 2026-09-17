@@ -27,13 +27,13 @@ final class ActualizarApunte
     {
         $asiento = $this->asientos->porId($id);
         if ($asiento === null || $asiento->libro === 'X') {
-            throw new InvalidArgumentException('Apunte no encontrado');
+            throw new InvalidArgumentException(_("Apunte no encontrado"));
         }
         if ($asiento->origen === 'remesa' || $asiento->tipo === 'remesa' || $asiento->remesaId !== null) {
-            throw new InvalidArgumentException('Un asiento de remesa no se edita a mano; se corrige reenviando');
+            throw new InvalidArgumentException(_("Un asiento de remesa no se edita a mano; se corrige reenviando"));
         }
         if ($asiento->origen === 'asignacion' || $asiento->tipo === 'asignacion_cc') {
-            throw new InvalidArgumentException('Un asiento de destinos 7 no se edita a mano; se corrige con una nueva propuesta');
+            throw new InvalidArgumentException(_("Un asiento de destinos 7 no se edita a mano; se corrige con una nueva propuesta"));
         }
         if ($asiento->tipo === 'cierre') {
             $datos['es_cierre'] = true;

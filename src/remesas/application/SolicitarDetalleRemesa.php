@@ -22,12 +22,12 @@ final class SolicitarDetalleRemesa
     public function ejecutar(int $remesaId, int $lineaId): SolicitudDetalle
     {
         if ($this->identidadId === null) {
-            throw new InvalidArgumentException('Sesión incompleta');
+            throw new InvalidArgumentException(_("Sesión incompleta"));
         }
         $ctx = $this->ambito->ejecutar();
         $remesa = $this->remesas->porId($remesaId);
         if ($remesa === null || $remesa->centroId !== $ctx->centroId) {
-            throw new InvalidArgumentException('Remesa no encontrada');
+            throw new InvalidArgumentException(_("Remesa no encontrada"));
         }
         $linea = null;
         foreach ($remesa->lineas as $l) {
@@ -37,7 +37,7 @@ final class SolicitarDetalleRemesa
             }
         }
         if ($linea === null) {
-            throw new InvalidArgumentException('Línea no encontrada');
+            throw new InvalidArgumentException(_("Línea no encontrada"));
         }
         $ultima = $this->remesas->ultimaSolicitudDeLinea($lineaId);
         if ($ultima !== null && $ultima->estado === 'pendiente') {

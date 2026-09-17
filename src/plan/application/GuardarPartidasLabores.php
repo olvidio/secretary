@@ -25,7 +25,7 @@ final class GuardarPartidasLabores
         $ctx = $this->ambito->ejecutar();
         $raw = $datos['partidas'] ?? [];
         if (!is_array($raw)) {
-            throw new InvalidArgumentException('Formato de partidas no válido');
+            throw new InvalidArgumentException(_("Formato de partidas no válido"));
         }
 
         $partidas = $this->normalizar($raw);
@@ -41,10 +41,10 @@ final class GuardarPartidasLabores
     private function normalizar(array $raw): array
     {
         if ($raw === []) {
-            throw new InvalidArgumentException('Debe haber al menos una partida');
+            throw new InvalidArgumentException(_("Debe haber al menos una partida"));
         }
         if (count($raw) > 12) {
-            throw new InvalidArgumentException('Como máximo 12 partidas en el cap. VII');
+            throw new InvalidArgumentException(_("Como máximo 12 partidas en el cap. VII"));
         }
 
         $out = [];
@@ -52,21 +52,21 @@ final class GuardarPartidasLabores
         $orden = 10;
         foreach ($raw as $fila) {
             if (!is_array($fila)) {
-                throw new InvalidArgumentException('Cada partida debe ser un objeto');
+                throw new InvalidArgumentException(_("Cada partida debe ser un objeto"));
             }
             $codigo = trim((string) ($fila['codigo'] ?? ''));
             $etiqueta = trim((string) ($fila['etiqueta'] ?? ''));
             if ($codigo === '' || !preg_match('/^\d{2,3}$/', $codigo)) {
-                throw new InvalidArgumentException('Código de partida no válido: ' . $codigo);
+                throw new InvalidArgumentException(sprintf(_("Código de partida no válido: %s"), $codigo));
             }
             if (!str_starts_with($codigo, '7')) {
-                throw new InvalidArgumentException('Las partidas del cap. VII empiezan por 7 (p. ej. 71, 791)');
+                throw new InvalidArgumentException(_("Las partidas del cap. VII empiezan por 7 (p. ej. 71, 791)"));
             }
             if ($etiqueta === '') {
-                throw new InvalidArgumentException('La etiqueta es obligatoria en la partida ' . $codigo);
+                throw new InvalidArgumentException(sprintf(_("La etiqueta es obligatoria en la partida %s"), $codigo));
             }
             if (isset($codigos[$codigo])) {
-                throw new InvalidArgumentException('Código duplicado: ' . $codigo);
+                throw new InvalidArgumentException(sprintf(_("Código duplicado: %s"), $codigo));
             }
             $codigos[$codigo] = true;
             $desgrava = !empty($fila['desgrava']);

@@ -1,45 +1,57 @@
-<h1>Copias de seguridad</h1>
+<h1><?= _("Copias de seguridad") ?></h1>
 <p class="muted">
-    Volcado completo de PostgreSQL (<span id="db-name">…</span>). Afecta a todos los centros
-    de esta base. Los Excel (<code>.xlsm</code>) no se incluyen; guarde también el
-    <code>.env</code> si usa TOTP.
+    <?= _("Volcado completo de PostgreSQL") ?> (<span id="db-name">…</span>). <?= _("Afecta a todos los centros de esta base. Los Excel (.xlsm) no se incluyen; guarde también el .env si usa TOTP.") ?>
 </p>
 
 <section>
-    <h2>Nueva copia</h2>
-    <p class="muted">Genera un fichero SQL (<code>.sql</code>) en el servidor y lo añade al listado.</p>
-    <button type="button" id="btn-backup">Crear copia ahora</button>
+    <h2><?= _("Nueva copia") ?></h2>
+    <p class="muted"><?= _("Genera un fichero SQL (.sql) en el servidor y lo añade al listado.") ?></p>
+    <button type="button" id="btn-backup"><?= _("Crear copia ahora") ?></button>
     <p class="ok" id="msg-backup" hidden></p>
 </section>
 
 <section>
-    <h2>Copias en el servidor</h2>
+    <h2><?= _("Copias en el servidor") ?></h2>
     <table id="tabla-copias">
         <thead>
-        <tr><th>Fichero</th><th>Fecha</th><th>Tamaño</th><th></th></tr>
+        <tr><th><?= _("Fichero") ?></th><th><?= _("Fecha") ?></th><th><?= _("Tamaño") ?></th><th></th></tr>
         </thead>
         <tbody></tbody>
     </table>
-    <p class="muted" id="sin-copias" hidden>Aún no hay copias guardadas en el servidor.</p>
+    <p class="muted" id="sin-copias" hidden><?= _("Aún no hay copias guardadas en el servidor.") ?></p>
 </section>
 
 <section>
-    <h2>Restaurar</h2>
+    <h2><?= _("Restaurar") ?></h2>
     <p class="muted peligro">
-        La restauración <strong>sobrescribe</strong> toda la base. Cierre otras sesiones antes
-        de continuar.
+        <?= _("La restauración sobrescribe toda la base. Cierre otras sesiones antes de continuar.") ?>
     </p>
-    <p class="muted">Elija una copia ya guardada en el servidor y pulse Restaurar en la tabla.</p>
+    <p class="muted"><?= _("Elija una copia ya guardada en el servidor y pulse Restaurar en la tabla.") ?></p>
     <form id="form-restore" class="grid-form">
-        <label>O fichero local (.sql o .dump)
+        <label><?= _("O fichero local (.sql o .dump)") ?>
             <input name="dump" type="file" accept=".sql,.dump,text/plain,application/octet-stream">
         </label>
-        <button type="submit" class="peligro">Restaurar desde fichero local</button>
+        <button type="submit" class="peligro"><?= _("Restaurar desde fichero local") ?></button>
     </form>
     <p class="ok" id="msg-restore" hidden></p>
 </section>
 
 <script>
+const I18N_COPIAS = {
+  descargar: <?= json_encode(_("Descargar"), JSON_UNESCAPED_UNICODE) ?>,
+  restaurar: <?= json_encode(_("Restaurar"), JSON_UNESCAPED_UNICODE) ?>,
+  borrar: <?= json_encode(_("Borrar"), JSON_UNESCAPED_UNICODE) ?>,
+  noListado: <?= json_encode(_("No se pudo cargar el listado"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmBorrar: <?= json_encode(_("¿Borrar «%s» del servidor? Esta acción no se puede deshacer."), JSON_UNESCAPED_UNICODE) ?>,
+  confirmRestaurar: <?= json_encode(_("¿Restaurar «%s»? Se sobrescribirá toda la base %s."), JSON_UNESCAPED_UNICODE) ?>,
+  restauracionOk: <?= json_encode(_("Restauración completada."), JSON_UNESCAPED_UNICODE) ?>,
+  copiaCreada: <?= json_encode(_("Copia creada: %s (%s)."), JSON_UNESCAPED_UNICODE) ?>,
+  elijaFichero: <?= json_encode(_("Elija un fichero .sql o .dump"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmLocal: <?= json_encode(_("¿Restaurar desde el fichero local? Se sobrescribirá toda la base."), JSON_UNESCAPED_UNICODE) ?>,
+  errorRestaurar: <?= json_encode(_("Error al restaurar"), JSON_UNESCAPED_UNICODE) ?>,
+  respuestaNoJson: <?= json_encode(_("Respuesta no JSON"), JSON_UNESCAPED_UNICODE) ?>,
+};
+
 function fmtBytes(n) {
   if (n < 1024) return n + ' B';
   if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
@@ -48,7 +60,7 @@ function fmtBytes(n) {
 
 async function loadCopias() {
   const r = await api('/api/copias');
-  if (!r.ok) return alert(r.error || 'No se pudo cargar el listado');
+  if (!r.ok) return alert(r.error || I18N_COPIAS.noListado);
   document.getElementById('db-name').textContent = r.database || 'secretario';
   const tb = document.querySelector('#tabla-copias tbody');
   const vacio = document.getElementById('sin-copias');
@@ -62,9 +74,9 @@ async function loadCopias() {
       '<td>' + esc(c.fecha) + '</td>' +
       '<td>' + esc(fmtBytes(c.bytes || 0)) + '</td>' +
       '<td class="acciones">' +
-        '<a href="/api/copias/descargar?fichero=' + encodeURIComponent(c.filename) + '">Descargar</a> ' +
-        '<button type="button" class="btn-restore-server peligro" data-fichero="' + esc(c.filename) + '">Restaurar</button> ' +
-        '<button type="button" class="btn-borrar-server peligro" data-fichero="' + esc(c.filename) + '">Borrar</button>' +
+        '<a href="/api/copias/descargar?fichero=' + encodeURIComponent(c.filename) + '">' + esc(I18N_COPIAS.descargar) + '</a> ' +
+        '<button type="button" class="btn-restore-server peligro" data-fichero="' + esc(c.filename) + '">' + esc(I18N_COPIAS.restaurar) + '</button> ' +
+        '<button type="button" class="btn-borrar-server peligro" data-fichero="' + esc(c.filename) + '">' + esc(I18N_COPIAS.borrar) + '</button>' +
       '</td>';
     tb.appendChild(tr);
   });
@@ -78,7 +90,8 @@ async function loadCopias() {
 
 async function borrarServidor(fichero) {
   if (!fichero) return;
-  if (!confirm('¿Borrar «' + fichero + '» del servidor? Esta acción no se puede deshacer.')) {
+  const msg = I18N_COPIAS.confirmBorrar.replace('%s', fichero);
+  if (!confirm(msg)) {
     return;
   }
   const s = await api('/api/copias/borrar', { method: 'POST', body: { fichero } });
@@ -88,15 +101,17 @@ async function borrarServidor(fichero) {
 
 async function restaurarServidor(fichero) {
   if (!fichero) return;
-  if (!confirm('¿Restaurar «' + fichero + '»? Se sobrescribirá toda la base ' + (document.getElementById('db-name').textContent || '') + '.')) {
+  const db = document.getElementById('db-name').textContent || '';
+  const msg = I18N_COPIAS.confirmRestaurar.replace('%s', fichero).replace('%s', db);
+  if (!confirm(msg)) {
     return;
   }
-  const msg = document.getElementById('msg-restore');
-  msg.hidden = true;
+  const msgEl = document.getElementById('msg-restore');
+  msgEl.hidden = true;
   const s = await api('/api/copias/restore', { method: 'POST', body: { fichero, confirmar: true } });
   if (!s.ok) return alert(s.error);
-  msg.hidden = false;
-  msg.textContent = s.mensaje || 'Restauración completada.';
+  msgEl.hidden = false;
+  msgEl.textContent = s.mensaje || I18N_COPIAS.restauracionOk;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -110,7 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const s = await api('/api/copias/backup', { method: 'POST', body: {} });
       if (!s.ok) return alert(s.error);
       msg.hidden = false;
-      msg.textContent = 'Copia creada: ' + (s.filename || '') + ' (' + fmtBytes(s.bytes || 0) + ').';
+      msg.textContent = I18N_COPIAS.copiaCreada
+        .replace('%s', s.filename || '')
+        .replace('%s', fmtBytes(s.bytes || 0));
       await loadCopias();
     } finally {
       btn.disabled = false;
@@ -122,9 +139,9 @@ document.addEventListener('DOMContentLoaded', () => {
     msg.hidden = true;
     const input = ev.target.querySelector('[name=dump]');
     if (!input.files || !input.files[0]) {
-      return alert('Elija un fichero .sql o .dump');
+      return alert(I18N_COPIAS.elijaFichero);
     }
-    if (!confirm('¿Restaurar desde el fichero local? Se sobrescribirá toda la base.')) {
+    if (!confirm(I18N_COPIAS.confirmLocal)) {
       return;
     }
     const fd = new FormData(ev.target);
@@ -135,10 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
       headers: { 'Accept': 'application/json', 'X-CSRF-Token': csrf },
       body: fd,
     });
-    const s = await res.json().catch(() => ({ ok: false, error: 'Respuesta no JSON' }));
-    if (!s.ok) return alert(s.error || 'Error al restaurar');
+    const s = await res.json().catch(() => ({ ok: false, error: I18N_COPIAS.respuestaNoJson }));
+    if (!s.ok) return alert(s.error || I18N_COPIAS.errorRestaurar);
     msg.hidden = false;
-    msg.textContent = s.mensaje || 'Restauración completada.';
+    msg.textContent = s.mensaje || I18N_COPIAS.restauracionOk;
     ev.target.reset();
   });
 });

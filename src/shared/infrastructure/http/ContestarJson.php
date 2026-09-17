@@ -31,6 +31,6 @@ final class ContestarJson
             return trim($m[1]);
         }
 
-        return $msg !== '' ? $msg : 'Error de base de datos';
+        return $msg !== '' ? $msg : _("Error de base de datos");
     }
 }

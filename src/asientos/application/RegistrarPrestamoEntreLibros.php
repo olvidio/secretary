@@ -36,19 +36,19 @@ final class RegistrarPrestamoEntreLibros
         $libroOrigen = strtoupper(trim((string) ($datos['libro_origen'] ?? '')));
         $libroDestino = strtoupper(trim((string) ($datos['libro_destino'] ?? '')));
         if ($fisicaId <= 0) {
-            throw new InvalidArgumentException('Indique la cuenta física');
+            throw new InvalidArgumentException(_("Indique la cuenta física"));
         }
         if (!in_array($libroOrigen, ['P', 'G'], true) || !in_array($libroDestino, ['P', 'G'], true)) {
-            throw new InvalidArgumentException('Libros P o G');
+            throw new InvalidArgumentException(_("Libros P o G"));
         }
         if ($libroOrigen === $libroDestino) {
-            throw new InvalidArgumentException('Origen y destino deben ser libros distintos');
+            throw new InvalidArgumentException(_("Origen y destino deben ser libros distintos"));
         }
 
         $contexto = $this->ambito->ejecutar();
         $fisica = $this->fisicas->porId($fisicaId);
         if ($fisica === null || $fisica->centroId !== $contexto->centroId || !$fisica->activo) {
-            throw new InvalidArgumentException('Cuenta física no válida');
+            throw new InvalidArgumentException(_("Cuenta física no válida"));
         }
 
         $tesoreriaOrigen = $this->cuentas->tesoreriaDeFisica($contexto->centroId, $libroOrigen, $fisicaId);
@@ -57,17 +57,17 @@ final class RegistrarPrestamoEntreLibros
         $puenteDestino = $this->cuentas->puenteEntreLibros($contexto->centroId, $libroDestino);
         if ($tesoreriaOrigen?->id === null || $tesoreriaDestino?->id === null
             || $puenteOrigen?->id === null || $puenteDestino?->id === null) {
-            throw new InvalidArgumentException('Faltan cuentas de tesorería o puente entre libros');
+            throw new InvalidArgumentException(_("Faltan cuentas de tesorería o puente entre libros"));
         }
 
         $fecha = $this->parseFecha((string) ($datos['fecha'] ?? ''));
         if (!$this->config->get()->periodo()->contiene($fecha)) {
-            throw new InvalidArgumentException('La fecha no corresponde al ejercicio');
+            throw new InvalidArgumentException(_("La fecha no corresponde al ejercicio"));
         }
 
         $importe = Dinero::fromInput((string) ($datos['cantidad'] ?? ''));
         if ($importe->isNegative() || $importe->isZero()) {
-            throw new InvalidArgumentException('La cantidad debe ser positiva');
+            throw new InvalidArgumentException(_("La cantidad debe ser positiva"));
         }
         $cents = $importe->toCents();
         $glosa = isset($datos['glosa']) && trim((string) $datos['glosa']) !== ''
@@ -110,14 +110,14 @@ final class RegistrarPrestamoEntreLibros
         $guardadoOrigen = $this->asientos->guardar($asientoOrigen);
         $guardadoDestino = $this->asientos->guardar($asientoDestino);
         if ($guardadoOrigen->id === null || $guardadoDestino->id === null) {
-            throw new InvalidArgumentException('No se pudieron guardar los asientos del préstamo');
+            throw new InvalidArgumentException(_("No se pudieron guardar los asientos del préstamo"));
         }
         $this->asientos->enlazar($guardadoOrigen->id, $guardadoDestino->id);
 
         $origenEnlazado = $this->asientos->porId($guardadoOrigen->id);
         $destinoEnlazado = $this->asientos->porId($guardadoDestino->id);
         if ($origenEnlazado === null || $destinoEnlazado === null) {
-            throw new InvalidArgumentException('No se pudieron releer los asientos enlazados');
+            throw new InvalidArgumentException(_("No se pudieron releer los asientos enlazados"));
         }
 
         return ['origen' => $origenEnlazado, 'destino' => $destinoEnlazado];
@@ -127,14 +127,14 @@ final class RegistrarPrestamoEntreLibros
     {
         $raw = trim($raw);
         if ($raw === '') {
-            throw new InvalidArgumentException('Falta la fecha');
+            throw new InvalidArgumentException(_("Falta la fecha"));
         }
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw) === 1) {
             return new DateTimeImmutable($raw);
         }
         $dt = DateTimeImmutable::createFromFormat('!d/m/Y', $raw);
         if ($dt === false) {
-            throw new InvalidArgumentException('Formato de fecha incorrecto');
+            throw new InvalidArgumentException(_("Formato de fecha incorrecto"));
         }
 
         return $dt;

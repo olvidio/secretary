@@ -32,7 +32,7 @@ final class PreferenciaBancoPersonal
         $ctx = $this->ambito->ejecutar();
         $banco = strtolower(trim($banco));
         if (!CatalogoBancosCsv::existe($banco)) {
-            throw new InvalidArgumentException('Banco no soportado: elija uno de la lista');
+            throw new InvalidArgumentException(_("Banco no soportado: elija uno de la lista"));
         }
         $this->bancos->guardar($ctx->personaId, $banco);
 

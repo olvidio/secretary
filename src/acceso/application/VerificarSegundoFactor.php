@@ -24,10 +24,10 @@ final class VerificarSegundoFactor
         $ahora ??= new DateTimeImmutable();
         $identidad = $this->identidades->porId($identidadId);
         if ($identidad === null || $identidad->id === null || !$identidad->activo) {
-            return new ResultadoLogin('fallo', 'Código incorrecto');
+            return new ResultadoLogin('fallo', _("Código incorrecto"));
         }
         if ($identidad->estaBloqueada($ahora)) {
-            return new ResultadoLogin('fallo', 'Cuenta temporalmente bloqueada. Pruebe más tarde.');
+            return new ResultadoLogin('fallo', _("Cuenta temporalmente bloqueada. Pruebe más tarde."));
         }
         $codigo = strtoupper(trim($codigo));
         $ok = false;
@@ -54,7 +54,7 @@ final class VerificarSegundoFactor
         if (!$ok) {
             $this->identidades->registrarFallo($identidad, $ahora);
 
-            return new ResultadoLogin('fallo', 'Código incorrecto');
+            return new ResultadoLogin('fallo', _("Código incorrecto"));
         }
         $this->identidades->registrarExito($identidad, $ahora);
         $centros = [];

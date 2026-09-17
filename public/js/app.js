@@ -1,3 +1,11 @@
+function t(key) {
+  return (window.I18N && window.I18N[key]) || key;
+}
+
+function secretaryLocale() {
+  return window.SECRETARY_LOCALE || 'es-ES';
+}
+
 async function api(url, opts = {}) {
   const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   const headers = {
@@ -14,7 +22,7 @@ async function api(url, opts = {}) {
     body = JSON.stringify(body);
   }
   const res = await fetch(url, {...opts, headers, body});
-  const data = await res.json().catch(() => ({ok: false, error: 'Respuesta no JSON'}));
+  const data = await res.json().catch(() => ({ok: false, error: t('respuesta_no_json')}));
   if (typeof data.ok === 'undefined') data.ok = res.ok;
   return data;
 }
@@ -53,7 +61,7 @@ function fmtImporteEs(valor) {
     ? Number(s.replace(/\./g, '').replace(',', '.'))
     : Number(s.replace(',', '.'));
   if (!Number.isFinite(n)) return String(valor);
-  return n.toLocaleString('es-ES', {
+  return n.toLocaleString(secretaryLocale(), {
     useGrouping: true,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

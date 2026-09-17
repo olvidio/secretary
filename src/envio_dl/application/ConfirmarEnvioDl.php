@@ -30,14 +30,14 @@ final class ConfirmarEnvioDl
         $ctx = $this->ambito->ejecutar();
         $envio = $this->envios->porId($id, $ctx->centroId);
         if ($envio === null) {
-            throw new InvalidArgumentException('Propuesta no encontrada');
+            throw new InvalidArgumentException(_("Propuesta no encontrada"));
         }
         if ($envio['estado'] !== 'borrador') {
-            throw new InvalidArgumentException('Solo se puede confirmar una propuesta en borrador');
+            throw new InvalidArgumentException(_("Solo se puede confirmar una propuesta en borrador"));
         }
         $lineas = $envio['lineas'];
         if ($lineas === []) {
-            throw new InvalidArgumentException('La propuesta no tiene líneas');
+            throw new InvalidArgumentException(_("La propuesta no tiene líneas"));
         }
         $fecha = new DateTimeImmutable('today');
         $fechaStr = $fecha->format('Y-m-d');
@@ -72,7 +72,7 @@ final class ConfirmarEnvioDl
         });
         $out = $this->envios->porId($id, $ctx->centroId);
         if ($out === null) {
-            throw new InvalidArgumentException('No se pudo releer la propuesta');
+            throw new InvalidArgumentException(_("No se pudo releer la propuesta"));
         }
         $out['total_es'] = Dinero::fromCents((int) $out['importe_total_cents'])->formatEs();
 

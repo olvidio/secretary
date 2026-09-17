@@ -34,7 +34,7 @@ final class ProponerDestinoLabores
         $ctx = $this->ambito->ejecutar();
         $partidas = $this->partidas->paraCentro($ctx->centroId);
         if ($partidas === []) {
-            throw new InvalidArgumentException('No hay partidas 7 en este centro');
+            throw new InvalidArgumentException(_("No hay partidas 7 en este centro"));
         }
         $realizado = [];
         $yaPersona = [];

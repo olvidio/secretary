@@ -46,14 +46,14 @@ final class ResolverMesRemesa
         $desde = PeriodoPersonal::primerDia($anio, $mes);
         $hasta = \DateTimeImmutable::createFromFormat('!Y-m-d', $periodo['hasta']);
         if ($hasta === false) {
-            throw new InvalidArgumentException('Periodo no válido');
+            throw new InvalidArgumentException(_("Periodo no válido"));
         }
         $ejercicio = $this->ejercicios->deCentroEnFecha($ctx->centroId, $desde);
         if ($ejercicio === null) {
             $ejercicio = $this->ejercicios->deCentroEnFecha($ctx->centroId, $hasta);
         }
         if ($ejercicio === null || $ejercicio->id === null) {
-            throw new InvalidArgumentException('No hay ejercicio que cubra ese mes');
+            throw new InvalidArgumentException(_("No hay ejercicio que cubra ese mes"));
         }
         PeriodoPersonal::fechaAsiento($desde, $hasta, $ejercicio);
 

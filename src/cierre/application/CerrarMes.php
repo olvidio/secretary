@@ -87,7 +87,7 @@ final class CerrarMes
             return [
                 'creados' => 0,
                 'meses' => [],
-                'mensaje' => 'No hay meses anteriores pendientes de cierre.',
+                'mensaje' => _("No hay meses anteriores pendientes de cierre."),
             ];
         }
 
@@ -99,7 +99,7 @@ final class CerrarMes
             $filtrados = [];
             foreach ($mesesYm as $ym) {
                 if (!isset($pendientes[$ym])) {
-                    throw new InvalidArgumentException('El mes ' . $ym . ' no está pendiente de cierre.');
+                    throw new InvalidArgumentException(sprintf(_("El mes %s no está pendiente de cierre."), $ym));
                 }
                 $filtrados[$ym] = $pendientes[$ym];
             }

@@ -29,7 +29,7 @@ final class CrearEjercicio
     {
         $centroId = (int) ($datos['centro_id'] ?? 0);
         if ($centroId <= 0) {
-            throw new InvalidArgumentException('centro_id es obligatorio');
+            throw new InvalidArgumentException(_("centro_id es obligatorio"));
         }
         $fechaInicio = self::fecha($datos['fecha_inicio'] ?? null, 'fecha_inicio');
         $fechaFin = self::fecha($datos['fecha_fin'] ?? null, 'fecha_fin');
@@ -48,7 +48,7 @@ final class CrearEjercicio
         foreach ($this->repo->listarDeCentro($centroId) as $existente) {
             if ($existente->solapaCon($nuevo)) {
                 throw new InvalidArgumentException(sprintf(
-                    'El ejercicio se solapa con «%s» (%s a %s)',
+                    _("El ejercicio se solapa con «%s» (%s a %s)"),
                     $existente->etiqueta,
                     $existente->fechaInicio->format('Y-m-d'),
                     $existente->fechaFin->format('Y-m-d'),
@@ -60,18 +60,14 @@ final class CrearEjercicio
         $ejercicioAnteriorId = null;
         if ($anterior !== null) {
             if ($anterior->estado === 'abierto') {
-                throw new InvalidArgumentException(
-                    'Cierre primero el ejercicio ' . $anterior->etiqueta
-                );
+                throw new InvalidArgumentException(sprintf(_("Cierre primero el ejercicio %s"), $anterior->etiqueta));
             }
             $ejercicioAnteriorId = $anterior->id;
         }
 
         $abiertoActual = $this->repo->abiertoDe($centroId);
         if ($abiertoActual !== null) {
-            throw new InvalidArgumentException(
-                'Cierre primero el ejercicio ' . $abiertoActual->etiqueta
-            );
+            throw new InvalidArgumentException(sprintf(_("Cierre primero el ejercicio %s"), $abiertoActual->etiqueta));
         }
 
         $guardado = $this->repo->guardar(new Ejercicio(
@@ -97,11 +93,11 @@ final class CrearEjercicio
     private static function fecha(mixed $v, string $campo): DateTimeImmutable
     {
         if (!is_string($v) || $v === '') {
-            throw new InvalidArgumentException($campo . ' es obligatorio');
+            throw new InvalidArgumentException(sprintf(_("%s es obligatorio"), $campo));
         }
         $f = DateTimeImmutable::createFromFormat('Y-m-d', $v);
         if ($f === false) {
-            throw new InvalidArgumentException($campo . ' debe tener formato AAAA-MM-DD');
+            throw new InvalidArgumentException(sprintf(_("%s debe tener formato AAAA-MM-DD"), $campo));
         }
 
         return $f->setTime(0, 0);

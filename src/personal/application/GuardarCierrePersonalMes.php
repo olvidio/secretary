@@ -27,11 +27,11 @@ final class GuardarCierrePersonalMes
         PeriodoPersonal::validar($anio, $mes);
         $fechaRaw = trim((string) ($datos['fecha_cierre'] ?? ''));
         if ($fechaRaw === '') {
-            throw new InvalidArgumentException('Indique la fecha de cierre');
+            throw new InvalidArgumentException(_("Indique la fecha de cierre"));
         }
         $fecha = DateTimeImmutable::createFromFormat('!Y-m-d', $fechaRaw);
         if ($fecha === false) {
-            throw new InvalidArgumentException('Fecha de cierre no válida');
+            throw new InvalidArgumentException(_("Fecha de cierre no válida"));
         }
         PeriodoPersonal::periodo($anio, $mes, null, false, $fecha);
         $this->cierres->guardarMes($ctx->personaId, $anio, $mes, $fecha);

@@ -1,17 +1,17 @@
-<h1>Persona activa</h1>
-<p class="muted">Centro y nombre con los que trabaja en el libro personal. Solo aparecen sus vínculos aprobados.</p>
+<h1><?= _("Persona activa") ?></h1>
+<p class="muted"><?= _("Centro y nombre con los que trabaja en el libro personal. Solo aparecen sus vínculos aprobados.") ?></p>
 <form id="form-persona" class="grid-form">
-    <label>Persona
+    <label><?= _("Persona") ?>
         <select name="persona_id" required></select>
     </label>
-    <button type="submit">Guardar</button>
-    <p class="ok" id="msg" hidden>Guardado</p>
-    <p class="muted" id="sin-personas" hidden>Esta cuenta no tiene ningún vínculo de persona.</p>
+    <button type="submit"><?= _("Guardar") ?></button>
+    <p class="ok" id="msg" hidden><?= _("Guardado") ?></p>
+    <p class="muted" id="sin-personas" hidden><?= _("Esta cuenta no tiene ningún vínculo de persona.") ?></p>
 </form>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
   const r = await api('/api/preferencias');
-  if (!r.ok) return alert(r.error || 'Error');
+  if (!r.ok) return alert(r.error || <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>);
   const sel = document.querySelector('#form-persona [name="persona_id"]');
   const personas = r.personas || [];
   const btn = document.querySelector('#form-persona button');

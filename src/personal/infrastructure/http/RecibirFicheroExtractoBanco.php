@@ -20,39 +20,41 @@ final class RecibirFicheroExtractoBanco
     {
         $banco = strtolower(trim($banco));
         if (!CatalogoBancosCsv::existe($banco)) {
-            throw new InvalidArgumentException('Banco no soportado: elija uno de la lista');
+            throw new InvalidArgumentException(_("Banco no soportado: elija uno de la lista"));
         }
         $info = $request->file($campo);
         if ($info === null) {
-            throw new InvalidArgumentException('Falta el fichero del extracto');
+            throw new InvalidArgumentException(_("Falta el fichero del extracto"));
         }
         $error = (int) ($info['error'] ?? UPLOAD_ERR_NO_FILE);
         if ($error === UPLOAD_ERR_INI_SIZE || $error === UPLOAD_ERR_FORM_SIZE) {
-            throw new InvalidArgumentException('El fichero supera el tamaño máximo (2 MB)');
+            throw new InvalidArgumentException(_("El fichero supera el tamaño máximo (2 MB)"));
         }
         if ($error !== UPLOAD_ERR_OK) {
-            throw new InvalidArgumentException('No se pudo recibir el fichero');
+            throw new InvalidArgumentException(_("No se pudo recibir el fichero"));
         }
         $nombre = (string) ($info['name'] ?? '');
         $ext = strtolower(pathinfo($nombre, PATHINFO_EXTENSION));
         $permitidas = self::extensiones($banco);
         if (!in_array($ext, $permitidas, true)) {
-            throw new InvalidArgumentException(
-                'Para ' . self::nombreBanco($banco) . ' use ' . implode(', ', $permitidas)
-            );
+            throw new InvalidArgumentException(sprintf(
+                _("Para %s use %s"),
+                self::nombreBanco($banco),
+                implode(', ', $permitidas),
+            ));
         }
         $size = (int) ($info['size'] ?? 0);
         if ($size <= 0 || $size > self::MAX_BYTES) {
-            throw new InvalidArgumentException('El fichero está vacío o supera 2 MB');
+            throw new InvalidArgumentException(_("El fichero está vacío o supera 2 MB"));
         }
         $tmp = (string) ($info['tmp_name'] ?? '');
         if ($tmp === '' || !is_readable($tmp)) {
-            throw new InvalidArgumentException('No se pudo leer el fichero subido');
+            throw new InvalidArgumentException(_("No se pudo leer el fichero subido"));
         }
         if ($ext === 'csv') {
             $raw = file_get_contents($tmp);
             if ($raw === false) {
-                throw new RuntimeException('No se pudo leer el CSV');
+                throw new RuntimeException(_("No se pudo leer el CSV"));
             }
 
             return ['csv' => $raw, 'temporal' => null];
@@ -101,21 +103,21 @@ final class RecibirFicheroExtractoBanco
     {
         $destino = tempnam(sys_get_temp_dir(), 'secbanco_');
         if ($destino === false) {
-            throw new RuntimeException('No se pudo crear un temporal para el extracto');
+            throw new RuntimeException(_("No se pudo crear un temporal para el extracto"));
         }
         $conExt = $destino . '.' . $ext;
         if (!rename($destino, $conExt)) {
             unlink($destino);
-            throw new RuntimeException('No se pudo preparar el extracto');
+            throw new RuntimeException(_("No se pudo preparar el extracto"));
         }
         if (is_uploaded_file($origen)) {
             if (!move_uploaded_file($origen, $conExt)) {
                 unlink($conExt);
-                throw new RuntimeException('No se pudo guardar el extracto');
+                throw new RuntimeException(_("No se pudo guardar el extracto"));
             }
         } elseif (!copy($origen, $conExt)) {
             unlink($conExt);
-            throw new RuntimeException('No se pudo copiar el extracto');
+            throw new RuntimeException(_("No se pudo copiar el extracto"));
         }
 
         return $conExt;

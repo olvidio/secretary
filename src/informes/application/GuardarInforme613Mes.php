@@ -23,12 +23,12 @@ final class GuardarInforme613Mes
     {
         $cuenta = strtoupper(trim($cuenta));
         if (!in_array($cuenta, ['P', 'G'], true)) {
-            throw new InvalidArgumentException('Cuenta: P o G');
+            throw new InvalidArgumentException(_("Cuenta: P o G"));
         }
 
         $fechaRaw = trim((string) ($datos['fecha_cierre'] ?? ''));
         if ($fechaRaw === '') {
-            throw new InvalidArgumentException('Falta fecha_cierre');
+            throw new InvalidArgumentException(_("Falta fecha_cierre"));
         }
         $fechaCierre = $this->fecha($fechaRaw);
 
@@ -80,7 +80,7 @@ final class GuardarInforme613Mes
         }
         $dt = DateTimeImmutable::createFromFormat('!d/m/Y', $raw);
         if ($dt === false) {
-            throw new InvalidArgumentException('Fecha de cierre inválida');
+            throw new InvalidArgumentException(_("Fecha de cierre inválida"));
         }
 
         return $dt;

@@ -45,7 +45,7 @@ final class CopiaSeguridadController
     {
         $nombre = trim((string) ($request->query('fichero') ?? ''));
         if ($nombre === '') {
-            return ContestarJson::error('Indique el fichero a descargar', 400);
+            return ContestarJson::error(_("Indique el fichero a descargar"), 400);
         }
         try {
             $ruta = $this->almacen->rutaDeNombre($nombre);
@@ -83,7 +83,7 @@ final class CopiaSeguridadController
 
         return ContestarJson::ok([
             'database' => $this->almacen->database(),
-            'mensaje' => 'Restauración completada. Compruebe el esquema con db:status si procede.',
+            'mensaje' => _("Restauración completada. Compruebe el esquema con db:status si procede."),
         ]);
     }
 
@@ -97,6 +97,6 @@ final class CopiaSeguridadController
             return ContestarJson::error($e->getMessage());
         }
 
-        return ContestarJson::ok(['mensaje' => 'Copia borrada del servidor.']);
+        return ContestarJson::ok(['mensaje' => _("Copia borrada del servidor.")]);
     }
 }

@@ -94,11 +94,11 @@ final class ArqueoController
     {
         $fisicaId = (int) ($vars['id'] ?? 0);
         if ($fisicaId <= 0) {
-            return ContestarJson::error('Identificador de cuenta física no válido');
+            return ContestarJson::error(_("Identificador de cuenta física no válido"));
         }
         $fisica = $this->fisicas->porId($fisicaId);
         if ($fisica === null) {
-            return ContestarJson::error('Cuenta física no encontrada');
+            return ContestarJson::error(_("Cuenta física no encontrada"));
         }
         $arqueo = $this->repo->ultimoPorFisica($fisicaId);
         $desglose = $this->saldosFisica($fisicaId);
@@ -115,7 +115,7 @@ final class ArqueoController
         $fisicaId = (int) ($vars['id'] ?? 0);
         $fisica = $this->fisicas->porId($fisicaId);
         if ($fisica === null) {
-            return ContestarJson::error('Cuenta física no encontrada');
+            return ContestarJson::error(_("Cuenta física no encontrada"));
         }
         $body = $request->json();
         $fecha = (string) ($body['fecha'] ?? date('Y-m-d'));

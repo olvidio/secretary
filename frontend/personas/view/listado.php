@@ -1,30 +1,30 @@
-<h1>Nombres</h1>
-<p class="muted">El correo convierte a esa persona en usuario del libro personal de <em>este</em> centro. Si el correo es nuevo, se muestra una contraseña inicial para comunicársela una vez. «Vivienda aporta a generales» indica si entra en el cierre automático de P/21 (típico de n); quien no aporta puede igualmente imputar gastos de casa a generales desde su libro personal. P/212 (vivienda personal) es un gasto propio, como ordinarios. La exención de meses es para quien llega o se va a mitad de año (no se le pide movimiento ni entra en el cierre esos meses).</p>
+<h1><?= _("Nombres") ?></h1>
+<p class="muted"><?= _("El correo convierte a esa persona en usuario del libro personal de este centro. Si el correo es nuevo, se muestra una contraseña inicial para comunicársela una vez. «Vivienda aporta a generales» indica si entra en el cierre automático de P/21 (típico de n); quien no aporta puede igualmente imputar gastos de casa a generales desde su libro personal. P/212 (vivienda personal) es un gasto propio, como ordinarios. La exención de meses es para quien llega o se va a mitad de año (no se le pide movimiento ni entra en el cierre esos meses).") ?></p>
 <form id="form-persona" class="grid-form">
     <input type="hidden" name="id">
-    <label>Nombre <input name="nombre" required></label>
-    <label>Apellidos <input name="apellidos"></label>
-    <label>Iniciales <input name="iniciales" required maxlength="6"></label>
-    <label>Correo <input name="email" type="email" autocomplete="off"></label>
-    <label>No paga desde mes <input name="mes_exento_inicio" type="number" min="1" max="12"></label>
-    <label>No paga hasta mes <input name="mes_exento_fin" type="number" min="1" max="12"></label>
-    <label>Otro intervalo desde <input name="mes_exento2_inicio" type="number" min="1" max="12"></label>
-    <label>Otro intervalo hasta <input name="mes_exento2_fin" type="number" min="1" max="12"></label>
-    <label>Importe fijo vivienda <input name="importe_vivienda_fijo"></label>
-    <label>Vivienda aporta a generales
+    <label><?= _("Nombre") ?> <input name="nombre" required></label>
+    <label><?= _("Apellidos") ?> <input name="apellidos"></label>
+    <label><?= _("Iniciales") ?> <input name="iniciales" required maxlength="6"></label>
+    <label><?= _("Correo") ?> <input name="email" type="email" autocomplete="off"></label>
+    <label><?= _("No paga desde mes") ?> <input name="mes_exento_inicio" type="number" min="1" max="12"></label>
+    <label><?= _("No paga hasta mes") ?> <input name="mes_exento_fin" type="number" min="1" max="12"></label>
+    <label><?= _("Otro intervalo desde") ?> <input name="mes_exento2_inicio" type="number" min="1" max="12"></label>
+    <label><?= _("Otro intervalo hasta") ?> <input name="mes_exento2_fin" type="number" min="1" max="12"></label>
+    <label><?= _("Importe fijo vivienda") ?> <input name="importe_vivienda_fijo"></label>
+    <label><?= _("Vivienda aporta a generales") ?>
         <select name="vivienda_aporta_generales">
-            <option value="1">Sí — P/21 tiene entrada G/11</option>
-            <option value="0">No — vivienda solo personal</option>
+            <option value="1"><?= _("Sí — P/21 tiene entrada G/11") ?></option>
+            <option value="0"><?= _("No — vivienda solo personal") ?></option>
         </select>
     </label>
-    <label>Puede desgravar donativos
+    <label><?= _("Puede desgravar donativos") ?>
         <select name="puede_desgravar">
-            <option value="1">Sí</option>
-            <option value="0">No — las 7 van a partidas que no desgravan</option>
+            <option value="1"><?= _("Sí") ?></option>
+            <option value="0"><?= _("No — las 7 van a partidas que no desgravan") ?></option>
         </select>
     </label>
-    <button type="submit">Guardar</button>
-    <button type="button" id="btn-nuevo">Nuevo</button>
+    <button type="submit"><?= _("Guardar") ?></button>
+    <button type="button" id="btn-nuevo"><?= _("Nuevo") ?></button>
 </form>
 <p class="ok" id="msg-password" hidden></p>
 <p class="ok" id="msg-personas" hidden></p>
@@ -32,13 +32,22 @@
 <table id="tabla-personas">
     <thead>
     <tr>
-        <th>#</th><th>Centro</th><th>Nombre</th><th>Apellidos</th><th>Iniciales</th><th>Correo</th>
-        <th>Exención</th><th>Vivienda fija</th><th>Aporta a G</th><th>Desgrava</th><th></th>
+        <th>#</th><th><?= _("Centro") ?></th><th><?= _("Nombre") ?></th><th><?= _("Apellidos") ?></th><th><?= _("Iniciales") ?></th><th><?= _("Correo") ?></th>
+        <th><?= _("Exención") ?></th><th><?= _("Vivienda fija") ?></th><th><?= _("Aporta a G") ?></th><th><?= _("Desgrava") ?></th><th></th>
     </tr>
     </thead>
     <tbody></tbody>
 </table>
 <script>
+const I18N_PERSONAS = {
+  si: <?= json_encode(_("sí"), JSON_UNESCAPED_UNICODE) ?>,
+  no: <?= json_encode(_("no"), JSON_UNESCAPED_UNICODE) ?>,
+  editar: <?= json_encode(_("Editar"), JSON_UNESCAPED_UNICODE) ?>,
+  borrar: <?= json_encode(_("Borrar"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmQuitar: <?= json_encode(_("¿Quitar %s del listado?"), JSON_UNESCAPED_UNICODE) ?>,
+  error: <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>,
+  passwordInicial: <?= json_encode(_("Contraseña inicial de %s: %s — comunícasela ahora; no se volverá a mostrar."), JSON_UNESCAPED_UNICODE) ?>,
+};
 async function loadPersonas() {
   const r = await api('/api/personas');
   const tb = document.querySelector('#tabla-personas tbody');
@@ -49,9 +58,9 @@ async function loadPersonas() {
       <td>${esc(p.iniciales)}</td><td>${esc(p.email)}</td>
       <td>${p.mes_exento_inicio || ''}–${p.mes_exento_fin || ''} ${p.mes_exento2_inicio || ''}–${p.mes_exento2_fin || ''}</td>
       <td>${p.importe_vivienda_fijo || ''}</td>
-      <td>${p.vivienda_aporta_generales ? 'sí' : 'no'}</td>
-      <td>${p.puede_desgravar ? 'sí' : 'no'}</td>
-      <td><button data-id="${p.id}">Editar</button> <button data-del="${p.id}">Borrar</button></td>`;
+      <td>${p.vivienda_aporta_generales ? esc(I18N_PERSONAS.si) : esc(I18N_PERSONAS.no)}</td>
+      <td>${p.puede_desgravar ? esc(I18N_PERSONAS.si) : esc(I18N_PERSONAS.no)}</td>
+      <td><button data-id="${p.id}">${esc(I18N_PERSONAS.editar)}</button> <button data-del="${p.id}">${esc(I18N_PERSONAS.borrar)}</button></td>`;
     tr.querySelector('[data-id]').onclick = () => {
       const form = document.getElementById('form-persona');
       fillForm(form, p);
@@ -59,9 +68,9 @@ async function loadPersonas() {
       form.querySelector('[name=puede_desgravar]').value = p.puede_desgravar ? '1' : '0';
     };
     tr.querySelector('[data-del]').onclick = async () => {
-      if (!confirm('¿Quitar ' + p.iniciales + ' del listado?')) return;
+      if (!confirm(I18N_PERSONAS.confirmQuitar.replace('%s', p.iniciales))) return;
       const s = await api('/api/personas/' + p.id, {method:'DELETE'});
-      if (!s.ok) return alert(s.error || 'Error');
+      if (!s.ok) return alert(s.error || I18N_PERSONAS.error);
       const msg = document.getElementById('msg-personas');
       if (s.mensaje) {
         msg.hidden = false;
@@ -96,7 +105,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const msg = document.getElementById('msg-password');
     if (s.password_inicial) {
       msg.hidden = false;
-      msg.textContent = 'Contraseña inicial de ' + (s.persona.email || '') + ': ' + s.password_inicial + ' — comunícasela ahora; no se volverá a mostrar.';
+      msg.textContent = I18N_PERSONAS.passwordInicial
+        .replace('%s', s.persona.email || '')
+        .replace('%s', s.password_inicial);
     } else {
       msg.hidden = true;
     }

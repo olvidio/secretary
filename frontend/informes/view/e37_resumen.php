@@ -1,11 +1,11 @@
-<h1>Resumen cuentas personales</h1>
-<p class="print-hide"><button type="button" onclick="window.print()">Imprimir</button></p>
+<h1><?= _("Resumen cuentas personales") ?></h1>
+<p class="print-hide"><button type="button" onclick="window.print()"><?= _("Imprimir") ?></button></p>
 <table id="tabla-res">
     <thead>
     <tr>
-        <th>Persona</th><th class="num">Ingresos</th><th class="num">Gastos</th>
-        <th class="num">Disponible</th><th class="num">Ay. fam.</th>
-        <th class="num">Lab. ap.</th><th class="num">Saldo F.</th><th class="num">Saldo c/c</th>
+        <th><?= _("Persona") ?></th><th class="num"><?= _("Ingresos") ?></th><th class="num"><?= _("Gastos") ?></th>
+        <th class="num"><?= _("Disponible") ?></th><th class="num"><?= _("Ay. fam.") ?></th>
+        <th class="num"><?= _("Lab. ap.") ?></th><th class="num"><?= _("Saldo F.") ?></th><th class="num"><?= _("Saldo c/c") ?></th>
     </tr>
     </thead>
     <tbody></tbody>

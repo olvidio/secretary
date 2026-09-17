@@ -22,11 +22,11 @@ final class GuardarConfiguracion
         $anio = (int) ($datos['anio'] ?? $actual->anio);
         $modo = (string) ($datos['modo_ejercicio'] ?? $actual->modoEjercicio);
         if (!in_array($modo, ['Año', 'Curso'], true)) {
-            throw new InvalidArgumentException('Modo: Año o Curso');
+            throw new InvalidArgumentException(_("Modo: Año o Curso"));
         }
         $tipo = (string) ($datos['tipo_cierre'] ?? $actual->tipoCierre);
         if (!in_array($tipo, ['vivienda', 'necesidades'], true)) {
-            throw new InvalidArgumentException('Tipo de cierre: vivienda o necesidades');
+            throw new InvalidArgumentException(_("Tipo de cierre: vivienda o necesidades"));
         }
         $ini = $this->fecha((string) ($datos['fecha_inicio'] ?? $actual->fechaInicio->format('Y-m-d')));
         $cie = $this->fecha((string) ($datos['fecha_cierre'] ?? $actual->fechaCierre->format('Y-m-d')));
@@ -53,7 +53,7 @@ final class GuardarConfiguracion
         }
         $dt = DateTimeImmutable::createFromFormat('!d/m/Y', $raw);
         if ($dt === false) {
-            throw new InvalidArgumentException('Fecha inválida');
+            throw new InvalidArgumentException(_("Fecha inválida"));
         }
 
         return $dt;

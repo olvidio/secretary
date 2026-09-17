@@ -21,12 +21,12 @@ final class BorrarCopiaPersonal
     {
         $nombre = trim((string) ($datos['fichero'] ?? ''));
         if ($nombre === '') {
-            throw new InvalidArgumentException('Indique el fichero a borrar');
+            throw new InvalidArgumentException(_("Indique el fichero a borrar"));
         }
         $ctx = $this->ambito->ejecutar();
         $persona = $this->personas->porId($ctx->personaId);
         if ($persona === null) {
-            throw new InvalidArgumentException('Persona no encontrada');
+            throw new InvalidArgumentException(_("Persona no encontrada"));
         }
         $almacen = new AlmacenCopiasPersonal(
             RutasCopiasPersonal::directorio(),

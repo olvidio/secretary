@@ -1,21 +1,21 @@
 <?php $cuenta = $cuentaEntrada ?? 'P'; ?>
-<h1>Entrada apuntes <?= htmlspecialchars($cuenta, ENT_QUOTES) ?></h1>
-<p class="muted">Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.<?php if ($cuenta === 'G'): ?> Un gasto de G con iniciales anota también P/111, P/21 y G/11.<?php endif; ?></p>
+<h1><?= sprintf(_("Entrada apuntes %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
+<p class="muted"><?php if ($cuenta === 'G'): ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber. Un gasto de G con iniciales anota también P/111, P/21 y G/11.") ?><?php else: ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.") ?><?php endif; ?></p>
 
 <div id="entrada-apuntes">
     <div class="entrada-cabecera">
-        <label>Iniciales
+        <label><?= _("Iniciales") ?>
             <select id="hdr-iniciales"><option value=""></option></select>
         </label>
         <label>A/B/C
             <select id="hdr-origen" required>
-                <option value="A">Apunte</option>
-                <option value="B">Banco</option>
-                <option value="C">Caja</option>
+                <option value="A"><?= _("Apunte") ?></option>
+                <option value="B"><?= _("Banco") ?></option>
+                <option value="C"><?= _("Caja") ?></option>
             </select>
         </label>
-        <label>Fecha <input id="hdr-fecha" type="date" required></label>
-        <label id="wrap-fisica" hidden>Cuenta de tesorería
+        <label><?= _("Fecha") ?> <input id="hdr-fecha" type="date" required></label>
+        <label id="wrap-fisica" hidden><?= _("Cuenta de tesorería") ?>
             <select id="hdr-fisica" disabled></select>
         </label>
     </div>
@@ -23,10 +23,10 @@
     <table class="entrada-lineas">
         <thead>
             <tr>
-                <th class="col-obs">Observaciones</th>
-                <th class="col-concepto">Concepto</th>
-                <th class="col-fimp">F. imputación</th>
-                <th class="col-cant">Cantidad</th>
+                <th class="col-obs"><?= _("Observaciones") ?></th>
+                <th class="col-concepto"><?= _("Concepto") ?></th>
+                <th class="col-fimp"><?= _("F. imputación") ?></th>
+                <th class="col-cant"><?= _("Cantidad") ?></th>
                 <th class="col-acc"></th>
             </tr>
         </thead>
@@ -40,13 +40,13 @@
                     <select id="sel-concepto" required></select>
                 </td>
                 <td class="col-fimp">
-                    <input id="inp-fimp" type="date" tabindex="-1" title="Vacío = la misma fecha de cabecera.">
+                    <input id="inp-fimp" type="date" tabindex="-1" title="<?= htmlspecialchars(_("Vacío = la misma fecha de cabecera."), ENT_QUOTES) ?>">
                 </td>
                 <td class="col-cant">
                     <input id="inp-cant" required inputmode="decimal">
                 </td>
                 <td class="col-acc">
-                    <button type="button" id="btn-anadir">Añadir</button>
+                    <button type="button" id="btn-anadir"><?= _("Añadir") ?></button>
                 </td>
             </tr>
         </tbody>
@@ -58,18 +58,38 @@
         </div>
         <span id="pie-gastos"></span>
         <span id="pie-saldo"></span>
-        <button type="button" id="btn-cuadrar" hidden>Cuadrar (111)</button>
+        <button type="button" id="btn-cuadrar" hidden><?= _("Cuadrar (111)") ?></button>
     </div>
     <p id="plantilla-preview" class="muted plantilla-preview" hidden></p>
-    <p class="muted entrada-hint">F. imputación vacía = la misma fecha de cabecera. Si difiere, el gasto/ingreso se imputa en ese día y la contrapartida (caja, banco o personal) en la fecha de cabecera; el tabulador la salta (de concepto a cantidad).
-        Las <a href="/plantillas-<?= strtolower($cuenta) ?>">plantillas</a> recurrentes aparecen en el desplegable de concepto.<?php if ($cuenta === 'G'): ?> Gasto con iniciales: P/111 → P/21 → G/11 → el gasto.<?php endif; ?></p>
+    <p class="muted entrada-hint"><?= _("F. imputación vacía = la misma fecha de cabecera. Si difiere, el gasto/ingreso se imputa en ese día y la contrapartida (caja, banco o personal) en la fecha de cabecera; el tabulador la salta (de concepto a cantidad).") ?>
+        <?= _("Las") ?> <a href="/plantillas-<?= strtolower($cuenta) ?>"><?= _("plantillas") ?></a> <?= _("recurrentes aparecen en el desplegable de concepto.") ?><?php if ($cuenta === 'G'): ?> <?= _("Gasto con iniciales: P/111 → P/21 → G/11 → el gasto.") ?><?php endif; ?></p>
 </div>
 
-<p id="msg" class="ok" hidden>Apunte guardado</p>
+<p id="msg" class="ok" hidden><?= _("Apunte guardado") ?></p>
 <p id="err" class="error" hidden></p>
 
 <script>
 const CUENTA = <?= json_encode($cuenta) ?>;
+const I18N_ENTRADA = {
+  plantillas: <?= json_encode(_("Plantillas"), JSON_UNESCAPED_UNICODE) ?>,
+  conceptos: <?= json_encode(_("Conceptos"), JSON_UNESCAPED_UNICODE) ?>,
+  anadir: <?= json_encode(_("Añadir"), JSON_UNESCAPED_UNICODE) ?>,
+  anadirPlantilla: <?= json_encode(_("Añadir plantilla"), JSON_UNESCAPED_UNICODE) ?>,
+  apunteGuardado: <?= json_encode(_("Apunte guardado"), JSON_UNESCAPED_UNICODE) ?>,
+  apuntesGuardados: <?= json_encode(_("%s apuntes guardados"), JSON_UNESCAPED_UNICODE) ?>,
+  indiqueCantidad: <?= json_encode(_("Indique la cantidad en la cabecera de la fila"), JSON_UNESCAPED_UNICODE) ?>,
+  noCuadre: <?= json_encode(_("No se pudo comprobar el cuadre"), JSON_UNESCAPED_UNICODE) ?>,
+  noSugerencia: <?= json_encode(_("No hay sugerencia de cuadre disponible"), JSON_UNESCAPED_UNICODE) ?>,
+  conIniciales: <?= json_encode(_("Con iniciales: "), JSON_UNESCAPED_UNICODE) ?>,
+  enPantalla: <?= json_encode(_("En pantalla: "), JSON_UNESCAPED_UNICODE) ?>,
+  saldoPantalla: <?= json_encode(_("Saldo pantalla: "), JSON_UNESCAPED_UNICODE) ?>,
+  cuadrar: <?= json_encode(_("Cuadrar (111 · %s)"), JSON_UNESCAPED_UNICODE) ?>,
+  cuadreOk: <?= json_encode(_("Apuntes A de %s cuadrados (saldo 0)."), JSON_UNESCAPED_UNICODE) ?>,
+  cuadreMal: <?= json_encode(_("Los apuntes A de %s no cuadran: saldo %s (gastos − ingresos)."), JSON_UNESCAPED_UNICODE) ?>,
+  cuadreAntesFecha: <?= json_encode(_(" Antes del %s cuadraba; el desajuste viene probablemente de los apuntes de esa fecha."), JSON_UNESCAPED_UNICODE) ?>,
+  sugSoloGastos: <?= json_encode(_("Sugerencia: añadir ingreso 111 (Trabajo) por %s."), JSON_UNESCAPED_UNICODE) ?>,
+  sugEquilibrar: <?= json_encode(_("Sugerencia: añadir ingreso 111 (Trabajo) por %s para equilibrar los apuntes A."), JSON_UNESCAPED_UNICODE) ?>,
+};
 document.addEventListener('DOMContentLoaded', async () => {
   const cfg = await api('/api/configuracion');
   const hoy = new Date().toISOString().slice(0, 10);
@@ -105,9 +125,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     selC.innerHTML = '';
     selC.appendChild(Object.assign(document.createElement('option'), { value: '' }));
     optgroupPlantillas = document.createElement('optgroup');
-    optgroupPlantillas.label = 'Plantillas';
+    optgroupPlantillas.label = I18N_ENTRADA.plantillas;
     const ogConceptos = document.createElement('optgroup');
-    ogConceptos.label = 'Conceptos';
+    ogConceptos.label = I18N_ENTRADA.conceptos;
     selC.appendChild(optgroupPlantillas);
     selC.appendChild(ogConceptos);
     (cons.conceptos || []).forEach(c => {
@@ -279,7 +299,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function limpiarPlantillaActiva() {
     plantillaActiva = null;
     document.getElementById('plantilla-preview').hidden = true;
-    btnAnadir.textContent = 'Añadir';
+    btnAnadir.textContent = I18N_ENTRADA.anadir;
   }
 
   function resumenPlantilla(p) {
@@ -318,12 +338,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const lineas = lineasContrapartidas();
     if (!lineas) {
       prev.hidden = true;
-      btnAnadir.textContent = 'Añadir';
+      btnAnadir.textContent = I18N_ENTRADA.anadir;
       return;
     }
-    prev.textContent = 'Con iniciales: ' + resumenPlantilla({ lineas: lineas });
+    prev.textContent = I18N_ENTRADA.conIniciales + resumenPlantilla({ lineas: lineas });
     prev.hidden = false;
-    btnAnadir.textContent = 'Añadir (' + lineas.length + ')';
+    btnAnadir.textContent = I18N_ENTRADA.anadir + ' (' + lineas.length + ')';
   }
 
   function aplicarPlantilla(p) {
@@ -336,7 +356,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const prev = document.getElementById('plantilla-preview');
     prev.textContent = p.nombre + ': ' + resumenPlantilla(p);
     prev.hidden = false;
-    btnAnadir.textContent = 'Añadir plantilla (' + (p.lineas || []).length + ')';
+    btnAnadir.textContent = I18N_ENTRADA.anadirPlantilla + ' (' + (p.lineas || []).length + ')';
     inpObs.focus();
   }
 
@@ -361,7 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function fmtEuro(n) {
-    return n.toLocaleString('es-ES', {
+    return n.toLocaleString(secretaryLocale(), {
       useGrouping: true,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -387,13 +407,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   function textoCuadre(c) {
     const ini = esc(c.iniciales || selI.value);
     if (c.cuadrado) {
-      return 'Apuntes A de ' + ini + ' cuadrados (saldo 0).';
+      return I18N_ENTRADA.cuadreOk.replace('%s', ini);
     }
-    let msg = 'Los apuntes A de ' + ini + ' no cuadran: saldo ' + esc(c.saldo_total_es)
-      + ' (gastos − ingresos).';
+    let msg = I18N_ENTRADA.cuadreMal.replace('%s', ini).replace('%s', esc(c.saldo_total_es));
     if (c.cuadrado_antes_fecha && c.solo_gastos_fecha && c.sugerencia) {
-      msg += ' Antes del ' + fmtFecha(c.fecha) + ' cuadraba; el desajuste viene probablemente'
-        + ' de los apuntes de esa fecha.';
+      msg += I18N_ENTRADA.cuadreAntesFecha.replace('%s', fmtFecha(c.fecha));
     }
     return msg;
   }
@@ -402,10 +420,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!c.sugerencia) return '';
     const s = c.sugerencia;
     if (s.motivo === 'solo_gastos_fecha') {
-      return 'Sugerencia: añadir ingreso 111 (Trabajo) por ' + esc(s.cantidad_es) + '.';
+      return I18N_ENTRADA.sugSoloGastos.replace('%s', esc(s.cantidad_es));
     }
-    return 'Sugerencia: añadir ingreso 111 (Trabajo) por ' + esc(s.cantidad_es)
-      + ' para equilibrar los apuntes A.';
+    return I18N_ENTRADA.sugEquilibrar.replace('%s', esc(s.cantidad_es));
   }
 
   async function actualizarCuadre() {
@@ -416,9 +433,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!esA) return;
 
     const { gastos, saldo } = calcularTotales();
-    document.getElementById('pie-gastos').textContent = gastos > 0 ? 'En pantalla: ' + fmtEuro(gastos) : '';
+    document.getElementById('pie-gastos').textContent = gastos > 0 ? I18N_ENTRADA.enPantalla + fmtEuro(gastos) : '';
     document.getElementById('pie-saldo').textContent = filasPantalla.length
-      ? 'Saldo pantalla: ' + fmtEuro(saldo) : '';
+      ? I18N_ENTRADA.saldoPantalla + fmtEuro(saldo) : '';
 
     const ini = selI.value;
     const fecha = document.getElementById('hdr-fecha').value;
@@ -435,7 +452,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       cuadreActual = null;
       alerta.hidden = false;
       alerta.classList.remove('cuadre-ok', 'cuadre-mal');
-      document.getElementById('cuadre-msg').textContent = r.error || 'No se pudo comprobar el cuadre';
+      document.getElementById('cuadre-msg').textContent = r.error || I18N_ENTRADA.noCuadre;
       document.getElementById('cuadre-sug').hidden = true;
       document.getElementById('btn-cuadrar').hidden = true;
       return;
@@ -460,7 +477,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.hidden = !cuadreActual.sugerencia;
     btn.disabled = !cuadreActual.sugerencia;
     if (cuadreActual.sugerencia) {
-      btn.textContent = 'Cuadrar (111 · ' + cuadreActual.sugerencia.cantidad_es + ')';
+      btn.textContent = I18N_ENTRADA.cuadrar.replace('%s', cuadreActual.sugerencia.cantidad_es);
     }
   }
 
@@ -509,7 +526,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const cantidad = inpCant.value.trim();
       if (!cantidad) {
         document.getElementById('err').hidden = false;
-        document.getElementById('err').textContent = 'Indique la cantidad en la cabecera de la fila';
+        document.getElementById('err').textContent = I18N_ENTRADA.indiqueCantidad;
         inpCant.focus();
         return;
       }
@@ -543,7 +560,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('msg').hidden = false;
     const creados = s.apuntes || [];
     document.getElementById('msg').textContent = creados.length > 1
-      ? creados.length + ' apuntes guardados' : 'Apunte guardado';
+      ? I18N_ENTRADA.apuntesGuardados.replace('%s', creados.length) : I18N_ENTRADA.apunteGuardado;
     creados.forEach(apunte => {
       appendFilaGuardada({
         observaciones: apunte.observaciones || datos.observaciones,
@@ -569,7 +586,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sug = cuadreActual?.sugerencia;
     if (!sug) {
       document.getElementById('err').hidden = false;
-      document.getElementById('err').textContent = 'No hay sugerencia de cuadre disponible';
+      document.getElementById('err').textContent = I18N_ENTRADA.noSugerencia;
       return;
     }
     const datos = {

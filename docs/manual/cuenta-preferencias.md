@@ -24,7 +24,7 @@ Elige la disposición de los menús del centro: la cinta «tipo excel», con los
 
 ### Idioma
 
-Guarda la preferencia entre español y catalán. De momento el programa se sigue viendo en español: queda anotada para cuando haya traducciones.
+Guarda la preferencia entre español y catalán. Al guardar, la pantalla se recarga con el idioma elegido.
 
 ### Centro
 

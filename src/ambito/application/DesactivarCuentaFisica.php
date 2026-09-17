@@ -23,18 +23,16 @@ final class DesactivarCuentaFisica
         $contexto = $this->ambito->ejecutar();
         $fisica = $this->fisicas->porId($cuentaFisicaId);
         if ($fisica === null || $fisica->centroId !== $contexto->centroId) {
-            throw new InvalidArgumentException('Cuenta física no encontrada');
+            throw new InvalidArgumentException(_("Cuenta física no encontrada"));
         }
         if (!$fisica->activo) {
-            throw new InvalidArgumentException('La cuenta física ya está desactivada');
+            throw new InvalidArgumentException(_("La cuenta física ya está desactivada"));
         }
 
         $activasDelTipo = $this->fisicas->contarActivasPorTipo($contexto->centroId, $fisica->tipo);
         if ($activasDelTipo <= 1) {
             $etiqueta = $fisica->tipo === 'caja' ? 'caja' : 'banco';
-            throw new InvalidArgumentException(
-                sprintf('No se puede desactivar la única %s activa del centro', $etiqueta)
-            );
+            throw new InvalidArgumentException(sprintf(_("No se puede desactivar la única %s activa del centro"), $etiqueta));
         }
 
         $desactivada = new CuentaFisica(

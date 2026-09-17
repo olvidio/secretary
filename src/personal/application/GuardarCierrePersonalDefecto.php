@@ -27,7 +27,7 @@ final class GuardarCierrePersonalDefecto
         if ($diaRaw !== null && $diaRaw !== '') {
             $dia = (int) $diaRaw;
             if ($dia < 1 || $dia > 28) {
-                throw new InvalidArgumentException('El día de cierre debe estar entre 1 y 28, o vacío');
+                throw new InvalidArgumentException(_("El día de cierre debe estar entre 1 y 28, o vacío"));
             }
         }
         $diaHabil = !empty($datos['dia_habil']);

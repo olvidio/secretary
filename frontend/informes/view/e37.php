@@ -1,17 +1,17 @@
 <style>
 @page { size: A4 landscape; margin: 8mm; }
 </style>
-<h1 class="print-hide">Cuentas personales (E37)</h1>
+<h1 class="print-hide"><?= _("Cuentas personales (E37)") ?></h1>
 <p class="filters print-hide">
-    <label>Persona
-        <select name="iniciales"><option value="">Todas</option></select>
+    <label><?= _("Persona") ?>
+        <select name="iniciales"><option value=""><?= _("Todas") ?></option></select>
     </label>
-    <button type="button" id="btn-imprimir" hidden>Imprimir</button>
+    <button type="button" id="btn-imprimir" hidden><?= _("Imprimir") ?></button>
 </p>
 
 <table id="tabla-e37" class="print-hide">
     <thead>
-    <tr><th>Fecha</th><th>Inic.</th><th>Concepto</th><th>Observaciones</th><th class="num">Cantidad</th></tr>
+    <tr><th><?= _("Fecha") ?></th><th><?= _("Inic.") ?></th><th><?= _("Concepto") ?></th><th><?= _("Observaciones") ?></th><th class="num"><?= _("Cantidad") ?></th></tr>
     </thead>
     <tbody></tbody>
 </table>
@@ -20,7 +20,7 @@
 <div id="hoja-e37" class="informe-e37-wrap" hidden>
     <article class="informe-e37" id="informe-e37">
         <header class="informe-e37-cab">
-            <span>fecha cierre:</span>
+            <span><?= _("fecha cierre:") ?></span>
             <span id="e37-fecha-cierre"></span>
         </header>
         <div class="informe-e37-scroll">
@@ -63,7 +63,7 @@ function celdaNum(valorEs) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   const pers = await api('/api/personas');
-  if (!pers.ok) return alert(pers.error || 'Error');
+  if (!pers.ok) return alert(pers.error || <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>);
   const sel = document.querySelector('[name=iniciales]');
   (pers.personas || []).forEach(p => {
     const o = document.createElement('option');
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     ).join('');
 
     const trEt = document.getElementById('e37-etiquetas');
-    trEt.innerHTML = '<th>Fecha</th><th>Concepto</th>' + cols.map(c =>
+    trEt.innerHTML = '<th><?= _("Fecha") ?></th><th><?= _("Concepto") ?></th>' + cols.map(c =>
       `<th class="num">${esc(c.etiqueta)}</th>`
     ).join('');
 
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const url = '/e37' + (ini ? '?iniciales=' + encodeURIComponent(ini) : '');
     history.replaceState(null, '', url);
     const r = await api('/api/informes/e37' + (ini ? '?iniciales=' + encodeURIComponent(ini) : ''));
-    if (!r.ok) return alert(r.error || 'Error');
+    if (!r.ok) return alert(r.error || <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>);
     if (ini && r.columnas) pintarHoja(r);
     else pintarLista(r);
   }

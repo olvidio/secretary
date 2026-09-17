@@ -19,10 +19,10 @@ final class CerrarEjercicio
     {
         $ejercicio = $this->ejercicios->porId($ejercicioId);
         if ($ejercicio === null) {
-            throw new InvalidArgumentException('Ejercicio no encontrado');
+            throw new InvalidArgumentException(_("Ejercicio no encontrado"));
         }
         if ($ejercicio->estado !== 'abierto') {
-            throw new InvalidArgumentException('Solo se puede cerrar un ejercicio abierto');
+            throw new InvalidArgumentException(_("Solo se puede cerrar un ejercicio abierto"));
         }
 
         return $this->ejercicios->guardar(new Ejercicio(

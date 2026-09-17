@@ -41,7 +41,7 @@ final class ResponderPreguntaAyuda
         $pregunta = new PreguntaAyuda($texto);
         $documentos = $this->documentacion->todos();
         if ($documentos === []) {
-            throw new RuntimeException('Todavía no hay manual que consultar');
+            throw new RuntimeException(_("Todavía no hay manual que consultar"));
         }
         $guardada = $this->registro->buscar($pregunta->huella($this->documentacion->version()));
         if ($guardada !== null) {
@@ -82,10 +82,10 @@ final class ResponderPreguntaAyuda
         }
         $desde = new DateTimeImmutable('-1 day');
         if ($this->registro->consultasAlModeloDesde($identidadId, $desde) >= $this->limiteDiario) {
-            throw new RuntimeException(
-                'Ha agotado las ' . $this->limiteDiario . ' consultas de ayuda del día. '
-                . 'Vuelva a intentarlo mañana.',
-            );
+            throw new RuntimeException(sprintf(
+                _("Ha agotado las %d consultas de ayuda del día. Vuelva a intentarlo mañana."),
+                $this->limiteDiario,
+            ));
         }
     }
 

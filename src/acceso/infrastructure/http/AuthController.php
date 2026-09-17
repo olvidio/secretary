@@ -89,7 +89,7 @@ final class AuthController
     {
         $id = $this->pendingId();
         if ($id === null) {
-            return $this->falloLogin($request, 'Sesión caducada');
+            return $this->falloLogin($request, _("Sesión caducada"));
         }
         $codigo = trim((string) $request->input('codigo', ''));
         try {
@@ -129,7 +129,7 @@ final class AuthController
     {
         $id = $this->pendingId();
         if ($id === null) {
-            return $this->falloLogin($request, 'Sesión caducada');
+            return $this->falloLogin($request, _("Sesión caducada"));
         }
         $codigo = trim((string) $request->input('codigo', ''));
         $res = $this->verificarTotp->ejecutar($id, $codigo);
@@ -162,9 +162,9 @@ final class AuthController
         }
         if (!$ok) {
             if ($this->esJson($request)) {
-                return ContestarJson::error('Centro no permitido', 403);
+                return ContestarJson::error(_("Centro no permitido"), 403);
             }
-            $_SESSION['login_error'] = 'Centro no permitido';
+            $_SESSION['login_error'] = _("Centro no permitido");
 
             return Response::redirect('/elegir-centro');
         }
@@ -189,9 +189,9 @@ final class AuthController
         }
         if (!$ok) {
             if ($this->esJson($request)) {
-                return ContestarJson::error('Persona no permitida', 403);
+                return ContestarJson::error(_("Persona no permitida"), 403);
             }
-            $_SESSION['login_error'] = 'Persona no permitida';
+            $_SESSION['login_error'] = _("Persona no permitida");
 
             return Response::redirect('/elegir-persona');
         }
