@@ -25,6 +25,22 @@ final class PdoPlanContableRepository implements PlanContableRepository
         return $id !== false ? (int) $id : null;
     }
 
+    public function porId(int $id): ?array
+    {
+        $st = $this->pdo->prepare('SELECT id, codigo, nombre FROM planes_contables WHERE id = :id');
+        $st->execute([':id' => $id]);
+        $row = $st->fetch();
+        if ($row === false) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $row['id'],
+            'codigo' => (string) $row['codigo'],
+            'nombre' => (string) $row['nombre'],
+        ];
+    }
+
     public function codigoPorCentro(int $centroId): string
     {
         $st = $this->pdo->prepare(

@@ -12,9 +12,9 @@ final class LayoutPantallaTest extends TestCase
 {
     public function testAceptaExcelYBurger(): void
     {
-        self::assertSame('excel', LayoutPantalla::porDefecto()->valor);
+        self::assertSame('burger', LayoutPantalla::porDefecto()->valor);
         self::assertSame('burger', (new LayoutPantalla('burger'))->valor);
-        self::assertSame('excel', LayoutPantalla::desde('')->valor);
+        self::assertSame('burger', LayoutPantalla::desde('')->valor);
     }
 
     public function testRechazaValorDesconocido(): void

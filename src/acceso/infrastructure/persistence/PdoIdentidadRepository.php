@@ -11,6 +11,7 @@ use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\entity\Identidad;
 use src\acceso\domain\entity\VinculoCentro;
 use src\acceso\domain\services\PoliticaBloqueo;
+use src\acceso\domain\value_objects\LayoutPantalla;
 
 final class PdoIdentidadRepository implements IdentidadRepository
 {
@@ -363,7 +364,7 @@ final class PdoIdentidadRepository implements IdentidadRepository
         $st->execute([':id' => $identidadId]);
         $v = $st->fetchColumn();
         if (!is_string($v) || $v === '') {
-            return 'excel';
+            return LayoutPantalla::porDefecto()->valor;
         }
 
         return $v;

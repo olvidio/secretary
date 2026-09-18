@@ -20,7 +20,7 @@ final class LayoutPantalla
 
     public static function porDefecto(): self
     {
-        return new self(self::EXCEL);
+        return new self(self::BURGER);
     }
 
     public static function desde(string $valor): self

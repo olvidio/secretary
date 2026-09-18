@@ -72,6 +72,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/admin/planes', [AdminPlanController::class, 'save']);
     $r->addRoute('POST', '/api/admin/planes/{id:\d+}/borrar', [AdminPlanController::class, 'delete']);
     $r->addRoute('GET', '/api/admin/planes/{id:\d+}/conceptos', [AdminPlanController::class, 'conceptos']);
+    $r->addRoute('GET', '/api/admin/planes/{id:\d+}/conceptos/export', [AdminPlanController::class, 'exportConceptos']);
+    $r->addRoute('POST', '/api/admin/planes/{id:\d+}/conceptos/import', [AdminPlanController::class, 'importConceptos']);
     $r->addRoute('POST', '/api/admin/planes/{id:\d+}/conceptos', [AdminPlanController::class, 'saveConceptos']);
     $r->addRoute('GET', '/api/admin/centros', [AdminCentroController::class, 'list']);
     $r->addRoute('POST', '/api/admin/centros', [AdminCentroController::class, 'create']);

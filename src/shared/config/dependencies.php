@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 use src\ambito\application\AsegurarCuentaCorrientePersona;
 use src\ambito\application\AsegurarCuentaDisponiblePersona;
+use src\administracion\application\ExportarConceptosPlan;
 use src\administracion\application\GuardarConceptosPlan;
+use src\administracion\application\ImportarConceptosPlan;
+use src\administracion\application\ObtenerConceptosPlan;
 use src\administracion\application\EliminarCentro;
 use src\administracion\application\EliminarPlanContable;
 use src\administracion\application\EliminarUsuario;
@@ -246,6 +249,9 @@ return [
     PlanContableRepository::class => autowire(PdoPlanContableRepository::class),
     PlanConceptoRepository::class => autowire(PdoPlanConceptoRepository::class),
     ResolverConceptosCentro::class => autowire(),
+    ObtenerConceptosPlan::class => autowire(),
+    ExportarConceptosPlan::class => autowire(),
+    ImportarConceptosPlan::class => autowire(),
     GuardarConceptosPlan::class => autowire(),
     PartidaLaboresRepository::class => autowire(PdoPartidaLaboresRepository::class),
     ListarPartidasLabores::class => autowire(),

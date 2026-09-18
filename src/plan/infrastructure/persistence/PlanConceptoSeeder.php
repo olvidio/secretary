@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace src\plan\infrastructure\persistence;
 
 use PDO;
-use src\conceptos\domain\services\CatalogoConceptos;
 use src\plan\domain\services\CatalogoPlanesContables;
 
 final class PlanConceptoSeeder
@@ -20,16 +19,8 @@ final class PlanConceptoSeeder
         }
         $repo = new PdoPlanConceptoRepository($pdo);
         $planes = $pdo->query('SELECT id, codigo FROM planes_contables')->fetchAll();
-        $filas = [];
-        foreach (CatalogoConceptos::todos() as $c) {
-            $filas[] = $c;
-        }
         foreach ($planes as $plan) {
-            $planId = (int) $plan['id'];
-            if ($repo->listar($planId) !== []) {
-                continue;
-            }
-            $repo->reemplazar($planId, $filas);
+            $repo->sembrarCatalogoSiVacio((int) $plan['id']);
         }
     }
 

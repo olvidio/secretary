@@ -18,5 +18,8 @@ interface PlanConceptoRepository
 
     public function copiarDesdePlan(int $origenId, int $destinoId): void;
 
+    /** Si el plan no tiene filas en plan_conceptos, carga el catálogo H16n por defecto. */
+    public function sembrarCatalogoSiVacio(int $planId): void;
+
     public function planIdDeCentro(int $centroId): ?int;
 }

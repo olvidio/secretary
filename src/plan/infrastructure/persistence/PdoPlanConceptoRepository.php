@@ -7,6 +7,7 @@ namespace src\plan\infrastructure\persistence;
 use InvalidArgumentException;
 use PDO;
 use src\conceptos\domain\entity\Concepto;
+use src\conceptos\domain\services\CatalogoConceptos;
 use src\plan\domain\contracts\PlanConceptoRepository;
 
 final class PdoPlanConceptoRepository implements PlanConceptoRepository
@@ -87,6 +88,14 @@ final class PdoPlanConceptoRepository implements PlanConceptoRepository
             ];
         }
         $this->reemplazar($destinoId, $filas);
+    }
+
+    public function sembrarCatalogoSiVacio(int $planId): void
+    {
+        if ($this->listar($planId) !== []) {
+            return;
+        }
+        $this->reemplazar($planId, CatalogoConceptos::todos());
     }
 
     public function planIdDeCentro(int $centroId): ?int

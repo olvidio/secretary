@@ -8,6 +8,9 @@ interface PlanContableRepository
 {
     public function idPorCodigo(string $codigo): ?int;
 
+    /** @return array{id:int,codigo:string,nombre:string}|null */
+    public function porId(int $id): ?array;
+
     public function codigoPorCentro(int $centroId): string;
 
     /** @return list<array{id:int, codigo:string, nombre:string}> */

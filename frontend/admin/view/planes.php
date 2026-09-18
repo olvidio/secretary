@@ -17,12 +17,20 @@
 <section id="sec-conceptos" hidden>
     <h2 id="titulo-conceptos"><?= _("Conceptos del plan") ?></h2>
     <p class="muted"><?= _("Edite nombres, descripciones y naturaleza. Los 7x son valores por defecto del capítulo VII.") ?></p>
-    <p>
-        <button type="button" class="on" data-cuenta="P" id="tab-p">P</button>
-        <button type="button" data-cuenta="G" id="tab-g">G</button>
+    <div class="plan-cuenta-bar">
+        <div class="plan-cuenta-tabs" role="tablist" aria-label="<?= htmlspecialchars(_("Libro contable"), ENT_QUOTES) ?>">
+            <button type="button" class="on" data-cuenta="P" id="tab-p" role="tab" aria-selected="true"><?= _("P — Personal") ?></button>
+            <button type="button" data-cuenta="G" id="tab-g" role="tab" aria-selected="false"><?= _("G — General") ?></button>
+        </div>
+        <p class="plan-cuenta-activa" id="etiq-cuenta-activa" aria-live="polite"></p>
+    </div>
+    <div class="plan-acciones">
         <button type="button" id="btn-add-concepto"><?= _("Añadir concepto") ?></button>
         <button type="button" id="btn-save-conceptos"><?= _("Guardar conceptos") ?></button>
-    </p>
+        <button type="button" id="btn-export-conceptos"><?= _("Exportar") ?></button>
+        <button type="button" id="btn-import-conceptos"><?= _("Importar") ?></button>
+        <input type="file" id="input-import-conceptos" accept=".json,application/json" hidden>
+    </div>
     <table id="tabla-conceptos">
         <thead>
         <tr>
@@ -43,7 +51,12 @@ const I18N_ADMIN_PLANES = {
   confirmBorrar: <?= json_encode(_("¿Borrar este plan contable?"), JSON_UNESCAPED_UNICODE) ?>,
   guardado: <?= json_encode(_("Plan guardado."), JSON_UNESCAPED_UNICODE) ?>,
   conceptosGuardados: <?= json_encode(_("Conceptos guardados."), JSON_UNESCAPED_UNICODE) ?>,
+  conceptosImportados: <?= json_encode(_("Conceptos importados."), JSON_UNESCAPED_UNICODE) ?>,
   capVII: <?= json_encode(_("7x — plantilla cap. VII"), JSON_UNESCAPED_UNICODE) ?>,
+  importInvalido: <?= json_encode(_("Fichero JSON no válido."), JSON_UNESCAPED_UNICODE) ?>,
+  libroP: <?= json_encode(_("Libro P (personal)"), JSON_UNESCAPED_UNICODE) ?>,
+  libroG: <?= json_encode(_("Libro G (general)"), JSON_UNESCAPED_UNICODE) ?>,
+  nConceptos: <?= json_encode(_("%d conceptos"), JSON_UNESCAPED_UNICODE) ?>,
 };
 const NATURALEZAS = ['ingreso', 'gasto', 'saldo', 'disponible', 'transferencia'];
 let planActivo = null;
@@ -111,6 +124,13 @@ function conceptosDelFormulario(cuenta) {
   }));
 }
 
+function actualizarEtiqCuenta() {
+  const n = (conceptosCache[cuentaActiva] || []).length;
+  const libro = cuentaActiva === 'G' ? I18N_ADMIN_PLANES.libroG : I18N_ADMIN_PLANES.libroP;
+  document.getElementById('etiq-cuenta-activa').textContent =
+    libro + ' · ' + I18N_ADMIN_PLANES.nConceptos.replace('%d', String(n));
+}
+
 function pintarConceptos() {
   const tb = document.querySelector('#tabla-conceptos tbody');
   tb.innerHTML = '';
@@ -118,29 +138,40 @@ function pintarConceptos() {
     const tr = filaConcepto(Object.assign({}, c, { _persistido: true }));
     tb.appendChild(tr);
   });
+  actualizarEtiqCuenta();
 }
 
 function cambiarCuenta(cuenta) {
-  if (planActivo) {
+  if (planActivo && cuenta !== cuentaActiva) {
     conceptosCache[cuentaActiva] = conceptosDelFormulario(cuentaActiva);
   }
   cuentaActiva = cuenta;
   document.getElementById('tab-p').classList.toggle('on', cuenta === 'P');
   document.getElementById('tab-g').classList.toggle('on', cuenta === 'G');
+  document.getElementById('tab-p').setAttribute('aria-selected', cuenta === 'P' ? 'true' : 'false');
+  document.getElementById('tab-g').setAttribute('aria-selected', cuenta === 'G' ? 'true' : 'false');
   pintarConceptos();
+}
+
+function repartirConceptos(lista) {
+  const cache = { P: [], G: [] };
+  (lista || []).forEach((c) => {
+    if (c.cuenta === 'P' || c.cuenta === 'G') {
+      cache[c.cuenta].push(c);
+    }
+  });
+  return cache;
 }
 
 async function abrirConceptos(plan) {
   planActivo = plan;
   document.getElementById('sec-conceptos').hidden = false;
+  document.getElementById('msg-conceptos').hidden = true;
   document.getElementById('titulo-conceptos').textContent =
     <?= json_encode(_("Conceptos de"), JSON_UNESCAPED_UNICODE) ?> + ' ' + (plan.nombre || plan.codigo);
-  const [rP, rG] = await Promise.all([
-    api('/api/admin/planes/' + plan.id + '/conceptos?cuenta=P'),
-    api('/api/admin/planes/' + plan.id + '/conceptos?cuenta=G'),
-  ]);
-  if (!rP.ok || !rG.ok) return alert(rP.error || rG.error);
-  conceptosCache = { P: rP.conceptos || [], G: rG.conceptos || [] };
+  const r = await api('/api/admin/planes/' + plan.id + '/conceptos');
+  if (!r.ok) return alert(r.error);
+  conceptosCache = repartirConceptos(r.conceptos);
   cuentaActiva = 'P';
   cambiarCuenta('P');
   document.getElementById('sec-conceptos').scrollIntoView({ behavior: 'smooth' });
@@ -188,10 +219,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!s.ok) return alert(s.error);
     document.getElementById('msg-conceptos').hidden = false;
     document.getElementById('msg-conceptos').textContent = I18N_ADMIN_PLANES.conceptosGuardados;
-    conceptosCache = { P: [], G: [] };
-    (s.conceptos || []).forEach((c) => {
-      conceptosCache[c.cuenta].push(c);
+    conceptosCache = repartirConceptos(s.conceptos);
+    pintarConceptos();
+  };
+  document.getElementById('btn-export-conceptos').onclick = () => {
+    if (!planActivo) return;
+    window.location.href = '/api/admin/planes/' + planActivo.id + '/conceptos/export';
+  };
+  document.getElementById('btn-import-conceptos').onclick = () => {
+    if (!planActivo) return;
+    document.getElementById('input-import-conceptos').click();
+  };
+  document.getElementById('input-import-conceptos').onchange = async (ev) => {
+    const input = ev.target;
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file || !planActivo) return;
+    let payload;
+    try {
+      payload = JSON.parse(await file.text());
+    } catch (e) {
+      return alert(I18N_ADMIN_PLANES.importInvalido);
+    }
+    const s = await api('/api/admin/planes/' + planActivo.id + '/conceptos/import', {
+      method: 'POST',
+      body: payload,
     });
+    if (!s.ok) return alert(s.error);
+    document.getElementById('msg-conceptos').hidden = false;
+    document.getElementById('msg-conceptos').textContent = I18N_ADMIN_PLANES.conceptosImportados;
+    conceptosCache = repartirConceptos(s.conceptos);
     pintarConceptos();
   };
 });

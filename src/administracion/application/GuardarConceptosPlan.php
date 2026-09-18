@@ -67,7 +67,7 @@ final class GuardarConceptosPlan
                 throw new InvalidArgumentException(_("Código y cuenta (P/G) son obligatorios"));
             }
             if ($nombre === '') {
-                throw new InvalidArgumentException(sprintf(_("Nombre obligatorio en %s/%s"), $cuenta, $codigo));
+                $nombre = $codigo;
             }
             if (!in_array($naturaleza, ReglasConceptoPlan::naturalezasValidas(), true)) {
                 throw new InvalidArgumentException(sprintf(_("Naturaleza no válida en %s"), $codigo));

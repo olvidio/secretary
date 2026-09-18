@@ -11,7 +11,7 @@ Gestiona la plataforma sin entrar en la contabilidad de ningún centro: planes c
 ## Cómo se usa
 
 1. Entrar con el usuario admin (por defecto alias `admin`, contraseña `admin` si no se cambia en `.env`).
-2. **Planes contables**: listar, crear, editar y borrar planes (no se borra uno en uso por algún centro). Con «Conceptos» se editan **todos** los códigos del plan (P y G), incluidos los 7x como plantilla por defecto del capítulo VII.
+2. **Planes contables**: listar, crear, editar y borrar planes (no se borra uno en uso por algún centro). Con «Conceptos» se editan **todos** los códigos del plan (P y G), incluidos los 7x como plantilla por defecto del capítulo VII. Si un plan no tenía conceptos cargados, al abrir el editor se rellenan con el catálogo H16n. **Exportar** descarga un JSON; **Importar** lo sustituye (mismo formato: objeto con `plan` y `conceptos`, o solo la lista `conceptos`).
 3. **Centros**: crear un centro con su secretario y plan; borrar un centro vacía antes sus datos contables.
 4. **Usuarios**: ver todas las identidades y borrar las que no sean el admin de plataforma.
 

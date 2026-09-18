@@ -762,11 +762,49 @@ body.admin { margin: 0; background: #f8fafc; }
   top: 0;
   z-index: 5;
 }
+.admin-top a { color: #e2e8f0; text-decoration: none; }
+.admin-top a:hover { color: #fff; text-decoration: underline; }
+.admin-top .muted { color: #cbd5e1; }
 .admin-nav { display: flex; flex-wrap: wrap; gap: .5rem 1rem; }
 .admin-nav a { color: #cbd5e1; text-decoration: none; }
 .admin-nav a.on { color: #fff; font-weight: 600; }
+.admin-nav a:hover { color: #fff; }
 .admin-top .linkish { background: none; border: none; color: #cbd5e1; cursor: pointer; text-decoration: underline; padding: 0; font: inherit; }
 .admin-main { max-width: 960px; margin: 0 auto; padding: 1rem 1.25rem 2rem; }
+.plan-cuenta-bar { margin: .75rem 0; }
+.plan-cuenta-tabs {
+  display: inline-flex;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+.plan-cuenta-tabs button {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: #475569;
+  padding: .45rem .95rem;
+  font-weight: 500;
+}
+.plan-cuenta-tabs button + button { border-left: 1px solid #94a3b8; }
+.plan-cuenta-tabs button.on {
+  background: #1e293b;
+  color: #fff;
+}
+.plan-cuenta-tabs button:not(.on):hover { background: #cbd5e1; }
+.plan-cuenta-activa {
+  margin: .5rem 0 0;
+  font-weight: 600;
+  color: #1e293b;
+}
+.plan-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem .5rem;
+  align-items: center;
+  margin: .75rem 0;
+}
 .yo-main {
   max-width: min(480px, 100%);
   width: 100%;

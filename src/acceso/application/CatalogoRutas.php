@@ -97,6 +97,8 @@ final class CatalogoRutas
             ['src\\administracion\\infrastructure\\http\\AdminPlanController', 'save', 'admin'],
             ['src\\administracion\\infrastructure\\http\\AdminPlanController', 'delete', 'admin'],
             ['src\\administracion\\infrastructure\\http\\AdminPlanController', 'conceptos', 'admin'],
+            ['src\\administracion\\infrastructure\\http\\AdminPlanController', 'exportConceptos', 'admin'],
+            ['src\\administracion\\infrastructure\\http\\AdminPlanController', 'importConceptos', 'admin'],
             ['src\\administracion\\infrastructure\\http\\AdminPlanController', 'saveConceptos', 'admin'],
             ['src\\administracion\\infrastructure\\http\\AdminCentroController', 'list', 'admin'],
             ['src\\administracion\\infrastructure\\http\\AdminCentroController', 'create', 'admin'],
