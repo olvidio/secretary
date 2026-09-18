@@ -46,8 +46,8 @@ final class PdoIdentidadRepository implements IdentidadRepository
     {
         if ($identidad->id === null) {
             $st = $this->pdo->prepare(
-                'INSERT INTO identidades (email, alias, password_hash, nombre, activo)
-                 VALUES (:email, :alias, :hash, :nombre, :activo) RETURNING id'
+                'INSERT INTO identidades (email, alias, password_hash, nombre, activo, es_admin)
+                 VALUES (:email, :alias, :hash, :nombre, :activo, :admin) RETURNING id'
             );
             $st->execute([
                 ':email' => strtolower($identidad->email),
@@ -55,12 +55,13 @@ final class PdoIdentidadRepository implements IdentidadRepository
                 ':hash' => $identidad->passwordHash,
                 ':nombre' => $identidad->nombre,
                 ':activo' => (int) $identidad->activo,
+                ':admin' => (int) $identidad->esAdmin,
             ]);
             $id = (int) $st->fetchColumn();
         } else {
             $st = $this->pdo->prepare(
                 'UPDATE identidades SET email = :email, alias = :alias, password_hash = :hash,
-                    nombre = :nombre, activo = :activo WHERE id = :id'
+                    nombre = :nombre, activo = :activo, es_admin = :admin WHERE id = :id'
             );
             $st->execute([
                 ':email' => strtolower($identidad->email),
@@ -68,6 +69,7 @@ final class PdoIdentidadRepository implements IdentidadRepository
                 ':hash' => $identidad->passwordHash,
                 ':nombre' => $identidad->nombre,
                 ':activo' => (int) $identidad->activo,
+                ':admin' => (int) $identidad->esAdmin,
                 ':id' => $identidad->id,
             ]);
             $id = $identidad->id;
@@ -507,7 +509,45 @@ final class PdoIdentidadRepository implements IdentidadRepository
                 ? (string) $row['alias']
                 : null,
             $emailVerificado,
+            self::booleano($row['es_admin'] ?? false),
         );
+    }
+
+    /** @return list<array{id:int, email:string, alias:?string, nombre:string, es_admin:bool, centros:int, personas:int}> */
+    public function listarTodas(): array
+    {
+        $rows = $this->pdo->query(
+            'SELECT i.id, i.email, i.alias, i.nombre, i.es_admin,
+                    (SELECT COUNT(*) FROM identidad_centro ic WHERE ic.identidad_id = i.id) AS centros,
+                    (SELECT COUNT(*) FROM identidad_persona ip WHERE ip.identidad_id = i.id) AS personas
+             FROM identidades i
+             ORDER BY i.es_admin DESC, i.alias NULLS LAST, i.email'
+        )->fetchAll();
+        $out = [];
+        foreach ($rows as $row) {
+            $out[] = [
+                'id' => (int) $row['id'],
+                'email' => (string) $row['email'],
+                'alias' => is_string($row['alias'] ?? null) && $row['alias'] !== ''
+                    ? (string) $row['alias']
+                    : null,
+                'nombre' => (string) $row['nombre'],
+                'es_admin' => self::booleano($row['es_admin'] ?? false),
+                'centros' => (int) $row['centros'],
+                'personas' => (int) $row['personas'],
+            ];
+        }
+
+        return $out;
+    }
+
+    public function eliminar(int $id): void
+    {
+        $st = $this->pdo->prepare('DELETE FROM identidades WHERE id = :id AND es_admin = FALSE');
+        $st->execute([':id' => $id]);
+        if ($st->rowCount() === 0) {
+            throw new RuntimeException('No se pudo eliminar la identidad');
+        }
     }
 
     private static function booleano(mixed $v): bool

@@ -19,6 +19,7 @@ if (!empty($contentView) && is_file($contentView)) {
 }
 ?>
 </main>
+<?php include __DIR__ . '/_pie_legal.php'; ?>
 <nav class="yo-tabbar">
     <a href="/yo" class="<?= ($nav ?? '') === 'yo' ? 'on' : '' ?>"><?= _("Resumen") ?></a>
     <a href="/yo/movimientos" class="<?= ($nav ?? '') === 'yo-movimientos' ? 'on' : '' ?>"><?= _("Lista") ?></a>

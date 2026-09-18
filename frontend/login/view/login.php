@@ -17,6 +17,7 @@
     <label><?= _("Contraseña") ?> <input type="password" name="password" required autocomplete="current-password"></label>
     <button type="submit"><?= _("Entrar") ?></button>
     <p class="login-alt"><a href="/registro" id="ir-registro"><?= _("Registrarse") ?></a></p>
+    <?php include dirname(__DIR__, 2) . '/shared/view/_pie_legal.php'; ?>
 </form>
 <script>
 document.getElementById('ir-registro').addEventListener('click', (ev) => {

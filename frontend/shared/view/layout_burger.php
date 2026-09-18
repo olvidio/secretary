@@ -66,6 +66,7 @@ if (!empty($contentView) && is_file($contentView)) {
 }
 ?>
     </main>
+    <?php include __DIR__ . '/_pie_legal.php'; ?>
 </div>
 <script>
 window.secretarioMenus = <?= json_encode([

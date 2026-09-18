@@ -36,13 +36,22 @@
         "orden": 40
     },
     {
-        "codigo": "21",
+        "codigo": "211",
         "cuenta": "P",
-        "descripcion": "21 Vivienda: cantidad para contribuir a los gastos de la casa",
-        "etiqueta": "21 Vivienda",
+        "descripcion": "211 Vivienda general: cuadra con G\/11 (cierre automático o imputación puntual a generales)",
+        "etiqueta": "211 Vivienda general",
         "naturaleza": "gasto",
-        "nombre": "Vivienda",
-        "orden": 50
+        "nombre": "Vivienda general",
+        "orden": 51
+    },
+    {
+        "codigo": "212",
+        "cuenta": "P",
+        "descripcion": "212 Vivienda personal: gastos de casa propios, sin contrapartida G\/11",
+        "etiqueta": "212 Vivienda personal",
+        "naturaleza": "gasto",
+        "nombre": "Vivienda personal",
+        "orden": 52
     },
     {
         "codigo": "22",
@@ -218,10 +227,10 @@
     {
         "codigo": "79",
         "cuenta": "P",
-        "descripcion": "79 ",
-        "etiqueta": "79 ",
+        "descripcion": "79 Otras labores",
+        "etiqueta": "79 Otras labores",
         "naturaleza": "gasto",
-        "nombre": "",
+        "nombre": "Otras labores",
         "orden": 250
     },
     {

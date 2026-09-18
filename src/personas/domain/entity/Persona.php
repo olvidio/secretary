@@ -36,7 +36,7 @@ final class Persona
         // golden master compara ListarPersonas byte a byte. La pantalla Nombres lo
         // añade encima al listar.
         public readonly ?string $email = null,
-        /** Si el gasto P/21 debe tener entrada G/11. Independiente del tipo de centro. */
+        /** Si entra en el cierre automático de vivienda (P/211). Imputación puntual a generales no depende de este flag. */
         public readonly bool $viviendaAportaGenerales = true,
         public readonly bool $puedeDesgravar = true,
     ) {

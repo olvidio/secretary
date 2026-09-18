@@ -24,6 +24,7 @@ final class AccesoSeeder
             return;
         }
         self::sembrarRutas($pdo);
+        self::sembrarIdentidadAdmin($pdo);
         self::sembrarIdentidadCentro($pdo);
         self::sembrarIdentidadPersona($pdo);
     }
@@ -41,6 +42,48 @@ final class AccesoSeeder
                 ':m' => $fila['metodo'],
                 ':a' => $fila['ambito'],
             ]);
+        }
+    }
+
+    /** Admin de plataforma: sin centro, contraseña en APP_ADMIN_PASSWORD (por defecto admin). */
+    private static function sembrarIdentidadAdmin(PDO $pdo): void
+    {
+        $repo = new PdoIdentidadRepository($pdo);
+        $alias = strtolower(ConnectionFactory::env('APP_ADMIN_USER', 'admin') ?: 'admin');
+        $pass = ConnectionFactory::env('APP_ADMIN_PASSWORD', 'admin') ?: 'admin';
+        $hash = password_hash($pass, PASSWORD_DEFAULT);
+        $identidad = $repo->porEmailOAlias($alias);
+        if ($identidad === null) {
+            $identidad = $repo->guardar(new Identidad(
+                null,
+                $alias . '@admin.local',
+                $hash,
+                _('Administrador'),
+                true,
+                0,
+                null,
+                null,
+                $alias,
+                null,
+                true,
+            ));
+        } else {
+            $identidad = $repo->guardar(new Identidad(
+                $identidad->id,
+                $identidad->email,
+                $hash,
+                $identidad->nombre,
+                $identidad->activo,
+                $identidad->intentosFallidos,
+                $identidad->bloqueadoHasta,
+                $identidad->ultimoAcceso,
+                $identidad->alias,
+                $identidad->emailVerificadoAt,
+                true,
+            ));
+        }
+        if ($identidad->id !== null) {
+            $repo->marcarEmailVerificado($identidad->id, new DateTimeImmutable());
         }
     }
 

@@ -60,11 +60,18 @@ final class IniciarSesion
                 'rol' => $v->rol,
             ];
         }
-        $personas = $this->identidades->personasDe($identidad->id);
-        if ($centros === [] && $personas === []) {
-            return new ResultadoLogin('fallo', _("Usuario o contraseña incorrectos"));
-        }
         $this->identidades->registrarExito($identidad, $ahora);
+        if ($identidad->esAdmin) {
+            return new ResultadoLogin(
+                'autenticado',
+                '',
+                $identidad->id,
+                $identidad->nombre,
+                $identidad->email,
+                'admin',
+                [],
+            );
+        }
         $totpOk = $this->identidades->totpConfirmado($identidad->id);
 
         if ($centros !== []) {

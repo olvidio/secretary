@@ -62,12 +62,37 @@ final class AgrupadorPrevision613P
         return $out;
     }
 
+    /**
+     * Oculta P/212 si no hay importe en la hoja (solo centros/personas que lo usan).
+     *
+     * @param list<array{codigo:string,total_cents:int,personas_cents?:list<int>}> $filas
+     * @return list<array{codigo:string,total_cents:int,personas_cents?:list<int>}>
+     */
+    public static function filtrar212SinUso(array $filas): array
+    {
+        return array_values(array_filter($filas, static function (array $f): bool {
+            if (($f['codigo'] ?? '') !== '212') {
+                return true;
+            }
+            if ((int) ($f['total_cents'] ?? 0) !== 0) {
+                return true;
+            }
+            foreach ($f['personas_cents'] ?? [] as $cents) {
+                if ((int) $cents !== 0) {
+                    return true;
+                }
+            }
+
+            return false;
+        }));
+    }
+
     public static function grupoDe(string $codigo): string
     {
         if (in_array($codigo, ['111', '112', '113', '12'], true)) {
             return 'I';
         }
-        if (in_array($codigo, ['21', '212', '22', '23', '24', '25', '26', '27', '28'], true)) {
+        if (in_array($codigo, ['211', '212', '22', '23', '24', '25', '26', '27', '28'], true)) {
             return 'II';
         }
         if ($codigo === '4') {

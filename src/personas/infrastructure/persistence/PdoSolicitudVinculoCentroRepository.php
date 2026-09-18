@@ -61,6 +61,20 @@ final class PdoSolicitudVinculoCentroRepository implements SolicitudVinculoCentr
         return is_array($row) ? $this->hydrate($row) : null;
     }
 
+    public function pendienteDeIdentidad(int $identidadId): ?SolicitudVinculoCentro
+    {
+        $st = $this->pdo->prepare(
+            "SELECT * FROM solicitudes_vinculo_centro
+             WHERE identidad_id = :i AND estado = 'pendiente'
+             ORDER BY created_at DESC, id DESC
+             LIMIT 1"
+        );
+        $st->execute([':i' => $identidadId]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
     public function guardar(SolicitudVinculoCentro $solicitud): SolicitudVinculoCentro
     {
         if ($solicitud->id === null) {

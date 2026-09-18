@@ -76,17 +76,17 @@ final class ComprobarPersonalesGenerales
         $comprobaciones = [
             [
                 'id' => 'vivienda_21_11',
-                'titulo' => 'Vivienda P/21 y generales G/11',
+                'titulo' => 'Vivienda P/211 y generales G/11',
                 'ok' => $vivienda['ok'],
                 'mensaje' => $vivienda['ok']
-                    ? 'Las salidas P/21 de quienes aportan coinciden con las entradas G/11 ('
+                    ? 'Las salidas P/211 de quienes aportan coinciden con las entradas G/11 ('
                         . $vivienda['total_p21_es'] . ' €).'
-                    : 'Las salidas P/21 de quienes aportan son ' . $vivienda['total_p21_es']
+                    : 'Las salidas P/211 de quienes aportan son ' . $vivienda['total_p21_es']
                         . ' € y las entradas G/11 ' . $vivienda['total_g11_es']
                         . ' € (diferencia ' . $vivienda['diferencia_es'] . ' €).',
-                'ayuda' => 'P/21 es la vivienda general (cierre y gastos imputados a generales desde el personal). '
-                    . 'Debe cuadrar con G/11. P/212 (vivienda personal) es un gasto propio, como ordinarios, '
-                    . 'y no entra aquí.',
+                'ayuda' => 'P/211 es la vivienda general (cierre automático o imputación puntual a generales). '
+                    . 'Debe cuadrar con G/11. P/212 (vivienda personal) es un gasto propio, sin G/11, '
+                    . 'y no entra aquí. Quien no entra en el cierre automático puede igualmente imputar a generales puntualmente (211/11).',
                 'totales' => [
                     'p21_es' => $vivienda['total_p21_es'],
                     'g11_es' => $vivienda['total_g11_es'],

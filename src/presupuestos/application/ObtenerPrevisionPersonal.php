@@ -64,7 +64,7 @@ final class ObtenerPrevisionPersonal
             ];
         }
         $filas = [];
-        foreach (AgrupadorPrevision613P::filas($para) as $f) {
+        foreach (AgrupadorPrevision613P::filas(AgrupadorPrevision613P::filtrar212SinUso($para)) as $f) {
             $orig = $f['codigo'] !== null ? ($porCodigo[$f['codigo']] ?? null) : null;
             $calc = Dinero::fromCents($f['total_cents']);
             $prevCents = $f['personas_cents'][0] ?? 0;

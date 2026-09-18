@@ -26,6 +26,7 @@ final class PlanContableSeeder
         }
 
         $pdo->prepare('UPDATE centros SET plan_contable_id = :p')->execute([':p' => $h16nId]);
+        PlanConceptoSeeder::sembrar($pdo);
         self::backfillPartidasLegacy($pdo);
     }
 

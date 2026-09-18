@@ -1,32 +1,22 @@
-<h1><?= _("Centros") ?></h1>
-<p class="muted"><?= _("Solicite unirse a un centro para el año del ejercicio. El secretario debe aprobar la petición; si ya existe su nombre en Nombres, puede vincularlo a su cuenta.") ?></p>
+<h1><?= _("Centro") ?></h1>
+<p class="muted"><?= _("Solo puede estar vinculado a un centro de tipo n. El secretario debe aprobar la petición.") ?></p>
 
-<section>
-    <h2><?= _("Mis vínculos") ?></h2>
-    <table id="tabla-vinculos">
-        <thead>
-        <tr><th><?= _("Centro") ?></th><th><?= _("Iniciales") ?></th><th><?= _("Nombre") ?></th><th><?= _("Año") ?></th><th></th></tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    <p id="vinculos-vacio" class="muted" hidden><?= _("Sin vínculos todavía.") ?></p>
+<section id="estado-vinculado" hidden>
+    <h2><?= _("Centro vinculado") ?></h2>
+    <dl class="datos-centro" id="datos-vinculo"></dl>
+    <p><button type="button" id="btn-desvincular" class="peligro"><?= _("Desvincular") ?></button></p>
 </section>
 
-<section>
-    <h2><?= _("Solicitudes") ?></h2>
-    <table id="tabla-solicitudes">
-        <thead>
-        <tr><th><?= _("Centro") ?></th><th><?= _("Año") ?></th><th><?= _("Estado") ?></th><th><?= _("Mensaje") ?></th></tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    <p id="solicitudes-vacio" class="muted" hidden><?= _("Sin solicitudes.") ?></p>
+<section id="estado-pendiente" hidden>
+    <h2><?= _("Solicitud pendiente") ?></h2>
+    <dl class="datos-centro" id="datos-solicitud"></dl>
+    <p class="muted"><?= _("Espere la aprobación del secretario del centro.") ?></p>
 </section>
 
-<section>
+<section id="estado-solicitar" hidden>
     <h2><?= _("Solicitar acceso") ?></h2>
     <form id="form-solicitud" class="grid-form">
-        <label><?= _("Centro") ?>
+        <label><?= _("Centro (tipo n)") ?>
             <select name="centro_id" required></select>
         </label>
         <label><?= _("Año del ejercicio") ?> <input name="anio" type="number" min="2000" max="2100" required></label>
@@ -39,70 +29,91 @@
 
 <script>
 const I18N_YO_CENTROS = {
-  noPersona: <?= json_encode(_("No se pudo cambiar la persona activa"), JSON_UNESCAPED_UNICODE) ?>,
-  noVinculos: <?= json_encode(_("No se pudieron cargar los vínculos"), JSON_UNESCAPED_UNICODE) ?>,
-  activa: <?= json_encode(_("Activa"), JSON_UNESCAPED_UNICODE) ?>,
-  usar: <?= json_encode(_("Usar"), JSON_UNESCAPED_UNICODE) ?>,
+  noVinculos: <?= json_encode(_("No se pudieron cargar los datos"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmDesvincular: <?= json_encode(_("¿Desvincularse de este centro? Podrá solicitar acceso a otro más tarde."), JSON_UNESCAPED_UNICODE) ?>,
+  noDesvincular: <?= json_encode(_("No se pudo desvincular"), JSON_UNESCAPED_UNICODE) ?>,
   elegir: <?= json_encode(_("Elegir…"), JSON_UNESCAPED_UNICODE) ?>,
   solicitudEnviada: <?= json_encode(_("Solicitud enviada. Espere la aprobación del centro."), JSON_UNESCAPED_UNICODE) ?>,
+  centro: <?= json_encode(_("Centro"), JSON_UNESCAPED_UNICODE) ?>,
+  iniciales: <?= json_encode(_("Iniciales"), JSON_UNESCAPED_UNICODE) ?>,
+  nombre: <?= json_encode(_("Nombre"), JSON_UNESCAPED_UNICODE) ?>,
+  anio: <?= json_encode(_("Año"), JSON_UNESCAPED_UNICODE) ?>,
+  mensaje: <?= json_encode(_("Mensaje"), JSON_UNESCAPED_UNICODE) ?>,
+  sinCentros: <?= json_encode(_("No hay centros de tipo n disponibles."), JSON_UNESCAPED_UNICODE) ?>,
 };
 document.addEventListener('DOMContentLoaded', async () => {
   const anio = new Date().getFullYear();
   document.querySelector('#form-solicitud [name=anio]').value = String(anio);
 
-  async function usarPersona(personaId) {
-    const s = await api('/api/preferencias/persona', { method: 'POST', body: { persona_id: personaId } });
-    if (!s.ok) return alert(s.error || I18N_YO_CENTROS.noPersona);
-    if (s.siguiente) location.href = s.siguiente;
+  function pintarDl(el, filas) {
+    el.innerHTML = filas.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
+  }
+
+  function mostrar(estado) {
+    ['estado-vinculado', 'estado-pendiente', 'estado-solicitar'].forEach((id) => {
+      document.getElementById(id).hidden = id !== estado;
+    });
   }
 
   async function cargar() {
-    const [vinc, centros, pref] = await Promise.all([
+    const [vinc, centros] = await Promise.all([
       api('/api/yo/vinculos-centro'),
       api('/api/yo/vinculos-centro/centros'),
-      api('/api/preferencias'),
     ]);
     if (!vinc.ok) return alert(vinc.error || I18N_YO_CENTROS.noVinculos);
-    const personaActiva = pref.ok ? pref.persona_id : null;
 
-    const tbV = document.querySelector('#tabla-vinculos tbody');
-    tbV.innerHTML = '';
     const vinculos = vinc.vinculos || [];
-    document.getElementById('vinculos-vacio').hidden = vinculos.length > 0;
-    vinculos.forEach((v) => {
-      const tr = document.createElement('tr');
-      const activa = personaActiva && v.id === personaActiva;
-      const btn = activa
-        ? '<span class="muted">' + esc(I18N_YO_CENTROS.activa) + '</span>'
-        : `<button type="button" class="btn-link" data-persona="${v.id}">${esc(I18N_YO_CENTROS.usar)}</button>`;
-      tr.innerHTML = `<td>${esc(v.centro_nombre || '')}</td><td>${esc(v.iniciales)}</td>
-        <td>${esc(v.nombre_completo || v.nombre)}</td><td>${esc(v.anio || '')}</td><td>${btn}</td>`;
-      tbV.appendChild(tr);
-      const b = tr.querySelector('[data-persona]');
-      if (b) b.onclick = () => usarPersona(Number(b.dataset.persona));
-    });
+    const solicitudes = (vinc.solicitudes || []).filter((s) => s.estado === 'pendiente');
 
-    const tbS = document.querySelector('#tabla-solicitudes tbody');
-    tbS.innerHTML = '';
-    const solicitudes = vinc.solicitudes || [];
-    document.getElementById('solicitudes-vacio').hidden = solicitudes.length > 0;
-    solicitudes.forEach((s) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${esc(s.centro_nombre || '')}</td><td>${esc(s.anio)}</td>
-        <td>${esc(s.estado)}</td><td>${esc(s.mensaje || '')}</td>`;
-      tbS.appendChild(tr);
-    });
+    if (vinculos.length > 0) {
+      const v = vinculos[0];
+      pintarDl(document.getElementById('datos-vinculo'), [
+        [I18N_YO_CENTROS.centro, v.centro_nombre || ''],
+        [I18N_YO_CENTROS.iniciales, v.iniciales || ''],
+        [I18N_YO_CENTROS.nombre, v.nombre_completo || v.nombre || ''],
+        [I18N_YO_CENTROS.anio, v.anio || ''],
+      ]);
+      document.getElementById('btn-desvincular').onclick = async () => {
+        if (!confirm(I18N_YO_CENTROS.confirmDesvincular)) return;
+        const s = await api('/api/yo/vinculos-centro/' + v.id + '/desvincular', { method: 'POST', body: {} });
+        if (!s.ok) return alert(s.error || I18N_YO_CENTROS.noDesvincular);
+        await cargar();
+      };
+      mostrar('estado-vinculado');
+      return;
+    }
+
+    if (solicitudes.length > 0) {
+      const s = solicitudes[0];
+      pintarDl(document.getElementById('datos-solicitud'), [
+        [I18N_YO_CENTROS.centro, s.centro_nombre || ''],
+        [I18N_YO_CENTROS.anio, s.anio || ''],
+        [I18N_YO_CENTROS.mensaje, s.mensaje || ''],
+      ]);
+      mostrar('estado-pendiente');
+      return;
+    }
 
     const sel = document.querySelector('#form-solicitud [name=centro_id]');
     sel.innerHTML = '<option value="">' + esc(I18N_YO_CENTROS.elegir) + '</option>';
-    if (centros.ok) {
-      (centros.centros || []).forEach((c) => {
+    const lista = centros.ok ? (centros.centros || []) : [];
+    if (lista.length === 0) {
+      const o = document.createElement('option');
+      o.value = '';
+      o.textContent = I18N_YO_CENTROS.sinCentros;
+      o.disabled = true;
+      sel.appendChild(o);
+      document.querySelector('#form-solicitud button[type=submit]').disabled = true;
+    } else {
+      document.querySelector('#form-solicitud button[type=submit]').disabled = false;
+      lista.forEach((c) => {
         const o = document.createElement('option');
         o.value = c.id;
         o.textContent = c.nombre || c.codigo;
         sel.appendChild(o);
       });
     }
+    mostrar('estado-solicitar');
   }
 
   document.getElementById('form-solicitud').onsubmit = async (ev) => {
@@ -118,8 +129,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     document.getElementById('ok-sol').hidden = false;
     document.getElementById('ok-sol').textContent = I18N_YO_CENTROS.solicitudEnviada;
-    ev.target.reset();
-    document.querySelector('#form-solicitud [name=anio]').value = String(anio);
     await cargar();
   };
 

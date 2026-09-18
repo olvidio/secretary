@@ -6,14 +6,16 @@ namespace src\apuntes\application;
 
 use src\apuntes\domain\services\ContrapartidasGastoGeneral;
 use src\asientos\domain\value_objects\FilaApunteExcel;
-use src\conceptos\domain\contracts\ConceptoRepository;
+use src\ambito\application\ResolverAmbitoActual;
+use src\conceptos\application\ResolverConceptosCentro;
 use src\personas\domain\contracts\PersonaRepository;
 
 final class CrearApuntesDeEntrada
 {
     public function __construct(
         private readonly CrearApunte $crear,
-        private readonly ConceptoRepository $conceptos,
+        private readonly ResolverConceptosCentro $conceptos,
+        private readonly ResolverAmbitoActual $ambito,
         private readonly PersonaRepository $personas,
         private readonly ContrapartidasGastoGeneral $contrapartidas,
     ) {
@@ -73,7 +75,7 @@ final class CrearApuntesDeEntrada
         }
         $cuenta = strtoupper(trim((string) ($datos['cuenta'] ?? '')));
         $codigo = trim((string) ($datos['concepto_codigo'] ?? $datos['concepto'] ?? ''));
-        $concepto = $this->conceptos->buscar($cuenta, $codigo);
+        $concepto = $this->conceptos->buscar($this->ambito->ejecutar()->centroId, $cuenta, $codigo);
         $iniciales = trim((string) ($datos['iniciales'] ?? ''));
         $persona = $iniciales !== '' ? $this->personas->porIniciales($iniciales) : null;
         $obsRaw = (string) ($datos['observaciones'] ?? '');

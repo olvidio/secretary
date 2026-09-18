@@ -7,12 +7,15 @@ namespace src\personas\application;
 use InvalidArgumentException;
 use PDO;
 use PDOException;
+use src\acceso\domain\contracts\IdentidadRepository;
 use src\personas\domain\contracts\PersonaRepository;
+use src\personas\domain\entity\Persona;
 
 final class BorrarPersona
 {
     public function __construct(
         private readonly PersonaRepository $repo,
+        private readonly IdentidadRepository $identidades,
         private readonly PDO $pdo,
     ) {
     }
@@ -30,6 +33,7 @@ final class BorrarPersona
 
         try {
             $this->pdo->beginTransaction();
+            $this->desvincularCuentaPersonal($persona);
             $this->repo->borrar($id);
             $this->pdo->commit();
 
@@ -46,12 +50,31 @@ final class BorrarPersona
             }
         }
 
+        $this->desvincularCuentaPersonal($persona);
         $this->repo->desactivar($id);
 
         return [
             'eliminada' => false,
             'mensaje' => _("Tiene apuntes, remesas u otros datos; se ha dado de baja y ya no sale en el listado, pero se conserva el histórico."),
         ];
+    }
+
+    private function desvincularCuentaPersonal(Persona $persona): void
+    {
+        if ($persona->id === null) {
+            return;
+        }
+        $identidad = $this->identidades->identidadDePersona($persona->id);
+        if ($identidad === null) {
+            return;
+        }
+        if (
+            $persona->email !== null
+            && strtolower($persona->email) === strtolower($identidad->email)
+        ) {
+            $this->repo->guardarEmail($persona->id, null);
+        }
+        $this->identidades->desvincularPersona($persona->id);
     }
 
     private function esViolacionClaveAjena(PDOException $e): bool

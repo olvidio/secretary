@@ -9,30 +9,22 @@ use InvalidArgumentException;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\entity\Identidad;
 use src\acceso\domain\services\GeneradorTokenVerificacion;
-use src\ambito\application\AsegurarCuentaCorrientePersona;
-use src\ambito\domain\contracts\CentroRepository;
-use src\ambito\domain\entity\Centro;
-use src\personal\application\AsegurarPlanPersonal;
 use src\personas\domain\contracts\PersonaRepository;
-use src\personas\domain\entity\Persona;
 
 /**
- * Alta pública desde el login: identidad de persona (nivel 1) en un centro.
- * El libro personal y la fila de Nombres se crean en ese centro.
+ * Alta pública desde el login: identidad de persona (nivel 1) sin centro.
+ * El vínculo a un centro se solicita después desde /yo/centros.
  */
 final class RegistrarUsuario
 {
     public function __construct(
         private readonly IdentidadRepository $identidades,
         private readonly PersonaRepository $personas,
-        private readonly CentroRepository $centros,
-        private readonly AsegurarPlanPersonal $planPersonal,
-        private readonly AsegurarCuentaCorrientePersona $cuentaCorriente,
     ) {
     }
 
     /**
-     * @return array{identidad: Identidad, persona_id: int, token_verificacion: string}
+     * @return array{identidad: Identidad, token_verificacion: string}
      */
     public function ejecutar(
         string $alias,
@@ -40,7 +32,7 @@ final class RegistrarUsuario
         string $password,
         string $passwordConfirm,
         string $nombre = '',
-        ?int $centroId = null,
+        bool $aceptoCondiciones = false,
     ): array {
         $alias = strtolower(trim($alias));
         $email = strtolower(trim($email));
@@ -71,30 +63,11 @@ final class RegistrarUsuario
         if ($this->personas->porEmail($email) !== null) {
             throw new InvalidArgumentException(_("Ese correo ya está asignado a un nombre"));
         }
-
-        $centro = $this->resolverCentro($centroId);
         if ($nombre === '') {
             $nombre = $alias;
         }
-        $aporta = $centro->tipoCierre === 'vivienda';
-        $persona = $this->personas->guardar(new Persona(
-            null,
-            $nombre,
-            '',
-            $this->inicialesLibres($alias, $centro->id ?? 0),
-            null,
-            null,
-            null,
-            null,
-            null,
-            0,
-            $centro->id,
-            true,
-            $email,
-            $aporta,
-        ));
-        if ($persona->id === null || $persona->centroId === null) {
-            throw new InvalidArgumentException(_("No se pudo crear la persona"));
+        if (!$aceptoCondiciones) {
+            throw new InvalidArgumentException(_("Debe aceptar las Condiciones de uso"));
         }
 
         $creada = $this->identidades->guardar(new Identidad(
@@ -111,9 +84,6 @@ final class RegistrarUsuario
         if ($creada->id === null) {
             throw new InvalidArgumentException(_("No se pudo crear la cuenta"));
         }
-        $this->identidades->vincularPersona($creada->id, $persona->id);
-        $this->cuentaCorriente->ejecutar($persona);
-        $this->planPersonal->ejecutar($persona->centroId, $persona->id);
 
         $token = GeneradorTokenVerificacion::generar();
         $this->identidades->guardarVerificacionEmail(
@@ -124,52 +94,7 @@ final class RegistrarUsuario
 
         return [
             'identidad' => $this->identidades->porId($creada->id) ?? $creada,
-            'persona_id' => $persona->id,
             'token_verificacion' => $token,
         ];
-    }
-
-    private function resolverCentro(?int $centroId): Centro
-    {
-        $listados = array_values(array_filter(
-            $this->centros->listar(),
-            static fn (Centro $c): bool => $c->id !== null && $c->activo,
-        ));
-        if ($listados === []) {
-            throw new InvalidArgumentException(_("Todavía no hay ningún centro. Pida a un secretario que lo cree."));
-        }
-        if ($centroId !== null && $centroId > 0) {
-            foreach ($listados as $c) {
-                if ($c->id === $centroId) {
-                    return $c;
-                }
-            }
-            throw new InvalidArgumentException(_("Ese centro no existe"));
-        }
-        if (count($listados) === 1) {
-            return $listados[0];
-        }
-        throw new InvalidArgumentException(_("Indique el centro"));
-    }
-
-    private function inicialesLibres(string $alias, int $centroId): string
-    {
-        $base = preg_replace('/[^a-z0-9]/', '', $alias) ?? '';
-        $base = substr($base, 0, 6);
-        if ($base === '') {
-            $base = 'usr';
-        }
-        $candidato = $base;
-        $n = 1;
-        while ($this->personas->porInicialesDeCentro($centroId, $candidato) !== null) {
-            $suf = (string) $n;
-            $candidato = substr($base, 0, max(1, 6 - strlen($suf))) . $suf;
-            $n++;
-            if ($n > 99) {
-                throw new InvalidArgumentException(_("No se pudieron generar iniciales únicas"));
-            }
-        }
-
-        return $candidato;
     }
 }

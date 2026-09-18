@@ -34,18 +34,21 @@ final class SolicitarVinculoCentro
         if ($anio < 2000 || $anio > 2100) {
             throw new InvalidArgumentException(_("Indique el año del ejercicio"));
         }
+        if ($this->identidades->centrosDe($identidadId) !== []) {
+            throw new InvalidArgumentException(_("Las cuentas de secretario no solicitan acceso como persona"));
+        }
+        if ($this->identidades->personasDe($identidadId) !== []) {
+            throw new InvalidArgumentException(_("Ya tiene un centro vinculado. Desvincúlese antes de solicitar otro."));
+        }
+        if ($this->solicitudes->pendienteDeIdentidad($identidadId) !== null) {
+            throw new InvalidArgumentException(_("Ya hay una solicitud pendiente"));
+        }
         $centro = $this->centros->porId($centroId);
         if ($centro === null || !$centro->activo) {
             throw new InvalidArgumentException(_("Centro no encontrado"));
         }
-        if ($this->identidades->centrosDe($identidadId) !== []) {
-            throw new InvalidArgumentException(_("Las cuentas de secretario no solicitan acceso como persona"));
-        }
-        if ($this->identidades->tienePersonaEnCentro($identidadId, $centroId)) {
-            throw new InvalidArgumentException(_("Ya está vinculado a ese centro"));
-        }
-        if ($this->solicitudes->pendiente($identidadId, $centroId, $anio) !== null) {
-            throw new InvalidArgumentException(_("Ya hay una solicitud pendiente para ese centro y año"));
+        if ($centro->tipo !== 'n') {
+            throw new InvalidArgumentException(_("Solo puede solicitarse acceso a centros de tipo n"));
         }
 
         $solicitud = $this->solicitudes->guardar(new SolicitudVinculoCentro(

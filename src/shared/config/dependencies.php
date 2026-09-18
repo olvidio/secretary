@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 use src\ambito\application\AsegurarCuentaCorrientePersona;
 use src\ambito\application\AsegurarCuentaDisponiblePersona;
+use src\administracion\application\GuardarConceptosPlan;
+use src\administracion\application\EliminarCentro;
+use src\administracion\application\EliminarPlanContable;
+use src\administracion\application\EliminarUsuario;
+use src\administracion\application\GuardarPlanContable;
+use src\administracion\infrastructure\http\AdminCentroController;
+use src\administracion\infrastructure\http\AdminPlanController;
+use src\administracion\infrastructure\http\AdminUsuarioController;
 use src\ambito\application\CrearCentro;
 use src\ambito\application\VaciarDatosCentro;
 use src\ambito\application\CrearCuentaFisica;
@@ -75,6 +83,7 @@ use src\cierre\application\GenerarApertura;
 use src\cierre\application\ReabrirEjercicio;
 use src\cierre\infrastructure\http\CierreController;
 use src\conceptos\application\ListarConceptos;
+use src\conceptos\application\ResolverConceptosCentro;
 use src\conceptos\domain\contracts\ConceptoRepository;
 use src\conceptos\infrastructure\http\ConceptoController;
 use src\conceptos\infrastructure\persistence\PdoConceptoRepository;
@@ -114,11 +123,13 @@ use src\presupuestos\infrastructure\persistence\PdoPresupuestoRepository;
 use src\presupuestos\infrastructure\persistence\PdoPrevisionPersonalRepository;
 use src\plan\domain\contracts\PartidaLaboresRepository;
 use src\plan\domain\contracts\PlanContableRepository;
+use src\plan\domain\contracts\PlanConceptoRepository;
 use src\plan\infrastructure\persistence\PdoPartidaLaboresRepository;
 use src\plan\application\GuardarPartidasLabores;
 use src\plan\application\ListarPartidasLabores;
 use src\plan\infrastructure\http\PartidaLaboresController;
 use src\plan\infrastructure\persistence\PdoPlanContableRepository;
+use src\plan\infrastructure\persistence\PdoPlanConceptoRepository;
 use src\acceso\application\AsegurarIdentidadCentro;
 use src\acceso\application\AutorizarPeticion;
 use src\acceso\application\CambiarCentroUsuario;
@@ -136,6 +147,7 @@ use src\acceso\application\IniciarSesion;
 use src\acceso\application\ResolverPersonaActiva;
 use src\acceso\application\ObtenerPreferenciasUsuario;
 use src\acceso\application\PrepararTotp;
+use src\acceso\application\RegistrarCentro;
 use src\acceso\application\RegistrarUsuario;
 use src\acceso\application\VerificarSegundoFactor;
 use src\acceso\application\VincularEmailPersona;
@@ -145,6 +157,12 @@ use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\infrastructure\crypto\CifradorSecretos as CifradorSecretosInfra;
 use src\acceso\infrastructure\http\AuthController;
 use src\acceso\infrastructure\http\PreferenciaController;
+use src\legal\application\ExigirDeclaracionResponsableNombres;
+use src\legal\application\RegistrarAceptacion;
+use src\legal\domain\contracts\AceptacionLegalRepository;
+use src\legal\domain\services\CatalogoDocumentosLegales;
+use src\legal\domain\services\DatosOperador;
+use src\legal\infrastructure\persistence\PdoAceptacionLegalRepository;
 use src\acceso\infrastructure\persistence\PdoAccesoRutaRepository;
 use src\acceso\infrastructure\persistence\PdoIdentidadRepository;
 use src\personal\application\AsegurarPlanPersonal;
@@ -226,6 +244,9 @@ return [
     ArqueoRepository::class => autowire(PdoArqueoRepository::class),
     CentroRepository::class => autowire(PdoCentroRepository::class),
     PlanContableRepository::class => autowire(PdoPlanContableRepository::class),
+    PlanConceptoRepository::class => autowire(PdoPlanConceptoRepository::class),
+    ResolverConceptosCentro::class => autowire(),
+    GuardarConceptosPlan::class => autowire(),
     PartidaLaboresRepository::class => autowire(PdoPartidaLaboresRepository::class),
     ListarPartidasLabores::class => autowire(),
     GuardarPartidasLabores::class => autowire(),
@@ -291,9 +312,23 @@ return [
         return new SmtpEnviadorCorreo($host, $port, $from);
     }),
     RegistrarUsuario::class => autowire(),
+    RegistrarCentro::class => autowire(),
     NotificarRegistroUsuario::class => autowire(),
     ConfirmarEmailRegistro::class => autowire(),
     ReenviarCorreoVerificacion::class => autowire(),
+    CatalogoDocumentosLegales::class => factory([CatalogoDocumentosLegales::class, 'porDefecto']),
+    DatosOperador::class => factory(static function (): DatosOperador {
+        $email = ConnectionFactory::env('LEGAL_RESPONSABLE_EMAIL')
+            ?: ConnectionFactory::env('MAIL_FROM', 'secretario@localhost')
+            ?: 'secretario@localhost';
+        $nombre = ConnectionFactory::env('LEGAL_RESPONSABLE_NOMBRE', '') ?: _('Operador de esta instancia de Secretario');
+        $direccion = ConnectionFactory::env('LEGAL_RESPONSABLE_DIRECCION', '') ?: _('No indicada');
+
+        return new DatosOperador($nombre, $email, $direccion);
+    }),
+    AceptacionLegalRepository::class => autowire(PdoAceptacionLegalRepository::class),
+    RegistrarAceptacion::class => autowire(),
+    ExigirDeclaracionResponsableNombres::class => autowire(),
     PrepararTotp::class => autowire(),
     ConfirmarTotp::class => factory(static function (
         IdentidadRepository $identidades,
@@ -353,6 +388,13 @@ return [
     ListarEjercicios::class => autowire(),
     EjercicioController::class => autowire(),
     CentroController::class => autowire(),
+    GuardarPlanContable::class => autowire(),
+    EliminarPlanContable::class => autowire(),
+    EliminarCentro::class => autowire(),
+    EliminarUsuario::class => autowire(),
+    AdminPlanController::class => autowire(),
+    AdminCentroController::class => autowire(),
+    AdminUsuarioController::class => autowire(),
     ObtenerResumen613::class => autowire(),
     GuardarInforme613Mes::class => autowire(),
     ObtenerE37::class => autowire(),
@@ -370,6 +412,7 @@ return [
     src\personas\domain\contracts\SolicitudVinculoCentroRepository::class => autowire(
         src\personas\infrastructure\persistence\PdoSolicitudVinculoCentroRepository::class,
     ),
+    src\personas\application\DesvincularPersonaCentro::class => autowire(),
     src\personas\application\SolicitarVinculoCentro::class => autowire(),
     src\personas\application\ListarVinculosPersona::class => autowire(),
     src\personas\application\ListarCentrosDisponiblesPersona::class => autowire(),

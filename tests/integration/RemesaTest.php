@@ -49,6 +49,8 @@ use src\remesas\application\SolicitarDetalleRemesa;
 use src\remesas\infrastructure\persistence\PdoRemesaRepository;
 use src\shared\infrastructure\persistence\SchemaInstaller;
 use Tests\Soporte\BaseDeDatosAislada;
+use Tests\support\ConceptosCentro;
+use src\conceptos\application\ResolverConceptosCentro;
 
 /** Fase 8 (D6): remesa versionada nivel 1 → nivel 2, sin duplicar asientos. */
 final class RemesaTest extends TestCase
@@ -275,7 +277,8 @@ final class RemesaTest extends TestCase
         $cierres = new PdoPersonalCierreRepository($this->pdo);
         $periodoPersonal = new ResolverPeriodoPersonal($cierres);
         $mes = new ResolverMesRemesa($resolver, $ejercicios, $asientos, $cuentas, $periodoPersonal);
-        $conceptos = new PdoConceptoRepository($this->pdo);
+        $conceptosRepo = new PdoConceptoRepository($this->pdo);
+        $conceptos = ConceptosCentro::resolver($this->pdo);
         $gastosGenerales = $this->gastosGeneralesDeRemesa(
             $asientos,
             $conceptos,
@@ -336,7 +339,7 @@ final class RemesaTest extends TestCase
                 $personas,
                 $periodoPersonal,
                 $gastosGenerales,
-                $this->plantillasDeRemesa($asientos, $conceptos, $personas, $config, $cuentas, $ambitoCentro, $ejercicios),
+                $this->plantillasDeRemesa($asientos, $conceptosRepo, $conceptos, $personas, $config, $cuentas, $ambitoCentro, $ejercicios),
                 $disponible,
             ),
             'rechazar' => new RechazarRemesa($ambitoCentro, $remesas, $asientos, $disponible),
@@ -363,7 +366,7 @@ final class RemesaTest extends TestCase
 
     private function gastosGeneralesDeRemesa(
         PdoAsientoRepository $asientos,
-        PdoConceptoRepository $conceptos,
+        ResolverConceptosCentro $conceptos,
         PdoPersonaRepository $personas,
         PdoConfiguracionRepository $config,
         PdoCuentaRepository $cuentas,
@@ -385,6 +388,7 @@ final class RemesaTest extends TestCase
                 new GenerarApertura($ejercicios, $asientos, $cuentas),
             ),
             $conceptos,
+            $ambito,
             $personas,
             new ContrapartidasGastoGeneral(),
         );
@@ -394,7 +398,8 @@ final class RemesaTest extends TestCase
 
     private function plantillasDeRemesa(
         PdoAsientoRepository $asientos,
-        PdoConceptoRepository $conceptos,
+        PdoConceptoRepository $conceptosRepo,
+        ResolverConceptosCentro $conceptos,
         PdoPersonaRepository $personas,
         PdoConfiguracionRepository $config,
         PdoCuentaRepository $cuentas,

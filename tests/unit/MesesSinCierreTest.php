@@ -14,8 +14,7 @@ final class MesesSinCierreTest extends TestCase
     {
         $r = (new MesesSinCierre())->ejecutar(
             ['2026-01', '2026-02'],
-            ['2026-01' => true],
-            ['2026-01' => true, '2026-02' => true],
+            ['2026-01' => false, '2026-02' => true],
             ['2026-01' => '100,00', '2026-02' => '200,00'],
         );
 
@@ -29,7 +28,6 @@ final class MesesSinCierreTest extends TestCase
     {
         $r = (new MesesSinCierre())->ejecutar(
             ['2026-03'],
-            [],
             ['2026-03' => false],
             ['2026-03' => '0,00'],
         );

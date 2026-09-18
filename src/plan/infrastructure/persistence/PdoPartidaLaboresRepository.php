@@ -7,13 +7,17 @@ namespace src\plan\infrastructure\persistence;
 use InvalidArgumentException;
 use PDO;
 use src\ambito\domain\entity\Cuenta;
+use src\conceptos\domain\services\ReglasConceptoPlan;
 use src\plan\domain\contracts\PartidaLaboresRepository;
+use src\plan\domain\contracts\PlanConceptoRepository;
 use src\plan\domain\services\CatalogoPlanesContables;
 
 final class PdoPartidaLaboresRepository implements PartidaLaboresRepository
 {
-    public function __construct(private readonly PDO $pdo)
-    {
+    public function __construct(
+        private readonly PDO $pdo,
+        private readonly PlanConceptoRepository $planConceptos,
+    ) {
     }
 
     public function paraCentro(int $centroId): array
@@ -41,7 +45,38 @@ final class PdoPartidaLaboresRepository implements PartidaLaboresRepository
 
     public function sembrarPorDefecto(int $centroId): void
     {
-        self::insertarPartidas($this->pdo, $centroId, CatalogoPlanesContables::partidasLaboresPorDefecto());
+        self::insertarPartidas($this->pdo, $centroId, $this->partidasPorDefectoDePlan($centroId));
+    }
+
+    /** @return list<array{codigo:string,etiqueta:string,orden:int,desgrava?:bool}> */
+    private function partidasPorDefectoDePlan(int $centroId): array
+    {
+        $planId = $this->planConceptos->planIdDeCentro($centroId);
+        if ($planId === null) {
+            return CatalogoPlanesContables::partidasLaboresPorDefecto();
+        }
+        $ref = [];
+        foreach (CatalogoPlanesContables::partidasLaboresReferencia() as $p) {
+            $ref[$p['codigo']] = $p;
+        }
+        $out = [];
+        foreach ($this->planConceptos->listar($planId, 'P') as $c) {
+            if (!ReglasConceptoPlan::esCapituloVII($c->codigo, $c->cuenta)) {
+                continue;
+            }
+            $out[] = [
+                'codigo' => $c->codigo,
+                'etiqueta' => $c->nombre !== '' ? $c->nombre : $c->codigo,
+                'orden' => $c->orden,
+                'desgrava' => $ref[$c->codigo]['desgrava'] ?? false,
+            ];
+        }
+        if ($out === []) {
+            return CatalogoPlanesContables::partidasLaboresPorDefecto();
+        }
+        usort($out, static fn (array $a, array $b): int => $a['orden'] <=> $b['orden']);
+
+        return array_slice($out, 0, 6);
     }
 
     public static function sembrarLegacy(PDO $pdo, int $centroId): void

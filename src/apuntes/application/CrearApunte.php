@@ -19,7 +19,7 @@ use src\asientos\domain\services\ConstructorAsientoPeriodificado;
 use src\asientos\domain\services\ProyectorAsientoAFilaExcel;
 use src\asientos\domain\services\TraductorApuntesAAsientos;
 use src\cierre\application\GenerarApertura;
-use src\conceptos\domain\contracts\ConceptoRepository;
+use src\conceptos\application\ResolverConceptosCentro;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\personas\domain\contracts\PersonaRepository;
 use src\shared\domain\value_objects\Dinero;
@@ -28,7 +28,7 @@ final class CrearApunte
 {
     public function __construct(
         private readonly AsientoRepository $asientos,
-        private readonly ConceptoRepository $conceptos,
+        private readonly ResolverConceptosCentro $conceptos,
         private readonly PersonaRepository $personas,
         private readonly ConfiguracionRepository $config,
         private readonly CuentaRepository $cuentas,
@@ -59,7 +59,7 @@ final class CrearApunte
             throw new InvalidArgumentException(_("Origen A, B o C"));
         }
         $conceptoCodigo = trim((string) ($datos['concepto_codigo'] ?? $datos['concepto'] ?? ''));
-        $concepto = $this->conceptos->buscar($cuenta, $conceptoCodigo);
+        $concepto = $this->conceptos->buscar($this->ambito->ejecutar()->centroId, $cuenta, $conceptoCodigo);
         if ($concepto === null) {
             throw new InvalidArgumentException(sprintf(_("Concepto no válido para %s"), $cuenta));
         }

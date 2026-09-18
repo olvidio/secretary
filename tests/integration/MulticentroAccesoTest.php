@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\integration;
 
+use Tests\support\ConceptosCentro;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\TestCase;
@@ -213,7 +214,11 @@ final class MulticentroAccesoTest extends TestCase
             $crearEjercicio,
             new PdoPobladorCentro($this->pdo),
             new AsegurarIdentidadCentro(new PdoIdentidadRepository($this->pdo)),
-            new \src\plan\infrastructure\persistence\PdoPartidaLaboresRepository($this->pdo),
+            new \src\plan\infrastructure\persistence\PdoPartidaLaboresRepository(
+                $this->pdo,
+                new \src\plan\infrastructure\persistence\PdoPlanConceptoRepository($this->pdo),
+            ),
+            new \src\plan\infrastructure\persistence\PdoPlanContableRepository($this->pdo),
         );
     }
 

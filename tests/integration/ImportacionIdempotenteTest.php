@@ -24,6 +24,7 @@ use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\presupuestos\infrastructure\persistence\PdoPresupuestoRepository;
 use src\shared\infrastructure\persistence\SchemaInstaller;
 use Tests\Soporte\BaseDeDatosAislada;
+use Tests\support\ConceptosCentro;
 
 /**
  * Fase "2b Reparación importador" (docs/dev/plan_ampliaciones.md).
@@ -188,7 +189,7 @@ final class ImportacionIdempotenteTest extends TestCase
 
         $crear = new CrearApunte(
             $asientoRepo,
-            new PdoConceptoRepository($pdo),
+            ConceptosCentro::resolver($pdo),
             $personaRepo,
             $configRepo,
             $cuentaRepo,

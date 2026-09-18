@@ -6,6 +6,8 @@
     "meses": 6,
     "modo_ejercicio": "Año",
     "num_residentes": 5,
+    "plan_contable": "H16n",
+    "tipo": "n",
     "tipo_cierre": "vivienda",
     "version": "7"
 }

@@ -134,7 +134,7 @@ final class ObtenerResumen613
         ];
         if ($cuenta === 'P') {
             $ingresos = $sum(['111', '112', '113', '12']);
-            $gastos = $sum(['21', '212', '22', '23', '24', '25', '26', '27', '28']);
+            $gastos = $sum(['211', '212', '22', '23', '24', '25', '26', '27', '28']);
             $atLab = $sum(['51', '52']);
             $lab = $sum($codigosLabores);
             $dispPrev = (new Dinero($ingresos['previsto']))->sub(new Dinero($gastos['previsto']));

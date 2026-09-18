@@ -59,6 +59,52 @@
     return `${sub}. ${nombre}`;
   }
 
+  /** P/212 solo si hay movimiento contable (realizado distinto de cero). */
+  function mostrar212(r) {
+    const l = linea(r, '212');
+    if (!l) return false;
+    const n = parseFloat(String(l.realizado));
+    return Number.isFinite(n) && n !== 0;
+  }
+
+  /** Suma previsto/realizado/% de varias líneas del informe. */
+  function sumLineas(items) {
+    const valid = items.filter(Boolean);
+    if (valid.length === 0) return null;
+    let prev = 0;
+    let real = 0;
+    valid.forEach((l) => {
+      prev += parseFloat(String(l.previsto)) || 0;
+      real += parseFloat(String(l.realizado)) || 0;
+    });
+    return {
+      previsto: prev.toFixed(2),
+      realizado: real.toFixed(2),
+      pct: prev > 0 ? real / prev : null,
+    };
+  }
+
+  function nombreLinea(l) {
+    return l.etiqueta.replace(/^\d+\.\s*/, '');
+  }
+
+  /** Cap. II: 21 suma 211+212; subfilas indentadas con el detalle. */
+  function bloqueViviendaP(r) {
+    const l211 = linea(r, '211');
+    const l212 = linea(r, '212');
+    if (!l211 && !mostrar212(r)) return [];
+    const tot = sumLineas([l211, l212].filter(Boolean));
+    if (!tot) return [];
+    const out = [fila('sub sub-total', '1. Vivienda', tot)];
+    if (l211) {
+      out.push(fila('sub sub-sub', `211. ${nombreLinea(l211)}`, l211));
+    }
+    if (mostrar212(r) && l212) {
+      out.push(fila('sub sub-sub', `212. ${nombreLinea(l212)}`, l212));
+    }
+    return out;
+  }
+
   /** Prefijo de capítulo (1, 2, 7…) → subnúmero visible (23 → 3. Ropa). */
   function etiquetaSub(l, prefijoCapitulo, opts = {}) {
     const { ancho = null } = opts;
@@ -108,7 +154,8 @@
     });
     out.push(fila('sub', '2. Extraordinarios', linea(r, '12')));
     out.push(fila('sec sec-cab sec-divide', 'II. Gastos personales', tot.gastos));
-    lineas(r, ['21', '22', '23', '24', '25', '26', '27', '28']).forEach((l) => {
+    bloqueViviendaP(r).forEach((html) => out.push(html));
+    lineas(r, ['22', '23', '24', '25', '26', '27', '28']).forEach((l) => {
       out.push(fila('sub', etiquetaSub(l, '2'), l));
     });
     out.push(fila('sec sec-cab sec-total sec-divide', 'III. Disponible (ingresos-gastos)', tot.disponible));

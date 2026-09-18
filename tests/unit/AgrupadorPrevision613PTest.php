@@ -9,12 +9,28 @@ use src\presupuestos\domain\services\AgrupadorPrevision613P;
 
 final class AgrupadorPrevision613PTest extends TestCase
 {
+    public function testFiltrar212SinUso(): void
+    {
+        $filtradas = AgrupadorPrevision613P::filtrar212SinUso([
+            self::linea('211', 'II', 1000, [1000]),
+            self::linea('212', 'II', 0, [0]),
+            self::linea('22', 'II', 500, [500]),
+        ]);
+        self::assertSame(['211', '22'], array_column($filtradas, 'codigo'));
+
+        $con212 = AgrupadorPrevision613P::filtrar212SinUso([
+            self::linea('212', 'II', 0, [12000]),
+        ]);
+        self::assertCount(1, $con212);
+        self::assertSame('212', $con212[0]['codigo']);
+    }
+
     public function testInsertaPadresDisponibleYSaldoFinal(): void
     {
         $filas = AgrupadorPrevision613P::filas([
             self::linea('111', 'I', 10000, [4000, 6000]),
             self::linea('12', 'I', 2000, [2000, 0]),
-            self::linea('21', 'II', 3000, [1000, 2000]),
+            self::linea('211', 'II', 3000, [1000, 2000]),
             self::linea('22', 'II', 1000, [0, 1000]),
             self::linea('4', 'IV', 500, [500, 0]),
             self::linea('51', 'V', 100, [100, 0]),

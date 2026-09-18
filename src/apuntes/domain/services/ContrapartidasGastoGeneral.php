@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace src\apuntes\domain\services;
 
 /**
- * Gasto de generales atribuido a una persona: P/111, P/21, G/11 y el gasto anotado.
- * P/21 es vivienda general (cuadra con G/11); P/212 es vivienda personal y no interviene aquí.
+ * Gasto de generales atribuido a una persona: P/111, P/211, G/11 y el gasto anotado.
+ * P/211 es vivienda general (cuadra con G/11); P/212 es vivienda personal y no interviene aquí.
  */
 final class ContrapartidasGastoGeneral
 {
@@ -42,7 +42,7 @@ final class ContrapartidasGastoGeneral
 
         return [
             ['cuenta' => 'P', 'origen' => 'A', 'concepto_codigo' => '111', 'observaciones' => null],
-            ['cuenta' => 'P', 'origen' => 'A', 'concepto_codigo' => '21', 'observaciones' => $obs],
+            ['cuenta' => 'P', 'origen' => 'A', 'concepto_codigo' => '211', 'observaciones' => $obs],
             ['cuenta' => 'G', 'origen' => 'A', 'concepto_codigo' => '11', 'observaciones' => $obs],
             ['cuenta' => 'G', 'origen' => $origen, 'concepto_codigo' => $conceptoCodigo, 'observaciones' => $obs],
         ];

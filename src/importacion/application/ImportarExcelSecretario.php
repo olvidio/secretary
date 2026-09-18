@@ -10,6 +10,7 @@ use PDO;
 use RuntimeException;
 use src\apuntes\domain\contracts\ApunteRepository;
 use src\apuntes\domain\entity\Apunte;
+use src\apuntes\domain\services\ClasificarConceptoViviendaP;
 use src\conceptos\domain\contracts\ConceptoRepository;
 use src\conceptos\domain\entity\Concepto;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
@@ -74,7 +75,7 @@ final class ImportarExcelSecretario
         if ($sha256 === false) {
             throw new RuntimeException('No se pudo calcular el sha256 de ' . $path);
         }
-        $filasExcel = $this->leerFilasTalonarios($book);
+        $filasExcel = $this->reclasificarViviendaP($this->leerFilasTalonarios($book));
         $cfgLeida = $this->leerConfig($book);
         $aislado = $centroCodigo !== null && trim($centroCodigo) !== '';
 
@@ -385,7 +386,7 @@ final class ImportarExcelSecretario
         $n = 0;
         $pMap = [
             6 => '111', 7 => '112', 8 => '113', 9 => '12',
-            12 => '21', 13 => '22', 14 => '23', 15 => '24', 16 => '25', 17 => '26', 18 => '27', 19 => '28',
+            12 => '211', 13 => '22', 14 => '23', 15 => '24', 16 => '25', 17 => '26', 18 => '27', 19 => '28',
             23 => '4', 26 => '51', 27 => '52', 29 => '6',
             32 => '71', 33 => '72', 34 => '73', 35 => '74', 36 => '75', 37 => '76', 38 => '77', 39 => '78', 40 => '79',
         ];
@@ -415,6 +416,23 @@ final class ImportarExcelSecretario
         }
 
         return $n;
+    }
+
+    /**
+     * @param list<FilaOrigenExcel> $filas
+     * @return list<FilaOrigenExcel>
+     */
+    private function reclasificarViviendaP(array $filas): array
+    {
+        $clasificador = new ClasificarConceptoViviendaP();
+        $apuntes = array_map(static fn (FilaOrigenExcel $f) => $f->apunte, $filas);
+        $reclasificados = $clasificador->reclasificarApuntes($apuntes);
+        $out = [];
+        foreach ($filas as $i => $fila) {
+            $out[] = $fila->conApunte($reclasificados[$i]);
+        }
+
+        return $out;
     }
 
     /**

@@ -25,6 +25,11 @@ final class Estructura613PTest extends TestCase
         $codigos = array_column($defs, 'codigo');
         self::assertSame('I', $defs[0]['grupo']);
         self::assertSame('VII', $defs[array_search('71', $codigos, true)]['grupo']);
+        self::assertContains('212', $codigos);
+        self::assertLessThan(
+            array_search('22', $codigos, true),
+            array_search('212', $codigos, true),
+        );
     }
 
     public function testCodigosLabores(): void

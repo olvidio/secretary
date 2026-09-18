@@ -105,6 +105,16 @@ final class CatalogoMenus
         return $out;
     }
 
+    /** @return list<Item> */
+    public static function itemsAdmin(): array
+    {
+        return [
+            ['nav' => 'admin-planes', 'href' => '/admin/planes', 'label' => _("Planes contables")],
+            ['nav' => 'admin-centros', 'href' => '/admin/centros', 'label' => _("Centros")],
+            ['nav' => 'admin-usuarios', 'href' => '/admin/usuarios', 'label' => _("Usuarios")],
+        ];
+    }
+
     public static function grupoDe(string $layout, string $nav): string
     {
         foreach (self::clavesGrupos($layout) as $grupo) {

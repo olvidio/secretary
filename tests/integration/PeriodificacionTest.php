@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\integration;
 
+use Tests\support\ConceptosCentro;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\TestCase;
@@ -262,7 +263,7 @@ final class PeriodificacionTest extends TestCase
         $proyector = new ProyectorAsientoAFilaExcel();
         $crear = new CrearApunte(
             $asientos,
-            new PdoConceptoRepository($this->pdo),
+            ConceptosCentro::resolver($this->pdo),
             $personas,
             $config,
             $cuentas,

@@ -6,12 +6,6 @@
         "previsto_es": "5.523,00"
     },
     {
-        "concepto_codigo": "21",
-        "cuenta": "P",
-        "previsto": "109240.00",
-        "previsto_es": "109.240,00"
-    },
-    {
         "concepto_codigo": "22",
         "cuenta": "P",
         "previsto": "12840.00",
@@ -88,5 +82,11 @@
         "cuenta": "P",
         "previsto": "0.00",
         "previsto_es": "0,00"
+    },
+    {
+        "concepto_codigo": "211",
+        "cuenta": "P",
+        "previsto": "109240.00",
+        "previsto_es": "109.240,00"
     }
 ]

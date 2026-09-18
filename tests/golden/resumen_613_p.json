@@ -50,13 +50,22 @@
             "realizado_es": "0,00"
         },
         {
-            "codigo": "21",
-            "etiqueta": "Vivienda",
-            "pct": 0.942338,
+            "codigo": "211",
+            "etiqueta": "Vivienda general",
+            "pct": 0.397821,
             "previsto": "54620.00",
             "previsto_es": "54.620,00",
-            "realizado": "51470.51",
-            "realizado_es": "51.470,51"
+            "realizado": "21729.00",
+            "realizado_es": "21.729,00"
+        },
+        {
+            "codigo": "212",
+            "etiqueta": "Vivienda personal",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "29741.51",
+            "realizado_es": "29.741,51"
         },
         {
             "codigo": "22",

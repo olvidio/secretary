@@ -175,6 +175,22 @@ final class AutorizarPeticionTest extends TestCase
         self::assertSame('Token CSRF inválido', $d->error);
     }
 
+    public function testDocumentoLegalEsPublico(): void
+    {
+        $d = $this->autorizar()->ejecutar(
+            self::PAGINA,
+            'documentoLegal',
+            'GET',
+            true,
+            null,
+            null,
+            null,
+            '',
+            false,
+        );
+        self::assertTrue($d->permitido);
+    }
+
     public function testLoginPublicoNoExigeSesion(): void
     {
         $d = $this->autorizar()->ejecutar(
@@ -216,6 +232,37 @@ final class AutorizarPeticionTest extends TestCase
             null,
             '',
             true,
+        );
+        self::assertTrue($dApi->permitido);
+    }
+
+    public function testPersonaCuentaNoExigePersonaActiva(): void
+    {
+        $d = $this->autorizar()->ejecutar(
+            self::PAGINA,
+            'yoCentros',
+            'GET',
+            true,
+            1,
+            null,
+            null,
+            'persona',
+            false,
+            null,
+        );
+        self::assertTrue($d->permitido);
+
+        $dApi = $this->autorizar()->ejecutar(
+            'src\\personas\\infrastructure\\http\\VinculoCentroController',
+            'listarYo',
+            'GET',
+            true,
+            1,
+            null,
+            null,
+            'persona',
+            true,
+            null,
         );
         self::assertTrue($dApi->permitido);
     }

@@ -20,6 +20,7 @@ final class Identidad
         public readonly ?DateTimeImmutable $ultimoAcceso,
         public readonly ?string $alias = null,
         public readonly ?DateTimeImmutable $emailVerificadoAt = null,
+        public readonly bool $esAdmin = false,
     ) {
     }
 

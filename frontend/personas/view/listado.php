@@ -1,5 +1,5 @@
 <h1><?= _("Nombres") ?></h1>
-<p class="muted"><?= _("El correo convierte a esa persona en usuario del libro personal de este centro. Si el correo es nuevo, se muestra una contraseña inicial para comunicársela una vez. «Vivienda aporta a generales» indica si entra en el cierre automático de P/21 (típico de n); quien no aporta puede igualmente imputar gastos de casa a generales desde su libro personal. P/212 (vivienda personal) es un gasto propio, como ordinarios. La exención de meses es para quien llega o se va a mitad de año (no se le pide movimiento ni entra en el cierre esos meses).") ?></p>
+<p class="muted"><?= _("El correo convierte a esa persona en usuario del libro personal de este centro. Si el correo es nuevo, se muestra una contraseña inicial para comunicársela una vez. «Vivienda aporta a generales» indica si entra en el cierre automático (P/211, típico de n); quien no aporta puede igualmente imputar a generales puntualmente (P/211 y G/11). P/212 (vivienda personal) es un gasto propio, sin G/11. La exención de meses es para quien llega o se va a mitad de año (no se le pide movimiento ni entra en el cierre esos meses).") ?></p>
 <form id="form-persona" class="grid-form">
     <input type="hidden" name="id">
     <label><?= _("Nombre") ?> <input name="nombre" required></label>
@@ -13,7 +13,7 @@
     <label><?= _("Importe fijo vivienda") ?> <input name="importe_vivienda_fijo"></label>
     <label><?= _("Vivienda aporta a generales") ?>
         <select name="vivienda_aporta_generales">
-            <option value="1"><?= _("Sí — P/21 tiene entrada G/11") ?></option>
+            <option value="1"><?= _("Sí — entra en el cierre automático (P/211)") ?></option>
             <option value="0"><?= _("No — vivienda solo personal") ?></option>
         </select>
     </label>
@@ -23,12 +23,18 @@
             <option value="0"><?= _("No — las 7 van a partidas que no desgravan") ?></option>
         </select>
     </label>
+    <label class="inline casilla-legal">
+        <input type="checkbox" name="asumo_responsable_nombres" value="1" id="asumo-responsable-nombres">
+        <span><?= htmlspecialchars((string) ($textoAsumoNombres ?? _('Declaro que el centro, y yo como secretario, somos responsables del tratamiento de los datos de las personas que doy de alta, importo o vinculo. Secretario es un programa gratuito que solo aloja la información. Tengo base legal para ese tratamiento.')), ENT_QUOTES) ?></span>
+    </label>
     <button type="submit"><?= _("Guardar") ?></button>
     <button type="button" id="btn-nuevo"><?= _("Nuevo") ?></button>
 </form>
 <p class="ok" id="msg-password" hidden></p>
 <p class="ok" id="msg-personas" hidden></p>
 <?php include __DIR__ . '/_solicitudes_vinculo.php'; ?>
+<section class="nombres-listado">
+<h2 class="nombres-listado-titulo"><?= _("Personas del centro") ?></h2>
 <table id="tabla-personas">
     <thead>
     <tr>
@@ -38,6 +44,7 @@
     </thead>
     <tbody></tbody>
 </table>
+</section>
 <script>
 const I18N_PERSONAS = {
   si: <?= json_encode(_("sí"), JSON_UNESCAPED_UNICODE) ?>,
@@ -47,6 +54,7 @@ const I18N_PERSONAS = {
   confirmQuitar: <?= json_encode(_("¿Quitar %s del listado?"), JSON_UNESCAPED_UNICODE) ?>,
   error: <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>,
   passwordInicial: <?= json_encode(_("Contraseña inicial de %s: %s — comunícasela ahora; no se volverá a mostrar."), JSON_UNESCAPED_UNICODE) ?>,
+  faltaResponsable: <?= json_encode(_("Marque que el centro es responsable de los datos de las personas que da de alta."), JSON_UNESCAPED_UNICODE) ?>,
 };
 async function loadPersonas() {
   const r = await api('/api/personas');
@@ -100,7 +108,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelector('[name=puede_desgravar]').value = '1';
   document.getElementById('form-persona').onsubmit = async (ev) => {
     ev.preventDefault();
-    const s = await api('/api/personas', {method:'POST', body: formObj(ev.target)});
+    const datos = formObj(ev.target);
+    const esAlta = !datos.id;
+    const casilla = document.getElementById('asumo-responsable-nombres');
+    if (esAlta && !casilla.checked) {
+      return alert(I18N_PERSONAS.faltaResponsable);
+    }
+    if (esAlta) {
+      datos.asumo_responsable_nombres = '1';
+    }
+    const s = await api('/api/personas', {method:'POST', body: datos});
     if (!s.ok) return alert(s.error);
     const msg = document.getElementById('msg-password');
     if (s.password_inicial) {

@@ -26,6 +26,7 @@ use src\personas\domain\entity\Persona;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\shared\infrastructure\persistence\SchemaInstaller;
 use Tests\Soporte\BaseDeDatosAislada;
+use Tests\support\ConceptosCentro;
 
 final class CalcularCuadreApuntesATest extends TestCase
 {
@@ -63,7 +64,7 @@ final class CalcularCuadreApuntesATest extends TestCase
 
         $crear = new CrearApunte(
             $asientos,
-            new PdoConceptoRepository($this->pdo),
+            ConceptosCentro::resolver($this->pdo),
             $personas,
             $config,
             $cuentas,
@@ -113,7 +114,8 @@ final class CalcularCuadreApuntesATest extends TestCase
                 new ProyectorAsientoAFilaExcel(),
                 $ambito,
             ),
-            new PdoConceptoRepository($this->pdo),
+            ConceptosCentro::resolver($this->pdo),
+            $ambito,
         );
         $r = $cuadre->ejecutar('P', 'jrm', $y . '-03-15');
 

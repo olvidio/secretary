@@ -7,13 +7,13 @@
 <script>
 const I18N_SOL_VINCULO = {
   error: <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>,
-  nuevoNombre: <?= json_encode(_("Nuevo nombre"), JSON_UNESCAPED_UNICODE) ?>,
+  nuevoNombre: <?= json_encode(_("Dar de alta y vincular"), JSON_UNESCAPED_UNICODE) ?>,
   vincularExistente: <?= json_encode(_("Vincular existente…"), JSON_UNESCAPED_UNICODE) ?>,
   rechazar: <?= json_encode(_("Rechazar"), JSON_UNESCAPED_UNICODE) ?>,
-  confirmNuevo: <?= json_encode(_("¿Crear un nombre nuevo y vincular la cuenta?"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmNuevo: <?= json_encode(_("¿Dar de alta y vincular la cuenta?"), JSON_UNESCAPED_UNICODE) ?>,
   confirmRechazar: <?= json_encode(_("¿Rechazar la solicitud?"), JSON_UNESCAPED_UNICODE) ?>,
   cargando: <?= json_encode(_("Cargando nombres parecidos…"), JSON_UNESCAPED_UNICODE) ?>,
-  sinParecidos: <?= json_encode(_("No hay nombres parecidos. Use «Nuevo nombre»."), JSON_UNESCAPED_UNICODE) ?>,
+  sinParecidos: <?= json_encode(_("No hay nombres parecidos. Use «Dar de alta y vincular»."), JSON_UNESCAPED_UNICODE) ?>,
   yaVinculado: <?= json_encode(_(" (ya vinculado)"), JSON_UNESCAPED_UNICODE) ?>,
   otraCuenta: <?= json_encode(_(" (otra cuenta)"), JSON_UNESCAPED_UNICODE) ?>,
   vincular: <?= json_encode(_("Vincular"), JSON_UNESCAPED_UNICODE) ?>,
@@ -36,20 +36,31 @@ async function cargarSolicitudesVinculo() {
     const box = document.createElement('article');
     box.className = 'solicitud-vinculo-box';
     box.innerHTML =
-      '<p><strong>' + esc(s.solicitante_nombre || s.solicitante_email) + '</strong>'
+      '<div class="solicitud-vinculo-cuerpo">'
+      + '<div class="solicitud-vinculo-info">'
+      + '<p><strong>' + esc(s.solicitante_nombre || s.solicitante_email) + '</strong>'
       + ' · ' + esc(s.solicitante_email || '')
       + ' · ' + esc(I18N_SOL_VINCULO.anio) + ' ' + esc(s.anio)
       + (s.mensaje ? '<br><span class="muted">' + esc(s.mensaje) + '</span>' : '')
       + '</p>'
+      + '</div>'
       + '<div class="solicitud-vinculo-acciones">'
-      + '<button type="button" data-nuevo>' + esc(I18N_SOL_VINCULO.nuevoNombre) + '</button> '
-      + '<button type="button" data-vincular>' + esc(I18N_SOL_VINCULO.vincularExistente) + '</button> '
+      + '<button type="button" data-nuevo>' + esc(I18N_SOL_VINCULO.nuevoNombre) + '</button>'
+      + '<button type="button" data-vincular>' + esc(I18N_SOL_VINCULO.vincularExistente) + '</button>'
       + '<button type="button" data-rechazar class="peligro">' + esc(I18N_SOL_VINCULO.rechazar) + '</button>'
+      + '</div>'
       + '</div>'
       + '<div class="solicitud-candidatos" hidden></div>';
     box.querySelector('[data-nuevo]').onclick = async () => {
       if (!confirm(I18N_SOL_VINCULO.confirmNuevo)) return;
-      const res = await api('/api/vinculos-centro/solicitudes/' + s.id + '/aprobar', { method: 'POST', body: {} });
+      const casilla = document.getElementById('asumo-responsable-nombres');
+      if (!casilla || !casilla.checked) {
+        return alert(typeof I18N_PERSONAS !== 'undefined' ? I18N_PERSONAS.faltaResponsable : I18N_SOL_VINCULO.error);
+      }
+      const res = await api('/api/vinculos-centro/solicitudes/' + s.id + '/aprobar', {
+        method: 'POST',
+        body: { asumo_responsable_nombres: '1' },
+      });
       if (!res.ok) return alert(res.error);
       await cargarSolicitudesVinculo();
       if (typeof loadPersonas === 'function') loadPersonas();
@@ -88,9 +99,13 @@ async function cargarSolicitudesVinculo() {
           btn.textContent = I18N_SOL_VINCULO.vincular;
           btn.onclick = async () => {
             if (!confirm(I18N_SOL_VINCULO.confirmVincular.replace('%s', p.iniciales))) return;
+            const casilla = document.getElementById('asumo-responsable-nombres');
+            if (!casilla || !casilla.checked) {
+              return alert(typeof I18N_PERSONAS !== 'undefined' ? I18N_PERSONAS.faltaResponsable : I18N_SOL_VINCULO.error);
+            }
             const res = await api('/api/vinculos-centro/solicitudes/' + s.id + '/aprobar', {
               method: 'POST',
-              body: { persona_id: p.id },
+              body: { persona_id: p.id, asumo_responsable_nombres: '1' },
             });
             if (!res.ok) return alert(res.error);
             await cargarSolicitudesVinculo();

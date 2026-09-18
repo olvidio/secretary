@@ -27,6 +27,7 @@ use src\personas\domain\entity\Persona;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\shared\infrastructure\persistence\SchemaInstaller;
 use Tests\Soporte\BaseDeDatosAislada;
+use Tests\support\ConceptosCentro;
 
 final class ContrapartidasGastoGeneralEntradaTest extends TestCase
 {
@@ -54,8 +55,8 @@ final class ContrapartidasGastoGeneralEntradaTest extends TestCase
         $cuentas = new PdoCuentaRepository($this->pdo);
         $ejercicios = new PdoEjercicioRepository($this->pdo);
         $personas = new PdoPersonaRepository($this->pdo);
-        $conceptos = new PdoConceptoRepository($this->pdo);
         $ambito = new ResolverAmbitoActual($config, new PdoCentroRepository($this->pdo), $ejercicios);
+        $conceptos = ConceptosCentro::resolver($this->pdo);
         $centroId = $ambito->ejecutar()->centroId;
         $persona = new Persona(null, 'José R.', 'JRM', 'jrm', null, null, null, null, null, 1, $centroId);
         $personas->guardar($persona);
@@ -78,6 +79,7 @@ final class ContrapartidasGastoGeneralEntradaTest extends TestCase
                 new GenerarApertura($ejercicios, $asientos, $cuentas),
             ),
             $conceptos,
+            $ambito,
             $personas,
             new ContrapartidasGastoGeneral(),
         );
@@ -96,7 +98,7 @@ final class ContrapartidasGastoGeneralEntradaTest extends TestCase
         ]);
 
         $codigos = array_map(static fn ($f) => $f->cuenta . '/' . $f->conceptoCodigo, $filas);
-        self::assertSame(['P/111', 'P/21', 'G/11', 'G/211'], $codigos);
+        self::assertSame(['P/111', 'P/211', 'G/11', 'G/211'], $codigos);
         foreach ($filas as $fila) {
             self::assertSame('40.00', $fila->cantidad->toString());
             self::assertSame('jrm', $fila->iniciales);
@@ -111,6 +113,6 @@ final class ContrapartidasGastoGeneralEntradaTest extends TestCase
         ))->ejecutar(['iniciales' => 'jrm']);
         $vistos = array_map(static fn (array $a): string => $a['cuenta'] . '/' . $a['concepto_codigo'], $listados);
         sort($vistos);
-        self::assertSame(['G/11', 'G/211', 'P/111', 'P/21'], $vistos);
+        self::assertSame(['G/11', 'G/211', 'P/111', 'P/211'], $vistos);
     }
 }

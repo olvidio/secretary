@@ -27,6 +27,7 @@
         <button type="submit"><?= _("Reenviar correo") ?></button>
     </form>
     <p class="login-alt"><a href="/login"><?= _("Volver a entrar") ?></a></p>
+    <?php include dirname(__DIR__, 2) . '/shared/view/_pie_legal.php'; ?>
 </div>
 </body>
 </html>

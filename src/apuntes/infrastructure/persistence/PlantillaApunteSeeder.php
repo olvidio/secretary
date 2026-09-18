@@ -41,7 +41,7 @@ final class PlantillaApunteSeeder
             true,
             10,
             [
-                new LineaPlantillaApunte('P', 'A', '21', 'per el club', 0),
+                new LineaPlantillaApunte('P', 'A', '211', 'per el club', 0),
                 new LineaPlantillaApunte('P', 'A', '111', null, 1),
                 new LineaPlantillaApunte('G', 'A', '11', 'per el club', 2),
                 new LineaPlantillaApunte('G', 'A', '211', 'ingres al club', 3),

@@ -6,6 +6,9 @@ namespace src\personas\infrastructure\http;
 
 use InvalidArgumentException;
 use src\ambito\application\ResolverAmbitoActual;
+use src\legal\application\ExigirDeclaracionResponsableNombres;
+use src\legal\application\LecturaAceptacion;
+use src\legal\infrastructure\http\HuellaAceptacionHttp;
 use src\personas\application\BorrarPersona;
 use src\personas\application\GuardarPersona;
 use src\personas\application\ListarPersonas;
@@ -20,6 +23,7 @@ final class PersonaController
         private readonly GuardarPersona $guardar,
         private readonly BorrarPersona $borrar,
         private readonly ResolverAmbitoActual $ambito,
+        private readonly ExigirDeclaracionResponsableNombres $declaracionNombres,
     ) {
     }
 
@@ -33,7 +37,29 @@ final class PersonaController
     public function save(Request $request, array $vars = []): Response
     {
         try {
-            $resultado = $this->guardar->ejecutar($request->json());
+            $datos = $request->json();
+            $id = isset($datos['id']) && $datos['id'] !== '' ? (int) $datos['id'] : null;
+            $aceptaNombres = LecturaAceptacion::marcada($datos['asumo_responsable_nombres'] ?? false);
+            if ($id === null) {
+                $this->declaracionNombres->comprobar($aceptaNombres);
+            }
+            $resultado = $this->guardar->ejecutar($datos);
+            if ($id === null) {
+                $ctx = $this->ambito->ejecutar();
+                $this->declaracionNombres->ejecutar(
+                    true,
+                    isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : null,
+                    'nombres_alta',
+                    HuellaAceptacionHttp::desde(
+                        $request,
+                        (string) ($_SESSION['idioma'] ?? 'es'),
+                        null,
+                        null,
+                        $ctx->centroId,
+                        $resultado['persona']->id,
+                    ),
+                );
+            }
             $fila = $resultado['persona']->toArray();
             $fila['email'] = $resultado['persona']->email ?? '';
             $fila['vivienda_aporta_generales'] = $resultado['persona']->viviendaAportaGenerales;

@@ -62,6 +62,9 @@ final class PdoPlantillaApunteRepository implements PlantillaApunteRepository
                 $id = (int) $st->fetchColumn();
             } else {
                 $id = $plantilla->id;
+                if ($id === null || $id <= 0) {
+                    throw new \InvalidArgumentException(_('Plantilla no encontrada'));
+                }
                 $st = $this->pdo->prepare(
                     'UPDATE plantillas_apunte
                      SET nombre = :nombre, activa = :activa, orden = :orden
@@ -74,6 +77,9 @@ final class PdoPlantillaApunteRepository implements PlantillaApunteRepository
                     ':id' => $id,
                     ':c' => $plantilla->centroId,
                 ]);
+                if ($st->rowCount() === 0) {
+                    throw new \InvalidArgumentException(_('Plantilla no encontrada'));
+                }
                 $del = $this->pdo->prepare('DELETE FROM plantilla_lineas_apunte WHERE plantilla_id = :id');
                 $del->execute([':id' => $id]);
             }

@@ -24,6 +24,10 @@
     <p class="muted"><?= _("Carga el .xlsm en el libro de este centro, sin tocar el de los demás.") ?></p>
     <form id="form-import" class="grid-form">
         <label><?= _("Fichero Excel") ?> <input name="excel" type="file" accept=".xlsm,.xlsx" required></label>
+        <label class="inline casilla-legal">
+            <input type="checkbox" name="asumo_responsable_nombres" value="1" required>
+            <span><?= htmlspecialchars((string) ($textoAsumoNombres ?? _('Declaro que el centro, y yo como secretario, somos responsables del tratamiento de los datos de las personas que doy de alta, importo o vinculo. Secretario es un programa gratuito que solo aloja la información. Tengo base legal para ese tratamiento.')), ENT_QUOTES) ?></span>
+        </label>
         <button type="submit"><?= _("Importar Excel") ?></button>
     </form>
     <p class="ok" id="msg-import" hidden></p>
@@ -47,29 +51,6 @@
         <p class="ok" id="msg-labores" hidden></p>
     </section>
 </section>
-
-<section>
-    <h2><?= _("Nuevo centro") ?></h2>
-    <p class="muted"><?= _("Crea una entidad distinta, con su plan de cuentas y su propio secretario. Tú no quedarás vinculado a ella. Si adjuntas el Excel, se importa en ese centro al crearlo.") ?></p>
-    <form id="form-centro" class="grid-form">
-        <label><?= _("Código") ?> <input name="codigo" required placeholder="<?= htmlspecialchars(_("p. ej. CASA-B"), ENT_QUOTES) ?>"></label>
-        <label><?= _("Nombre") ?> <input name="nombre" required></label>
-        <label><?= _("Tipo de cierre") ?>
-            <select name="tipo_cierre">
-                <option value="vivienda"><?= _("Vivienda") ?></option>
-                <option value="necesidades"><?= _("Necesidades") ?></option>
-            </select>
-        </label>
-        <label><?= _("Ejercicio desde") ?> <input name="fecha_inicio" type="date" required></label>
-        <label><?= _("Ejercicio hasta") ?> <input name="fecha_fin" type="date" required></label>
-        <label><?= _("Usuario secretario") ?> <input name="usuario" required placeholder="<?= htmlspecialchars(_("p. ej. scl2"), ENT_QUOTES) ?>"></label>
-        <label><?= _("Correo secretario") ?> <input name="email" type="email" required></label>
-        <label><?= _("Contraseña") ?> <input name="password" type="password" required minlength="6"></label>
-        <label><?= _("Excel (opcional)") ?> <input name="excel" type="file" accept=".xlsm,.xlsx"></label>
-        <button type="submit"><?= _("Crear centro") ?></button>
-    </form>
-    <p class="ok" id="msg-centro" hidden></p>
-</section>
 <script>
 const I18N_CENTROS = {
   importados: <?= json_encode(_(" Importados %s nombres y %s asientos."), JSON_UNESCAPED_UNICODE) ?>,
@@ -78,10 +59,9 @@ const I18N_CENTROS = {
   noCentro: <?= json_encode(_("No se pudo cargar el centro"), JSON_UNESCAPED_UNICODE) ?>,
   partidasGuardadas: <?= json_encode(_("Partidas guardadas."), JSON_UNESCAPED_UNICODE) ?>,
   excelImportado: <?= json_encode(_("Excel importado."), JSON_UNESCAPED_UNICODE) ?>,
+  faltaResponsable: <?= json_encode(_("Marque que el centro es responsable de los datos de las personas que da de alta."), JSON_UNESCAPED_UNICODE) ?>,
   confirmVaciar: <?= json_encode(_("Esto borra asientos, remesas y arqueos de ESTE centro para poder recargar el Excel. Quedan el centro, los usuarios y los nombres. ¿Seguro?"), JSON_UNESCAPED_UNICODE) ?>,
   vaciados: <?= json_encode(_("Vaciados %s asientos en %s ejercicio(s). Ya puedes importar el Excel."), JSON_UNESCAPED_UNICODE) ?>,
-  centroCreado: <?= json_encode(_("Centro «%s» creado. Entra con %s (tendrá que activar TOTP)."), JSON_UNESCAPED_UNICODE) ?>,
-  excelNoImportado: <?= json_encode(_(" El Excel no se importó: %s"), JSON_UNESCAPED_UNICODE) ?>,
 };
 function textoImportacion(imp) {
   if (!imp) return '';
@@ -146,7 +126,7 @@ async function loadCentro() {
   }
   const c = r.centro || {};
   p.textContent = (c.nombre || c.codigo || '')
-    + ' · plan H16n'
+    + (c.plan_contable ? ' · plan ' + c.plan_contable : '')
     + (c.tipo_cierre ? ' · cierre ' + c.tipo_cierre : '');
   (r.usuarios || []).forEach((u) => {
     const tr = document.createElement('tr');
@@ -155,11 +135,6 @@ async function loadCentro() {
   });
 }
 document.addEventListener('DOMContentLoaded', () => {
-  const year = new Date().getFullYear();
-  const ini = document.querySelector('#form-centro [name=fecha_inicio]');
-  const fin = document.querySelector('#form-centro [name=fecha_fin]');
-  if (ini && !ini.value) ini.value = year + '-01-01';
-  if (fin && !fin.value) fin.value = year + '-12-31';
   loadCentro();
   loadLabores();
   document.getElementById('btn-add-labor')?.addEventListener('click', () => {
@@ -186,6 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   document.getElementById('form-import').onsubmit = async (ev) => {
     ev.preventDefault();
+    if (!ev.target.querySelector('[name=asumo_responsable_nombres]')?.checked) {
+      return alert(I18N_CENTROS.faltaResponsable);
+    }
     const btn = ev.target.querySelector('button[type=submit]');
     const msg = document.getElementById('msg-import');
     btn.disabled = true;
@@ -211,32 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
     msg.textContent = I18N_CENTROS.vaciados
       .replace('%s', s.asientos || 0)
       .replace('%s', s.ejercicios || 0);
-  };
-  document.getElementById('form-centro').onsubmit = async (ev) => {
-    ev.preventDefault();
-    const btn = ev.target.querySelector('button[type=submit]');
-    const msg = document.getElementById('msg-centro');
-    btn.disabled = true;
-    msg.hidden = true;
-    try {
-      const s = await api('/api/centros', {method:'POST', body: new FormData(ev.target)});
-      if (!s.ok) return alert(s.error);
-      msg.hidden = false;
-      let texto = I18N_CENTROS.centroCreado
-        .replace('%s', s.centro.nombre || s.centro.codigo)
-        .replace('%s', s.usuario.alias || s.usuario.email);
-      if (s.aviso_import) {
-        texto += I18N_CENTROS.excelNoImportado.replace('%s', s.aviso_import);
-      } else {
-        texto += textoImportacion(s.importacion);
-      }
-      msg.textContent = texto;
-      ev.target.reset();
-      if (ini) ini.value = year + '-01-01';
-      if (fin) fin.value = year + '-12-31';
-    } finally {
-      btn.disabled = false;
-    }
   };
 });
 </script>

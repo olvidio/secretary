@@ -19,10 +19,6 @@ use src\acceso\domain\services\TotpRfc6238;
 use src\acceso\infrastructure\crypto\CifradorSecretos;
 use src\acceso\infrastructure\persistence\PdoAccesoRutaRepository;
 use src\acceso\infrastructure\persistence\PdoIdentidadRepository;
-use src\ambito\application\AsegurarCuentaCorrientePersona;
-use src\ambito\infrastructure\persistence\PdoCentroRepository;
-use src\ambito\infrastructure\persistence\PdoCuentaRepository;
-use src\personal\application\AsegurarPlanPersonal;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\shared\infrastructure\persistence\SchemaInstaller;
 use Tests\Soporte\BaseDeDatosAislada;
@@ -209,24 +205,32 @@ final class AutenticacionTest extends TestCase
         $pdo = $this->prepararBaseDeTestVacia();
         (new SchemaInstaller($pdo))->install();
         $identidades = new PdoIdentidadRepository($pdo);
-        $cuentas = new PdoCuentaRepository($pdo);
         $alta = (new RegistrarUsuario(
             $identidades,
             new PdoPersonaRepository($pdo),
-            new PdoCentroRepository($pdo),
-            new AsegurarPlanPersonal($cuentas),
-            new AsegurarCuentaCorrientePersona($cuentas),
-        ))->ejecutar('dani', 'dani@example.test', 'secret1', 'secret1', 'Dani');
+        ))->ejecutar('dani', 'dani@example.test', 'secret1', 'secret1', 'Dani', true);
         self::assertNotNull($alta['identidad']->id);
         $resolver = new ResolverPersonaActiva($identidades);
         $pendiente = (new IniciarSesion($identidades, $resolver))->ejecutar('dani', 'secret1');
         self::assertSame('fallo', $pendiente->estado);
         self::assertStringContainsString('correo', strtolower($pendiente->mensaje));
-        (new ConfirmarEmailRegistro($identidades))->ejecutar($alta['token_verificacion']);
+        $catalogo = \src\legal\domain\services\CatalogoDocumentosLegales::porDefecto();
+        $aceptaciones = new \src\legal\infrastructure\persistence\PdoAceptacionLegalRepository($pdo);
+        (new ConfirmarEmailRegistro(
+            $identidades,
+            new \src\legal\application\RegistrarAceptacion(
+                $aceptaciones,
+                $catalogo,
+                new \src\legal\domain\services\DatosOperador('Op', 'op@test.local', 'Dir'),
+            ),
+            $catalogo,
+        ))->ejecutar($alta['token_verificacion']);
         $login = (new IniciarSesion($identidades, $resolver))->ejecutar('dani', 'secret1');
         self::assertSame('autenticado', $login->estado);
         self::assertSame('persona', $login->nivel);
-        self::assertSame($alta['persona_id'], $login->personaId);
+        self::assertNull($login->personaId);
+        $nAcept = (int) $pdo->query("SELECT COUNT(*) FROM aceptaciones_legales WHERE canal = 'confirmacion_email'")->fetchColumn();
+        self::assertSame(1, $nAcept);
         $desconocido = (new IniciarSesion($identidades, $resolver))->ejecutar('nadie', 'secret1');
         self::assertSame('desconocido', $desconocido->estado);
     }

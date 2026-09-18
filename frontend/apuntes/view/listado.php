@@ -36,7 +36,7 @@
 const I18N_APUNTES = {
   error: <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>,
   verEnG: <?= json_encode(_("Ver en G"), JSON_UNESCAPED_UNICODE) ?>,
-  aceptar21: <?= json_encode(_("Aceptar (P/21 y G/11)"), JSON_UNESCAPED_UNICODE) ?>,
+  aceptar21: <?= json_encode(_("Aceptar (P/211 y G/11)"), JSON_UNESCAPED_UNICODE) ?>,
   aceptar111: <?= json_encode(_("Aceptar (ingreso P/111)"), JSON_UNESCAPED_UNICODE) ?>,
   cuadra: <?= json_encode(_("cuadra"), JSON_UNESCAPED_UNICODE) ?>,
   noCuadra: <?= json_encode(_("no cuadra"), JSON_UNESCAPED_UNICODE) ?>,
@@ -48,10 +48,10 @@ const I18N_APUNTES = {
   sugEnG: <?= json_encode(_("Sugerencia: en G hay un %s."), JSON_UNESCAPED_UNICODE) ?>,
   sugDevolucion: <?= json_encode(_(" Es una devolución. En P sobran gastos por esa cantidad; falta un ingreso P/A 111 (el 111 de ese día no incluye este abono)."), JSON_UNESCAPED_UNICODE) ?>,
   sugFaltaGasto: <?= json_encode(_(" Falta el gasto P/A de esa cantidad (el 111 de ese día parece incluirlo)."), JSON_UNESCAPED_UNICODE) ?>,
-  sugVivienda21: <?= json_encode(_(" Si vivienda aporta a generales, debería haber un P/21 por el mismo importe."), JSON_UNESCAPED_UNICODE) ?>,
+  sugVivienda21: <?= json_encode(_(" Si imputa a generales, debería haber un P/211 por el mismo importe."), JSON_UNESCAPED_UNICODE) ?>,
   sugPareja: <?= json_encode(_(" Puede faltar el apunte P/A pareja."), JSON_UNESCAPED_UNICODE) ?>,
   confirm21: <?= json_encode(_("Se anotará un gasto P/A 21 (vivienda) de %s € el %s y, si esta persona aporta a generales, el ingreso G/A 11."), JSON_UNESCAPED_UNICODE) ?>,
-  p21g11Fallo: <?= json_encode(_("P/21 creado, pero G/11 falló: %s"), JSON_UNESCAPED_UNICODE) ?>,
+  p21g11Fallo: <?= json_encode(_("P/211 creado, pero G/11 falló: %s"), JSON_UNESCAPED_UNICODE) ?>,
   confirm111: <?= json_encode(_("Se anotará un ingreso P/A 111 de %s € el %s (contrapartida de la devolución en G). El apunte G no se toca."), JSON_UNESCAPED_UNICODE) ?>,
 };
 function parseImporte(raw) {
@@ -225,7 +225,7 @@ async function aceptarSugerencia21(a) {
   };
   const p = await api('/api/apuntes', {
     method: 'POST',
-    body: Object.assign({ cuenta: 'P', concepto_codigo: '21' }, base),
+    body: Object.assign({ cuenta: 'P', concepto_codigo: '211' }, base),
   });
   if (!p.ok) return alert(p.error);
   const pers = await api('/api/personas');

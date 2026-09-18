@@ -9,13 +9,13 @@ use src\ambito\application\ResolverAmbitoActual;
 use src\apuntes\domain\contracts\PlantillaApunteRepository;
 use src\apuntes\domain\entity\PlantillaApunte;
 use src\apuntes\domain\value_objects\LineaPlantillaApunte;
-use src\conceptos\domain\contracts\ConceptoRepository;
+use src\conceptos\application\ResolverConceptosCentro;
 
 final class GuardarPlantillaApunte
 {
     public function __construct(
         private readonly PlantillaApunteRepository $plantillas,
-        private readonly ConceptoRepository $conceptos,
+        private readonly ResolverConceptosCentro $conceptos,
         private readonly ResolverAmbitoActual $ambito,
     ) {
     }
@@ -35,7 +35,7 @@ final class GuardarPlantillaApunte
         if ($nombre === '') {
             throw new InvalidArgumentException(_("Falta el nombre de la plantilla"));
         }
-        $id = isset($datos['id']) ? (int) $datos['id'] : null;
+        $id = self::normalizarId($datos['id'] ?? null);
         if ($this->plantillas->existeNombre($ctx->centroId, $cuenta, $nombre, $id)) {
             throw new InvalidArgumentException(_("Ya existe una plantilla con ese nombre"));
         }
@@ -60,7 +60,7 @@ final class GuardarPlantillaApunte
                 throw new InvalidArgumentException(_("Origen A, B o C en cada línea"));
             }
             $concepto = trim((string) ($raw['concepto_codigo'] ?? ''));
-            if ($concepto === '' || $this->conceptos->buscar($lineaCuenta, $concepto) === null) {
+            if ($concepto === '' || $this->conceptos->buscar($ctx->centroId, $lineaCuenta, $concepto) === null) {
                 throw new InvalidArgumentException(sprintf(_("Concepto no válido: %s"), $concepto));
             }
             $obs = trim((string) ($raw['observaciones'] ?? ''));
@@ -87,5 +87,15 @@ final class GuardarPlantillaApunte
         ));
 
         return $guardada->toArray();
+    }
+
+    private static function normalizarId(mixed $raw): ?int
+    {
+        if ($raw === null || $raw === '' || $raw === false) {
+            return null;
+        }
+        $id = (int) $raw;
+
+        return $id > 0 ? $id : null;
     }
 }

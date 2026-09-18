@@ -13,6 +13,7 @@
         <p class="<?= !empty($ok) ? 'ok' : 'error' ?>"><?= htmlspecialchars((string) $mensaje, ENT_QUOTES) ?></p>
     <?php endif; ?>
     <p class="login-alt"><a href="/login"><?= _("Ir al login") ?></a></p>
+    <?php include dirname(__DIR__, 2) . '/shared/view/_pie_legal.php'; ?>
 </div>
 </body>
 </html>

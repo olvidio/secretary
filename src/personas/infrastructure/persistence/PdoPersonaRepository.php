@@ -76,15 +76,12 @@ final class PdoPersonaRepository implements PersonaRepository
             return [];
         }
         $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], mb_strtolower($termino)) . '%';
+        // Un solo :t: PDO+pgsql con prepares nativos no admite repetir el mismo nombre ni
+        // varios :tN / ? en la misma sentencia (HY093 o syntax error near «:»).
         $st = $this->pdo->prepare(
             'SELECT * FROM personas
              WHERE centro_id = :c AND activo = TRUE
-               AND (
-                    lower(nombre) LIKE :t ESCAPE \'\\\'
-                    OR lower(apellidos) LIKE :t ESCAPE \'\\\'
-                    OR lower(trim(nombre || \' \' || apellidos)) LIKE :t ESCAPE \'\\\'
-                    OR lower(iniciales) LIKE :t ESCAPE \'\\\'
-               )
+               AND lower(trim(concat_ws(\' \', nombre, apellidos, iniciales))) LIKE :t ESCAPE \'\\\'
              ORDER BY orden, id
              LIMIT 20'
         );

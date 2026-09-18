@@ -12,7 +12,7 @@ final class CalculadoraE37
     private const INGRESOS = ['111', '112', '113', '12'];
 
     /** Gastos que restan del disponible (también se copian a la columna Gastos). */
-    private const GASTOS_DISPONIBLE = ['21', '212', '22', '23', '24', '25', '26', '27', '28'];
+    private const GASTOS_DISPONIBLE = ['211', '212', '22', '23', '24', '25', '26', '27', '28'];
 
     /**
      * @return array<string, list<string>>
@@ -21,7 +21,7 @@ final class CalculadoraE37
     {
         return [
             'ingresos' => self::INGRESOS,
-            'vivienda' => ['21', '212'],
+            'vivienda' => ['211', '212'],
             'ordinarios' => ['22'],
             'ropa' => ['23'],
             'ca_crt' => ['24'],
@@ -46,7 +46,7 @@ final class CalculadoraE37
         return [
             ['clave' => 'ingresos', 'etiqueta' => 'Ingresos', 'codigo' => '111 112 113 12'],
             ['clave' => 'gastos', 'etiqueta' => 'Gastos', 'codigo' => ''],
-            ['clave' => 'vivienda', 'etiqueta' => 'Vivienda', 'codigo' => '21 212'],
+            ['clave' => 'vivienda', 'etiqueta' => 'Vivienda', 'codigo' => '211 212'],
             ['clave' => 'ordinarios', 'etiqueta' => 'Orden', 'codigo' => '22'],
             ['clave' => 'ropa', 'etiqueta' => 'Ropa', 'codigo' => '23'],
             ['clave' => 'ca_crt', 'etiqueta' => 'car…', 'codigo' => '24'],

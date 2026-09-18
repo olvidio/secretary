@@ -21,6 +21,7 @@ use src\asientos\domain\services\ProyectorAsientoAFilaExcel;
 use src\asientos\infrastructure\persistence\PdoAsientoRepository;
 use src\conceptos\application\ListarConceptos;
 use src\conceptos\infrastructure\persistence\PdoConceptoRepository;
+use Tests\support\ConceptosCentro;
 use src\configuracion\application\ObtenerConfiguracion;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\importacion\application\ImportarExcelSecretario;
@@ -104,10 +105,11 @@ final class GoldenMasterTest extends TestCase
         $resultadoImportacion = $importar->ejecutar($excelPath, true);
 
         $this->compararOActualizar('importacion', $resultadoImportacion);
-        $this->compararOActualizar('configuracion', (new ObtenerConfiguracion($configRepo))->ejecutar());
+        $this->compararOActualizar('configuracion', (new ObtenerConfiguracion($configRepo, $ambito, $centroRepo))->ejecutar());
         $this->compararOActualizar('personas', (new ListarPersonas($personaRepo, $centroRepo))->ejecutar());
-        $this->compararOActualizar('conceptos_p', (new ListarConceptos($conceptoRepo))->ejecutar('P'));
-        $this->compararOActualizar('conceptos_g', (new ListarConceptos($conceptoRepo))->ejecutar('G'));
+        $resolverConceptos = ConceptosCentro::resolver($pdo);
+        $this->compararOActualizar('conceptos_p', (new ListarConceptos($conceptoRepo, $resolverConceptos, $ambito))->ejecutar('P'));
+        $this->compararOActualizar('conceptos_g', (new ListarConceptos($conceptoRepo, $resolverConceptos, $ambito))->ejecutar('G'));
         $this->compararOActualizar('presupuesto_p', $this->dumpPresupuesto($presupuestoRepo, 'P'));
         $this->compararOActualizar('presupuesto_g', $this->dumpPresupuesto($presupuestoRepo, 'G'));
 
@@ -117,7 +119,7 @@ final class GoldenMasterTest extends TestCase
             $presupuestoRepo,
             $personaRepo,
             $ambito,
-            new PdoPartidaLaboresRepository($pdo),
+            new PdoPartidaLaboresRepository($pdo, new \src\plan\infrastructure\persistence\PdoPlanConceptoRepository($pdo)),
             new PdoInforme613MesRepository($pdo),
             $arqueoRepo,
             new PdoCuentaFisicaRepository($pdo),

@@ -86,7 +86,7 @@ final class ObtenerPrevisionConsolidada
             }
         }
         $filas = [];
-        foreach (AgrupadorPrevision613P::filas($paraAgrupar) as $f) {
+        foreach (AgrupadorPrevision613P::filas(AgrupadorPrevision613P::filtrar212SinUso($paraAgrupar)) as $f) {
             $filas[] = self::formatearFila($f, $personas);
         }
 

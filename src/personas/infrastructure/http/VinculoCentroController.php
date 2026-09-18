@@ -6,7 +6,12 @@ namespace src\personas\infrastructure\http;
 
 use InvalidArgumentException;
 use src\ambito\application\ResolverAmbitoActual;
+use src\acceso\domain\contracts\IdentidadRepository;
+use src\legal\application\ExigirDeclaracionResponsableNombres;
+use src\legal\application\LecturaAceptacion;
+use src\legal\infrastructure\http\HuellaAceptacionHttp;
 use src\personas\application\AprobarSolicitudVinculoCentro;
+use src\personas\application\DesvincularPersonaCentro;
 use src\personas\application\ListarCandidatosVinculoCentro;
 use src\personas\application\ListarCentrosDisponiblesPersona;
 use src\personas\application\ListarSolicitudesVinculoCentro;
@@ -27,7 +32,10 @@ final class VinculoCentroController
         private readonly ListarCandidatosVinculoCentro $candidatos,
         private readonly AprobarSolicitudVinculoCentro $aprobar,
         private readonly RechazarSolicitudVinculoCentro $rechazar,
+        private readonly DesvincularPersonaCentro $desvincular,
+        private readonly IdentidadRepository $identidades,
         private readonly ResolverAmbitoActual $ambito,
+        private readonly ExigirDeclaracionResponsableNombres $declaracionNombres,
     ) {
     }
 
@@ -69,6 +77,26 @@ final class VinculoCentroController
         }
     }
 
+    public function desvincularYo(Request $request, array $vars): Response
+    {
+        try {
+            $identidadId = (int) ($_SESSION['identidad_id'] ?? 0);
+            if ($identidadId <= 0) {
+                return ContestarJson::error(_("No autenticado"), 401);
+            }
+            $personaId = (int) ($vars['id'] ?? 0);
+            $this->desvincular->ejecutar($identidadId, $personaId);
+            if (!empty($_SESSION['persona_id']) && (int) $_SESSION['persona_id'] === $personaId) {
+                unset($_SESSION['persona_id']);
+            }
+            $_SESSION['personas_vinculo'] = $this->identidades->personasVinculoDe($identidadId);
+
+            return ContestarJson::ok();
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+    }
+
     public function listarCentro(Request $request, array $vars = []): Response
     {
         $centroId = $this->ambito->ejecutar()->centroId;
@@ -96,14 +124,32 @@ final class VinculoCentroController
         try {
             $centroId = $this->ambito->ejecutar()->centroId;
             $resolvedBy = (int) ($_SESSION['identidad_id'] ?? 0);
+            $datos = $request->json();
+            $this->declaracionNombres->comprobar(
+                LecturaAceptacion::marcada($datos['asumo_responsable_nombres'] ?? false),
+            );
+            $persona = $this->aprobar->ejecutar(
+                $centroId,
+                (int) $vars['id'],
+                $resolvedBy,
+                $datos,
+            );
+            $this->declaracionNombres->ejecutar(
+                true,
+                $resolvedBy > 0 ? $resolvedBy : null,
+                'vinculo_alta',
+                HuellaAceptacionHttp::desde(
+                    $request,
+                    (string) ($_SESSION['idioma'] ?? 'es'),
+                    null,
+                    null,
+                    $centroId,
+                    isset($persona['id']) ? (int) $persona['id'] : null,
+                ),
+            );
 
             return ContestarJson::ok([
-                'persona' => $this->aprobar->ejecutar(
-                    $centroId,
-                    (int) $vars['id'],
-                    $resolvedBy,
-                    $request->json(),
-                ),
+                'persona' => $persona,
             ]);
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());

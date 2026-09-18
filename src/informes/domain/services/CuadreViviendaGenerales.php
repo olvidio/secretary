@@ -7,12 +7,12 @@ namespace src\informes\domain\services;
 use src\shared\domain\value_objects\Dinero;
 
 /**
- * Contrapartida P/21 ↔ G/11 (vivienda general). P/212 (vivienda personal) no interviene.
+ * Contrapartida P/211 ↔ G/11 (vivienda general). P/212 (vivienda personal) no interviene.
  */
 final class CuadreViviendaGenerales
 {
     /** @var list<string> */
-    private const CONCEPTOS_P_VIVIENDA_GENERAL = ['21', '211'];
+    private const CONCEPTOS_P_VIVIENDA_GENERAL = ['211'];
 
     /**
      * @param list<array<string, mixed>> $apuntesP21
@@ -49,7 +49,7 @@ final class CuadreViviendaGenerales
                     $ok = false;
                     if ($g11 !== 0 || $p21 !== 0) {
                         $avisos[] = $p['nombre'] . ' (' . $p['iniciales'] . ') no aporta al cierre automático: '
-                            . 'P/21 ' . $this->fmtEs($p21) . ' €, G/11 ' . $this->fmtEs($g11) . ' €.';
+                            . 'P/211 ' . $this->fmtEs($p21) . ' €, G/11 ' . $this->fmtEs($g11) . ' €.';
                     }
                 }
                 if ($p21 !== 0 || $g11 !== 0) {
@@ -82,7 +82,7 @@ final class CuadreViviendaGenerales
                 continue;
             }
             $etiqueta = $ini === '' ? 'sin iniciales' : $ini;
-            $avisos[] = 'Hay P/21 de ' . $this->fmtEs($p21) . ' € a nombre de ' . $etiqueta
+            $avisos[] = 'Hay P/211 de ' . $this->fmtEs($p21) . ' € a nombre de ' . $etiqueta
                 . ' sin persona en Nombres.';
         }
 

@@ -10,6 +10,8 @@ códigos de recuperación, CSRF y autorización por tabla.
    del login inicia el mismo alta: identidad de **persona** (nivel 1) en un centro
    (el único, o el elegido si hay varios). Tras crear la cuenta entra en `/yo`.
    Un secretario de centro no se auto-registra: se da de alta en `/centros`.
+   El alta pública exige aceptar las Condiciones de uso (casilla + correo de
+   confirmación). Ver `docs/dev/legal.md`.
 2. Identidad de **centro** sin TOTP confirmado → `GET /totp-activar` (clave e URI
    `otpauth://`). Confirmar con 6 dígitos. Se muestran **una vez** 8 códigos
    `XXXX-XXXX`.

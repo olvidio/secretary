@@ -7,7 +7,8 @@ namespace src\cierre\domain\services;
 use DateTimeImmutable;
 
 /**
- * Meses con gastos generales repartibles pero sin asiento de cierre de vivienda.
+ * Meses anteriores que aún requieren cierre (reparto pendiente tras ignorar
+ * cierres automáticos ya generados, completos o parciales).
  */
 final class MesesSinCierre
 {
@@ -29,23 +30,18 @@ final class MesesSinCierre
 
     /**
      * @param list<string> $mesesRevisar Y-m desde fecha de inicio hasta el mes anterior al de cierre
-     * @param array<string, true> $mesesConCierre
      * @param array<string, bool> $mesesQueRequieren
      * @param array<string, string> $gastosEs
      * @return array{ok: bool, meses: list<array{ym: string, mes: int, mes_es: string, gastos_es: string}>}
      */
     public function ejecutar(
         array $mesesRevisar,
-        array $mesesConCierre,
         array $mesesQueRequieren,
         array $gastosEs,
     ): array {
         $faltantes = [];
         foreach ($mesesRevisar as $ym) {
             if (empty($mesesQueRequieren[$ym])) {
-                continue;
-            }
-            if (isset($mesesConCierre[$ym])) {
                 continue;
             }
             $mes = (int) substr($ym, 5, 2);

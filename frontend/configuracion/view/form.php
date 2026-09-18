@@ -10,11 +10,20 @@
     </label>
     <label><?= _("Fecha inicio") ?> <input name="fecha_inicio" type="date" required></label>
     <label><?= _("Fecha cierre") ?> <input name="fecha_cierre" type="date" required></label>
+    <label><?= _("Tipo de centro") ?>
+        <select name="tipo">
+            <option value="n"><?= _("n") ?></option>
+            <option value="sg"><?= _("sg") ?></option>
+        </select>
+    </label>
     <label><?= _("Tipo de cierre") ?>
         <select name="tipo_cierre">
-            <option value="vivienda"><?= _("Vivienda (n) — P 21 / G 11") ?></option>
-            <option value="necesidades"><?= _("Necesidades (agd/sss+) — P 6 / G 14") ?></option>
+            <option value="vivienda"><?= _("Vivienda — P 21 / G 11") ?></option>
+            <option value="necesidades"><?= _("Necesidades — P 6 / G 14") ?></option>
         </select>
+    </label>
+    <label><?= _("Plan contable") ?>
+        <select name="plan_contable" required></select>
     </label>
     <button type="submit"><?= _("Guardar") ?></button>
     <p class="ok" id="msg" hidden><?= _("Guardado") ?></p>
@@ -51,8 +60,20 @@ async function loadTramos() {
   tb.innerHTML = '';
   (r.tramos || []).forEach((t) => tb.appendChild(filaTramo(t)));
 }
+function rellenarPlanes(select, planes, seleccionado) {
+  select.innerHTML = '';
+  (planes || []).forEach((p) => {
+    const opt = document.createElement('option');
+    opt.value = p.codigo;
+    opt.textContent = p.nombre || p.codigo;
+    select.appendChild(opt);
+  });
+  if (seleccionado) select.value = seleccionado;
+}
 document.addEventListener('DOMContentLoaded', async () => {
   const r = await api('/api/configuracion');
+  const planSelect = document.querySelector('#form-config [name=plan_contable]');
+  rellenarPlanes(planSelect, r.planes, r.config?.plan_contable);
   fillForm(document.getElementById('form-config'), r.config);
   document.getElementById('form-config').addEventListener('submit', async (ev) => {
     ev.preventDefault();

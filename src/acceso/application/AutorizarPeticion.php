@@ -75,7 +75,17 @@ final class AutorizarPeticion
         if ($ambito === 'autenticado') {
             return new DecisionAcceso(true);
         }
+        if ($ambito === 'admin') {
+            if ($nivel !== 'admin') {
+                return $this->denegar($esApi, _("Esta área es de administración"), 403, '/');
+            }
+
+            return new DecisionAcceso(true);
+        }
         if ($ambito === 'centro') {
+            if ($nivel === 'admin') {
+                return $this->denegar($esApi, _("Esta área es del centro"), 403, '/admin');
+            }
             if ($nivel !== 'centro') {
                 return $this->denegar($esApi, _("Esta área es del centro"), 403, '/yo');
             }
@@ -88,7 +98,20 @@ final class AutorizarPeticion
 
             return new DecisionAcceso(true);
         }
+        if ($ambito === 'persona-cuenta') {
+            if ($nivel === 'admin') {
+                return $this->denegar($esApi, _("Esta área es personal"), 403, '/admin');
+            }
+            if ($nivel !== 'persona') {
+                return $this->denegar($esApi, _("Esta área es personal"), 403, '/');
+            }
+
+            return new DecisionAcceso(true);
+        }
         if ($ambito === 'persona') {
+            if ($nivel === 'admin') {
+                return $this->denegar($esApi, _("Esta área es personal"), 403, '/admin');
+            }
             if ($nivel !== 'persona') {
                 return $this->denegar($esApi, _("Esta área es personal"), 403, '/');
             }

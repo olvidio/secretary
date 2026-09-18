@@ -57,7 +57,7 @@ final class GuardarInforme613MesTest extends TestCase
     {
         $centros = $this->createMock(CentroRepository::class);
         $centros->method('porId')->willReturn(
-            new Centro(2, 'CTR2', 'Centro 2', 'vivienda', CatalogoPlanesContables::H16N)
+            new Centro(2, 'CTR2', 'Centro 2', 'n', 'vivienda', CatalogoPlanesContables::H16N)
         );
 
         return new ResolverAmbitoActual(

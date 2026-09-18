@@ -11,7 +11,7 @@ use src\personas\domain\contracts\PersonaRepository;
 use src\remesas\domain\entity\Remesa;
 use src\shared\domain\value_objects\Dinero;
 
-/** Genera P/21, G/11 y el gasto G al aceptar una remesa con líneas marcadas como generales. */
+/** Genera P/211, G/11 y el gasto G al aceptar una remesa con líneas marcadas como generales. */
 final class RegistrarGastosGeneralesDeRemesa
 {
     public function __construct(

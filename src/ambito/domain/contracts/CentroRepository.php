@@ -16,4 +16,6 @@ interface CentroRepository
     public function porCodigo(string $codigo): ?Centro;
 
     public function guardar(Centro $centro): Centro;
+
+    public function borrar(int $id): void;
 }

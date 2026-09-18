@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\integration;
 
+use Tests\support\ConceptosCentro;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\TestCase;
@@ -136,7 +137,7 @@ final class ArqueoTest extends TestCase
             new PdoPresupuestoRepository($this->pdo),
             new PdoPersonaRepository($this->pdo),
             $ambito,
-            new PdoPartidaLaboresRepository($this->pdo),
+            new PdoPartidaLaboresRepository($this->pdo, new \src\plan\infrastructure\persistence\PdoPlanConceptoRepository($this->pdo)),
             new PdoInforme613MesRepository($this->pdo),
             $arqueoRepo,
             new PdoCuentaFisicaRepository($this->pdo),

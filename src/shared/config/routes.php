@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use FastRoute\RouteCollector;
+use src\administracion\infrastructure\http\AdminCentroController;
+use src\administracion\infrastructure\http\AdminPlanController;
+use src\administracion\infrastructure\http\AdminUsuarioController;
 use src\ambito\infrastructure\http\CentroController;
 use src\ambito\infrastructure\http\EjercicioController;
 use src\ambito\infrastructure\http\TesoreriaController;
@@ -63,8 +66,18 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/configuracion', [ConfiguracionController::class, 'save']);
 
     $r->addRoute('GET', '/api/centros', [CentroController::class, 'get']);
-    $r->addRoute('POST', '/api/centros', [CentroController::class, 'create']);
     $r->addRoute('POST', '/api/centros/import', [CentroController::class, 'import']);
+
+    $r->addRoute('GET', '/api/admin/planes', [AdminPlanController::class, 'list']);
+    $r->addRoute('POST', '/api/admin/planes', [AdminPlanController::class, 'save']);
+    $r->addRoute('POST', '/api/admin/planes/{id:\d+}/borrar', [AdminPlanController::class, 'delete']);
+    $r->addRoute('GET', '/api/admin/planes/{id:\d+}/conceptos', [AdminPlanController::class, 'conceptos']);
+    $r->addRoute('POST', '/api/admin/planes/{id:\d+}/conceptos', [AdminPlanController::class, 'saveConceptos']);
+    $r->addRoute('GET', '/api/admin/centros', [AdminCentroController::class, 'list']);
+    $r->addRoute('POST', '/api/admin/centros', [AdminCentroController::class, 'create']);
+    $r->addRoute('POST', '/api/admin/centros/{id:\d+}/borrar', [AdminCentroController::class, 'delete']);
+    $r->addRoute('GET', '/api/admin/usuarios', [AdminUsuarioController::class, 'list']);
+    $r->addRoute('POST', '/api/admin/usuarios/{id:\d+}/borrar', [AdminUsuarioController::class, 'delete']);
     $r->addRoute('POST', '/api/centros/vaciar', [CentroController::class, 'vaciar']);
     $r->addRoute('POST', '/api/centros/usuarios', [CentroController::class, 'addUsuario']);
     $r->addRoute('GET', '/api/centros/partidas-labores', [PartidaLaboresController::class, 'list']);
@@ -81,6 +94,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/yo/vinculos-centro', [VinculoCentroController::class, 'listarYo']);
     $r->addRoute('GET', '/api/yo/vinculos-centro/centros', [VinculoCentroController::class, 'centrosDisponibles']);
     $r->addRoute('POST', '/api/yo/vinculos-centro', [VinculoCentroController::class, 'solicitarYo']);
+    $r->addRoute('POST', '/api/yo/vinculos-centro/{id:\d+}/desvincular', [VinculoCentroController::class, 'desvincularYo']);
 
     $r->addRoute('GET', '/api/conceptos', [ConceptoController::class, 'list']);
 

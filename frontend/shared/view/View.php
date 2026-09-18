@@ -41,6 +41,21 @@ final class View
     }
 
     /**
+     * Layout del administrador de plataforma.
+     *
+     * @param array<string, mixed> $data
+     */
+    public function pageAdmin(string $viewFile, array $data = []): string
+    {
+        $data['contentView'] = $this->root . '/' . $viewFile;
+        extract($data, EXTR_SKIP);
+        ob_start();
+        include $this->root . '/shared/view/layout_admin.php';
+
+        return (string) ob_get_clean();
+    }
+
+    /**
      * @param array<string, mixed> $data
      */
     public function standalone(string $viewFile, array $data = []): string

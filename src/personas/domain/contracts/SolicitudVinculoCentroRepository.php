@@ -18,6 +18,8 @@ interface SolicitudVinculoCentroRepository
 
     public function pendiente(int $identidadId, int $centroId, int $anio): ?SolicitudVinculoCentro;
 
+    public function pendienteDeIdentidad(int $identidadId): ?SolicitudVinculoCentro;
+
     public function guardar(SolicitudVinculoCentro $solicitud): SolicitudVinculoCentro;
 
     public function marcarResuelta(int $id, string $estado, ?int $personaId, int $resolvedBy): void;

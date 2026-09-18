@@ -23,7 +23,7 @@ final class ContrapartidasGastoGeneralTest extends TestCase
         self::assertNotNull($lineas);
         self::assertCount(4, $lineas);
         self::assertSame(['P', 'A', '111', null], $this->tuple($lineas[0]));
-        self::assertSame(['P', 'A', '21', 'agua'], $this->tuple($lineas[1]));
+        self::assertSame(['P', 'A', '211', 'agua'], $this->tuple($lineas[1]));
         self::assertSame(['G', 'A', '11', 'agua'], $this->tuple($lineas[2]));
         self::assertSame(['G', 'C', '201', 'agua'], $this->tuple($lineas[3]));
     }

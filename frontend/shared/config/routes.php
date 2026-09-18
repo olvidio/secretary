@@ -10,6 +10,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/registro', [PageController::class, 'registro']);
     $r->addRoute('GET', '/registro-enviado', [PageController::class, 'registroEnviado']);
     $r->addRoute('GET', '/confirmar-email', [PageController::class, 'confirmarEmail']);
+    $r->addRoute('GET', '/condiciones', [PageController::class, 'documentoLegal', ['tipo' => 'condiciones']]);
+    $r->addRoute('GET', '/privacidad', [PageController::class, 'documentoLegal', ['tipo' => 'privacidad']]);
     $r->addRoute('GET', '/totp-activar', [PageController::class, 'totpActivar']);
     $r->addRoute('GET', '/totp-verificar', [PageController::class, 'totpVerificar']);
     $r->addRoute('GET', '/totp-codigos', [PageController::class, 'totpCodigos']);
@@ -23,6 +25,10 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/yo/cierre', [PageController::class, 'yoCierre']);
     $r->addRoute('GET', '/yo/centros', [PageController::class, 'yoCentros']);
     $r->addRoute('GET', '/yo/ayuda', [PageController::class, 'yoAyuda']);
+    $r->addRoute('GET', '/admin', [PageController::class, 'admin']);
+    $r->addRoute('GET', '/admin/planes', [PageController::class, 'adminPlanes']);
+    $r->addRoute('GET', '/admin/centros', [PageController::class, 'adminCentros']);
+    $r->addRoute('GET', '/admin/usuarios', [PageController::class, 'adminUsuarios']);
     $cuenta = [
         ['/cuenta/mail', 'acceso/view/cuenta_mail.php', 'cuenta-mail'],
         ['/cuenta/password', 'acceso/view/cuenta_password.php', 'cuenta-password'],

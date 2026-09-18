@@ -9,11 +9,16 @@ use src\acceso\application\IniciarSesion;
 use src\acceso\application\NotificarRegistroUsuario;
 use src\acceso\application\PrepararTotp;
 use src\acceso\application\ReenviarCorreoVerificacion;
+use src\acceso\application\RegistrarCentro;
 use src\acceso\application\RegistrarUsuario;
 use src\acceso\application\ResolverPersonaActiva;
 use src\acceso\application\ResultadoLogin;
 use src\acceso\application\VerificarSegundoFactor;
 use src\acceso\domain\contracts\IdentidadRepository;
+use src\legal\application\LecturaAceptacion;
+use src\legal\application\RegistrarAceptacion;
+use src\legal\domain\services\CatalogoDocumentosLegales;
+use src\legal\infrastructure\http\HuellaAceptacionHttp;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
@@ -27,9 +32,12 @@ final class AuthController
         private readonly VerificarSegundoFactor $verificarTotp,
         private readonly IdentidadRepository $identidades,
         private readonly RegistrarUsuario $registrar,
+        private readonly RegistrarCentro $registrarCentro,
         private readonly NotificarRegistroUsuario $notificarRegistro,
         private readonly ReenviarCorreoVerificacion $reenviarVerificacion,
         private readonly ResolverPersonaActiva $resolverPersona,
+        private readonly RegistrarAceptacion $registrarAceptacion,
+        private readonly CatalogoDocumentosLegales $documentos,
     ) {
     }
 
@@ -206,26 +214,61 @@ final class AuthController
 
     public function registro(Request $request, array $vars = []): Response
     {
+        $tipoCuenta = strtolower(trim((string) $request->input('tipo_cuenta', 'persona')));
         $alias = trim((string) $request->input('usuario', $request->input('alias', '')));
         $email = trim((string) $request->input('email', ''));
         $nombre = trim((string) $request->input('nombre', ''));
         $pass = (string) $request->input('password', '');
         $confirm = (string) $request->input('password_confirm', $request->input('password2', ''));
-        $centroRaw = $request->input('centro_id', null);
-        $centroId = $centroRaw === null || $centroRaw === '' ? null : (int) $centroRaw;
+        $codigoCentro = trim((string) $request->input('codigo_centro', ''));
+        $nombreCentro = trim((string) $request->input('nombre_centro', ''));
+        $tipoCentro = strtolower(trim((string) $request->input('centro_tipo', 'n')));
+        $acepto = LecturaAceptacion::marcada($request->input('acepto_condiciones', false));
+        $previo = [
+            'tipo_cuenta' => $tipoCuenta,
+            'usuario' => $alias,
+            'email' => $email,
+            'nombre' => $nombre,
+            'codigo_centro' => $codigoCentro,
+            'nombre_centro' => $nombreCentro,
+            'centro_tipo' => $tipoCentro,
+        ];
         try {
-            $alta = $this->registrar->ejecutar($alias, $email, $pass, $confirm, $nombre, $centroId);
+            if ($tipoCuenta === 'centro') {
+                $alta = $this->registrarCentro->ejecutar(
+                    $codigoCentro,
+                    $nombreCentro,
+                    $tipoCentro,
+                    $alias,
+                    $email,
+                    $pass,
+                    $confirm,
+                    $nombre,
+                    $acepto,
+                );
+            } else {
+                $alta = $this->registrar->ejecutar($alias, $email, $pass, $confirm, $nombre, $acepto);
+            }
+            $idioma = (string) ($_SESSION['idioma'] ?? 'es');
+            $this->registrarAceptacion->ejecutar(
+                (int) $alta['identidad']->id,
+                'formulario_registro',
+                $this->documentos->textoCasillaRegistro($idioma),
+                HuellaAceptacionHttp::desde(
+                    $request,
+                    $idioma,
+                    strtolower(trim($email)),
+                    strtolower(trim($alias)),
+                ),
+            );
             $this->notificarRegistro->ejecutar((int) $alta['identidad']->id, $alta['token_verificacion']);
         } catch (\InvalidArgumentException $e) {
-            return $this->falloRegistro($request, $e->getMessage(), $alias, $email, $nombre, $centroId);
+            return $this->falloRegistro($request, $e->getMessage(), $previo);
         } catch (\Throwable $e) {
             return $this->falloRegistro(
                 $request,
                 _('No se pudo enviar el correo de confirmación. Compruebe la configuración de correo o póngase en contacto con el administrador.'),
-                $alias,
-                $email,
-                $nombre,
-                $centroId,
+                $previo,
             );
         }
         if ($this->esJson($request)) {
@@ -315,8 +358,14 @@ final class AuthController
 
     private function siguienteTrasAuth(ResultadoLogin $res): string
     {
+        if ($res->nivel === 'admin') {
+            return '/admin';
+        }
         if ($res->nivel === 'persona') {
             $vinculos = $this->personasVinculoDeIdentidad($res->identidadId ?? 0);
+            if ($vinculos === []) {
+                return '/yo/centros';
+            }
             if (count($vinculos) > 1 && ($res->personaId === null || empty($_SESSION['persona_id']))) {
                 return '/elegir-persona';
             }
@@ -402,24 +451,14 @@ final class AuthController
         return Response::redirect('/registro' . $qs);
     }
 
-    private function falloRegistro(
-        Request $request,
-        string $mensaje,
-        string $alias,
-        string $email,
-        string $nombre,
-        ?int $centroId,
-    ): Response {
+    /** @param array<string, mixed> $previo */
+    private function falloRegistro(Request $request, string $mensaje, array $previo): Response
+    {
         if ($this->esJson($request)) {
             return ContestarJson::error($mensaje, 400);
         }
         $_SESSION['login_error'] = $mensaje;
-        $_SESSION['registro'] = [
-            'usuario' => $alias,
-            'email' => $email,
-            'nombre' => $nombre,
-            'centro_id' => $centroId,
-        ];
+        $_SESSION['registro'] = $previo;
 
         return Response::redirect('/registro');
     }

@@ -8,13 +8,14 @@ use InvalidArgumentException;
 use RuntimeException;
 use src\acceso\application\AsegurarIdentidadCentro;
 use src\acceso\domain\contracts\IdentidadRepository;
-use src\ambito\application\CrearCentro;
 use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\application\VaciarDatosCentro;
 use src\ambito\domain\contracts\CentroRepository;
-use src\plan\domain\services\CatalogoPlanesContables;
 use src\importacion\application\ImportarExcelSecretario;
 use src\importacion\infrastructure\http\RecibirFicheroExcel;
+use src\legal\application\ExigirDeclaracionResponsableNombres;
+use src\legal\application\LecturaAceptacion;
+use src\legal\infrastructure\http\HuellaAceptacionHttp;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
@@ -25,10 +26,10 @@ final class CentroController
         private readonly ResolverAmbitoActual $ambito,
         private readonly CentroRepository $centros,
         private readonly IdentidadRepository $identidades,
-        private readonly CrearCentro $crear,
         private readonly AsegurarIdentidadCentro $asegurarUsuario,
         private readonly ImportarExcelSecretario $importar,
         private readonly VaciarDatosCentro $vaciarDatos,
+        private readonly ExigirDeclaracionResponsableNombres $declaracionNombres,
     ) {
     }
 
@@ -43,48 +44,8 @@ final class CentroController
         return ContestarJson::ok([
             'centro' => $centro->toArray(),
             'usuarios' => $this->identidades->usuariosDeCentro($ctx->centroId),
-            'planes_contables' => CatalogoPlanesContables::todos(),
+            'planes_contables' => [],
         ]);
-    }
-
-    public function create(Request $request, array $vars = []): Response
-    {
-        try {
-            $resultado = $this->crear->ejecutar($request->json());
-            $identidad = $resultado['identidad'];
-            $importacion = null;
-            $avisoImport = null;
-            $excel = RecibirFicheroExcel::opcional($request, 'excel');
-            if ($excel !== null) {
-                try {
-                    $importacion = $this->importar->ejecutar(
-                        $excel,
-                        true,
-                        false,
-                        $resultado['centro']->codigo,
-                    );
-                } catch (\Throwable $e) {
-                    $avisoImport = $e->getMessage();
-                } finally {
-                    RecibirFicheroExcel::limpiar($excel);
-                }
-            }
-
-            return ContestarJson::ok([
-                'centro' => $resultado['centro']->toArray(),
-                'ejercicio' => $resultado['ejercicio']->toArray(),
-                'usuario' => [
-                    'id' => $identidad->id,
-                    'alias' => $identidad->alias,
-                    'email' => $identidad->email,
-                    'nombre' => $identidad->nombre,
-                ],
-                'importacion' => $importacion,
-                'aviso_import' => $avisoImport,
-            ]);
-        } catch (InvalidArgumentException | RuntimeException $e) {
-            return ContestarJson::error($e->getMessage());
-        }
     }
 
     public function import(Request $request, array $vars = []): Response
@@ -96,8 +57,23 @@ final class CentroController
         }
         $excel = null;
         try {
+            $this->declaracionNombres->comprobar(
+                LecturaAceptacion::marcada($request->input('asumo_responsable_nombres', false)),
+            );
             $excel = RecibirFicheroExcel::obligatorio($request, 'excel');
             $importacion = $this->importar->ejecutar($excel, true, false, $centro->codigo);
+            $this->declaracionNombres->ejecutar(
+                true,
+                isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : null,
+                'nombres_import',
+                HuellaAceptacionHttp::desde(
+                    $request,
+                    (string) ($_SESSION['idioma'] ?? 'es'),
+                    null,
+                    null,
+                    $ctx->centroId,
+                ),
+            );
 
             return ContestarJson::ok([
                 'importacion' => $importacion,

@@ -20,7 +20,7 @@ final class Estructura613P
             ['codigo' => '112', 'etiqueta' => '2. Familia', 'codigos' => ['112'], 'grupo' => 'I'],
             ['codigo' => '113', 'etiqueta' => '3. Varios', 'codigos' => ['113'], 'grupo' => 'I'],
             ['codigo' => '12', 'etiqueta' => '2. Extraordinarios', 'codigos' => ['12'], 'grupo' => 'I'],
-            ['codigo' => '21', 'etiqueta' => 'Vivienda', 'codigos' => ['21'], 'grupo' => 'II'],
+            ['codigo' => '211', 'etiqueta' => 'Vivienda general', 'codigos' => ['211'], 'grupo' => 'II'],
             ['codigo' => '212', 'etiqueta' => 'Vivienda personal', 'codigos' => ['212'], 'grupo' => 'II'],
             ['codigo' => '22', 'etiqueta' => 'Ordinarios', 'codigos' => ['22'], 'grupo' => 'II'],
             ['codigo' => '23', 'etiqueta' => 'Ropa', 'codigos' => ['23'], 'grupo' => 'II'],

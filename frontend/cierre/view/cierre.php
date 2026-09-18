@@ -1,5 +1,5 @@
 <h1><?= _("Apuntes de cierre de mes") ?></h1>
-<p><?= _("Reparte lo que falta por cubrir de los gastos G 201–215 del mes. Del total se resta lo ya pagado en G/11 ese mes (incluido quien no entra en el reparto). Lo pendiente se reparte entre quienes aportan a generales. Quien en el ejercicio ya lleva cubierta su cuota acumulada no recibe cierre este mes; el hueco lo cubren quienes van más atrasados. El retraso de meses anteriores no se deshace. El cierre automático de este mes no cuenta porque se regenera. Observaciones: «automático».") ?></p>
+<p><?= _("Reparte lo que falta por cubrir de los gastos G 201–215 del mes. Del total se resta lo ya pagado en G/11 ese mes (incluido quien no entra en el reparto y el cierre automático ya generado). Lo pendiente se reparte entre quienes aportan a generales. Quien en el ejercicio ya lleva cubierta su cuota acumulada no recibe cierre este mes; el hueco lo cubren quienes van más atrasados. El retraso de meses anteriores no se deshace. Si «A generar» es cero, el mes ya está cubierto; «Generar apuntes» borra los automáticos de este mes y los recrea. Observaciones: «automático».") ?></p>
 <p id="resumen" class="muted"></p>
 <div id="aviso-faltantes" class="aviso-cierre" hidden>
   <p><strong><?= _("Faltan apuntes de vivienda en meses anteriores:") ?></strong> <span id="lista-faltantes"></span>.</p>
@@ -19,6 +19,7 @@ const I18N_CIERRE = {
   regularizados: <?= json_encode(_("Regularizados %s apuntes: %s."), JSON_UNESCAPED_UNICODE) ?>,
   confirmGenerar: <?= json_encode(_("¿Borrar el cierre de este mes y generar de nuevo?"), JSON_UNESCAPED_UNICODE) ?>,
   creados: <?= json_encode(_("Creados %s apuntes"), JSON_UNESCAPED_UNICODE) ?>,
+  nadaImputar: <?= json_encode(_("No falta nada por imputar este mes (gastos ya cubiertos). «Generar apuntes» sustituye cualquier cierre automático previo."), JSON_UNESCAPED_UNICODE) ?>,
 };
 document.addEventListener('DOMContentLoaded', async () => {
   const r = await api('/api/cierre');
@@ -37,7 +38,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       .join(', ');
   }
   const tb = document.querySelector('#prev tbody');
+  let pendiente = false;
   (r.lineas || []).forEach(l => {
+    if (l.importe !== '0.00' && l.importe !== '0') pendiente = true;
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${esc(l.iniciales)}</td><td>${esc(l.nombre)}</td>`
       + `<td class="num">${esc(l.importe_bruto_es)}</td>`
@@ -45,6 +48,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       + `<td class="num">${esc(l.importe_es)}</td>`;
     tb.appendChild(tr);
   });
+  if (!pendiente && (r.lineas || []).length) {
+    document.getElementById('msg').hidden = false;
+    document.getElementById('msg').textContent = I18N_CIERRE.nadaImputar;
+  }
   document.getElementById('btn-regularizar').onclick = async () => {
     const lista = faltantes.map(m => m.mes_es).join(', ');
     if (!confirm(I18N_CIERRE.confirmRegularizar.replace('%s', lista))) return;

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace src\presupuestos\application;
 
-use src\conceptos\domain\contracts\ConceptoRepository;
+use src\ambito\application\ResolverAmbitoActual;
+use src\conceptos\application\ResolverConceptosCentro;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
 use src\presupuestos\domain\entity\LineaPresupuesto;
 use src\shared\domain\value_objects\Dinero;
@@ -13,7 +14,8 @@ final class GuardarPresupuesto
 {
     public function __construct(
         private readonly PresupuestoRepository $repo,
-        private readonly ConceptoRepository $conceptos,
+        private readonly ResolverConceptosCentro $conceptos,
+        private readonly ResolverAmbitoActual $ambito,
     ) {
     }
 
@@ -24,7 +26,7 @@ final class GuardarPresupuesto
     {
         foreach ($lineas as $codigo => $previsto) {
             $codigo = (string) $codigo;
-            if ($this->conceptos->buscar($cuenta, $codigo) === null) {
+            if ($this->conceptos->buscar($this->ambito->ejecutar()->centroId, $cuenta, $codigo) === null) {
                 continue;
             }
             $imp = $previsto === '' || $previsto === null ? Dinero::zero() : Dinero::fromInput((string) $previsto);
@@ -40,9 +42,9 @@ final class GuardarPresupuesto
             $index[$l->conceptoCodigo] = $l;
         }
         $out = [];
-        foreach ($this->conceptos->listar($cuenta) as $c) {
-            $linea = $index[$c->codigo] ?? new LineaPresupuesto($cuenta, $c->codigo, Dinero::zero());
-            $out[] = $linea->toArray() + ['nombre' => $c->nombre];
+        foreach ($this->conceptos->listar($this->ambito->ejecutar()->centroId, $cuenta) as $c) {
+            $linea = $index[$c['codigo']] ?? new LineaPresupuesto($cuenta, $c['codigo'], Dinero::zero());
+            $out[] = $linea->toArray() + ['nombre' => $c['nombre']];
         }
 
         return $out;

@@ -6,7 +6,7 @@
 
 ## Para qué sirve
 
-Guarda los datos generales del centro: cómo se llama, qué ejercicio se está llevando y qué tipo de reparto mensual de gastos de la casa se aplica.
+Guarda los datos generales del centro: cómo se llama, qué ejercicio se está llevando, el **plan contable**, el **tipo de centro** (n o sg) y el **tipo de cierre** contable (vivienda o necesidades).
 
 Conviene repasarla al empezar, porque la entrada de apuntes, el resumen mensual y el cierre de mes toman de aquí sus valores por defecto.
 
@@ -15,16 +15,19 @@ Conviene repasarla al empezar, porque la entrada de apuntes, el resumen mensual 
 1. Escribir el nombre del centro y el año del ejercicio.
 2. Elegir si el ejercicio va por «Año» (enero a diciembre) o por «Curso» (termina el 31 de agosto del año siguiente).
 3. Poner la fecha de inicio y la fecha de cierre.
-4. Elegir el tipo de cierre.
-5. Pulsar «Guardar»; aparece el aviso «Guardado».
-6. En «Tramos de desgravación» se editan los tramos (p. ej. 250 € al 80 % y el resto al 40 %) y se pulsa «Guardar tramos». Sirven al proponer destinos 7.
+4. Elegir el **tipo de centro** (**n** o **sg**).
+5. Elegir el **tipo de cierre** (vivienda o necesidades).
+6. Elegir el **plan contable** (hoy solo H16n; las partidas del capítulo VII se personalizan en Ámbito → Centros).
+7. Pulsar «Guardar»; aparece el aviso «Guardado».
+8. En «Tramos de desgravación» se editan los tramos (p. ej. 250 € al 80 % y el resto al 40 %) y se pulsa «Guardar tramos». Sirven al proponer destinos 7.
 
 ## Reglas que conviene saber
 
 - La **fecha de cierre** no es el final del ejercicio: es la fecha hasta la que hay datos metidos. El final real se deduce del año y del modo elegido: 31 de diciembre, o 31 de agosto del año siguiente si es «Curso».
 - Las pantallas de entrada de apuntes proponen por defecto el mes de la fecha de cierre, así que cambiarla cambia el mes en que se trabaja.
-- El **tipo de cierre** decide qué conceptos usa el reparto mensual de los gastos generales. «Vivienda» carga el gasto 21 en el libro personal y el ingreso 11 en el general. «Necesidades» usa el 6 y el 14.
-- El tipo de cierre marca además el valor por defecto de «vivienda aporta a generales» al dar de alta un nombre: sí en los centros de vivienda, no en los de necesidades.
+- El **tipo de centro** (**n** / **sg**) y el **tipo de cierre** (vivienda / necesidades) son campos distintos. El tipo de centro indica si las cuentas personales pueden solicitar acceso (**n** sí, **sg** no). El tipo de cierre decide el reparto mensual de gastos generales: vivienda → 21 / 11; necesidades → 6 / 14.
+- El **plan contable** fija la estructura de cuentas del centro (613 P/G, conceptos). Cambiarlo en un centro con datos ya cargados puede requerir revisar conceptos y partidas; conviene elegirlo al empezar.
+- El tipo de cierre marca el valor por defecto de «vivienda aporta a generales» al dar de alta un nombre: sí en vivienda, no en necesidades.
 - Los tramos de desgravación se pueden cambiar; el primero se llena entre varias personas antes de subir el importe de una sola.
 
 ## Problemas frecuentes

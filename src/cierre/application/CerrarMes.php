@@ -11,7 +11,6 @@ use src\ambito\domain\value_objects\ContextoActual;
 use src\apuntes\application\CrearApunte;
 use src\apuntes\application\ListarApuntes;
 use src\asientos\domain\contracts\AsientoRepository;
-use src\asientos\domain\entity\Asiento;
 use src\cierre\domain\services\MesesSinCierre;
 use src\cierre\domain\services\RepartoCierre;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
@@ -44,7 +43,17 @@ final class CerrarMes
         $hasta = $cierre->modify('last day of this month');
 
         $personas = $this->personasDeCentro($contexto->centroId);
-        $preparado = $this->prepararReparto($cfg, $desde, $hasta, $contexto, $personas, $mes);
+        // Siempre excluye el cierre automático del mes en curso: la vista previa
+        // muestra lo que se generará al confirmar (idempotente: borra y recrea).
+        $preparado = $this->prepararReparto(
+            $cfg,
+            $desde,
+            $hasta,
+            $contexto,
+            $personas,
+            $mes,
+            true,
+        );
         $gastos = $preparado['gastos'];
         $reparto = $preparado['reparto'];
         if (!$confirmar) {
@@ -119,6 +128,7 @@ final class CerrarMes
                 $contexto,
                 $personas,
                 (int) $info['mes'],
+                true,
             )['reparto'];
             $creados = $this->generarParaRango($cfg, $contexto, $desde, $hasta, $reparto);
             $totalCreados += count($creados);
@@ -147,7 +157,7 @@ final class CerrarMes
         array $reparto,
     ): array {
         $this->asientos->borrarCierresEntre($contexto->ejercicioId, $desde, $hasta);
-        $conceptoP = $cfg->tipoCierre === 'necesidades' ? '6' : '21';
+        $conceptoP = $cfg->tipoCierre === 'necesidades' ? '6' : '211';
         $conceptoG = $cfg->tipoCierre === 'necesidades' ? '14' : '11';
         $obs = 'automático';
         $creados = [];
@@ -183,54 +193,19 @@ final class CerrarMes
         }
 
         $personas = $this->personasDeCentro($contexto->centroId);
-        $mesesConCierre = $this->mesesConAsientoCierre($contexto, $cfg->fechaInicio, $cfg->fechaCierre);
         $requieren = [];
         $gastosEs = [];
         foreach ($mesesRevisar as $ym) {
             $desde = new DateTimeImmutable($ym . '-01');
             $hasta = $desde->modify('last day of this month');
             $mesNum = (int) substr($ym, 5, 2);
-            $preparado = $this->prepararReparto($cfg, $desde, $hasta, $contexto, $personas, $mesNum);
+            $preparado = $this->prepararReparto($cfg, $desde, $hasta, $contexto, $personas, $mesNum, true);
             $gastosEs[$ym] = $preparado['gastos']->formatEs();
             $reparto = $preparado['reparto'];
             $requieren[$ym] = $this->repartoGeneraApuntes($reparto);
         }
 
-        return $this->mesesSinCierre->ejecutar($mesesRevisar, $mesesConCierre, $requieren, $gastosEs);
-    }
-
-    /** @return array<string, true> */
-    private function mesesConAsientoCierre(
-        ContextoActual $contexto,
-        DateTimeImmutable $desde,
-        DateTimeImmutable $hasta,
-    ): array {
-        $limite = $hasta->modify('first day of this month')->modify('-1 day');
-        if ($limite < $desde) {
-            return [];
-        }
-
-        $asientos = $this->asientos->listar($contexto->ejercicioId, [
-            'tipo' => 'cierre',
-            'desde' => $desde->format('Y-m-d'),
-            'hasta' => $limite->format('Y-m-d'),
-        ]);
-
-        return $this->indexarMeses($asientos);
-    }
-
-    /**
-     * @param list<Asiento> $asientos
-     * @return array<string, true>
-     */
-    private function indexarMeses(array $asientos): array
-    {
-        $out = [];
-        foreach ($asientos as $asiento) {
-            $out[$asiento->fecha->format('Y-m')] = true;
-        }
-
-        return $out;
+        return $this->mesesSinCierre->ejecutar($mesesRevisar, $requieren, $gastosEs);
     }
 
     /**
@@ -294,15 +269,18 @@ final class CerrarMes
         ContextoActual $contexto,
         array $personas,
         int $mes,
+        bool $excluirCierreAutoDelMes,
     ): array {
         $gastos = $this->gastosGeneralesDelMes($contexto, $desde, $hasta);
-        $aportacionesMes = $this->aportacionesGenerales($cfg, $desde, $hasta);
+        $excDesde = $excluirCierreAutoDelMes ? $desde : null;
+        $excHasta = $excluirCierreAutoDelMes ? $hasta : null;
+        $aportacionesMes = $this->aportacionesGenerales($cfg, $desde, $hasta, $excDesde, $excHasta);
         $aportacionesYtd = $this->aportacionesGenerales(
             $cfg,
             $cfg->fechaInicio,
             $hasta,
-            $desde,
-            $hasta,
+            $excDesde,
+            $excHasta,
         );
         $objetivoYtd = RepartoCierre::objetivoAcumulado(
             $personas,
@@ -389,9 +367,11 @@ final class CerrarMes
             'concepto' => $conceptoG,
             'origen' => 'A',
         ]) as $fila) {
-            if (!empty($fila['es_cierre'])) {
+            if (!empty($fila['es_cierre'])
+                && $excluirDesde !== null
+                && $excluirHasta !== null) {
                 $f = (string) ($fila['fecha'] ?? '');
-                if ($excluirDesde === null || ($f >= $excluirDesde && $f <= $excluirHasta)) {
+                if ($f >= $excluirDesde && $f <= $excluirHasta) {
                     continue;
                 }
             }

@@ -2,45 +2,36 @@
 
 - Ruta: `/registro`, `/registro-enviado`, `/confirmar-email`
 - Menú: No sale en el menú: se llega desde el enlace «Registrarse» de la pantalla de entrada
-- Quién: cualquier persona
+- Quién: cualquier persona o quien vaya a crear un centro
 
 ## Para qué sirve
 
-Sirve para crear una cuenta propia y llevar el libro personal: las cuentas de cada uno, separadas de las del centro. La cuenta nace dentro de un centro y, al crearla, el programa abre el libro personal y añade el nombre a la lista de personas de ese centro.
+Sirve para crear una cuenta en el programa. Hay dos modalidades:
 
-Tras registrarse, el programa envía un correo de bienvenida con un enlace para confirmar la dirección. La cuenta no permite entrar hasta confirmar el correo.
+- **Personal:** libro propio sin centro. Tras confirmar el correo puede solicitar acceso a un centro de tipo **n** desde Centros.
+- **Centro (secretario):** crea un centro nuevo (tipo **n** o **sg**) y la cuenta del secretario. Tras confirmar el correo debe activar el segundo factor para operar.
 
-Un secretario de centro no se da de alta aquí: su cuenta la crea otro secretario desde la pantalla de centros.
+Tras registrarse, el programa envía un correo con enlace de confirmación (48 horas). No se puede entrar hasta confirmarlo. Al marcar la casilla y abrir el enlace se aceptan las [Condiciones de uso](/condiciones) y se informa de la [Política de privacidad](/privacidad).
 
 ## Cómo se usa
 
-1. En la pantalla de entrada, pulsar «Registrarse». Si ya se había escrito el usuario o el correo, viene puesto.
-2. Escribir el usuario: empieza por letra, de 2 a 32 caracteres, con letras, números, puntos o guiones.
-3. Escribir el correo y, si se quiere, el nombre completo; si se deja vacío, se usa el usuario.
-4. Si hay más de un centro, elegir el centro en el desplegable.
-5. Escribir la contraseña dos veces: al menos seis caracteres.
-6. Pulsar «Crear cuenta». Aparece la pantalla «Revise su correo».
-7. Abrir el mensaje recibido y pulsar el enlace de confirmación (válido 48 horas).
-8. Volver a la pantalla de entrada e iniciar sesión con el usuario y la contraseña elegidos.
-
-Si no llega el correo, en «Revise su correo» se puede pulsar «Reenviar correo».
+1. En la pantalla de entrada, pulsar «Registrarse».
+2. Elegir **Personal** o **Centro (secretario)**.
+3. Si es centro: escribir código, nombre y tipo (**n** o **sg**).
+4. Escribir usuario, correo, nombre (opcional) y contraseña (dos veces).
+5. Marcar que se aceptan las condiciones (la casilla viene vacía) y pulsar «Crear cuenta».
+6. Confirmar el correo recibido. El mensaje recuerda la versión de las condiciones.
+7. Entrar con usuario y contraseña. Las cuentas personales sin centro irán a **Centros**; las de secretario activarán el segundo factor.
 
 ## Reglas que conviene saber
 
 - Cada correo puede tener una sola cuenta.
-- Las cuentas personales no necesitan código de seguridad de seis dígitos, aunque se puede activar después.
-- Si en el programa todavía no hay ningún centro creado, no se puede registrar nadie: el botón queda desactivado.
-- Hay otra forma de tener cuenta personal sin pasar por aquí: que el secretario escriba el correo en la ficha de la persona, dentro de la lista de nombres del centro (esa cuenta queda activa sin confirmación por correo).
+- Hay que aceptar las condiciones: el servicio es gratuito y no se garantiza la ausencia de fallos ni la conservación de los datos; hay que hacer copias.
+- **n** y **sg** son tipos de centro; las cuentas personales solo pueden solicitar acceso a centros **n**.
+- Un secretario ya existente no se da de alta aquí como centro adicional: otro secretario lo añade desde la pantalla de centros del programa.
 
 ## Problemas frecuentes
 
-- **«Ese usuario ya existe»**: elegir otro usuario.
-- **«Ese correo ya tiene una cuenta»**: entrar con ese correo desde la pantalla de entrada.
-- **«Ese correo ya está asignado a un nombre»**: el secretario ya creó la cuenta personal desde el centro. Basta entrar con ese correo.
+- **«Ese usuario ya existe»** / **«Ese correo ya tiene una cuenta»**: usar otro identificador o entrar con el existente.
 - **«Confirme su correo antes de entrar»**: abrir el enlace del correo o reenviarlo desde `/registro-enviado`.
-- **«El enlace ha caducado»**: solicitar un nuevo correo desde «Reenviar correo».
-- **«No se pudo enviar el correo de confirmación»**: el administrador debe revisar la configuración SMTP (`MAIL_HOST`, `MAIL_PORT`, `MAIL_FROM`, `APP_URL` en el entorno).
-- **«El usuario debe empezar por letra y tener 2-32 caracteres»**: quitar espacios, acentos y signos raros.
-- **«Las contraseñas no coinciden»** o **«La contraseña debe tener al menos 6 caracteres»**: repetir la contraseña con cuidado.
-- **«Todavía no hay ningún centro. Pida a un secretario que lo cree.»**: hay que esperar a que exista un centro.
-- **«Indique el centro»**: hay varios y no se ha elegido ninguno.
+- **«Debe aceptar las Condiciones de uso»**: falta marcar la casilla del registro.

@@ -96,4 +96,9 @@ interface IdentidadRepository
     public function marcarEmailVerificado(int $identidadId, DateTimeImmutable $cuando): void;
 
     public function tokenVerificacionDe(int $identidadId): ?string;
+
+    /** @return list<array{id:int, email:string, alias:?string, nombre:string, es_admin:bool, centros:int, personas:int}> */
+    public function listarTodas(): array;
+
+    public function eliminar(int $id): void;
 }

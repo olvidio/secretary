@@ -26,6 +26,7 @@ use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\presupuestos\infrastructure\persistence\PdoPresupuestoRepository;
 use src\shared\infrastructure\persistence\SchemaInstaller;
 use Tests\Soporte\BaseDeDatosAislada;
+use Tests\support\ConceptosCentro;
 
 /** Fase 3 OLA 2: informes y entrada sobre asientos. */
 final class PartidaDobleInformesTest extends TestCase
@@ -48,7 +49,7 @@ final class PartidaDobleInformesTest extends TestCase
 
         (new CrearApunte(
             $ctx['asientos'],
-            $ctx['conceptos'],
+            $ctx['resolverConceptos'],
             $ctx['personas'],
             $ctx['config'],
             $ctx['cuentas'],
@@ -81,7 +82,7 @@ final class PartidaDobleInformesTest extends TestCase
         $ctx = $this->importarYPreparar();
         $filas = (new CrearApunte(
             $ctx['asientos'],
-            $ctx['conceptos'],
+            $ctx['resolverConceptos'],
             $ctx['personas'],
             $ctx['config'],
             $ctx['cuentas'],
@@ -181,6 +182,11 @@ final class PartidaDobleInformesTest extends TestCase
         (new ImportarExcelSecretario($pdo, $config, $personas, $conceptos, $apuntes, $presupuesto))
             ->ejecutar($excelPath, true);
 
-        return compact('pdo', 'config', 'personas', 'conceptos', 'apuntes', 'presupuesto', 'asientos', 'cuentas', 'fisicas', 'ambito', 'ejercicioRepo');
+        $resolverConceptos = ConceptosCentro::resolver($pdo);
+
+        return compact(
+            'pdo', 'config', 'personas', 'conceptos', 'apuntes', 'presupuesto',
+            'asientos', 'cuentas', 'fisicas', 'ambito', 'ejercicioRepo', 'resolverConceptos',
+        );
     }
 }

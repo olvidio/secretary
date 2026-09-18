@@ -13,12 +13,13 @@ Desde aquí se abre también el libro personal de cada una, con solo poner su co
 ## Cómo se usa
 
 1. Rellenar nombre, apellidos e iniciales, y pulsar «Guardar».
-2. Si esa persona va a llevar su propio libro, escribir su correo. Cuando el correo es nuevo, la pantalla muestra una contraseña inicial: hay que comunicársela en ese momento, porque no se vuelve a mostrar.
-3. Indicar si su aportación de vivienda tiene contrapartida en el libro general y, si procede, un importe fijo.
-4. Indicar si **puede desgravar** donativos. Quien no puede, al proponer destinos 7 recibe solo partidas que no desgravan.
-5. Si llega o se va a mitad de año, marcar los meses en que no paga. Hay dos intervalos.
-6. «Editar» recupera una fila en el formulario, «Borrar» la quita del listado previa confirmación y «Nuevo» vacía el formulario. Si la persona tiene apuntes o remesas, no se borra del todo: se da de baja y deja de salir aquí, pero el histórico se conserva.
-7. En «Solicitudes de acceso personal», cada petición se resuelve creando un nombre nuevo, vinculándola a uno que ya existe o rechazándola.
+2. La primera vez (alta nueva) hay que marcar que **el centro es responsable** de los datos de esas personas: el programa es gratuito y solo los aloja. La misma casilla vale para las solicitudes de acceso y para importar el Excel en Centros.
+3. Si esa persona va a llevar su propio libro, escribir su correo. Cuando el correo es nuevo, la pantalla muestra una contraseña inicial: hay que comunicársela en ese momento, porque no se vuelve a mostrar.
+4. Indicar si su aportación de vivienda tiene contrapartida en el libro general y, si procede, un importe fijo.
+5. Indicar si **puede desgravar** donativos. Quien no puede, al proponer destinos 7 recibe solo partidas que no desgravan.
+6. Si llega o se va a mitad de año, marcar los meses en que no paga. Hay dos intervalos.
+7. «Editar» recupera una fila en el formulario, «Borrar» la quita del listado previa confirmación y «Nuevo» vacía el formulario. Si la persona tiene apuntes o remesas, no se borra del todo: se da de baja y deja de salir aquí, pero el histórico se conserva.
+8. En «Solicitudes de acceso personal», cada petición se resuelve creando un nombre nuevo, vinculándola a uno que ya existe o rechazándola.
 
 ## Reglas que conviene saber
 
@@ -37,3 +38,4 @@ Desde aquí se abre también el libro personal de cada una, con solo poner su co
 - **«El mes debe estar entre 1 y 12»**: los meses de exención se escriben como número.
 - **«Ese correo ya está asignado a otro nombre»**: cada correo pertenece a una sola persona.
 - **«Ese correo es de un usuario de centro; no puede usarse como cuenta personal»**: el correo de un secretario no sirve aquí.
+- **«Debe aceptar que el centro es responsable…»**: falta marcar la casilla de responsable de los datos.

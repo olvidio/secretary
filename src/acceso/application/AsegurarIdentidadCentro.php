@@ -23,6 +23,7 @@ final class AsegurarIdentidadCentro
         string $password,
         string $nombre = '',
         string $rol = 'admin',
+        bool $verificarEmail = true,
     ): Identidad {
         $alias = strtolower(trim($alias));
         $email = strtolower(trim($email));
@@ -103,7 +104,9 @@ final class AsegurarIdentidadCentro
         if ($creada->id === null) {
             throw new InvalidArgumentException(_("No se pudo crear el usuario"));
         }
-        $this->identidades->marcarEmailVerificado($creada->id, new DateTimeImmutable());
+        if ($verificarEmail) {
+            $this->identidades->marcarEmailVerificado($creada->id, new DateTimeImmutable());
+        }
         $this->identidades->vincularCentro($creada->id, $centroId, $rol);
 
         return $this->identidades->porId($creada->id) ?? $creada;

@@ -24,7 +24,7 @@
                     <option value=""><?= _("— Elija —") ?></option>
                 </select>
             </label>
-            <p class="muted"><?= _("Al aceptar la remesa, el centro cargará vivienda general (P/21), ingreso G/11 y este gasto en generales. La vivienda personal (P/212) es otra categoría, como ordinarios.") ?></p>
+            <p class="muted"><?= _("Al aceptar la remesa, el centro cargará vivienda general (P/211), ingreso G/11 y este gasto en generales. La vivienda personal (P/212) es otra categoría, como ordinarios.") ?></p>
         </div>
         <fieldset class="yo-tesoreria">
             <label><span><?= _("Caja") ?></span><input type="radio" name="tesoreria" value="CAJA" checked></label>

@@ -129,7 +129,7 @@
         {
             "cantidad": "976.00",
             "cantidad_es": "976,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-01-26",
@@ -185,7 +185,7 @@
         {
             "cantidad": "1100.00",
             "cantidad_es": "1.100,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-01-30",
@@ -311,7 +311,7 @@
         {
             "cantidad": "800.00",
             "cantidad_es": "800,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-01-30",
@@ -339,7 +339,7 @@
         {
             "cantidad": "1435.10",
             "cantidad_es": "1.435,10",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-01-31",
@@ -465,7 +465,7 @@
         {
             "cantidad": "1000.00",
             "cantidad_es": "1.000,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-01-31",
@@ -493,7 +493,7 @@
         {
             "cantidad": "1394.00",
             "cantidad_es": "1.394,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-01-31",
@@ -717,7 +717,7 @@
         {
             "cantidad": "1500.00",
             "cantidad_es": "1.500,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-02-02",
@@ -815,7 +815,7 @@
         {
             "cantidad": "2130.00",
             "cantidad_es": "2.130,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-02-24",
@@ -843,7 +843,7 @@
         {
             "cantidad": "1583.00",
             "cantidad_es": "1.583,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-02-24",
@@ -955,7 +955,7 @@
         {
             "cantidad": "1443.79",
             "cantidad_es": "1.443,79",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-02-28",
@@ -1081,7 +1081,7 @@
         {
             "cantidad": "1000.00",
             "cantidad_es": "1.000,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-02-28",
@@ -1109,7 +1109,7 @@
         {
             "cantidad": "899.00",
             "cantidad_es": "899,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-02-28",
@@ -1207,7 +1207,7 @@
         {
             "cantidad": "1100.00",
             "cantidad_es": "1.100,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-02-28",
@@ -1333,7 +1333,7 @@
         {
             "cantidad": "800.00",
             "cantidad_es": "800,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-02-28",
@@ -1529,7 +1529,7 @@
         {
             "cantidad": "1500.00",
             "cantidad_es": "1.500,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-03-03",
@@ -1641,7 +1641,7 @@
         {
             "cantidad": "656.00",
             "cantidad_es": "656,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-03-27",
@@ -1669,7 +1669,7 @@
         {
             "cantidad": "391.00",
             "cantidad_es": "391,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-03-27",
@@ -1711,7 +1711,7 @@
         {
             "cantidad": "1395.00",
             "cantidad_es": "1.395,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-03-30",
@@ -1809,7 +1809,7 @@
         {
             "cantidad": "1806.64",
             "cantidad_es": "1.806,64",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-03-31",
@@ -1893,7 +1893,7 @@
         {
             "cantidad": "1100.00",
             "cantidad_es": "1.100,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-03-31",
@@ -2019,7 +2019,7 @@
         {
             "cantidad": "800.00",
             "cantidad_es": "800,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-03-31",
@@ -2187,7 +2187,7 @@
         {
             "cantidad": "2000.00",
             "cantidad_es": "2.000,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-04-05",
@@ -2243,7 +2243,7 @@
         {
             "cantidad": "2000.00",
             "cantidad_es": "2.000,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-04-06",
@@ -2355,7 +2355,7 @@
         {
             "cantidad": "1500.00",
             "cantidad_es": "1.500,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-04-12",
@@ -2593,7 +2593,7 @@
         {
             "cantidad": "1555.47",
             "cantidad_es": "1.555,47",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-04-30",
@@ -2677,7 +2677,7 @@
         {
             "cantidad": "1248.00",
             "cantidad_es": "1.248,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-04-30",
@@ -2719,7 +2719,7 @@
         {
             "cantidad": "938.00",
             "cantidad_es": "938,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-04-30",
@@ -2817,7 +2817,7 @@
         {
             "cantidad": "1100.00",
             "cantidad_es": "1.100,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-04-30",
@@ -2901,7 +2901,7 @@
         {
             "cantidad": "800.00",
             "cantidad_es": "800,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-04-30",
@@ -3153,7 +3153,7 @@
         {
             "cantidad": "1500.00",
             "cantidad_es": "1.500,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-05-12",
@@ -3335,7 +3335,7 @@
         {
             "cantidad": "664.00",
             "cantidad_es": "664,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-05-28",
@@ -3433,7 +3433,7 @@
         {
             "cantidad": "300.00",
             "cantidad_es": "300,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-05-28",
@@ -3685,7 +3685,7 @@
         {
             "cantidad": "1500.00",
             "cantidad_es": "1.500,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-05-31",
@@ -3713,7 +3713,7 @@
         {
             "cantidad": "1653.62",
             "cantidad_es": "1.653,62",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-05-31",
@@ -3755,7 +3755,7 @@
         {
             "cantidad": "1970.00",
             "cantidad_es": "1.970,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-05-31",
@@ -3853,7 +3853,7 @@
         {
             "cantidad": "1100.00",
             "cantidad_es": "1.100,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-05-31",
@@ -3993,7 +3993,7 @@
         {
             "cantidad": "800.00",
             "cantidad_es": "800,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-05-31",
@@ -4315,7 +4315,7 @@
         {
             "cantidad": "539.00",
             "cantidad_es": "539,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-06-30",
@@ -4329,7 +4329,7 @@
         {
             "cantidad": "819.00",
             "cantidad_es": "819,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-06-30",
@@ -4385,7 +4385,7 @@
         {
             "cantidad": "1457.89",
             "cantidad_es": "1.457,89",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-06-30",
@@ -4441,7 +4441,7 @@
         {
             "cantidad": "1100.00",
             "cantidad_es": "1.100,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-06-30",
@@ -4581,7 +4581,7 @@
         {
             "cantidad": "800.00",
             "cantidad_es": "800,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-06-30",
@@ -4693,7 +4693,7 @@
         {
             "cantidad": "973.00",
             "cantidad_es": "973,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "212",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-06-30",
@@ -4819,7 +4819,7 @@
         {
             "cantidad": "343.00",
             "cantidad_es": "343,00",
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
             "es_cierre": false,
             "fecha": "2026-06-30",

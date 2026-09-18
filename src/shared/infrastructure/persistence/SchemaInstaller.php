@@ -8,6 +8,7 @@ use PDO;
 use src\acceso\infrastructure\persistence\AccesoSeeder;
 use src\apuntes\infrastructure\persistence\PlantillaApunteSeeder;
 use src\ambito\infrastructure\persistence\AmbitoSeeder;
+use src\legal\infrastructure\persistence\LegalSeeder;
 use src\plan\infrastructure\persistence\PlanContableSeeder;
 use src\conceptos\domain\services\CatalogoConceptos;
 use src\personal\infrastructure\persistence\Nivel1Seeder;
@@ -38,6 +39,7 @@ final class SchemaInstaller
         AmbitoSeeder::sembrar($this->pdo);
         PlanContableSeeder::sembrar($this->pdo);
         AccesoSeeder::sembrar($this->pdo);
+        LegalSeeder::sembrar($this->pdo);
         PlantillaApunteSeeder::sembrar($this->pdo);
         Nivel1Seeder::sembrar($this->pdo);
     }

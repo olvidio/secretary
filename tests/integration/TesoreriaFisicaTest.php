@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\integration;
 
+use Tests\support\ConceptosCentro;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\TestCase;
@@ -107,7 +108,7 @@ final class TesoreriaFisicaTest extends TestCase
 
         $crearApunte = new CrearApunte(
             $asientoRepo,
-            new PdoConceptoRepository($this->pdo),
+            ConceptosCentro::resolver($this->pdo),
             $personaRepo,
             $configRepo,
             $cuentaRepo,

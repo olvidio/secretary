@@ -13,6 +13,7 @@ use src\ambito\domain\contracts\PobladorCentro;
 use src\ambito\domain\entity\Centro;
 use src\ambito\domain\entity\Ejercicio;
 use src\plan\domain\contracts\PartidaLaboresRepository;
+use src\plan\domain\contracts\PlanContableRepository;
 use src\plan\domain\services\CatalogoPlanesContables;
 
 /**
@@ -28,6 +29,7 @@ final class CrearCentro
         private readonly PobladorCentro $poblador,
         private readonly AsegurarIdentidadCentro $asegurarIdentidad,
         private readonly PartidaLaboresRepository $partidasLabores,
+        private readonly PlanContableRepository $planes,
     ) {
     }
 
@@ -39,20 +41,29 @@ final class CrearCentro
     {
         $codigo = trim((string) ($datos['codigo'] ?? ''));
         $nombre = trim((string) ($datos['nombre'] ?? ''));
-        $tipo = (string) ($datos['tipo_cierre'] ?? 'vivienda');
+        $tipo = strtolower(trim((string) ($datos['tipo'] ?? 'n')));
+        $tipoCierre = (string) ($datos['tipo_cierre'] ?? 'vivienda');
+        $verificarEmail = !array_key_exists('verificar_email', $datos) || (bool) $datos['verificar_email'];
         if ($codigo === '' || $nombre === '') {
             throw new InvalidArgumentException(_("Código y nombre del centro son obligatorios"));
         }
-        if (!in_array($tipo, ['vivienda', 'necesidades'], true)) {
+        if (!in_array($tipo, ['n', 'sg'], true)) {
+            throw new InvalidArgumentException(_("Tipo de centro: n o sg"));
+        }
+        if (!in_array($tipoCierre, ['vivienda', 'necesidades'], true)) {
             throw new InvalidArgumentException(_("Tipo de cierre: vivienda o necesidades"));
         }
         if ($this->centros->porCodigo($codigo) !== null) {
             throw new InvalidArgumentException(_("Ya existe un centro con ese código"));
         }
+        $planCodigo = trim((string) ($datos['plan_contable'] ?? CatalogoPlanesContables::H16N));
+        if ($this->planes->idPorCodigo($planCodigo) === null) {
+            throw new InvalidArgumentException(_("Plan contable no válido"));
+        }
         $this->pdo->beginTransaction();
         try {
             $centro = $this->centros->guardar(
-                new Centro(null, $codigo, $nombre, $tipo, CatalogoPlanesContables::H16N)
+                new Centro(null, $codigo, $nombre, $tipo, $tipoCierre, $planCodigo)
             );
             if ($centro->id === null) {
                 throw new InvalidArgumentException(_("No se pudo crear el centro"));
@@ -73,6 +84,7 @@ final class CrearCentro
                 (string) ($datos['password'] ?? ''),
                 $nombre,
                 'admin',
+                $verificarEmail,
             );
             $this->pdo->commit();
         } catch (\Throwable $e) {

@@ -20,7 +20,7 @@ final class ListarCentrosDisponiblesPersona
     {
         $out = [];
         foreach ($this->centros->listar() as $centro) {
-            if ($centro->id === null || !$centro->activo) {
+            if ($centro->id === null || !$centro->activo || $centro->tipo !== 'n') {
                 continue;
             }
             if ($this->identidades->tienePersonaEnCentro($identidadId, $centro->id)) {

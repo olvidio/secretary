@@ -56,37 +56,41 @@ final class PdoCentroRepository implements CentroRepository
 
     public function guardar(Centro $centro, ?int $planContableId = null): Centro
     {
-        if ($centro->id === null) {
-            if ($planContableId === null) {
-                $stPlan = $this->pdo->prepare('SELECT id FROM planes_contables WHERE codigo = :c');
-                $stPlan->execute([':c' => $centro->planContableCodigo]);
-                $planContableId = $stPlan->fetchColumn();
-                if ($planContableId === false) {
-                    throw new \RuntimeException('Plan contable no encontrado: ' . $centro->planContableCodigo);
-                }
-                $planContableId = (int) $planContableId;
+        if ($planContableId === null) {
+            $stPlan = $this->pdo->prepare('SELECT id FROM planes_contables WHERE codigo = :c');
+            $stPlan->execute([':c' => $centro->planContableCodigo]);
+            $planContableId = $stPlan->fetchColumn();
+            if ($planContableId === false) {
+                throw new \RuntimeException('Plan contable no encontrado: ' . $centro->planContableCodigo);
             }
+            $planContableId = (int) $planContableId;
+        }
+        if ($centro->id === null) {
             $st = $this->pdo->prepare(
-                'INSERT INTO centros (codigo, nombre, tipo_cierre, plan_contable_id, activo)
-                 VALUES (:codigo, :nombre, :tipo, :plan, :activo) RETURNING id'
+                'INSERT INTO centros (codigo, nombre, tipo, tipo_cierre, plan_contable_id, activo)
+                 VALUES (:codigo, :nombre, :tipo_centro, :tipo_cierre, :plan, :activo) RETURNING id'
             );
             $st->execute([
                 ':codigo' => $centro->codigo,
                 ':nombre' => $centro->nombre,
-                ':tipo' => $centro->tipoCierre,
+                ':tipo_centro' => $centro->tipo,
+                ':tipo_cierre' => $centro->tipoCierre,
                 ':plan' => $planContableId,
                 ':activo' => (int) $centro->activo,
             ]);
             $id = (int) $st->fetchColumn();
         } else {
             $st = $this->pdo->prepare(
-                'UPDATE centros SET codigo = :codigo, nombre = :nombre, tipo_cierre = :tipo, activo = :activo
+                'UPDATE centros SET codigo = :codigo, nombre = :nombre, tipo = :tipo_centro,
+                 tipo_cierre = :tipo_cierre, plan_contable_id = :plan, activo = :activo
                  WHERE id = :id'
             );
             $st->execute([
                 ':codigo' => $centro->codigo,
                 ':nombre' => $centro->nombre,
-                ':tipo' => $centro->tipoCierre,
+                ':tipo_centro' => $centro->tipo,
+                ':tipo_cierre' => $centro->tipoCierre,
+                ':plan' => $planContableId,
                 ':activo' => (int) $centro->activo,
                 ':id' => $centro->id,
             ]);
@@ -96,6 +100,15 @@ final class PdoCentroRepository implements CentroRepository
         return $this->porId($id) ?? throw new \RuntimeException('Centro no encontrado tras guardar');
     }
 
+    public function borrar(int $id): void
+    {
+        $st = $this->pdo->prepare('DELETE FROM centros WHERE id = :id');
+        $st->execute([':id' => $id]);
+        if ($st->rowCount() === 0) {
+            throw new \RuntimeException('Centro no encontrado');
+        }
+    }
+
     /** @param array<string, mixed> $row */
     private function hydrate(array $row): Centro
     {
@@ -103,6 +116,7 @@ final class PdoCentroRepository implements CentroRepository
             (int) $row['id'],
             (string) $row['codigo'],
             (string) $row['nombre'],
+            (string) ($row['tipo'] ?? 'n'),
             (string) $row['tipo_cierre'],
             (string) ($row['plan_contable_codigo'] ?? CatalogoPlanesContables::H16N),
             (bool) $row['activo'],

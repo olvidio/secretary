@@ -12,7 +12,7 @@ final class CalculadoraE37Test extends TestCase
 {
     public function testViviendaVaAGastosYASuColumna(): void
     {
-        $celdas = CalculadoraE37::celdasDeMovimiento('21', new Dinero('1500.00'));
+        $celdas = CalculadoraE37::celdasDeMovimiento('211', new Dinero('1500.00'));
         self::assertSame('1500.00', $celdas['vivienda']->toString());
         self::assertSame('1500.00', $celdas['gastos']->toString());
         self::assertArrayNotHasKey('ingresos', $celdas);

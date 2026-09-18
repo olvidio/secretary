@@ -72,6 +72,9 @@ final class AprobarSolicitudVinculoCentro
         }
 
         $this->identidades->vincularPersona($solicitud->identidadId, $personaId, $solicitud->anio);
+        if (trim($identidad->email) !== '') {
+            $this->personas->guardarEmail($personaId, $identidad->email);
+        }
         $this->solicitudes->marcarResuelta($solicitudId, 'aprobada', $personaId, $resolvedBy);
 
         $persona = $this->personas->porId($personaId);

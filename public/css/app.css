@@ -61,6 +61,41 @@ body.prevision-hoja main { max-width: none; }
 .tabla-prevision tr.prevision-total td.col-concepto { background: #e2e8f0; }
 tr.cierre { background: #fffbeb; }
 .grid-form, .filters { display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: end; margin-bottom: 1rem; }
+.solicitudes-vinculo {
+  margin: 1.25rem 0 0;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid var(--line);
+}
+.solicitud-vinculo-box {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: .75rem 1rem;
+  margin-bottom: .75rem;
+}
+.solicitud-vinculo-box:last-child { margin-bottom: 0; }
+.solicitud-vinculo-cuerpo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem 1.25rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.solicitud-vinculo-info { flex: 1 1 14rem; min-width: 0; }
+.solicitud-vinculo-info p { margin: 0; }
+.solicitud-vinculo-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  flex-shrink: 0;
+  align-items: center;
+}
+.solicitud-candidatos { margin-top: .75rem; padding-top: .75rem; border-top: 1px solid var(--line); }
+.lista-candidatos { margin: .35rem 0 0; padding-left: 1.25rem; }
+.lista-candidatos li { margin-bottom: .35rem; }
+.nombres-listado { margin-top: 1.5rem; }
+.nombres-listado-titulo { font-size: 1.1rem; margin: 0 0 .75rem; }
+.nombres-listado #tabla-personas { margin-top: 0; }
 .entrada-cabecera {
   display: flex;
   flex-wrap: wrap;
@@ -146,6 +181,35 @@ button.peligro, button[type="button"].peligro { background: var(--err); }
 .login { display: grid; place-items: center; min-height: 100vh; padding: 1rem; }
 .login-box { background: #fff; padding: 2rem; border: 1px solid var(--line); width: min(28rem, calc(100vw - 2rem)); display: grid; gap: .8rem; }
 .login-box input, .login-box select, .login-box button { width: 100%; }
+.login-box fieldset.registro-tipo { border: 0; padding: 0; margin: 0; display: grid; gap: .4rem; }
+.login-box fieldset.registro-tipo legend { font-weight: 600; margin-bottom: .2rem; }
+.login-box label.inline { display: flex; flex-direction: row; align-items: flex-start; gap: .4rem; }
+.login-box label.inline input { width: auto; margin-top: .2rem; }
+.login-box.documento-legal { width: min(44rem, calc(100vw - 2rem)); }
+.documento-legal-cuerpo { font-size: .95rem; line-height: 1.45; }
+.documento-legal-cuerpo h1 { font-size: 1.25rem; margin: 0 0 .6rem; }
+.documento-legal-cuerpo h2 { font-size: 1.05rem; margin: 1.1rem 0 .35rem; }
+.documento-legal-cuerpo p { margin: 0 0 .7rem; }
+.documento-legal-cuerpo ul { margin: 0 0 .8rem 1.2rem; }
+.documento-legal-cuerpo li { margin: 0 0 .25rem; }
+.login-legal { margin: 0; text-align: center; font-size: .8rem; color: #4a5568; }
+.login-legal a { color: inherit; }
+main + .login-legal, .yo-main + .login-legal { padding: .6rem 1rem 1.2rem; }
+label.casilla-legal {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: .45rem;
+}
+label.casilla-legal span { font-size: .85rem; line-height: 1.35; }
+.grid-form label.casilla-legal {
+  flex: 1 1 100%;
+  max-width: 100%;
+}
+.grid-form label.inline { display: flex; flex-direction: row; align-items: flex-start; gap: .45rem; }
+.grid-form label.inline input[type=checkbox] { width: auto; margin-top: .2rem; flex-shrink: 0; }
+dl.datos-centro { display: grid; grid-template-columns: auto 1fr; gap: .2rem 1rem; margin: 0 0 1rem; }
+dl.datos-centro dt { font-weight: 600; margin: 0; }
+dl.datos-centro dd { margin: 0; }
 .login-alt { margin: 0; text-align: center; font-size: .9rem; }
 .totp-qr { display: flex; justify-content: center; padding: .5rem; background: #fff; border: 1px solid var(--line); border-radius: 6px; }
 .totp-qr img { display: block; }
@@ -363,6 +427,7 @@ td.saldo-cc-neg { color: var(--err); font-weight: 600; }
 .informe-613-tabla tr.sub td:first-child { padding-left: 1.1rem; }
 .informe-613-tabla tr.sub-grp td:first-child { padding-left: 1.1rem; font-weight: 600; }
 .informe-613-tabla tr.sub-italic td:first-child { font-style: italic; padding-left: 2rem; }
+.informe-613-tabla tr.sub-sub td:first-child { padding-left: 2rem; }
 .informe-613-tabla tr.sec-azul td { font-weight: 700; }
 .informe-613-tabla tr.sec-azul td:nth-child(5) { background: var(--613-azul); }
 .informe-613-tabla td.num .informe-613-tabla-input {
@@ -684,6 +749,24 @@ body.yo {
 }
 .yo-top .user-menu { margin-left: auto; }
 .yo-top a { color: #fff; }
+body.admin { margin: 0; background: #f8fafc; }
+.admin-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .75rem 1rem;
+  padding: .75rem 1rem;
+  background: #1e293b;
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.admin-nav { display: flex; flex-wrap: wrap; gap: .5rem 1rem; }
+.admin-nav a { color: #cbd5e1; text-decoration: none; }
+.admin-nav a.on { color: #fff; font-weight: 600; }
+.admin-top .linkish { background: none; border: none; color: #cbd5e1; cursor: pointer; text-decoration: underline; padding: 0; font: inherit; }
+.admin-main { max-width: 960px; margin: 0 auto; padding: 1rem 1.25rem 2rem; }
 .yo-main {
   max-width: min(480px, 100%);
   width: 100%;

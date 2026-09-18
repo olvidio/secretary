@@ -1,6 +1,6 @@
 <h1><?= _("Comprobaciones personales / generales") ?></h1>
 <p class="muted saldos-ayuda">
-    <?= _("Contrasta apuntes A de Personales con los de Generales. En Nombres se indica, persona a persona, si la vivienda (P/21) se aporta a generales (G/11). Eso no depende de si el centro es n o agd: puede haber de los dos en el mismo libro. También avisa quién no ha anotado movimiento en el mes de cierre o en los anteriores (la exención de Nombres deja fuera esos meses).") ?>
+    <?= _("Contrasta apuntes A de Personales con los de Generales. P/211 (vivienda general) cuadra con G/11; P/212 es vivienda personal y no entra aquí. En Nombres se indica quién entra en el cierre automático; quien no aporta puede igualmente imputar a generales puntualmente (211/11). También avisa quién no ha anotado movimiento en el mes de cierre o en los anteriores (la exención de Nombres deja fuera esos meses).") ?>
 </p>
 <form id="form-comp" class="filters">
     <label><?= _("Hasta") ?> <input type="date" name="hasta"></label>
@@ -38,14 +38,14 @@ function tablaPersonasComprobacion(c, hasta) {
     return html + '</tbody></table>';
   }
   let html = '<table class="comprobacion-personas"><thead><tr>'
-    + '<th>' + esc(I18N_COMP.persona) + '</th><th>' + esc(I18N_COMP.aportaG) + '</th><th class="num">P/21</th>'
+    + '<th>' + esc(I18N_COMP.persona) + '</th><th>' + esc(I18N_COMP.aportaG) + '</th><th class="num">P/211</th>'
     + '<th class="num">G/11</th><th class="num">' + esc(I18N_COMP.diferencia) + '</th><th></th></tr></thead><tbody>';
   c.personas.forEach((p) => {
     const q = new URLSearchParams({
       cuenta: 'P',
       origen: 'A',
       iniciales: p.iniciales,
-      concepto: '21',
+      concepto: '211',
       from: '/comprobaciones',
     });
     if (hasta) q.set('hasta', hasta);
@@ -63,7 +63,7 @@ function tablaPersonasComprobacion(c, hasta) {
       <td class="num">${esc(p.p21_es)}</td>
       <td class="num">${esc(p.g11_es)}</td>
       <td class="num">${esc(p.diferencia_es)}</td>
-      <td><a href="/apuntes?${q.toString()}">P/21</a>
+      <td><a href="/apuntes?${q.toString()}">P/211</a>
         · <a href="/apuntes?${qg.toString()}">G/11</a></td>
     </tr>`;
   });

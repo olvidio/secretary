@@ -7,6 +7,7 @@ namespace src\ambito\infrastructure\persistence;
 use PDO;
 use src\conceptos\domain\services\CatalogoConceptos;
 use src\plan\domain\services\CatalogoPlanesContables;
+use src\plan\infrastructure\persistence\PdoPlanConceptoRepository;
 use src\configuracion\domain\entity\ConfiguracionCentro;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\shared\infrastructure\persistence\ConverterDate;
@@ -80,15 +81,15 @@ final class AmbitoSeeder
         $planId = self::idPlan($pdo, CatalogoPlanesContables::H16N);
         if ($planId === null) {
             $ins = $pdo->prepare(
-                'INSERT INTO centros (codigo, nombre, tipo_cierre) VALUES (:c, :n, :t) RETURNING id'
+                'INSERT INTO centros (codigo, nombre, tipo, tipo_cierre) VALUES (:c, :n, :tipo, :t) RETURNING id'
             );
-            $ins->execute([':c' => $codigo, ':n' => $cfg->centro, ':t' => $cfg->tipoCierre]);
+            $ins->execute([':c' => $codigo, ':n' => $cfg->centro, ':tipo' => 'n', ':t' => $cfg->tipoCierre]);
         } else {
             $ins = $pdo->prepare(
-                'INSERT INTO centros (codigo, nombre, tipo_cierre, plan_contable_id)
-                 VALUES (:c, :n, :t, :p) RETURNING id'
+                'INSERT INTO centros (codigo, nombre, tipo, tipo_cierre, plan_contable_id)
+                 VALUES (:c, :n, :tipo, :t, :p) RETURNING id'
             );
-            $ins->execute([':c' => $codigo, ':n' => $cfg->centro, ':t' => $cfg->tipoCierre, ':p' => $planId]);
+            $ins->execute([':c' => $codigo, ':n' => $cfg->centro, ':tipo' => 'n', ':t' => $cfg->tipoCierre, ':p' => $planId]);
         }
 
         return (int) $ins->fetchColumn();
@@ -200,7 +201,8 @@ final class AmbitoSeeder
         $excluir = CatalogoPlanesContables::codigosCapituloVIIReservados();
         $partidasLabores = self::partidasLaboresDeCentro($pdo, $centroId);
 
-        foreach (CatalogoConceptos::todos() as $c) {
+        $conceptosPlan = self::conceptosPlanDeCentro($pdo, $centroId);
+        foreach ($conceptosPlan as $c) {
             if ($c['cuenta'] === 'P' && in_array($c['codigo'], $excluir, true)) {
                 continue;
             }
@@ -246,6 +248,31 @@ final class AmbitoSeeder
                 'orden' => $p['orden'],
             ]);
         }
+    }
+
+    /**
+     * @return list<array{codigo:string,cuenta:string,nombre:string,descripcion:string,naturaleza:string,orden:int}>
+     */
+    private static function conceptosPlanDeCentro(PDO $pdo, int $centroId): array
+    {
+        $repo = new PdoPlanConceptoRepository($pdo);
+        $planId = $repo->planIdDeCentro($centroId);
+        if ($planId === null) {
+            return CatalogoConceptos::todos();
+        }
+        $out = [];
+        foreach ($repo->listar($planId) as $c) {
+            $out[] = [
+                'codigo' => $c->codigo,
+                'cuenta' => $c->cuenta,
+                'nombre' => $c->nombre,
+                'descripcion' => $c->descripcion,
+                'naturaleza' => $c->naturaleza,
+                'orden' => $c->orden,
+            ];
+        }
+
+        return $out !== [] ? $out : CatalogoConceptos::todos();
     }
 
     /**

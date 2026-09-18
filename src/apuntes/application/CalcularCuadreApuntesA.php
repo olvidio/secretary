@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace src\apuntes\application;
 
-use src\conceptos\domain\contracts\ConceptoRepository;
+use src\ambito\application\ResolverAmbitoActual;
+use src\conceptos\application\ResolverConceptosCentro;
 use src\shared\domain\value_objects\Dinero;
 
 final class CalcularCuadreApuntesA
 {
     public function __construct(
         private readonly ListarApuntes $listar,
-        private readonly ConceptoRepository $conceptos,
+        private readonly ResolverConceptosCentro $conceptos,
+        private readonly ResolverAmbitoActual $ambito,
     ) {
     }
 
@@ -27,8 +29,8 @@ final class CalcularCuadreApuntesA
         }
 
         $naturalezas = [];
-        foreach ($this->conceptos->listar($cuenta) as $concepto) {
-            $naturalezas[$concepto->codigo] = $concepto->naturaleza;
+        foreach ($this->conceptos->listar($this->ambito->ejecutar()->centroId, $cuenta) as $concepto) {
+            $naturalezas[$concepto['codigo']] = $concepto['naturaleza'];
         }
 
         $apuntes = $this->listar->ejecutar([

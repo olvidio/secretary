@@ -14,6 +14,7 @@ use src\ambito\application\AsegurarCuentaCorrientePersona;
 use src\ambito\infrastructure\persistence\PdoCuentaRepository;
 use src\personal\application\AsegurarPlanPersonal;
 use src\personas\application\AprobarSolicitudVinculoCentro;
+use src\personas\application\ListarCandidatosVinculoCentro;
 use src\personas\application\ListarSolicitudesVinculoCentro;
 use src\personas\application\SolicitarVinculoCentro;
 use src\personas\domain\entity\Persona;
@@ -96,6 +97,11 @@ final class SolicitudVinculoCentroTest extends TestCase
         $listar = new ListarSolicitudesVinculoCentro($solicitudes, $identidades, $centros);
         self::assertCount(1, $listar->ejecutar($centro->id));
 
+        $candidatos = new ListarCandidatosVinculoCentro($solicitudes, $personas, $identidades);
+        $parecidos = $candidatos->ejecutar($centro->id, (int) $sol['id']);
+        self::assertNotEmpty($parecidos);
+        self::assertSame($existente->id, $parecidos[0]['id']);
+
         $aprobar = new AprobarSolicitudVinculoCentro(
             $solicitudes,
             $personas,
@@ -112,5 +118,52 @@ final class SolicitudVinculoCentroTest extends TestCase
         self::assertTrue($identidades->tienePersonaEnAlgunCentro($identidad->id));
         self::assertSame($anio, $identidades->anioVinculoPersona($identidad->id, $existente->id));
         self::assertSame([], $listar->ejecutar($centro->id));
+        $releida = $personas->porId($existente->id);
+        self::assertSame('ana@test.local', $releida?->email);
+    }
+
+    public function testSolicitudAprobadaAltaNuevaCopiaCorreo(): void
+    {
+        $centros = new PdoCentroRepository($this->pdo);
+        $personas = new PdoPersonaRepository($this->pdo);
+        $identidades = new PdoIdentidadRepository($this->pdo);
+        $solicitudes = new PdoSolicitudVinculoCentroRepository($this->pdo);
+        $cuentas = new PdoCuentaRepository($this->pdo);
+
+        $centro = $centros->listar()[0];
+        self::assertNotNull($centro->id);
+
+        $identidad = $identidades->guardar(new Identidad(
+            null,
+            'pepe@test.local',
+            password_hash('secret', PASSWORD_DEFAULT),
+            'Pepe López',
+            true,
+            0,
+            null,
+            null,
+            'pepe',
+        ));
+        self::assertNotNull($identidad->id);
+
+        $solicitar = new SolicitarVinculoCentro($solicitudes, $identidades, $centros);
+        $sol = $solicitar->ejecutar($identidad->id, [
+            'centro_id' => $centro->id,
+            'anio' => 2026,
+        ]);
+
+        $aprobar = new AprobarSolicitudVinculoCentro(
+            $solicitudes,
+            $personas,
+            $identidades,
+            $centros,
+            new AsegurarCuentaCorrientePersona($cuentas),
+            new AsegurarPlanPersonal($cuentas),
+        );
+        $resultado = $aprobar->ejecutar($centro->id, (int) $sol['id'], $identidad->id);
+        self::assertSame('pepe', $resultado['iniciales']);
+
+        $creada = $personas->porId((int) $resultado['id']);
+        self::assertSame('pepe@test.local', $creada?->email);
     }
 }

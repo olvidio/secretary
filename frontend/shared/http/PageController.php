@@ -13,6 +13,10 @@ use src\acceso\domain\value_objects\IdiomaUsuario;
 use src\acceso\domain\value_objects\LayoutPantalla;
 use src\acceso\infrastructure\http\ProteccionCsrf;
 use src\ambito\domain\contracts\CentroRepository;
+use src\legal\domain\services\CatalogoDocumentosLegales;
+use src\legal\domain\services\DatosOperador;
+use src\legal\infrastructure\http\HuellaAceptacionHttp;
+use src\legal\infrastructure\markdown\RenderizadorMarkdownLegal;
 use src\personal\domain\services\CatalogoBancosCsv;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
@@ -25,6 +29,8 @@ final class PageController
         private readonly IdentidadRepository $identidades,
         private readonly CentroRepository $centros,
         private readonly ConfirmarEmailRegistro $confirmarEmail,
+        private readonly CatalogoDocumentosLegales $documentos,
+        private readonly DatosOperador $operador,
     ) {
     }
 
@@ -66,29 +72,19 @@ final class PageController
                 $usuario = strtolower($identificador);
             }
         }
-        $centros = [];
-        foreach ($this->centros->listar() as $c) {
-            if ($c->id === null || !$c->activo) {
-                continue;
-            }
-            $centros[] = [
-                'id' => $c->id,
-                'codigo' => $c->codigo,
-                'nombre' => $c->nombre,
-            ];
-        }
-        $centroId = isset($previo['centro_id']) && $previo['centro_id'] !== null
-            ? (int) $previo['centro_id']
-            : 0;
-
         return Response::html($this->view->standalone('login/view/registro.php', [
             'error' => $error,
             'csrf' => ProteccionCsrf::renovarToken(),
             'usuario' => $usuario,
             'email' => $email,
             'nombre' => $nombre,
-            'centros' => $centros,
-            'centroId' => $centroId,
+            'tipoCuenta' => (string) ($previo['tipo_cuenta'] ?? 'persona'),
+            'codigoCentro' => (string) ($previo['codigo_centro'] ?? ''),
+            'nombreCentro' => (string) ($previo['nombre_centro'] ?? ''),
+            'centroTipo' => (string) ($previo['centro_tipo'] ?? 'n'),
+            'textoAceptacion' => $this->documentos->textoCasillaRegistro($this->idiomaUsuario()),
+            'versionCondiciones' => $this->documentos->vigente('condiciones')->version,
+            'versionPrivacidad' => $this->documentos->vigente('privacidad')->version,
         ]));
     }
 
@@ -114,7 +110,11 @@ final class PageController
         $token = trim((string) ($request->query('token', '') ?? ''));
         if ($token !== '') {
             try {
-                $this->confirmarEmail->ejecutar($token);
+                $this->confirmarEmail->ejecutar(
+                    $token,
+                    null,
+                    HuellaAceptacionHttp::desde($request, $this->idiomaUsuario()),
+                );
                 $ok = true;
                 $mensaje = _('Su correo está confirmado. Ya puede entrar.');
             } catch (\InvalidArgumentException $e) {
@@ -129,6 +129,25 @@ final class PageController
         }
 
         return Response::redirect('/login');
+    }
+
+    public function documentoLegal(Request $request, array $vars = []): Response
+    {
+        $tipo = (string) ($vars['tipo'] ?? '');
+        $idioma = $this->idiomaUsuario();
+        $doc = $this->documentos->vigente($tipo, $idioma);
+        $texto = strtr($doc->texto, [
+            '{{OPERADOR_NOMBRE}}' => $this->operador->nombre,
+            '{{OPERADOR_EMAIL}}' => $this->operador->email,
+            '{{OPERADOR_DIRECCION}}' => $this->operador->direccion,
+        ]);
+
+        return Response::html($this->view->standalone('legal/view/documento.php', [
+            'titulo' => $tipo === 'privacidad' ? _('Política de privacidad') : _('Condiciones de uso'),
+            'version' => $doc->version,
+            'cuerpoHtml' => RenderizadorMarkdownLegal::aHtml($texto),
+            'operador' => $this->operador,
+        ]));
     }
 
     public function totpActivar(Request $request, array $vars = []): Response
@@ -218,7 +237,7 @@ final class PageController
             $_SESSION['personas_vinculo'] = $personas;
         }
         if ($personas === []) {
-            return Response::redirect('/login');
+            return Response::redirect('/yo/centros');
         }
         if (count($personas) === 1) {
             $_SESSION['persona_id'] = (int) $personas[0]['persona_id'];
@@ -258,6 +277,7 @@ final class PageController
             'cuentaInforme' => $vars['informe'] ?? null,
             'cuentaArqueo' => $vars['arqueo'] ?? null,
             'cuentaPresupuesto' => $vars['presupuesto'] ?? null,
+            'textoAsumoNombres' => $this->documentos->textoCasillaNombres($this->idiomaUsuario()),
         ]));
     }
 
@@ -314,6 +334,26 @@ final class PageController
         return $this->paginaYo('personal/view/centros.php', 'yo-centros');
     }
 
+    public function admin(Request $request, array $vars = []): Response
+    {
+        return Response::redirect('/admin/planes');
+    }
+
+    public function adminPlanes(Request $request, array $vars = []): Response
+    {
+        return $this->paginaAdmin('admin/view/planes.php', 'admin-planes');
+    }
+
+    public function adminCentros(Request $request, array $vars = []): Response
+    {
+        return $this->paginaAdmin('admin/view/centros.php', 'admin-centros');
+    }
+
+    public function adminUsuarios(Request $request, array $vars = []): Response
+    {
+        return $this->paginaAdmin('admin/view/usuarios.php', 'admin-usuarios');
+    }
+
     public function yoAyuda(Request $request, array $vars = []): Response
     {
         return $this->paginaYo('ayuda/view/ayuda.php', 'yo-ayuda');
@@ -331,6 +371,17 @@ final class PageController
             'idioma' => $this->idiomaUsuario(),
             'mostrarRemesas' => $this->mostrarRemesasPersona(),
         ], $extra)));
+    }
+
+    private function paginaAdmin(string $view, string $nav): Response
+    {
+        return Response::html($this->view->pageAdmin($view, [
+            'usuario' => $_SESSION['usuario'] ?? '',
+            'nav' => $nav,
+            'csrf' => ProteccionCsrf::asegurarToken(),
+            'idioma' => $this->idiomaUsuario(),
+            'menuItems' => CatalogoMenus::itemsAdmin(),
+        ]));
     }
 
     private function mostrarRemesasPersona(): bool

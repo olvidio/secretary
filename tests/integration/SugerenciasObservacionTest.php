@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\integration;
 
+use Tests\support\ConceptosCentro;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\TestCase;
@@ -58,7 +59,7 @@ final class SugerenciasObservacionTest extends TestCase
 
         $crear = new CrearApunte(
             $asientos,
-            new PdoConceptoRepository($this->pdo),
+            ConceptosCentro::resolver($this->pdo),
             $personas,
             $config,
             $cuentas,

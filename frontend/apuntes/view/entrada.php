@@ -1,6 +1,6 @@
 <?php $cuenta = $cuentaEntrada ?? 'P'; ?>
 <h1><?= sprintf(_("Entrada apuntes %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
-<p class="muted"><?php if ($cuenta === 'G'): ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber. Un gasto de G con iniciales anota también P/111, P/21 y G/11.") ?><?php else: ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.") ?><?php endif; ?></p>
+<p class="muted"><?php if ($cuenta === 'G'): ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber. Un gasto de G con iniciales anota también P/111, P/211 y G/11.") ?><?php else: ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.") ?><?php endif; ?></p>
 
 <div id="entrada-apuntes">
     <div class="entrada-cabecera">
@@ -62,7 +62,7 @@
     </div>
     <p id="plantilla-preview" class="muted plantilla-preview" hidden></p>
     <p class="muted entrada-hint"><?= _("F. imputación vacía = la misma fecha de cabecera. Si difiere, el gasto/ingreso se imputa en ese día y la contrapartida (caja, banco o personal) en la fecha de cabecera; el tabulador la salta (de concepto a cantidad).") ?>
-        <?= _("Las") ?> <a href="/plantillas-<?= strtolower($cuenta) ?>"><?= _("plantillas") ?></a> <?= _("recurrentes aparecen en el desplegable de concepto.") ?><?php if ($cuenta === 'G'): ?> <?= _("Gasto con iniciales: P/111 → P/21 → G/11 → el gasto.") ?><?php endif; ?></p>
+        <?= _("Las") ?> <a href="/plantillas-<?= strtolower($cuenta) ?>"><?= _("plantillas") ?></a> <?= _("recurrentes aparecen en el desplegable de concepto.") ?><?php if ($cuenta === 'G'): ?> <?= _("Gasto con iniciales: P/111 → P/211 → G/11 → el gasto.") ?><?php endif; ?></p>
 </div>
 
 <p id="msg" class="ok" hidden><?= _("Apunte guardado") ?></p>
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const origen = selOrigen.value || 'A';
     return [
       { cuenta: 'P', origen: 'A', concepto_codigo: '111', observaciones: '' },
-      { cuenta: 'P', origen: 'A', concepto_codigo: '21', observaciones: obs },
+      { cuenta: 'P', origen: 'A', concepto_codigo: '211', observaciones: obs },
       { cuenta: 'G', origen: 'A', concepto_codigo: '11', observaciones: obs },
       { cuenta: 'G', origen: origen, concepto_codigo: codigo, observaciones: obs },
     ];

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use src\acceso\infrastructure\persistence\AccesoSeeder;
 use src\apuntes\infrastructure\persistence\PlantillaApunteSeeder;
 use src\ambito\infrastructure\persistence\AmbitoSeeder;
+use src\legal\infrastructure\persistence\LegalSeeder;
 use src\plan\infrastructure\persistence\PlanContableSeeder;
 use src\asientos\application\ConvertirApuntesAAsientos;
 use src\importacion\application\ImportarExcelSecretario;
@@ -50,6 +51,7 @@ if ($cmd === 'db:migrate') {
     AmbitoSeeder::sembrar($pdo);
     PlanContableSeeder::sembrar($pdo);
     AccesoSeeder::sembrar($pdo);
+    LegalSeeder::sembrar($pdo);
     PlantillaApunteSeeder::sembrar($pdo);
     Nivel1Seeder::sembrar($pdo);
     if ($aplicadas !== []) {

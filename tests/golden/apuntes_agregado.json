@@ -73,10 +73,16 @@
             "suma": "300.00"
         },
         {
-            "concepto_codigo": "21",
+            "concepto_codigo": "211",
             "cuenta": "P",
-            "n": 46,
-            "suma": "54748.51"
+            "n": 20,
+            "suma": "24713.00"
+        },
+        {
+            "concepto_codigo": "212",
+            "cuenta": "P",
+            "n": 26,
+            "suma": "30035.51"
         },
         {
             "concepto_codigo": "22",

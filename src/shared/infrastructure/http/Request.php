@@ -22,6 +22,8 @@ final class Request
         public readonly string $rawBody = '',
         public readonly array $headers = [],
         public readonly array $files = [],
+        public readonly ?string $clientIp = null,
+        public readonly ?string $userAgent = null,
     ) {
     }
 
@@ -49,6 +51,10 @@ final class Request
             $raw,
             self::cabecerasDesdeServidor(),
             $_FILES,
+            self::ipCliente(),
+            isset($_SERVER['HTTP_USER_AGENT']) && is_string($_SERVER['HTTP_USER_AGENT'])
+                ? $_SERVER['HTTP_USER_AGENT']
+                : null,
         );
     }
 
@@ -102,5 +108,12 @@ final class Request
         }
 
         return $out;
+    }
+
+    private static function ipCliente(): ?string
+    {
+        $ip = $_SERVER['REMOTE_ADDR'] ?? null;
+
+        return is_string($ip) && $ip !== '' ? $ip : null;
     }
 }

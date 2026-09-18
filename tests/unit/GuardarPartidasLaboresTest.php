@@ -32,7 +32,7 @@ final class GuardarPartidasLaboresTest extends TestCase
 
         $centros = $this->createMock(CentroRepository::class);
         $centros->method('porId')->willReturn(
-            new Centro(2, 'CTR2', 'Centro 2', 'vivienda', CatalogoPlanesContables::H16N)
+            new Centro(2, 'CTR2', 'Centro 2', 'n', 'vivienda', CatalogoPlanesContables::H16N)
         );
 
         $resolver = new ResolverAmbitoActual(
@@ -63,7 +63,7 @@ final class GuardarPartidasLaboresTest extends TestCase
 
         $centros = $this->createMock(CentroRepository::class);
         $centros->method('porId')->willReturn(
-            new Centro(1, 'CTR', 'Centro', 'vivienda', CatalogoPlanesContables::H16N)
+            new Centro(1, 'CTR', 'Centro', 'n', 'vivienda', CatalogoPlanesContables::H16N)
         );
 
         $resolver = new ResolverAmbitoActual(
