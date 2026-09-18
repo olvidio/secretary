@@ -18,14 +18,17 @@ final class GuardarTramosDesgravacion
 
     /**
      * @param array<string, mixed> $datos
-     * @return list<array{hasta_cents:?int, porcentaje:int}>
+     * @return array{tramos: list<array{hasta_cents:?int, porcentaje:int}>, maximo_pct: int}
      */
     public function ejecutar(array $datos): array
     {
         $raw = $datos['tramos'] ?? TramosDesgravacion::porDefecto();
-        $norm = TramosDesgravacion::normalizar($raw);
-        $this->tramos->guardar($this->ambito->ejecutar()->centroId, $norm);
+        $pack = TramosDesgravacion::empaquetar(
+            is_array($raw) ? $raw : [],
+            $datos['maximo_pct'] ?? TramosDesgravacion::MAXIMO_PCT_POR_DEFECTO,
+        );
+        $this->tramos->guardar($this->ambito->ejecutar()->centroId, $pack['tramos'], $pack['maximo_pct']);
 
-        return $norm;
+        return $pack;
     }
 }

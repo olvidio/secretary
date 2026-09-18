@@ -10,7 +10,7 @@ use src\shared\domain\value_objects\Dinero;
  * Reparte el disponible entre partidas 7: primero el tramo de mayor % entre
  * quienes pueden desgravar (para cumplir presupuesto), el resto a las que no.
  *
- * @phpstan-type PersonaIn array{id:int, disponible_cents:int, puede_desgravar:bool, ya_desgravado_cents:int}
+ * @phpstan-type PersonaIn array{id:int, disponible_cents:int, puede_desgravar:bool, ya_desgravado_cents:int, tope_cents?:?int}
  * @phpstan-type PartidaIn array{codigo:string, etiqueta:string, desgrava:bool, orden:int, hueco_cents:int}
  * @phpstan-type Tramo array{hasta_cents:?int, porcentaje:int}
  * @phpstan-type LineaOut array{persona_id:int, codigo:string, etiqueta:string, cents:int}
@@ -49,11 +49,14 @@ final class RepartidorLabores
         $disp = [];
         $ya = [];
         $puede = [];
+        $tope = [];
         foreach ($personas as $p) {
             $id = (int) $p['id'];
             $disp[$id] = max(0, (int) $p['disponible_cents']);
             $ya[$id] = max(0, (int) $p['ya_desgravado_cents']);
             $puede[$id] = (bool) $p['puede_desgravar'];
+            $topeRaw = $p['tope_cents'] ?? null;
+            $tope[$id] = $topeRaw === null || $topeRaw === '' ? null : max(0, (int) $topeRaw);
         }
 
         /** @var array<int, array<string, array{etiqueta:string, cents:int}>> $acum */
@@ -71,6 +74,9 @@ final class RepartidorLabores
                 $cap = TramosDesgravacion::capacidadTramo($tramo, $ya[$id], $hastaAnterior);
                 if ($cap === PHP_INT_MAX) {
                     $cap = $cents;
+                }
+                if ($tope[$id] !== null) {
+                    $cap = min($cap, max(0, $tope[$id] - $ya[$id]));
                 }
                 $cap = min($cents, $cap);
                 if ($cap > 0) {
@@ -95,19 +101,8 @@ final class RepartidorLabores
             if ($cents <= 0) {
                 continue;
             }
-            if ($puede[$id] && $destSi !== []) {
-                $trozos = self::echar($cents, $destSi);
-                $puesto = self::sumarTrozos($trozos);
-                $disp[$id] -= $puesto;
-                self::acumular($acum, $id, $trozos);
-                $cents = $disp[$id];
-            }
-            if ($cents <= 0) {
-                continue;
-            }
-            $dest = !$puede[$id]
-                ? ($destNo !== [] ? $destNo : $destSi)
-                : ($destNo !== [] ? $destNo : $destSi);
+            $usarNo = $destNo !== [];
+            $dest = $usarNo ? $destNo : $destSi;
             if ($dest === []) {
                 continue;
             }
@@ -121,9 +116,7 @@ final class RepartidorLabores
                 $disp[$id] -= self::sumarTrozos($trozos2);
                 self::acumular($acum, $id, $trozos2);
             }
-            if (!$puede[$id]) {
-                $destNo = $dest;
-            } elseif ($destNo !== []) {
+            if ($usarNo) {
                 $destNo = $dest;
             } else {
                 $destSi = $dest;

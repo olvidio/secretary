@@ -17,19 +17,21 @@ Desde aquí se abre también el libro personal de cada una, con solo poner su co
 3. Si esa persona va a llevar su propio libro, escribir su correo. Cuando el correo es nuevo, la pantalla muestra una contraseña inicial: hay que comunicársela en ese momento, porque no se vuelve a mostrar.
 4. Indicar si su aportación de vivienda tiene contrapartida en el libro general y, si procede, un importe fijo.
 5. Indicar si **puede desgravar** donativos. Quien no puede, al proponer destinos 7 recibe solo partidas que no desgravan.
-6. Si llega o se va a mitad de año, marcar los meses en que no paga. Hay dos intervalos.
-7. «Editar» recupera una fila en el formulario, «Borrar» la quita del listado previa confirmación y «Nuevo» vacía el formulario. Si la persona tiene apuntes o remesas, no se borra del todo: se da de baja y deja de salir aquí, pero el histórico se conserva.
-8. En «Solicitudes de acceso personal», cada petición se resuelve creando un nombre nuevo, vinculándola a uno que ya existe o rechazándola.
+6. Si se conoce, escribir la **base liquidable** del IRPF (casillas 0500 y 0510 de la renta). Si se deja vacío, el programa pone el **111 de la previsión** de esa persona; si aún no hay previsión guardada, el ingreso 111 real proyectado a fin de año. El 10 % de esa cifra es el tope de donativos que desgravan.
+7. Si llega o se va a mitad de año, marcar los meses en que no paga. Hay dos intervalos.
+8. «Editar» recupera una fila en el formulario, «Borrar» la quita del listado previa confirmación y «Nuevo» vacía el formulario. Si la persona tiene apuntes o remesas, no se borra del todo: se da de baja y deja de salir aquí, pero el histórico se conserva.
+9. En «Solicitudes de acceso personal», cada petición se resuelve creando un nombre nuevo, vinculándola a uno que ya existe o rechazándola.
 
 ## Reglas que conviene saber
 
 - Las iniciales no llevan espacios, no se repiten y admiten hasta seis caracteres.
 - «Vivienda aporta a generales» se decide **por persona**, no por centro: si está en «sí», cada gasto de vivienda (21) del libro personal debe tener el mismo importe como ingreso 11 en el general. La pantalla de Comprobaciones lo verifica.
-- Quien no aporta a generales debe dejar la exención vacía, para que Comprobaciones avise si no anota el mes.
+- Quien no aporta a generales debe dejar la exención vacía, para que Comprobaciones avise si no anota el mes. Si el Excel trae exención de 1 a 12, al importar se convierte en «Aporta a G» = no, sin exención.
 - La exención deja fuera esos meses: no se le pide movimiento ni entra en el reparto del cierre.
 - Con importe fijo de vivienda, esa persona paga siempre esa cantidad en el cierre.
 - Borrar el correo deja el nombre en la lista, pero le quita el acceso a su libro personal.
 - «Puede desgravar» condiciona la pantalla Disponible: si está en no, todo el disponible va a partidas 7 que no desgravan.
+- La **base liquidable** recorta el tope de las 7 que desgravan (el % está en Configuración, 10 % por defecto). Si el recuadro está vacío, se usa el 111 de la previsión personal o, a falta de ella, el ingreso 111 proyectado a fin de año.
 
 ## Problemas frecuentes
 

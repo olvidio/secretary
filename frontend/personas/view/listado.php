@@ -23,6 +23,10 @@
             <option value="0"><?= _("No — las 7 van a partidas que no desgravan") ?></option>
         </select>
     </label>
+    <label><?= _("Base liquidable IRPF") ?>
+        <input name="base_liquidable" inputmode="decimal">
+        <span class="muted"><?= _("Si se deja vacío, se usa el 111 de la previsión personal; si aún no está guardada, el ingreso 111 proyectado a fin de año.") ?></span>
+    </label>
     <label class="inline casilla-legal">
         <input type="checkbox" name="asumo_responsable_nombres" value="1" id="asumo-responsable-nombres">
         <span><?= htmlspecialchars((string) ($textoAsumoNombres ?? _('Declaro que el centro, y yo como secretario, somos responsables del tratamiento de los datos de las personas que doy de alta, importo o vinculo. Secretario es un programa gratuito que solo aloja la información. Tengo base legal para ese tratamiento.')), ENT_QUOTES) ?></span>
@@ -39,7 +43,7 @@
     <thead>
     <tr>
         <th>#</th><th><?= _("Centro") ?></th><th><?= _("Nombre") ?></th><th><?= _("Apellidos") ?></th><th><?= _("Iniciales") ?></th><th><?= _("Correo") ?></th>
-        <th><?= _("Exención") ?></th><th><?= _("Vivienda fija") ?></th><th><?= _("Aporta a G") ?></th><th><?= _("Desgrava") ?></th><th></th>
+        <th><?= _("Exención") ?></th><th><?= _("Vivienda fija") ?></th><th><?= _("Aporta a G") ?></th><th><?= _("Desgrava") ?></th><th><?= _("Base liq.") ?></th><th></th>
     </tr>
     </thead>
     <tbody></tbody>
@@ -55,7 +59,21 @@ const I18N_PERSONAS = {
   error: <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>,
   passwordInicial: <?= json_encode(_("Contraseña inicial de %s: %s — comunícasela ahora; no se volverá a mostrar."), JSON_UNESCAPED_UNICODE) ?>,
   faltaResponsable: <?= json_encode(_("Marque que el centro es responsable de los datos de las personas que da de alta."), JSON_UNESCAPED_UNICODE) ?>,
+  basePrevision: <?= json_encode(_("111 previsión"), JSON_UNESCAPED_UNICODE) ?>,
+  baseProyectado: <?= json_encode(_("111 proyectado"), JSON_UNESCAPED_UNICODE) ?>,
 };
+function etiquetaBaseLiquidable(p) {
+  const valor = p.base_liquidable || p.base_liquidable_defecto || '';
+  if (!valor) return '';
+  if (p.base_liquidable) return valor;
+  if (p.base_liquidable_origen === 'prevision_111') {
+    return valor + ' (' + I18N_PERSONAS.basePrevision + ')';
+  }
+  if (p.base_liquidable_origen === 'proyectado_111') {
+    return valor + ' (' + I18N_PERSONAS.baseProyectado + ')';
+  }
+  return valor;
+}
 async function loadPersonas() {
   const r = await api('/api/personas');
   const tb = document.querySelector('#tabla-personas tbody');
@@ -68,12 +86,18 @@ async function loadPersonas() {
       <td>${p.importe_vivienda_fijo || ''}</td>
       <td>${p.vivienda_aporta_generales ? esc(I18N_PERSONAS.si) : esc(I18N_PERSONAS.no)}</td>
       <td>${p.puede_desgravar ? esc(I18N_PERSONAS.si) : esc(I18N_PERSONAS.no)}</td>
+      <td>${esc(etiquetaBaseLiquidable(p))}</td>
       <td><button data-id="${p.id}">${esc(I18N_PERSONAS.editar)}</button> <button data-del="${p.id}">${esc(I18N_PERSONAS.borrar)}</button></td>`;
     tr.querySelector('[data-id]').onclick = () => {
       const form = document.getElementById('form-persona');
       fillForm(form, p);
       form.querySelector('[name=vivienda_aporta_generales]').value = p.vivienda_aporta_generales ? '1' : '0';
       form.querySelector('[name=puede_desgravar]').value = p.puede_desgravar ? '1' : '0';
+      const bl = form.querySelector('[name=base_liquidable]');
+      bl.placeholder = p.base_liquidable_defecto || '';
+      if (!p.base_liquidable && p.base_liquidable_defecto) {
+        bl.value = p.base_liquidable_defecto;
+      }
     };
     tr.querySelector('[data-del]').onclick = async () => {
       if (!confirm(I18N_PERSONAS.confirmQuitar.replace('%s', p.iniciales))) return;
@@ -102,6 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('form-persona').reset();
     document.querySelector('[name=vivienda_aporta_generales]').value = aportaDefault;
     document.querySelector('[name=puede_desgravar]').value = '1';
+    document.querySelector('[name=base_liquidable]').placeholder = '';
     document.getElementById('msg-password').hidden = true;
   };
   document.querySelector('[name=vivienda_aporta_generales]').value = aportaDefault;
@@ -130,6 +155,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     ev.target.reset();
     document.querySelector('[name=vivienda_aporta_generales]').value = aportaDefault;
+    document.querySelector('[name=base_liquidable]').placeholder = '';
     loadPersonas();
   };
 });

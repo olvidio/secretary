@@ -90,6 +90,55 @@ final class RepartidorLaboresTest extends TestCase
         self::assertStringContainsString('74', $r['textos'][0]['texto']);
     }
 
+    public function testElTopeDeLaBaseDejaElExcesoEnPartidasQueNoDesgravan(): void
+    {
+        $r = RepartidorLabores::repartir(
+            [
+                [
+                    'id' => 1,
+                    'disponible_cents' => 100000,
+                    'puede_desgravar' => true,
+                    'ya_desgravado_cents' => 0,
+                    'tope_cents' => 25000,
+                ],
+            ],
+            [
+                ['codigo' => '73', 'etiqueta' => 'Proas', 'desgrava' => true, 'orden' => 10, 'hueco_cents' => 200000],
+                ['codigo' => '74', 'etiqueta' => 'Prelatura', 'desgrava' => false, 'orden' => 20, 'hueco_cents' => 200000],
+            ],
+            TramosDesgravacion::porDefecto(),
+        );
+        $por = [];
+        foreach ($r['lineas'] as $l) {
+            $por[$l['codigo']] = $l['cents'];
+        }
+        self::assertSame(25000, $por['73']);
+        self::assertSame(75000, $por['74']);
+    }
+
+    public function testSiElUltimoTramoTieneHastaElExcesoNoDesgrava(): void
+    {
+        $r = RepartidorLabores::repartir(
+            [
+                ['id' => 1, 'disponible_cents' => 50000, 'puede_desgravar' => true, 'ya_desgravado_cents' => 0],
+            ],
+            [
+                ['codigo' => '73', 'etiqueta' => 'Proas', 'desgrava' => true, 'orden' => 10, 'hueco_cents' => 200000],
+                ['codigo' => '74', 'etiqueta' => 'Prelatura', 'desgrava' => false, 'orden' => 20, 'hueco_cents' => 200000],
+            ],
+            [
+                ['hasta_cents' => 25000, 'porcentaje' => 80],
+                ['hasta_cents' => 40000, 'porcentaje' => 40],
+            ],
+        );
+        $por = [];
+        foreach ($r['lineas'] as $l) {
+            $por[$l['codigo']] = $l['cents'];
+        }
+        self::assertSame(40000, $por['73']);
+        self::assertSame(10000, $por['74']);
+    }
+
     public function testTextoDeVariasPartidas(): void
     {
         $t = RepartidorLabores::texto([

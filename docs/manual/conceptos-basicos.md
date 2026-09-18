@@ -52,7 +52,9 @@ cerrar el mes se carga la vivienda solo a quien lo tenga marcado.
 
 Quien llega o se va a mitad de año necesita un **intervalo de exención**: los
 meses en los que no paga por gastos del centro. Quien no vive en el centro deja
-la exención vacía, y así Comprobaciones avisa si algún mes no tiene movimiento.
+la exención vacía y «vivienda aporta a generales» en no; así Comprobaciones
+avisa si algún mes no tiene movimiento. Si el Excel trae exención de 1 a 12,
+al importar se convierte en eso.
 
 ## Qué se carga al cerrar el mes
 

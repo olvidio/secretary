@@ -15,7 +15,7 @@ final class ObtenerTramosDesgravacion
     ) {
     }
 
-    /** @return list<array{hasta_cents:?int, porcentaje:int}> */
+    /** @return array{tramos: list<array{hasta_cents:?int, porcentaje:int}>, maximo_pct: int} */
     public function ejecutar(): array
     {
         return $this->tramos->deCentro($this->ambito->ejecutar()->centroId);

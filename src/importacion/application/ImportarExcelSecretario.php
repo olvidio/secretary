@@ -16,6 +16,7 @@ use src\conceptos\domain\entity\Concepto;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\configuracion\domain\entity\ConfiguracionCentro;
 use src\importacion\domain\entity\FilaOrigenExcel;
+use src\importacion\domain\services\InterpretarExencionExcel;
 use src\importacion\infrastructure\excel\XlsxReader;
 use src\importacion\infrastructure\persistence\PdoImportEjecucionRepository;
 use src\importacion\infrastructure\persistence\PdoImportFilaRepository;
@@ -329,21 +330,28 @@ final class ImportarExcelSecretario
                 $fijo = new Dinero(number_format((float) $cols['K'], 2, '.', ''));
             }
             $existente = $this->personas->porInicialesDeCentro($centroId, $iniciales);
+            $interpretado = InterpretarExencionExcel::de(
+                self::mesInt($cols['E'] ?? null),
+                self::mesInt($cols['F'] ?? null),
+                self::mesInt($cols['H'] ?? null),
+                self::mesInt($cols['I'] ?? null),
+                $existente->viviendaAportaGenerales ?? $aportaPorDefecto,
+            );
             $this->personas->guardar(new Persona(
                 $existente?->id,
                 $nombre,
                 trim((string) ($cols['C'] ?? '')),
                 $iniciales,
-                self::mesInt($cols['E'] ?? null),
-                self::mesInt($cols['F'] ?? null),
-                self::mesInt($cols['H'] ?? null),
-                self::mesInt($cols['I'] ?? null),
+                $interpretado['mesExentoInicio'],
+                $interpretado['mesExentoFin'],
+                $interpretado['mesExento2Inicio'],
+                $interpretado['mesExento2Fin'],
                 $fijo,
                 $n + 1,
                 $centroId,
                 $existente->activo ?? true,
                 $existente->email ?? null,
-                $existente->viviendaAportaGenerales ?? $aportaPorDefecto,
+                $interpretado['aportaGenerales'],
             ));
             $inicialesPresentes[] = $iniciales;
             $n++;

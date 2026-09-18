@@ -50,4 +50,32 @@ final class DisponibleServiciosTest extends TestCase
         self::assertSame(15000, TramosDesgravacion::capacidadTramo($tramo, 10000, 0));
         self::assertSame(0, TramosDesgravacion::capacidadTramo($tramo, 25000, 0));
     }
+
+    public function testTopeEsElPorcentajeDeLaBaseLiquidable(): void
+    {
+        self::assertSame(25000, TramosDesgravacion::topeBaseCents(250000, 10));
+        self::assertSame(15000, TramosDesgravacion::topeBaseCents(100000, 15));
+        self::assertNull(TramosDesgravacion::topeBaseCents(null, 10));
+        self::assertNull(TramosDesgravacion::topeBaseCents(0, 10));
+    }
+
+    public function testJsonAntiguoSinMaximoUsaElDiezPorCiento(): void
+    {
+        $c = TramosDesgravacion::desempaquetar([
+            ['hasta_cents' => 25000, 'porcentaje' => 80],
+            ['hasta_cents' => null, 'porcentaje' => 40],
+        ]);
+        self::assertSame(10, $c['maximo_pct']);
+        self::assertCount(2, $c['tramos']);
+    }
+
+    public function testUltimoTramoConHastaNoSeEstiraSinTope(): void
+    {
+        $t = TramosDesgravacion::normalizar([
+            ['hasta_cents' => 25000, 'porcentaje' => 80],
+            ['hasta_cents' => 200000, 'porcentaje' => 40],
+        ]);
+        self::assertCount(2, $t);
+        self::assertSame(200000, $t[1]['hasta_cents']);
+    }
 }

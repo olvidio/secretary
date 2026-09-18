@@ -39,6 +39,8 @@ final class Persona
         /** Si entra en el cierre automático de vivienda (P/211). Imputación puntual a generales no depende de este flag. */
         public readonly bool $viviendaAportaGenerales = true,
         public readonly bool $puedeDesgravar = true,
+        /** Base liquidable del IRPF (casillas 0500+0510). El tope de donativos es un % de esta base. */
+        public readonly ?Dinero $baseLiquidable = null,
     ) {
     }
 

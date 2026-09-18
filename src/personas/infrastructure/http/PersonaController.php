@@ -64,6 +64,7 @@ final class PersonaController
             $fila['email'] = $resultado['persona']->email ?? '';
             $fila['vivienda_aporta_generales'] = $resultado['persona']->viviendaAportaGenerales;
             $fila['puede_desgravar'] = $resultado['persona']->puedeDesgravar;
+            $fila['base_liquidable'] = $resultado['persona']->baseLiquidable?->toString() ?? '';
             $payload = ['persona' => $fila];
             if ($resultado['password_inicial'] !== null) {
                 $payload['password_inicial'] = $resultado['password_inicial'];

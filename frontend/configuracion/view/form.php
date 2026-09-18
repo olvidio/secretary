@@ -30,9 +30,12 @@
 </form>
 <section>
     <h2><?= _("Tramos de desgravación") ?></h2>
-    <p class="muted"><?= _("Se usan al proponer destinos 7. El primer tramo (p. ej. 250 € al 80 %) se reparte entre varias personas antes de subir el importe de una sola.") ?></p>
+    <p class="muted"><?= _("Se usan al proponer destinos 7. El primer tramo (p. ej. 250 € al 80 %) se reparte entre varias personas antes de subir el importe de una sola. El máximo es el 10 % de la base liquidable de cada uno (art. 69.1 de la Ley del IRPF); lo que pase de ese tope va a partidas 7 que no desgravan.") ?></p>
+    <label><?= _("Máximo (% de la base liquidable)") ?>
+        <input id="maximo-pct" type="number" min="1" max="100" value="10" required>
+    </label>
     <table id="tabla-tramos">
-        <thead><tr><th><?= _("Hasta (€, vacío = resto)") ?></th><th>%</th><th></th></tr></thead>
+        <thead><tr><th><?= _("Hasta (€, vacío = resto hasta el máximo)") ?></th><th>%</th><th></th></tr></thead>
         <tbody></tbody>
     </table>
     <p>
@@ -59,6 +62,8 @@ async function loadTramos() {
   const tb = document.querySelector('#tabla-tramos tbody');
   tb.innerHTML = '';
   (r.tramos || []).forEach((t) => tb.appendChild(filaTramo(t)));
+  const maximo = document.getElementById('maximo-pct');
+  if (maximo) maximo.value = String(r.maximo_pct ?? 10);
 }
 function rellenarPlanes(select, planes, seleccionado) {
   select.innerHTML = '';
@@ -97,7 +102,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       return { hasta_cents: hastaCents, porcentaje: pct };
     });
-    const s = await api('/api/desgravacion-tramos', { method: 'POST', body: { tramos } });
+    const s = await api('/api/desgravacion-tramos', {
+      method: 'POST',
+      body: {
+        tramos,
+        maximo_pct: Number(document.getElementById('maximo-pct').value),
+      },
+    });
     document.getElementById('msg-tramos').hidden = !s.ok;
     if (!s.ok) alert(s.error);
   };

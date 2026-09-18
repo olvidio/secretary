@@ -20,27 +20,27 @@ final class PdoTramosDesgravacionRepository implements TramosDesgravacionReposit
         $st->execute([':id' => $centroId]);
         $raw = $st->fetchColumn();
         if ($raw === false || $raw === null) {
-            return TramosDesgravacion::porDefecto();
+            return TramosDesgravacion::desempaquetar([]);
         }
         if (is_string($raw)) {
             $decoded = json_decode($raw, true);
             $raw = is_array($decoded) ? $decoded : [];
         }
         if (!is_array($raw)) {
-            return TramosDesgravacion::porDefecto();
+            return TramosDesgravacion::desempaquetar([]);
         }
 
-        return TramosDesgravacion::normalizar($raw);
+        return TramosDesgravacion::desempaquetar($raw);
     }
 
-    public function guardar(int $centroId, array $tramos): void
+    public function guardar(int $centroId, array $tramos, int $maximoPct): void
     {
-        $norm = TramosDesgravacion::normalizar($tramos);
+        $pack = TramosDesgravacion::empaquetar($tramos, $maximoPct);
         $st = $this->pdo->prepare(
             'UPDATE centros SET desgravacion_tramos_json = CAST(:j AS jsonb) WHERE id = :id'
         );
         $st->execute([
-            ':j' => json_encode($norm, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '[]',
+            ':j' => json_encode($pack, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}',
             ':id' => $centroId,
         ]);
     }

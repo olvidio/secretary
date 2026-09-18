@@ -10,7 +10,9 @@ use src\disponible\domain\contracts\AsignacionLaboresRepository;
 use src\disponible\domain\contracts\SaldoDisponibleRepository;
 use src\disponible\domain\contracts\TramosDesgravacionRepository;
 use src\disponible\domain\services\RepartidorLabores;
+use src\disponible\domain\services\TramosDesgravacion;
 use src\plan\domain\contracts\PartidaLaboresRepository;
+use src\personas\application\EstimarBasesLiquidables;
 use src\personas\domain\contracts\PersonaRepository;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
 use src\shared\domain\value_objects\Dinero;
@@ -25,6 +27,7 @@ final class ProponerDestinoLabores
         private readonly PartidaLaboresRepository $partidas,
         private readonly PresupuestoRepository $presupuesto,
         private readonly PersonaRepository $personas,
+        private readonly EstimarBasesLiquidables $basesLiquidables,
     ) {
     }
 
@@ -66,6 +69,8 @@ final class ProponerDestinoLabores
         foreach ($this->saldos->listarDeCentro($ctx->centroId) as $s) {
             $saldos[$s['persona_id']] = $s['saldo_cents'];
         }
+        $configTramos = $this->tramos->deCentro($ctx->centroId);
+        $bases = $this->basesLiquidables->deCentro();
         $personasIn = [];
         $nombres = [];
         foreach ($this->personas->listarDeCentro($ctx->centroId) as $p) {
@@ -83,18 +88,26 @@ final class ProponerDestinoLabores
                     $ya += $cents;
                 }
             }
+            $baseCents = $p->baseLiquidable?->toCents();
+            if ($baseCents === null || $baseCents <= 0) {
+                $baseCents = $bases[$p->id]['cents'] ?? null;
+            }
             $personasIn[] = [
                 'id' => $p->id,
                 'disponible_cents' => $disp,
                 'puede_desgravar' => $p->puedeDesgravar,
                 'ya_desgravado_cents' => $ya,
+                'tope_cents' => TramosDesgravacion::topeBaseCents(
+                    $baseCents,
+                    $configTramos['maximo_pct'],
+                ),
             ];
         }
 
         $reparto = RepartidorLabores::repartir(
             $personasIn,
             $partidasIn,
-            $this->tramos->deCentro($ctx->centroId),
+            $configTramos['tramos'],
         );
         $lineasRepo = [];
         $porPersona = [];

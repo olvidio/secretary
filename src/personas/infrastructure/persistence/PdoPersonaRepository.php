@@ -114,8 +114,8 @@ final class PdoPersonaRepository implements PersonaRepository
             // backfilleará en el siguiente db:migrate (ver comentario en Persona::centroId).
             $sql = 'INSERT INTO personas (nombre, apellidos, iniciales, mes_exento_inicio, mes_exento_fin,
                     mes_exento2_inicio, mes_exento2_fin, importe_vivienda_fijo, orden, centro_id, email,
-                    vivienda_aporta_generales, puede_desgravar)
-                 VALUES (:n, :a, :i, :e1, :e2, :e3, :e4, :imp, :o, :cid, :email, :aporta, :desgrava)';
+                    vivienda_aporta_generales, puede_desgravar, base_liquidable)
+                 VALUES (:n, :a, :i, :e1, :e2, :e3, :e4, :imp, :o, :cid, :email, :aporta, :desgrava, :bl)';
             $params = $this->params($persona);
             $params[':cid'] = $persona->centroId;
             $params[':email'] = $persona->email !== null && $persona->email !== ''
@@ -132,7 +132,7 @@ final class PdoPersonaRepository implements PersonaRepository
                 'UPDATE personas SET nombre=:n, apellidos=:a, iniciales=:i, mes_exento_inicio=:e1,
                     mes_exento_fin=:e2, mes_exento2_inicio=:e3, mes_exento2_fin=:e4,
                     importe_vivienda_fijo=:imp, orden=:o, vivienda_aporta_generales=:aporta,
-                    puede_desgravar=:desgrava
+                    puede_desgravar=:desgrava, base_liquidable=:bl
                  WHERE id = :id'
             );
             $params = $this->params($persona);
@@ -254,6 +254,7 @@ final class PdoPersonaRepository implements PersonaRepository
             ':o' => $p->orden,
             ':aporta' => $p->viviendaAportaGenerales ? 1 : 0,
             ':desgrava' => $p->puedeDesgravar ? 1 : 0,
+            ':bl' => $p->baseLiquidable?->toString(),
         ];
     }
 
@@ -263,6 +264,10 @@ final class PdoPersonaRepository implements PersonaRepository
         $fijo = null;
         if (!empty($row['importe_vivienda_fijo'])) {
             $fijo = new Dinero((string) $row['importe_vivienda_fijo']);
+        }
+        $baseLiquidable = null;
+        if (!empty($row['base_liquidable'])) {
+            $baseLiquidable = new Dinero((string) $row['base_liquidable']);
         }
 
         return new Persona(
@@ -283,6 +288,7 @@ final class PdoPersonaRepository implements PersonaRepository
                 : null,
             !isset($row['vivienda_aporta_generales']) || self::booleano($row['vivienda_aporta_generales']),
             !isset($row['puede_desgravar']) || self::booleano($row['puede_desgravar']),
+            $baseLiquidable,
         );
     }
 }

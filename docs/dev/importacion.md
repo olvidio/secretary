@@ -30,6 +30,10 @@ Si el ejercicio aún no tiene filas en `import_filas` (base convertida en la Fas
 
 El Excel trae **una** fecha: `fecha_operacion = fecha`. Nunca se parte en periodificación al importar.
 
+## Nombres: exención 1–12 del Excel legado
+
+En la hoja `Nombres P`, una exención de enero a diciembre (columnas E–F = 1 y 12) marcaba a quien no entra en el cierre de vivienda. `InterpretarExencionExcel` lo traduce: se vacían los intervalos de exención y `vivienda_aporta_generales` queda en `false`. Un intervalo parcial (llegada o salida a mitad de año) se conserva. El golden `personas.json` deja de llevar `mes_exento_*` 1–12 en esos nombres (el flag `aporta` no entra en el volcado de `ListarPersonas::ejecutar()`).
+
 ## Qué se sigue reemplazando
 
 `apuntes` y `presupuesto_lineas` siguen siendo una instantánea del último Excel (el golden master agrega `apuntes`). No son el libro diario. Las personas siguen en upsert (Fase 2b).

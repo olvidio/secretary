@@ -22,7 +22,7 @@ Al aceptar una remesa, si la persona envió el saldo de su caja/banco, se puede 
 
 - Quien en Nombres no puede desgravar recibe solo partidas 7 que no desgravan.
 - Qué partidas desgravan se marca en Centros → labores apostólicas.
-- Los tramos (p. ej. 250 € al 80 % y el resto al 40 %) están en Configuración.
+- Los tramos (p. ej. 250 € al 80 % y el resto al 40 %) y el máximo (10 % de la base liquidable) están en Configuración. La base liquidable se escribe en Nombres; si falta, se toma el 111 de la previsión o el ingreso 111 proyectado a fin de año.
 - Las 7 que la persona ya anotó en su libro viajan en la remesa. Las de la propuesta se apuntan al confirmar; cuando las haga después, el programa no las vuelve a cargar.
 
 ## Problemas frecuentes

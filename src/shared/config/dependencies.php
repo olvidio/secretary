@@ -107,6 +107,7 @@ use src\informes\domain\services\MesesSinMovimiento;
 use src\informes\infrastructure\http\InformeController;
 use src\informes\infrastructure\persistence\PdoInforme613MesRepository;
 use src\personas\application\BorrarPersona;
+use src\personas\application\EstimarBasesLiquidables;
 use src\personas\application\GuardarPersona;
 use src\personas\application\ListarPersonas;
 use src\personas\domain\contracts\PersonaRepository;
@@ -369,6 +370,7 @@ return [
     ObtenerConfiguracion::class => autowire(),
     GuardarConfiguracion::class => autowire(),
     ListarPersonas::class => autowire(),
+    EstimarBasesLiquidables::class => autowire(),
     GuardarPersona::class => autowire(),
     BorrarPersona::class => autowire(),
     VincularEmailPersona::class => autowire(),

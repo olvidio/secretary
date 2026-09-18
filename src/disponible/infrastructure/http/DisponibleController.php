@@ -63,13 +63,13 @@ final class DisponibleController
 
     public function tramos(Request $request, array $vars = []): Response
     {
-        return ContestarJson::ok(['tramos' => $this->obtenerTramos->ejecutar()]);
+        return ContestarJson::ok($this->obtenerTramos->ejecutar());
     }
 
     public function guardarTramos(Request $request, array $vars = []): Response
     {
         try {
-            return ContestarJson::ok(['tramos' => $this->guardarTramos->ejecutar($request->json())]);
+            return ContestarJson::ok($this->guardarTramos->ejecutar($request->json()));
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
         }

@@ -81,6 +81,11 @@ final class GuardarPersona
             $datos['puede_desgravar'] ?? null,
             $existente !== null ? $existente->puedeDesgravar : true,
         );
+        $baseLiquidable = $existente !== null ? $existente->baseLiquidable : null;
+        if (array_key_exists('base_liquidable', $datos)) {
+            $rawBl = trim((string) ($datos['base_liquidable'] ?? ''));
+            $baseLiquidable = $rawBl === '' ? null : Dinero::fromInput($rawBl);
+        }
         $persona = new Persona(
             $id,
             $nombre,
@@ -97,6 +102,7 @@ final class GuardarPersona
             $emailPersona,
             $aporta,
             $puedeDesgravar,
+            $baseLiquidable,
         );
         $guardada = $this->repo->guardar($persona);
         $this->cuentaCorriente->ejecutar($guardada);
