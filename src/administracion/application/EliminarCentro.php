@@ -44,14 +44,16 @@ final class EliminarCentro
             )->execute([':c' => $centroId]);
             $this->pdo->prepare('DELETE FROM remesas WHERE centro_id = :c')->execute([':c' => $centroId]);
             $this->pdo->prepare('DELETE FROM import_ejecuciones WHERE centro_id = :c')->execute([':c' => $centroId]);
+            $this->pdo->prepare('DELETE FROM envios_dl WHERE centro_id = :c')->execute([':c' => $centroId]);
+            $this->pdo->prepare('DELETE FROM asignaciones_labores WHERE centro_id = :c')->execute([':c' => $centroId]);
             $this->pdo->prepare('DELETE FROM ejercicios WHERE centro_id = :c')->execute([':c' => $centroId]);
             $this->pdo->prepare(
                 'DELETE FROM identidad_persona WHERE persona_id IN (SELECT id FROM personas WHERE centro_id = :c)'
             )->execute([':c' => $centroId]);
-            $this->pdo->prepare('DELETE FROM personas WHERE centro_id = :c')->execute([':c' => $centroId]);
             $this->pdo->prepare('UPDATE cuentas SET padre_id = NULL WHERE centro_id = :c')
                 ->execute([':c' => $centroId]);
             $this->pdo->prepare('DELETE FROM cuentas WHERE centro_id = :c')->execute([':c' => $centroId]);
+            $this->pdo->prepare('DELETE FROM personas WHERE centro_id = :c')->execute([':c' => $centroId]);
             $this->pdo->prepare('DELETE FROM cuentas_fisicas WHERE centro_id = :c')->execute([':c' => $centroId]);
             $this->pdo->prepare('DELETE FROM identidad_centro WHERE centro_id = :c')->execute([':c' => $centroId]);
             $this->centros->borrar($centroId);
