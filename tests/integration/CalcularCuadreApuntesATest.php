@@ -116,6 +116,8 @@ final class CalcularCuadreApuntesATest extends TestCase
             ),
             ConceptosCentro::resolver($this->pdo),
             $ambito,
+            $personas,
+            $config,
         );
         $r = $cuadre->ejecutar('P', 'jrm', $y . '-03-15');
 

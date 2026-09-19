@@ -1,6 +1,6 @@
 <h1><?= _("Saldos") ?></h1>
 <p class="muted saldos-ayuda">
-    <?= _("El saldo de apuntes A es el de la cuenta personal (libro P) de cada residente. Debería ser cero: cada gasto personal (origen A) va con su contrapartida, normalmente un ingreso 111 (Trabajo).") ?>
+    <?= _("Por persona: cuadre de apuntes A, C y B (positivo = más ingresos que gastos; debería ser cero) y saldo de la cuenta corriente (concepto 9).") ?>
 </p>
 <form id="form-saldos" class="filters">
     <label><?= _("Hasta") ?> <input type="date" name="hasta"></label>
@@ -15,9 +15,17 @@
     </thead>
     <tbody></tbody>
 </table>
-<h2><?= _("Cuentas personales (apuntes A)") ?></h2>
+<h2><?= _("Cuentas personales") ?></h2>
 <table id="tabla-saldos">
-    <thead><tr><th><?= _("Persona") ?></th><th class="num"><?= _("Saldo") ?></th></tr></thead>
+    <thead>
+    <tr>
+        <th><?= _("Persona") ?></th>
+        <th class="num"><?= _("A") ?></th>
+        <th class="num"><?= _("C") ?></th>
+        <th class="num"><?= _("B") ?></th>
+        <th class="num"><?= _("c/c") ?></th>
+    </tr>
+    </thead>
     <tbody></tbody>
 </table>
 <section id="comprobaciones" class="comprobaciones-saldos" hidden>
@@ -39,7 +47,11 @@ const I18N_SALDOS = {
   verApuntesA: <?= json_encode(_("Ver apuntes A"), JSON_UNESCAPED_UNICODE) ?>,
   caja: <?= json_encode(_("Caja"), JSON_UNESCAPED_UNICODE) ?>,
   banco: <?= json_encode(_("Banco"), JSON_UNESCAPED_UNICODE) ?>,
-  saldoAGlobal: <?= json_encode(_("Saldo A global"), JSON_UNESCAPED_UNICODE) ?>,
+  saldoCcGlobal: <?= json_encode(_("Saldo c/c global"), JSON_UNESCAPED_UNICODE) ?>,
+  colA: <?= json_encode(_("A"), JSON_UNESCAPED_UNICODE) ?>,
+  colC: <?= json_encode(_("C"), JSON_UNESCAPED_UNICODE) ?>,
+  colB: <?= json_encode(_("B"), JSON_UNESCAPED_UNICODE) ?>,
+  colCc: <?= json_encode(_("c/c"), JSON_UNESCAPED_UNICODE) ?>,
 };
 function parseSaldoNum(es) {
   if (!es) return 0;
@@ -118,15 +130,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const r = await api('/api/informes/saldos?hasta=' + hasta);
     document.getElementById('tot').innerHTML =
       `${esc(I18N_SALDOS.caja)} <strong>${esc(r.caja_es)}</strong> · ${esc(I18N_SALDOS.banco)} <strong>${esc(r.banco_es)}</strong>`
-      + ` · ${esc(I18N_SALDOS.saldoAGlobal)} <strong>${esc(r.saldo_a_es)}</strong>`;
+      + ` · ${esc(I18N_SALDOS.saldoCcGlobal)} <strong>${esc(r.saldo_a_es)}</strong>`;
     const tb = document.querySelector('#tabla-saldos tbody');
     tb.innerHTML = '';
     (r.por_persona || []).forEach(p => {
       const tr = document.createElement('tr');
-      if (Math.abs(parseSaldoNum(p.saldo_a_es)) > 0.001) {
+      const celdas = [
+        p.saldo_apuntes_a_es || '0,00',
+        p.saldo_apuntes_c_es || '0,00',
+        p.saldo_apuntes_b_es || '0,00',
+        p.saldo_cc_es || p.saldo_a_es || '0,00',
+      ];
+      if (celdas.some((v) => Math.abs(parseSaldoNum(v)) > 0.001)) {
         tr.className = 'saldos-alerta';
       }
-      tr.innerHTML = `<td>${esc(p.nombre)} (${esc(p.iniciales)})</td><td class="num">${esc(p.saldo_a_es)}</td>`;
+      tr.innerHTML = `<td>${esc(p.nombre)} (${esc(p.iniciales)})</td>`
+        + celdas.map((v) => `<td class="num">${esc(v)}</td>`).join('');
       tb.appendChild(tr);
     });
     const tr = await api('/api/informes/tesoreria?hasta=' + hasta);

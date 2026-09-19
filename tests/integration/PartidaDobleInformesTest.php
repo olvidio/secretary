@@ -12,6 +12,7 @@ use src\ambito\infrastructure\persistence\PdoCuentaFisicaRepository;
 use src\ambito\infrastructure\persistence\PdoCuentaRepository;
 use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
 use src\apuntes\application\CrearApunte;
+use src\apuntes\application\ListarApuntes;
 use src\asientos\domain\entity\Asiento;
 use src\asientos\domain\entity\Movimiento;
 use src\asientos\domain\exceptions\AsientoDescuadrado;
@@ -38,12 +39,7 @@ final class PartidaDobleInformesTest extends TestCase
     public function testGastoGeneralConInicialesNoAlteraSaldoPersonal(): void
     {
         $ctx = $this->importarYPreparar();
-        $saldosAntes = (new CalcularSaldos(
-            $ctx['asientos'],
-            $ctx['config'],
-            $ctx['personas'],
-            $ctx['ambito'],
-        ))->ejecutar(null);
+        $saldosAntes = $this->calcularSaldos($ctx)->ejecutar(null);
 
         $acAntes = $this->saldoPersona($saldosAntes, 'ac');
 
@@ -67,12 +63,7 @@ final class PartidaDobleInformesTest extends TestCase
             'cantidad' => '100.00',
         ]);
 
-        $saldosDespues = (new CalcularSaldos(
-            $ctx['asientos'],
-            $ctx['config'],
-            $ctx['personas'],
-            $ctx['ambito'],
-        ))->ejecutar(null);
+        $saldosDespues = $this->calcularSaldos($ctx)->ejecutar(null);
 
         self::assertSame($acAntes, $this->saldoPersona($saldosDespues, 'ac'));
     }
@@ -183,10 +174,30 @@ final class PartidaDobleInformesTest extends TestCase
             ->ejecutar($excelPath, true);
 
         $resolverConceptos = ConceptosCentro::resolver($pdo);
+        $listarApuntes = new ListarApuntes(
+            $asientos,
+            $cuentas,
+            $personas,
+            new ProyectorAsientoAFilaExcel(),
+            $ambito,
+        );
 
         return compact(
             'pdo', 'config', 'personas', 'conceptos', 'apuntes', 'presupuesto',
-            'asientos', 'cuentas', 'fisicas', 'ambito', 'ejercicioRepo', 'resolverConceptos',
+            'asientos', 'cuentas', 'fisicas', 'ambito', 'ejercicioRepo', 'resolverConceptos', 'listarApuntes',
+        );
+    }
+
+    /** @param array<string, mixed> $ctx */
+    private function calcularSaldos(array $ctx): CalcularSaldos
+    {
+        return new CalcularSaldos(
+            $ctx['asientos'],
+            $ctx['config'],
+            $ctx['personas'],
+            $ctx['ambito'],
+            $ctx['listarApuntes'],
+            $ctx['resolverConceptos'],
         );
     }
 }

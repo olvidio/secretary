@@ -152,6 +152,8 @@ final class ComprobarSaldos
             'personas' => $personas,
             'ayuda' => 'Los apuntes A (sin caja/banco) deben cuadrar por persona: cada gasto '
                 . 'personal lleva su contrapartida, normalmente un ingreso 111 (Trabajo). '
+                . 'Si sobran ingresos, suele faltar el gasto de vivienda: P/211 si aporta a generales '
+                . '(cuadra con G/11) o P/212 si es vivienda personal. '
                 . 'Si falta, el saldo de la cuenta personal queda distinto de cero.',
         ];
     }

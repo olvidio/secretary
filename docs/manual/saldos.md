@@ -16,14 +16,15 @@ Además tiene un botón que ejecuta unas revisiones automáticas y señala, pers
 2. Pulsar **Calcular** para rehacer las cifras con esa fecha.
 3. Arriba aparece el resumen: dinero en Caja, en Banco y el saldo global de las cuentas personales.
 4. La tabla **Tesorería física** pone una fila por cada caja o cuenta bancaria real del centro, con su parte en el libro personal (P), en el general (G) y el total físico.
-5. La tabla **Cuentas personales** da el saldo de cada persona. Las filas distintas de cero se resaltan.
+5. La tabla **Cuentas personales** muestra, por persona, el cuadre de apuntes **A**, **C** y **B** (positivo si ha ingresado más de lo que ha gastado; debería ser cero) y el saldo de la **c/c** (concepto 9). Las filas con algún valor distinto de cero se resaltan.
 6. **Ejecutar comprobaciones** añade abajo tres revisiones: que no haya apuntes descuadrados, que la suma de todas las cuentas personales sea cero y el detalle por persona.
 
 ## Reglas que conviene saber
 
 - Se cuenta desde la fecha de inicio del ejercicio hasta la fecha indicada; los apuntes posteriores no entran.
-- Los apuntes A son los que no mueven la caja ni el banco del centro.
-- El saldo de cada cuenta personal debería ser cero: cada gasto personal lleva su contrapartida, normalmente un ingreso del concepto 111 (Trabajo). La suma de esas cuentas es el **IX del 613 P**.
+- **A:** apuntes que no mueven caja ni banco; deberían cuadrar (ingresos = gastos). En la tabla, positivo = más ingresos que gastos.
+- **C** y **B:** apuntes desde caja o banco del centro; misma regla de signo y también deberían cuadrar por persona.
+- **c/c:** saldo de la cuenta corriente personal (concepto 9). La suma de todas las c/c es el **IX del 613 P**.
 - Un saldo personal negativo con arqueo de caja y banco cuadrado **puede ser coherente**: el arqueo mira el dinero físico (P+G juntos). El negativo de la cuenta personal es vivienda u otro gasto A que aún no tiene 111, no un billete que falte en el cajón.
 - El total físico de una caja es la suma de lo que hay en P y en G: el dinero es el mismo, aunque la contabilidad lo reparta en dos libros.
 - Caja y Banco del resumen suman todas las cajas y bancos del centro.
@@ -31,5 +32,5 @@ Además tiene un botón que ejecuta unas revisiones automáticas y señala, pers
 ## Problemas frecuentes
 
 - **Avisa de que hay apuntes descuadrados**: algún apunte se grabó con un lado distinto del otro. Hasta corregirlo, los saldos no son fiables.
-- **Una persona sale con saldo distinto de cero**: le falta la contrapartida. En las comprobaciones se propone el importe del apunte que falta y hay un enlace para ver sus apuntes A. Si el desfase coincide con vivienda «automático», ver Cierre de mes y el aviso del E37: aportar de más el mes siguiente no lo cancela.
+- **Una persona sale con saldo distinto de cero**: le falta la contrapartida. En las comprobaciones se propone el importe y el concepto del apunte que falta (111, 211 o 212) y hay un enlace para ver sus apuntes A. P/211 imputa a generales (cuadra con G/11); P/212 es vivienda personal. Si el desfase coincide con vivienda «automático», ver Cierre de mes y el aviso del E37: aportar de más el mes siguiente no lo cancela.
 - **Los saldos parecen antiguos**: revisar la fecha «Hasta» y volver a pulsar Calcular.

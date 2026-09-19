@@ -14,6 +14,7 @@ use src\personal\application\ResolverPersonaActual;
 use src\personal\infrastructure\persistence\AlmacenCopiasPersonal;
 use src\personal\infrastructure\persistence\RutasCopiasPersonal;
 use src\personas\domain\contracts\PersonaRepository;
+use src\shared\domain\exceptions\LimiteCopiasAlcanzado;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
@@ -41,8 +42,11 @@ final class CopiaPersonalController
 
     public function backup(Request $request, array $vars = []): Response
     {
+        $borrarMasAntigua = !empty($request->json()['borrar_mas_antigua']);
         try {
-            return ContestarJson::ok($this->crear->ejecutar());
+            return ContestarJson::ok($this->crear->ejecutar($borrarMasAntigua));
+        } catch (LimiteCopiasAlcanzado $e) {
+            return ContestarJson::error($e->getMessage(), 400, ['codigo' => LimiteCopiasAlcanzado::CODIGO]);
         } catch (RuntimeException $e) {
             return ContestarJson::error($e->getMessage());
         }

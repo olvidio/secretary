@@ -14,9 +14,10 @@ final class ContestarJson
         return Response::json(['ok' => true] + $data);
     }
 
-    public static function error(string $mensaje, int $status = 400): Response
+    /** @param array<string, mixed> $extra */
+    public static function error(string $mensaje, int $status = 400, array $extra = []): Response
     {
-        return Response::json(['ok' => false, 'error' => $mensaje], $status);
+        return Response::json(['ok' => false, 'error' => $mensaje] + $extra, $status);
     }
 
     public static function errorPdo(PDOException $e): Response

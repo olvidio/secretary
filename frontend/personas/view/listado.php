@@ -42,7 +42,7 @@
 <table id="tabla-personas">
     <thead>
     <tr>
-        <th>#</th><th><?= _("Centro") ?></th><th><?= _("Nombre") ?></th><th><?= _("Apellidos") ?></th><th><?= _("Iniciales") ?></th><th><?= _("Correo") ?></th>
+        <th>#</th><th><?= _("Código") ?></th><th><?= _("Nombre") ?></th><th><?= _("Apellidos") ?></th><th><?= _("Iniciales") ?></th><th><?= _("Correo") ?></th>
         <th><?= _("Exención") ?></th><th><?= _("Vivienda fija") ?></th><th><?= _("Aporta a G") ?></th><th><?= _("Desgrava") ?></th><th><?= _("Base liq.") ?></th><th></th>
     </tr>
     </thead>
@@ -80,7 +80,7 @@ async function loadPersonas() {
   tb.innerHTML = '';
   (r.personas || []).forEach((p, i) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${i+1}</td><td>${esc(p.centro_nombre || '')}</td><td>${esc(p.nombre)}</td><td>${esc(p.apellidos)}</td>
+    tr.innerHTML = `<td>${i+1}</td><td>${esc(p.centro_codigo || '')}</td><td>${esc(p.nombre)}</td><td>${esc(p.apellidos)}</td>
       <td>${esc(p.iniciales)}</td><td>${esc(p.email)}</td>
       <td>${p.mes_exento_inicio || ''}–${p.mes_exento_fin || ''} ${p.mes_exento2_inicio || ''}–${p.mes_exento2_fin || ''}</td>
       <td>${p.importe_vivienda_fijo || ''}</td>

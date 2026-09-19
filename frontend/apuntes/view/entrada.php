@@ -83,12 +83,15 @@ const I18N_ENTRADA = {
   conIniciales: <?= json_encode(_("Con iniciales: "), JSON_UNESCAPED_UNICODE) ?>,
   enPantalla: <?= json_encode(_("En pantalla: "), JSON_UNESCAPED_UNICODE) ?>,
   saldoPantalla: <?= json_encode(_("Saldo pantalla: "), JSON_UNESCAPED_UNICODE) ?>,
-  cuadrar: <?= json_encode(_("Cuadrar (111 · %s)"), JSON_UNESCAPED_UNICODE) ?>,
+  cuadrar: <?= json_encode(_("Cuadrar (%s · %s)"), JSON_UNESCAPED_UNICODE) ?>,
   cuadreOk: <?= json_encode(_("Apuntes A de %s cuadrados (saldo 0)."), JSON_UNESCAPED_UNICODE) ?>,
   cuadreMal: <?= json_encode(_("Los apuntes A de %s no cuadran: saldo %s (gastos − ingresos)."), JSON_UNESCAPED_UNICODE) ?>,
   cuadreAntesFecha: <?= json_encode(_(" Antes del %s cuadraba; el desajuste viene probablemente de los apuntes de esa fecha."), JSON_UNESCAPED_UNICODE) ?>,
   sugSoloGastos: <?= json_encode(_("Sugerencia: añadir ingreso 111 (Trabajo) por %s."), JSON_UNESCAPED_UNICODE) ?>,
   sugEquilibrar: <?= json_encode(_("Sugerencia: añadir ingreso 111 (Trabajo) por %s para equilibrar los apuntes A."), JSON_UNESCAPED_UNICODE) ?>,
+  sugVivienda211: <?= json_encode(_("Sugerencia: añadir gasto 211 (vivienda general) por %s."), JSON_UNESCAPED_UNICODE) ?>,
+  sugVivienda212: <?= json_encode(_("Sugerencia: añadir gasto 212 (vivienda personal) por %s."), JSON_UNESCAPED_UNICODE) ?>,
+  sugNecesidades: <?= json_encode(_("Sugerencia: añadir gasto 6 (necesidades) por %s."), JSON_UNESCAPED_UNICODE) ?>,
 };
 document.addEventListener('DOMContentLoaded', async () => {
   const cfg = await api('/api/configuracion');
@@ -422,6 +425,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (s.motivo === 'solo_gastos_fecha') {
       return I18N_ENTRADA.sugSoloGastos.replace('%s', esc(s.cantidad_es));
     }
+    if (s.motivo === 'saldo_negativo_vivienda') {
+      if (s.concepto_codigo === '212') {
+        return I18N_ENTRADA.sugVivienda212.replace('%s', esc(s.cantidad_es));
+      }
+      if (s.concepto_codigo === '6') {
+        return I18N_ENTRADA.sugNecesidades.replace('%s', esc(s.cantidad_es));
+      }
+      return I18N_ENTRADA.sugVivienda211.replace('%s', esc(s.cantidad_es));
+    }
     return I18N_ENTRADA.sugEquilibrar.replace('%s', esc(s.cantidad_es));
   }
 
@@ -477,7 +489,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.hidden = !cuadreActual.sugerencia;
     btn.disabled = !cuadreActual.sugerencia;
     if (cuadreActual.sugerencia) {
-      btn.textContent = I18N_ENTRADA.cuadrar.replace('%s', cuadreActual.sugerencia.cantidad_es);
+      btn.textContent = I18N_ENTRADA.cuadrar
+        .replace('%s', cuadreActual.sugerencia.concepto_codigo)
+        .replace('%s', cuadreActual.sugerencia.cantidad_es);
     }
   }
 

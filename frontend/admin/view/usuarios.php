@@ -1,7 +1,7 @@
 <h1><?= _("Usuarios") ?></h1>
 <p class="muted"><?= _("Cuentas de acceso al sistema. No se puede borrar al administrador de plataforma.") ?></p>
 <table id="tabla-usuarios">
-    <thead><tr><th><?= _("Alias") ?></th><th><?= _("Correo") ?></th><th><?= _("Nombre") ?></th><th><?= _("Centros") ?></th><th><?= _("Personas") ?></th><th></th></tr></thead>
+    <thead><tr><th><?= _("Alias") ?></th><th><?= _("Correo") ?></th><th><?= _("Nombre del usuario") ?></th><th><?= _("Centros") ?></th><th><?= _("Personas") ?></th><th></th></tr></thead>
     <tbody></tbody>
 </table>
 <script>

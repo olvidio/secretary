@@ -10,6 +10,7 @@ use src\shared\application\BorrarCopiaSeguridad;
 use src\shared\application\CrearCopiaSeguridad;
 use src\shared\application\ListarCopiasSeguridad;
 use src\shared\application\RestaurarCopiaSeguridad;
+use src\shared\domain\exceptions\LimiteCopiasAlcanzado;
 use src\shared\infrastructure\persistence\AlmacenCopiasSeguridad;
 
 final class CopiaSeguridadController
@@ -34,8 +35,11 @@ final class CopiaSeguridadController
 
     public function backup(Request $request, array $vars = []): Response
     {
+        $borrarMasAntigua = !empty($request->json()['borrar_mas_antigua']);
         try {
-            return ContestarJson::ok($this->crear->ejecutar());
+            return ContestarJson::ok($this->crear->ejecutar($borrarMasAntigua));
+        } catch (LimiteCopiasAlcanzado $e) {
+            return ContestarJson::error($e->getMessage(), 400, ['codigo' => LimiteCopiasAlcanzado::CODIGO]);
         } catch (RuntimeException $e) {
             return ContestarJson::error($e->getMessage());
         }

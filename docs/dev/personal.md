@@ -65,6 +65,7 @@ crea otra identidad de persona en el centro elegido (o el único) y entra igual.
 
 Copia del libro personal (solo movimientos X): menú de usuario → **Copia personal**
 (`/cuenta/copias`). JSON en `var/backups/personal/`. API `/api/yo/copias/...`.
+Tope de 5 copias por persona en el servidor (igual que en `/copias` del centro).
 No toca el centro ni remesas ya aceptadas. En Docker, `var/backups/personal` debe ser
 escribible por PHP-FPM (`chmod 777 var/backups/personal` en desarrollo).
 

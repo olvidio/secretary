@@ -360,7 +360,20 @@ final class RemesaTest extends TestCase
                 new ProyectorAsientoAFilaExcel(),
                 $ambitoCentro,
             ),
-            'saldos' => new CalcularSaldos($asientos, $config, $personas, $ambitoCentro),
+            'saldos' => new CalcularSaldos(
+                $asientos,
+                $config,
+                $personas,
+                $ambitoCentro,
+                new ListarApuntes(
+                    $asientos,
+                    $cuentas,
+                    $personas,
+                    new ProyectorAsientoAFilaExcel(),
+                    $ambitoCentro,
+                ),
+                $conceptos,
+            ),
         ];
     }
 

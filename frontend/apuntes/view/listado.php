@@ -50,7 +50,7 @@ const I18N_APUNTES = {
   sugFaltaGasto: <?= json_encode(_(" Falta el gasto P/A de esa cantidad (el 111 de ese día parece incluirlo)."), JSON_UNESCAPED_UNICODE) ?>,
   sugVivienda21: <?= json_encode(_(" Si imputa a generales, debería haber un P/211 por el mismo importe."), JSON_UNESCAPED_UNICODE) ?>,
   sugPareja: <?= json_encode(_(" Puede faltar el apunte P/A pareja."), JSON_UNESCAPED_UNICODE) ?>,
-  confirm21: <?= json_encode(_("Se anotará un gasto P/A 21 (vivienda) de %s € el %s y, si esta persona aporta a generales, el ingreso G/A 11."), JSON_UNESCAPED_UNICODE) ?>,
+  confirmVivienda: <?= json_encode(_("Se anotará un gasto P/A %s de %s € el %s y, si imputa a generales (211), el ingreso G/A 11."), JSON_UNESCAPED_UNICODE) ?>,
   p21g11Fallo: <?= json_encode(_("P/211 creado, pero G/11 falló: %s"), JSON_UNESCAPED_UNICODE) ?>,
   confirm111: <?= json_encode(_("Se anotará un ingreso P/A 111 de %s € el %s (contrapartida de la devolución en G). El apunte G no se toca."), JSON_UNESCAPED_UNICODE) ?>,
 };
@@ -212,7 +212,13 @@ async function aceptarSugerencia21(a) {
   const fecha = a.fecha;
   const ini = a.iniciales || '';
   const obs = a.observaciones || '';
-  const txt = I18N_APUNTES.confirm21
+  const pers = await api('/api/personas');
+  const persona = (pers.personas || []).find((x) => x.iniciales === ini);
+  const aporta = persona ? !!persona.vivienda_aporta_generales : true;
+  const esG11 = a.cuenta === 'G' && a.concepto_codigo === '11';
+  const concepto = (aporta || esG11) ? '211' : '212';
+  const txt = I18N_APUNTES.confirmVivienda
+    .replace('%s', concepto)
     .replace('%s', fmtEuro(parseImporte(cant)))
     .replace('%s', a.fecha_es || fecha);
   if (!confirm(txt)) return;
@@ -225,13 +231,10 @@ async function aceptarSugerencia21(a) {
   };
   const p = await api('/api/apuntes', {
     method: 'POST',
-    body: Object.assign({ cuenta: 'P', concepto_codigo: '211' }, base),
+    body: Object.assign({ cuenta: 'P', concepto_codigo: concepto }, base),
   });
   if (!p.ok) return alert(p.error);
-  const pers = await api('/api/personas');
-  const persona = (pers.personas || []).find((x) => x.iniciales === ini);
-  const aporta = persona ? !!persona.vivienda_aporta_generales : true;
-  if (aporta) {
+  if (concepto === '211' && !esG11) {
     const g = await api('/api/apuntes', {
       method: 'POST',
       body: Object.assign({ cuenta: 'G', concepto_codigo: '11' }, base),

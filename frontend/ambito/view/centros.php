@@ -8,7 +8,7 @@
     <p id="centro-actual" class="muted"><?= _("Cargando…") ?></p>
     <table id="tabla-usuarios">
         <thead>
-        <tr><th><?= _("Usuario") ?></th><th><?= _("Correo") ?></th><th><?= _("Nombre") ?></th><th><?= _("Rol") ?></th></tr>
+        <tr><th><?= _("Usuario") ?></th><th><?= _("Correo") ?></th><th><?= _("Nombre del usuario") ?></th><th><?= _("Rol") ?></th></tr>
         </thead>
         <tbody></tbody>
     </table>
@@ -17,7 +17,7 @@
         <label><?= _("Usuario (alias)") ?> <input name="usuario" required placeholder="<?= htmlspecialchars(_("p. ej. scl"), ENT_QUOTES) ?>"></label>
         <label><?= _("Correo") ?> <input name="email" type="email" required></label>
         <label><?= _("Contraseña") ?> <input name="password" type="password" required minlength="6"></label>
-        <label><?= _("Nombre") ?> <input name="nombre"></label>
+        <label><?= _("Nombre del usuario") ?> <input name="nombre" autocomplete="name"></label>
         <button type="submit"><?= _("Vincular") ?></button>
     </form>
     <h3><?= _("Excel de este centro") ?></h3>

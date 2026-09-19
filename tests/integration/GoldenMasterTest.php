@@ -131,7 +131,7 @@ final class GoldenMasterTest extends TestCase
         $this->compararOActualizar('e37', $e37->detalle(null));
         $this->compararOActualizar('e37_resumen', $e37->resumen());
 
-        $saldos = new CalcularSaldos($asientoRepo, $configRepo, $personaRepo, $ambito);
+        $saldos = new CalcularSaldos($asientoRepo, $configRepo, $personaRepo, $ambito, $listarApuntes, $resolverConceptos);
         $this->compararOActualizar('saldos', $saldos->ejecutar(null));
 
         $this->compararOActualizar('arqueo', $this->dumpArqueos($arqueoRepo));

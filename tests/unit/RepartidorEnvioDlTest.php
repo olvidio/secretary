@@ -11,27 +11,26 @@ use src\shared\domain\value_objects\Dinero;
 
 final class RepartidorEnvioDlTest extends TestCase
 {
-    public function testEntranTodosLosNoExentosAunqueNoAportenVivienda(): void
+    public function testEntranTodosLosActivosAunqueNoAportenVivienda(): void
     {
         $personas = [
             $this->persona(1, 'aaa', false),
             $this->persona(2, 'bbb', true),
         ];
-        $saldos = [1 => 0, 2 => 0];
-        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('10'), $personas, 6, $saldos);
+        $saldos = [1 => 5000, 2 => 5000];
+        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('10'), $personas, $saldos);
         self::assertCount(2, $lineas);
     }
 
-    public function testExcluyeExentos(): void
+    public function testNoExcluyeExentosDelMes(): void
     {
         $personas = [
             $this->persona(1, 'aaa', true, 1, 12),
             $this->persona(2, 'bbb', true),
         ];
         $saldos = [1 => 10000, 2 => 10000];
-        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('10'), $personas, 6, $saldos);
-        self::assertCount(1, $lineas);
-        self::assertSame(2, $lineas[0]['persona_id']);
+        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('10'), $personas, $saldos);
+        self::assertCount(2, $lineas);
     }
 
     public function testExcluyeSaldoNegativo(): void
@@ -42,25 +41,25 @@ final class RepartidorEnvioDlTest extends TestCase
             $this->persona(3, 'ccc', true),
         ];
         $saldos = [1 => 10000, 2 => -20000, 3 => 10000];
-        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('100'), $personas, 6, $saldos);
+        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('100'), $personas, $saldos);
         self::assertSame([
             1 => 5000,
             3 => 5000,
         ], $this->mapLineas($lineas));
     }
 
-    public function testSaldoCeroReparteEquitativamente(): void
+    public function testExcluyeSaldoCero(): void
     {
         $personas = [
             $this->persona(1, 'aaa', true),
             $this->persona(2, 'bbb', true),
         ];
         $saldos = [1 => 0, 2 => 0];
-        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('10'), $personas, 6, $saldos);
-        self::assertSame([1 => 500, 2 => 500], $this->mapLineas($lineas));
+        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('10'), $personas, $saldos);
+        self::assertSame([], $lineas);
     }
 
-    public function testConAlgunoACeroReparteEquitativamenteEntreTodos(): void
+    public function testConAlgunoACeroSoloReparteEntreSaldoPositivo(): void
     {
         $personas = [
             $this->persona(1, 'aaa', true),
@@ -68,8 +67,8 @@ final class RepartidorEnvioDlTest extends TestCase
             $this->persona(3, 'ccc', true),
         ];
         $saldos = [1 => 10000, 2 => 0, 3 => 10000];
-        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('90'), $personas, 6, $saldos);
-        self::assertSame([1 => 3000, 2 => 3000, 3 => 3000], $this->mapLineas($lineas));
+        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('90'), $personas, $saldos);
+        self::assertSame([1 => 4500, 3 => 4500], $this->mapLineas($lineas));
     }
 
     public function testRedondeaAEurosEnteros(): void
@@ -80,21 +79,21 @@ final class RepartidorEnvioDlTest extends TestCase
             $this->persona(3, 'ccc', true),
         ];
         $saldos = [1 => 10000, 2 => 10000, 3 => 10000];
-        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('10'), $personas, 6, $saldos);
+        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('10'), $personas, $saldos);
         foreach ($lineas as $l) {
             self::assertSame(0, $l['importe_cents'] % 100);
         }
         self::assertSame(1000, array_sum(array_column($lineas, 'importe_cents')));
     }
 
-    public function testSinSaldoReparteIgualEnEuros(): void
+    public function testSinSaldoPositivoNoReparte(): void
     {
         $personas = [
             $this->persona(1, 'aaa', true),
             $this->persona(2, 'bbb', true),
         ];
-        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('10'), $personas, 6, []);
-        self::assertSame([1 => 500, 2 => 500], $this->mapLineas($lineas));
+        $lineas = RepartidorEnvioDl::repartir(Dinero::fromInput('10'), $personas, []);
+        self::assertSame([], $lineas);
     }
 
     /** @param list<array{persona_id:int, importe_cents:int}> $lineas */

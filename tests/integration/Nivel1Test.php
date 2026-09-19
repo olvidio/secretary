@@ -17,7 +17,10 @@ use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\infrastructure\persistence\PdoCentroRepository;
 use src\ambito\infrastructure\persistence\PdoCuentaRepository;
 use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
+use src\apuntes\application\ListarApuntes;
+use src\asientos\domain\services\ProyectorAsientoAFilaExcel;
 use src\asientos\infrastructure\persistence\PdoAsientoRepository;
+use Tests\support\ConceptosCentro;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\informes\application\CalcularSaldos;
 use src\personal\application\AsegurarPlanPersonal;
@@ -265,7 +268,14 @@ final class Nivel1Test extends TestCase
             'listarA' => new ListarMovimientosPersonales($resolverA, $asientos, $cuentas, new PdoPlantillaApunteRepository($this->pdo)),
             'listarB' => new ListarMovimientosPersonales($resolverB, $asientos, $cuentas, new PdoPlantillaApunteRepository($this->pdo)),
             'subcuentaA' => new CrearSubcuentaPersonal($resolverA, $cuentas),
-            'saldos' => new CalcularSaldos($asientos, $config, $personas, $ambitoCentro),
+            'saldos' => new CalcularSaldos(
+                $asientos,
+                $config,
+                $personas,
+                $ambitoCentro,
+                new ListarApuntes($asientos, $cuentas, $personas, new ProyectorAsientoAFilaExcel(), $ambitoCentro),
+                ConceptosCentro::resolver($this->pdo),
+            ),
         ];
     }
 }

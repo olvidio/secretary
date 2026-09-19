@@ -6,7 +6,10 @@ namespace src\informes\application;
 
 use DateTimeImmutable;
 use src\ambito\application\ResolverAmbitoActual;
+use src\apuntes\application\ListarApuntes;
+use src\apuntes\domain\services\SaldoCuadreApuntes;
 use src\asientos\domain\contracts\AsientoRepository;
+use src\conceptos\application\ResolverConceptosCentro;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\personas\domain\contracts\PersonaRepository;
 use src\shared\domain\value_objects\Dinero;
@@ -18,6 +21,8 @@ final class CalcularSaldos
         private readonly ConfiguracionRepository $config,
         private readonly PersonaRepository $personas,
         private readonly ResolverAmbitoActual $ambito,
+        private readonly ListarApuntes $listarApuntes,
+        private readonly ResolverConceptosCentro $conceptos,
     ) {
     }
 
@@ -70,17 +75,44 @@ final class CalcularSaldos
             }
         }
 
+        $naturalezas = [];
+        foreach ($this->conceptos->listar($contexto->centroId, 'P') as $concepto) {
+            $naturalezas[$concepto['codigo']] = $concepto['naturaleza'];
+        }
+        $personaIdPorIniciales = [];
+        foreach ($personasPorId as $pid => $persona) {
+            $personaIdPorIniciales[strtolower($persona->iniciales)] = $pid;
+        }
+        $saldosApuntes = SaldoCuadreApuntes::porPersonaYOrigen(
+            $this->listarApuntes->ejecutar(['cuenta' => 'P', 'hasta' => $hastaStr]),
+            $naturalezas,
+            $personaIdPorIniciales,
+        );
+
         $porPersona = [];
         foreach ($this->personas->listarDeCentro($contexto->centroId) as $p) {
-            $s = $porPersonaMap[$p->iniciales] ?? Dinero::zero();
+            $cc = $porPersonaMap[$p->iniciales] ?? Dinero::zero();
             if ($iniciales !== null && $p->iniciales !== $iniciales) {
                 continue;
             }
+            $apuntes = $p->id !== null ? ($saldosApuntes[$p->id] ?? ['A' => 0, 'B' => 0, 'C' => 0]) : ['A' => 0, 'B' => 0, 'C' => 0];
+            // Cuadre interno: gasto suma, ingreso resta. En pantalla: positivo = más ingresos que gastos.
+            $saldoApuntesA = Dinero::fromCents(-$apuntes['A']);
+            $saldoApuntesB = Dinero::fromCents(-$apuntes['B']);
+            $saldoApuntesC = Dinero::fromCents(-$apuntes['C']);
             $porPersona[] = [
                 'iniciales' => $p->iniciales,
                 'nombre' => $p->nombreCompleto(),
-                'saldo_a' => $s->toString(),
-                'saldo_a_es' => $s->formatEs(),
+                'saldo_a' => $cc->toString(),
+                'saldo_a_es' => $cc->formatEs(),
+                'saldo_apuntes_a' => $saldoApuntesA->toString(),
+                'saldo_apuntes_a_es' => $saldoApuntesA->formatEs(),
+                'saldo_apuntes_b' => $saldoApuntesB->toString(),
+                'saldo_apuntes_b_es' => $saldoApuntesB->formatEs(),
+                'saldo_apuntes_c' => $saldoApuntesC->toString(),
+                'saldo_apuntes_c_es' => $saldoApuntesC->formatEs(),
+                'saldo_cc' => $cc->toString(),
+                'saldo_cc_es' => $cc->formatEs(),
             ];
         }
 

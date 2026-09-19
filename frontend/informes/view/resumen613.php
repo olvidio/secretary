@@ -87,7 +87,7 @@
                       class="informe-613-obs-caja" aria-label="<?= htmlspecialchars(_("Observaciones"), ENT_QUOTES) ?>"></textarea>
         </section>
 
-        <footer class="informe-613-pie">
+        <div class="informe-613-pie">
             <div class="informe-613-firmas">
                 <div class="informe-613-firma informe-613-firma-d"><?= _("VºBº El d") ?></div>
                 <div class="informe-613-firma informe-613-firma-scl"><?= _("VºBº El scl") ?></div>
@@ -96,9 +96,9 @@
                 <span id="codigo-informe">613 <?= htmlspecialchars($cuenta, ENT_QUOTES) ?></span>
                 <span id="fecha-impresion"></span>
             </div>
-        </footer>
+        </div>
     </article>
 </div>
 <script>window.CUENTA_613 = <?= json_encode($cuenta) ?>;</script>
 <script src="/js/html2pdf.bundle.min.js"></script>
-<script src="/js/resumen613.js"></script>
+<script src="/js/resumen613.js?v=<?= (int) (@filemtime(dirname(__DIR__, 3) . '/public/js/resumen613.js') ?: 0) ?>"></script>

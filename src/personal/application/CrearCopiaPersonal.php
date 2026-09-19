@@ -9,6 +9,7 @@ use src\personal\domain\contracts\CopiaPersonalRepository;
 use src\personal\infrastructure\persistence\AlmacenCopiasPersonal;
 use src\personal\infrastructure\persistence\RutasCopiasPersonal;
 use src\personas\domain\contracts\PersonaRepository;
+use src\shared\application\AsegurarHuecoCopias;
 
 final class CrearCopiaPersonal
 {
@@ -22,7 +23,7 @@ final class CrearCopiaPersonal
     /**
      * @return array{filename: string, bytes: int, fecha: string, movimientos: int}
      */
-    public function ejecutar(): array
+    public function ejecutar(bool $borrarMasAntigua = false): array
     {
         $ctx = $this->ambito->ejecutar();
         $persona = $this->personas->porId($ctx->personaId);
@@ -34,6 +35,11 @@ final class CrearCopiaPersonal
             RutasCopiasPersonal::directorio(),
             $ctx->personaId,
             $persona->iniciales,
+        );
+        AsegurarHuecoCopias::ejecutar(
+            $almacen->listar(),
+            fn (string $nombre) => $almacen->borrarPorNombre($nombre),
+            $borrarMasAntigua,
         );
         $fila = $almacen->crear($snapshot);
 

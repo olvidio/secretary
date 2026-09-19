@@ -33,12 +33,13 @@ final class ProponerEnvioDl
         if ($total->toCents() % 100 !== 0) {
             throw new InvalidArgumentException(_("El importe debe ser un número entero de euros (sin céntimos)"));
         }
-        $mes = (int) date('n');
         $personas = $this->personas->listarDeCentro($ctx->centroId);
         $saldosData = $this->calcularSaldos->ejecutar(null);
-        $saldoPorIniciales = [];
+        $saldoCajaPorIniciales = [];
         foreach ($saldosData['por_persona'] as $row) {
-            $saldoPorIniciales[strtolower((string) $row['iniciales'])] = Dinero::fromInput((string) $row['saldo_a'])->toCents();
+            $saldoCajaPorIniciales[strtolower((string) $row['iniciales'])] = Dinero::fromInput(
+                (string) ($row['saldo_apuntes_c'] ?? '0'),
+            )->toCents();
         }
         $saldoPorPersona = [];
         $saldoEsPorPersona = [];
@@ -47,11 +48,11 @@ final class ProponerEnvioDl
                 continue;
             }
             $ini = strtolower(trim($p->iniciales));
-            $cents = $saldoPorIniciales[$ini] ?? 0;
+            $cents = $saldoCajaPorIniciales[$ini] ?? 0;
             $saldoPorPersona[$p->id] = $cents;
             $saldoEsPorPersona[$p->id] = Dinero::fromCents($cents)->formatEs();
         }
-        $lineas = RepartidorEnvioDl::repartir($total, $personas, $mes, $saldoPorPersona);
+        $lineas = RepartidorEnvioDl::repartir($total, $personas, $saldoPorPersona);
         $nombres = [];
         foreach ($personas as $p) {
             if ($p->id !== null) {

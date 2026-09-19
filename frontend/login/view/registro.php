@@ -48,7 +48,7 @@ $centroTipo = (string) ($centroTipo ?? 'n');
 
     <label><?= _("Usuario") ?> <input name="usuario" required autofocus autocomplete="username" pattern="[a-zA-Z][a-zA-Z0-9._-]{1,31}" title="<?= htmlspecialchars(_("Letra inicial y 2-32 caracteres"), ENT_QUOTES) ?>" value="<?= htmlspecialchars((string) ($usuario ?? ''), ENT_QUOTES) ?>"></label>
     <label><?= _("Correo") ?> <input type="email" name="email" required autocomplete="email" value="<?= htmlspecialchars((string) ($email ?? ''), ENT_QUOTES) ?>"></label>
-    <label><?= _("Nombre") ?> <input name="nombre" autocomplete="name" value="<?= htmlspecialchars((string) ($nombre ?? ''), ENT_QUOTES) ?>"></label>
+    <label><?= _("Nombre del usuario") ?> <input name="nombre" autocomplete="name" value="<?= htmlspecialchars((string) ($nombre ?? ''), ENT_QUOTES) ?>"></label>
     <label><?= _("Contraseña") ?> <input type="password" name="password" required minlength="6" autocomplete="new-password"></label>
     <label><?= _("Repetir contraseña") ?> <input type="password" name="password_confirm" required minlength="6" autocomplete="new-password"></label>
     <label class="inline casilla-legal">

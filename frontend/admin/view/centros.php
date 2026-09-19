@@ -1,13 +1,13 @@
 <h1><?= _("Centros") ?></h1>
 <p class="muted"><?= _("Alta y baja de centros contables. Cada uno lleva su secretario y su plan de cuentas.") ?></p>
 <table id="tabla-centros">
-    <thead><tr><th><?= _("Código") ?></th><th><?= _("Nombre") ?></th><th><?= _("Plan") ?></th><th><?= _("Cierre") ?></th><th></th></tr></thead>
+    <thead><tr><th><?= _("Código") ?></th><th><?= _("Nombre del centro") ?></th><th><?= _("Plan") ?></th><th><?= _("Cierre") ?></th><th></th></tr></thead>
     <tbody></tbody>
 </table>
 <h2><?= _("Nuevo centro") ?></h2>
 <form id="form-centro" class="grid-form">
     <label><?= _("Código") ?> <input name="codigo" required></label>
-    <label><?= _("Nombre") ?> <input name="nombre" required></label>
+    <label><?= _("Nombre del centro") ?> <input name="nombre" required></label>
     <label><?= _("Plan contable") ?> <select name="plan_contable" required></select></label>
     <label><?= _("Tipo de cierre") ?>
         <select name="tipo_cierre">
@@ -24,6 +24,7 @@
     <label><?= _("Ejercicio desde") ?> <input name="fecha_inicio" type="date" required></label>
     <label><?= _("Ejercicio hasta") ?> <input name="fecha_fin" type="date" required></label>
     <label><?= _("Usuario secretario") ?> <input name="usuario" required></label>
+    <label><?= _("Nombre del usuario") ?> <input name="nombre_usuario" autocomplete="name"></label>
     <label><?= _("Correo secretario") ?> <input name="email" type="email" required></label>
     <label><?= _("Contraseña") ?> <input name="password" type="password" required minlength="6"></label>
     <label><?= _("Excel (opcional)") ?> <input name="excel" type="file" accept=".xlsm,.xlsx"></label>

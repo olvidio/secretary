@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace src\apuntes\application;
 
 use src\ambito\application\ResolverAmbitoActual;
+use src\apuntes\domain\services\SaldoCuadreApuntes;
+use src\apuntes\domain\services\SugerenciaCuadreApuntesA;
 use src\conceptos\application\ResolverConceptosCentro;
+use src\configuracion\domain\contracts\ConfiguracionRepository;
+use src\personas\domain\contracts\PersonaRepository;
 use src\shared\domain\value_objects\Dinero;
 
 final class CalcularCuadreApuntesA
@@ -14,6 +18,8 @@ final class CalcularCuadreApuntesA
         private readonly ListarApuntes $listar,
         private readonly ResolverConceptosCentro $conceptos,
         private readonly ResolverAmbitoActual $ambito,
+        private readonly PersonaRepository $personas,
+        private readonly ConfiguracionRepository $config,
     ) {
     }
 
@@ -28,13 +34,25 @@ final class CalcularCuadreApuntesA
             return ['aplica' => false];
         }
 
+        $contexto = $this->ambito->ejecutar();
         $naturalezas = [];
-        foreach ($this->conceptos->listar($this->ambito->ejecutar()->centroId, $cuenta) as $concepto) {
+        foreach ($this->conceptos->listar($contexto->centroId, $cuenta) as $concepto) {
             $naturalezas[$concepto['codigo']] = $concepto['naturaleza'];
+        }
+
+        $naturalezasG = [];
+        foreach ($this->conceptos->listar($contexto->centroId, 'G') as $concepto) {
+            $naturalezasG[$concepto['codigo']] = $concepto['naturaleza'];
         }
 
         $apuntes = $this->listar->ejecutar([
             'cuenta' => $cuenta,
+            'origen' => 'A',
+            'iniciales' => $iniciales,
+        ]);
+
+        $apuntesG = $this->listar->ejecutar([
+            'cuenta' => 'G',
             'origen' => 'A',
             'iniciales' => $iniciales,
         ]);
@@ -46,7 +64,7 @@ final class CalcularCuadreApuntesA
         $hayApuntesFecha = false;
 
         foreach ($apuntes as $apunte) {
-            $signed = $this->signedCents(
+            $signed = SaldoCuadreApuntes::signedCents(
                 (string) $apunte['concepto_codigo'],
                 (string) $apunte['cantidad'],
                 $naturalezas,
@@ -68,13 +86,22 @@ final class CalcularCuadreApuntesA
         $cuadrado = abs($saldoTotal) <= 0;
         $cuadradoAntes = abs($saldoAntes) <= 0;
 
-        $sugerencia = $this->sugerencia(
+        $persona = $this->personas->porInicialesDeCentro($contexto->centroId, $iniciales);
+        $cfg = $this->config->get();
+        $aportaVivienda = $persona === null || $persona->viviendaAportaGenerales;
+
+        $sugerencia = SugerenciaCuadreApuntesA::sugerir(
             $cuadrado,
             $cuadradoAntes,
             $hayApuntesFecha,
             $soloGastosFecha,
             $saldoFecha,
             $saldoTotal,
+            $fecha,
+            $apuntesG,
+            $naturalezasG,
+            $aportaVivienda,
+            $cfg->tipoCierre,
         );
 
         return [
@@ -89,61 +116,6 @@ final class CalcularCuadreApuntesA
             'saldo_fecha_es' => $this->fmtEs($saldoFecha),
             'solo_gastos_fecha' => $soloGastosFecha && $hayApuntesFecha,
             'sugerencia' => $sugerencia,
-        ];
-    }
-
-    /**
-     * @param array<string, string> $naturalezas
-     */
-    private function signedCents(string $codigo, string $cantidad, array $naturalezas): int
-    {
-        $nat = $naturalezas[$codigo] ?? '';
-        if ($nat !== 'gasto' && $nat !== 'ingreso') {
-            return 0;
-        }
-        $cents = Dinero::fromInput($cantidad)->toCents();
-
-        return $nat === 'gasto' ? $cents : -$cents;
-    }
-
-    /**
-     * @return array<string, string>|null
-     */
-    private function sugerencia(
-        bool $cuadrado,
-        bool $cuadradoAntes,
-        bool $hayApuntesFecha,
-        bool $soloGastosFecha,
-        int $saldoFecha,
-        int $saldoTotal,
-    ): ?array {
-        if ($cuadrado) {
-            return null;
-        }
-
-        if ($cuadradoAntes && $hayApuntesFecha && $soloGastosFecha && $saldoFecha > 0) {
-            return $this->sugerencia111($saldoFecha, 'solo_gastos_fecha');
-        }
-
-        if ($saldoTotal > 0) {
-            return $this->sugerencia111($saldoTotal, 'saldo_positivo');
-        }
-
-        return null;
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function sugerencia111(int $cents, string $motivo): array
-    {
-        $importe = Dinero::fromCents($cents);
-
-        return [
-            'concepto_codigo' => '111',
-            'cantidad' => $importe->toString(),
-            'cantidad_es' => $importe->formatEs(),
-            'motivo' => $motivo,
         ];
     }
 

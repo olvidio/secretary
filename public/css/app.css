@@ -29,6 +29,7 @@ th { background: #edf2f7; }
 body.prevision-hoja main { max-width: none; }
 .prevision-print-cab { display: none; }
 .prevision-print-imp { display: none; }
+.informe-print-cab { display: none; }
 .tabla-prevision {
   width: 100%;
   font-size: 13px;
@@ -145,6 +146,7 @@ button[type="button"] { background: #4a5568; }
 button.peligro, button[type="button"].peligro { background: var(--err); }
 .ok { color: var(--ok); }
 .muted { color: #4a5568; }
+p.peligro { color: var(--err); }
 .error { color: var(--err); }
 .sugerencias-wrap { position: relative; min-width: 16rem; }
 .sugerencias {
@@ -626,8 +628,66 @@ body.e37-hoja main { max-width: none; }
   border-top: 2px solid #1a202c;
 }
 @media print {
-  .ribbon, .print-hide, button { display: none !important; }
+  .ribbon,
+  header.ribbon,
+  .burger-sidebar,
+  .burger-top,
+  .burger-toggle,
+  .burger-overlay,
+  nav,
+  .print-hide,
+  button,
+  .login-legal,
+  .user-menu { display: none !important; }
+  html, body {
+    min-height: 0 !important;
+    height: auto !important;
+  }
   body, main { background: #fff; padding: 0; max-width: none; }
+  body.layout-burger,
+  body.layout-excel {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+  body.layout-burger .burger-shell {
+    margin-left: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    display: block !important;
+  }
+  body.layout-burger main { flex: none !important; overflow: visible !important; }
+  body.informe-613-hoja > .burger-toggle,
+  body.informe-613-hoja > .burger-overlay,
+  body.informe-613-hoja > .burger-sidebar,
+  body.informe-613-imprimiendo > .burger-toggle,
+  body.informe-613-imprimiendo > .burger-overlay,
+  body.informe-613-imprimiendo > .burger-sidebar,
+  body.informe-613-hoja .burger-top,
+  body.informe-613-imprimiendo .burger-top,
+  body.informe-613-hoja .login-legal,
+  body.informe-613-imprimiendo .login-legal,
+  body.informe-613-hoja .burger-shell > *:not(main),
+  body.informe-613-imprimiendo .burger-shell > *:not(main),
+  body.informe-613-hoja .informe-613-wrap > *:not(#informe-613),
+  body.informe-613-imprimiendo .informe-613-wrap > *:not(#informe-613) { display: none !important; }
+  body.informe-613-hoja .burger-shell,
+  body.informe-613-hoja main,
+  body.informe-613-hoja .informe-613-wrap,
+  body.informe-613-imprimiendo .burger-shell,
+  body.informe-613-imprimiendo main,
+  body.informe-613-imprimiendo .informe-613-wrap {
+    display: block !important;
+    flex: none !important;
+    flex-grow: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  body.informe-613-hoja main,
+  body.informe-613-imprimiendo main { padding: 0; }
   .informe-613-wrap { max-width: none; }
   .informe-e37-wrap { overflow: visible; }
   .informe-e37-scroll { overflow: visible; }
@@ -646,18 +706,63 @@ body.e37-hoja main { max-width: none; }
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .informe-613 {
+  body.informe-613-hoja #informe-613,
+  body.informe-613-imprimiendo #informe-613 {
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column;
+    /* A4 retrato menos márgenes @page (12mm arriba + 12mm abajo) */
+    min-height: 273mm;
+  }
+  body.informe-613-hoja .informe-613,
+  body.informe-613-imprimiendo .informe-613 {
     border: 0;
     padding: 0;
     font-size: 9.5pt;
+    line-height: 1.25;
   }
-  .informe-613-tabla tr.sec-cab td,
-  .informe-613-tabla tr.sec-azul td:nth-child(5),
-  .informe-613-obs-caja,
-  .informe-613-cocina-input,
-  .informe-613-tabla tr.sec-azul td:nth-child(5) {
+  body.informe-613-hoja .informe-613-tabla tr.sec-cab.sec-divide td,
+  body.informe-613-imprimiendo .informe-613-tabla tr.sec-cab.sec-divide td {
+    border-top-width: 0.55rem;
+  }
+  body.informe-613-hoja .informe-613-resumen-fila.informe-613-resumen-divide,
+  body.informe-613-imprimiendo .informe-613-resumen-fila.informe-613-resumen-divide {
+    border-top-width: 0.55rem;
+  }
+  body.informe-613-hoja .informe-613-obs-caja,
+  body.informe-613-imprimiendo .informe-613-obs-caja {
+    min-height: 2rem;
+    resize: none;
+  }
+  body.informe-613-hoja .informe-613-tabla tr.sec-cab td,
+  body.informe-613-hoja .informe-613-tabla tr.sec-azul td:nth-child(5),
+  body.informe-613-hoja .informe-613-obs-caja,
+  body.informe-613-hoja .informe-613-cocina-input,
+  body.informe-613-imprimiendo .informe-613-tabla tr.sec-cab td,
+  body.informe-613-imprimiendo .informe-613-tabla tr.sec-azul td:nth-child(5),
+  body.informe-613-imprimiendo .informe-613-obs-caja,
+  body.informe-613-imprimiendo .informe-613-cocina-input {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+  body.informe-613-hoja #informe-613 .informe-613-pie,
+  body.informe-613-imprimiendo #informe-613 .informe-613-pie {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1 1 auto;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-top: 0.65rem;
+  }
+  body.informe-613-hoja #informe-613 .informe-613-firmas,
+  body.informe-613-imprimiendo #informe-613 .informe-613-firmas {
+    display: grid !important;
+    margin-bottom: 0;
+  }
+  body.informe-613-hoja #informe-613 .informe-613-pie-meta,
+  body.informe-613-imprimiendo #informe-613 .informe-613-pie-meta {
+    display: flex !important;
+    margin-top: auto;
   }
   body.prevision-hoja .prevision-print-cab {
     display: block;
@@ -720,10 +825,25 @@ body.e37-hoja main { max-width: none; }
   }
   body.prevision-personal-hoja .tabla-prevision thead { display: table-header-group; }
   body.prevision-personal-hoja .tabla-prevision tr { break-inside: avoid; }
+  body.informe-resumen-hoja .informe-print-cab {
+    display: block;
+    font-size: 11pt;
+    font-weight: 700;
+    margin: 0 0 .5rem;
+  }
+  body.informe-resumen-hoja .informe-print-tabla {
+    font-size: 9pt;
+    margin: 0;
+  }
+  body.informe-resumen-hoja .informe-print-tabla th,
+  body.informe-resumen-hoja .informe-print-tabla td {
+    padding: .12rem .25rem;
+  }
+  body.e37-hoja .print-hide { display: none !important; }
 }
 @page {
   size: A4 portrait;
-  margin: 14mm 12mm;
+  margin: 12mm 12mm;
 }
 
 /* Nivel 1 — pantallas personales (inspiradas en Monefy / Money Manager) */

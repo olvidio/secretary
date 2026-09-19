@@ -12,7 +12,8 @@ antiguas en formato `.dump` siguen pudiendo restaurarse.
 
 Menú **Inicio → Copias** (`/copias`): crear copia, descargar las guardadas en el servidor
 y restaurar (desde el servidor o subiendo un `.sql` / `.dump` local). Requiere sesión de
-centro con TOTP confirmado.
+centro con TOTP confirmado. En el servidor hay un tope de 5 copias; al superarlo la API
+responde `codigo: limite_copias` y la pantalla ofrece borrar la más antigua.
 
 ## CLI
 

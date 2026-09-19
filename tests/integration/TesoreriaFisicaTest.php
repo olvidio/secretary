@@ -16,6 +16,7 @@ use src\ambito\infrastructure\persistence\PdoCuentaFisicaRepository;
 use src\ambito\infrastructure\persistence\PdoCuentaRepository;
 use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
 use src\apuntes\application\CrearApunte;
+use src\apuntes\application\ListarApuntes;
 use src\apuntes\infrastructure\persistence\PdoApunteRepository;
 use src\asientos\application\RegistrarPrestamoEntreLibros;
 use src\asientos\application\RegistrarTraspasoTesoreria;
@@ -102,7 +103,7 @@ final class TesoreriaFisicaTest extends TestCase
             $desde,
             $hasta,
         );
-        $bancoGlobalAntes = (new CalcularSaldos($asientoRepo, $configRepo, $personaRepo, $ambito))->ejecutar(null)['banco'];
+        $bancoGlobalAntes = $this->calcularSaldos($asientoRepo, $configRepo, $personaRepo, $cuentaRepo, $ambito)->ejecutar(null)['banco'];
         $banco1GAntes = $this->saldoCuentaCodigo($asientoRepo, $contexto, $desde, $hasta, 'G', 'BANCO.1/G');
         $banco2GAntes = $this->saldoCuentaCodigo($asientoRepo, $contexto, $desde, $hasta, 'G', 'BANCO.2/G');
 
@@ -144,7 +145,7 @@ final class TesoreriaFisicaTest extends TestCase
         );
         $delta201 = ($realizadoDespues['201'] ?? 0) - ($realizadoAntes['201'] ?? 0);
         self::assertSame(2500, $delta201, '613 G línea 201 sube 25.00');
-        $bancoGlobalDespues = (new CalcularSaldos($asientoRepo, $configRepo, $personaRepo, $ambito))->ejecutar(null)['banco'];
+        $bancoGlobalDespues = $this->calcularSaldos($asientoRepo, $configRepo, $personaRepo, $cuentaRepo, $ambito)->ejecutar(null)['banco'];
         self::assertSame(
             Dinero::fromInput($bancoGlobalAntes)->sub(Dinero::fromInput('25.00'))->toString(),
             $bancoGlobalDespues,
@@ -259,5 +260,22 @@ final class TesoreriaFisicaTest extends TestCase
         }
 
         return Dinero::zero();
+    }
+
+    private function calcularSaldos(
+        PdoAsientoRepository $asientos,
+        PdoConfiguracionRepository $config,
+        PdoPersonaRepository $personas,
+        PdoCuentaRepository $cuentas,
+        ResolverAmbitoActual $ambito,
+    ): CalcularSaldos {
+        return new CalcularSaldos(
+            $asientos,
+            $config,
+            $personas,
+            $ambito,
+            new ListarApuntes($asientos, $cuentas, $personas, new ProyectorAsientoAFilaExcel(), $ambito),
+            ConceptosCentro::resolver($this->pdo),
+        );
     }
 }

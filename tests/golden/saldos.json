@@ -9,61 +9,141 @@
             "iniciales": "ac",
             "nombre": "Antoni Companys",
             "saldo_a": "0.00",
-            "saldo_a_es": "0,00"
+            "saldo_a_es": "0,00",
+            "saldo_apuntes_a": "0.00",
+            "saldo_apuntes_a_es": "0,00",
+            "saldo_apuntes_b": "0.00",
+            "saldo_apuntes_b_es": "0,00",
+            "saldo_apuntes_c": "-650.00",
+            "saldo_apuntes_c_es": "-650,00",
+            "saldo_cc": "0.00",
+            "saldo_cc_es": "0,00"
         },
         {
             "iniciales": "fb",
             "nombre": "Francesc Boix",
             "saldo_a": "130.00",
-            "saldo_a_es": "130,00"
+            "saldo_a_es": "130,00",
+            "saldo_apuntes_a": "130.00",
+            "saldo_apuntes_a_es": "130,00",
+            "saldo_apuntes_b": "0.00",
+            "saldo_apuntes_b_es": "0,00",
+            "saldo_apuntes_c": "0.00",
+            "saldo_apuntes_c_es": "0,00",
+            "saldo_cc": "130.00",
+            "saldo_cc_es": "130,00"
         },
         {
             "iniciales": "ds",
             "nombre": "Daniel Serrabou",
             "saldo_a": "0.00",
-            "saldo_a_es": "0,00"
+            "saldo_a_es": "0,00",
+            "saldo_apuntes_a": "0.00",
+            "saldo_apuntes_a_es": "0,00",
+            "saldo_apuntes_b": "-210.22",
+            "saldo_apuntes_b_es": "-210,22",
+            "saldo_apuntes_c": "-10.00",
+            "saldo_apuntes_c_es": "-10,00",
+            "saldo_cc": "0.00",
+            "saldo_cc_es": "0,00"
         },
         {
             "iniciales": "jrm",
             "nombre": "Josep Maria Ribot",
             "saldo_a": "0.00",
-            "saldo_a_es": "0,00"
+            "saldo_a_es": "0,00",
+            "saldo_apuntes_a": "0.00",
+            "saldo_apuntes_a_es": "0,00",
+            "saldo_apuntes_b": "0.00",
+            "saldo_apuntes_b_es": "0,00",
+            "saldo_apuntes_c": "0.00",
+            "saldo_apuntes_c_es": "0,00",
+            "saldo_cc": "0.00",
+            "saldo_cc_es": "0,00"
         },
         {
             "iniciales": "rd",
             "nombre": "Rafa Dionis",
             "saldo_a": "86.36",
-            "saldo_a_es": "86,36"
+            "saldo_a_es": "86,36",
+            "saldo_apuntes_a": "86.36",
+            "saldo_apuntes_a_es": "86,36",
+            "saldo_apuntes_b": "0.00",
+            "saldo_apuntes_b_es": "0,00",
+            "saldo_apuntes_c": "0.00",
+            "saldo_apuntes_c_es": "0,00",
+            "saldo_cc": "86.36",
+            "saldo_cc_es": "86,36"
         },
         {
             "iniciales": "af",
             "nombre": "Agustí Fontarnau",
             "saldo_a": "0.00",
-            "saldo_a_es": "0,00"
+            "saldo_a_es": "0,00",
+            "saldo_apuntes_a": "0.00",
+            "saldo_apuntes_a_es": "0,00",
+            "saldo_apuntes_b": "3300.00",
+            "saldo_apuntes_b_es": "3.300,00",
+            "saldo_apuntes_c": "0.00",
+            "saldo_apuntes_c_es": "0,00",
+            "saldo_cc": "0.00",
+            "saldo_cc_es": "0,00"
         },
         {
             "iniciales": "jmg",
             "nombre": "Josep Maria Grau",
             "saldo_a": "0.00",
-            "saldo_a_es": "0,00"
+            "saldo_a_es": "0,00",
+            "saldo_apuntes_a": "0.00",
+            "saldo_apuntes_a_es": "0,00",
+            "saldo_apuntes_b": "0.00",
+            "saldo_apuntes_b_es": "0,00",
+            "saldo_apuntes_c": "0.00",
+            "saldo_apuntes_c_es": "0,00",
+            "saldo_cc": "0.00",
+            "saldo_cc_es": "0,00"
         },
         {
             "iniciales": "qr",
             "nombre": "Quico Ribas",
             "saldo_a": "0.00",
-            "saldo_a_es": "0,00"
+            "saldo_a_es": "0,00",
+            "saldo_apuntes_a": "0.00",
+            "saldo_apuntes_a_es": "0,00",
+            "saldo_apuntes_b": "0.00",
+            "saldo_apuntes_b_es": "0,00",
+            "saldo_apuntes_c": "2750.00",
+            "saldo_apuntes_c_es": "2.750,00",
+            "saldo_cc": "0.00",
+            "saldo_cc_es": "0,00"
         },
         {
             "iniciales": "pp",
             "nombre": "Pere Puig",
             "saldo_a": "0.00",
-            "saldo_a_es": "0,00"
+            "saldo_a_es": "0,00",
+            "saldo_apuntes_a": "0.00",
+            "saldo_apuntes_a_es": "0,00",
+            "saldo_apuntes_b": "0.00",
+            "saldo_apuntes_b_es": "0,00",
+            "saldo_apuntes_c": "0.00",
+            "saldo_apuntes_c_es": "0,00",
+            "saldo_cc": "0.00",
+            "saldo_cc_es": "0,00"
         },
         {
             "iniciales": "mv",
             "nombre": "Manel Vicente",
             "saldo_a": "0.00",
-            "saldo_a_es": "0,00"
+            "saldo_a_es": "0,00",
+            "saldo_apuntes_a": "0.00",
+            "saldo_apuntes_a_es": "0,00",
+            "saldo_apuntes_b": "0.00",
+            "saldo_apuntes_b_es": "0,00",
+            "saldo_apuntes_c": "0.00",
+            "saldo_apuntes_c_es": "0,00",
+            "saldo_cc": "0.00",
+            "saldo_cc_es": "0,00"
         }
     ],
     "saldo_a": "216.36",

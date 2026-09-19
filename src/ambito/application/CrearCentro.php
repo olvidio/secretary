@@ -41,6 +41,7 @@ final class CrearCentro
     {
         $codigo = trim((string) ($datos['codigo'] ?? ''));
         $nombre = trim((string) ($datos['nombre'] ?? ''));
+        $nombreUsuario = trim((string) ($datos['nombre_usuario'] ?? ''));
         $tipo = strtolower(trim((string) ($datos['tipo'] ?? 'n')));
         $tipoCierre = (string) ($datos['tipo_cierre'] ?? 'vivienda');
         $verificarEmail = !array_key_exists('verificar_email', $datos) || (bool) $datos['verificar_email'];
@@ -82,7 +83,7 @@ final class CrearCentro
                 (string) ($datos['usuario'] ?? ''),
                 (string) ($datos['email'] ?? ''),
                 (string) ($datos['password'] ?? ''),
-                $nombre,
+                $nombreUsuario,
                 'admin',
                 $verificarEmail,
             );

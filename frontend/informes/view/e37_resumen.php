@@ -1,6 +1,7 @@
-<h1><?= _("Resumen cuentas personales") ?></h1>
+<h1 class="print-hide"><?= _("Resumen cuentas personales") ?></h1>
 <p class="print-hide"><button type="button" onclick="window.print()"><?= _("Imprimir") ?></button></p>
-<table id="tabla-res">
+<p class="informe-print-cab"><?= _("Resumen cuentas personales") ?></p>
+<table id="tabla-res" class="informe-print-tabla">
     <thead>
     <tr>
         <th><?= _("Persona") ?></th><th class="num"><?= _("Ingresos") ?></th><th class="num"><?= _("Gastos") ?></th>
@@ -13,6 +14,7 @@
 <p id="aviso-saldo-cc" class="aviso-saldo-cc" hidden></p>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
+  document.body.classList.add('informe-resumen-hoja');
   const r = await api('/api/informes/e37-resumen');
   const tb = document.querySelector('#tabla-res tbody');
   (r.filas || []).forEach(f => {

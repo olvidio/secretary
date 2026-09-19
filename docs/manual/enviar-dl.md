@@ -17,13 +17,13 @@ Registra un envío de efectivo a la delegación local como gasto de necesidades 
 
 ## Reglas que conviene saber
 
-- Entran todos los nombres activos que no están exentos ese mes (da igual si aportan vivienda a generales).
-- El reparto usa el saldo de la cuenta personal (P/9, la misma cifra que en **Saldos**, hasta la fecha de cierre). **Saldo negativo:** no entra. **Saldo cero:** reparto equitativo entre todos los que entran (aunque otros tengan saldo positivo). **Todos con saldo positivo:** reparto proporcional al saldo.
+- Entran todos los nombres activos (da igual si están exentos en un mes o si aportan vivienda a generales).
+- El reparto usa el **saldo en caja** de cada persona (columna **C** de **Saldos**: apuntes desde caja, hasta la fecha de cierre). **Solo entran quienes tienen saldo positivo**; el importe se reparte entre ellos de forma proporcional. Saldo cero o negativo: no entra.
 - Cada cuota se redondea a euros enteros (sin céntimos).
 - No usa el disponible ni la cuenta corriente: es un gasto directo desde la caja del centro (origen C).
 - Es distinto de **Disponible → Proponer destinos 7**, que reparte el saldo operativo entre varias partidas 7 y liquida CC.
 
 ## Problemas frecuentes
 
-- **La propuesta está vacía**: todos están exentos este mes o el importe es demasiado pequeño para repartir en euros enteros.
+- **La propuesta está vacía**: nadie tiene saldo positivo en caja, o el importe es demasiado pequeño para repartir en euros enteros.
 - **El total no cuadra con la suma**: el último residente recibe el resto de céntimos para que el reparto sea exacto.

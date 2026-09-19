@@ -7,6 +7,8 @@
     <h2><?= _("Nueva copia") ?></h2>
     <p class="muted"><?= _("Genera un fichero JSON con todos tus movimientos personales.") ?></p>
     <button type="button" id="btn-backup-personal"><?= _("Crear copia ahora") ?></button>
+    <p class="peligro" id="aviso-limite-copias-personal" hidden><?= _("Solo se permite tener 5 copias en el servidor") ?></p>
+    <button type="button" id="btn-backup-reemplazar-personal" hidden><?= _("Borrar la más antigua y guardar") ?></button>
     <p class="ok" id="msg-backup-personal" hidden></p>
 </section>
 
@@ -56,6 +58,7 @@ const I18N_COPIAS_PERSONAL = {
   confirmLocal: <?= json_encode(_("¿Restaurar desde el fichero local? Se sustituirán todos sus movimientos personales."), JSON_UNESCAPED_UNICODE) ?>,
   errorRestaurar: <?= json_encode(_("Error al restaurar"), JSON_UNESCAPED_UNICODE) ?>,
   respuestaNoJson: <?= json_encode(_("Respuesta no JSON"), JSON_UNESCAPED_UNICODE) ?>,
+  limiteCopias: <?= json_encode(_("Solo se permite tener 5 copias en el servidor"), JSON_UNESCAPED_UNICODE) ?>,
 };
 
 function fmtBytes(n) {
@@ -114,26 +117,48 @@ async function restaurarPersonal(fichero) {
   msg.textContent = s.mensaje || I18N_COPIAS_PERSONAL.restauracionOk;
 }
 
+async function crearCopiaPersonal(borrarMasAntigua) {
+  const btn = document.getElementById('btn-backup-personal');
+  const btnReemplazar = document.getElementById('btn-backup-reemplazar-personal');
+  const aviso = document.getElementById('aviso-limite-copias-personal');
+  const msg = document.getElementById('msg-backup-personal');
+  btn.disabled = true;
+  btnReemplazar.disabled = true;
+  msg.hidden = true;
+  if (!borrarMasAntigua) {
+    aviso.hidden = true;
+    btnReemplazar.hidden = true;
+  }
+  try {
+    const body = borrarMasAntigua ? { borrar_mas_antigua: true } : {};
+    const s = await api('/api/yo/copias/backup', { method: 'POST', body });
+    if (!s.ok) {
+      if (s.codigo === 'limite_copias') {
+        aviso.textContent = s.error || I18N_COPIAS_PERSONAL.limiteCopias;
+        aviso.hidden = false;
+        btnReemplazar.hidden = false;
+        return;
+      }
+      return alert(s.error);
+    }
+    aviso.hidden = true;
+    btnReemplazar.hidden = true;
+    msg.hidden = false;
+    msg.textContent = I18N_COPIAS_PERSONAL.copiaCreada
+      .replace('%s', s.filename || '')
+      .replace('%s', fmtBytes(s.bytes || 0))
+      .replace('%s', s.movimientos || 0);
+    await loadCopiasPersonal();
+  } finally {
+    btn.disabled = false;
+    btnReemplazar.disabled = false;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   loadCopiasPersonal();
-  document.getElementById('btn-backup-personal').addEventListener('click', async () => {
-    const btn = document.getElementById('btn-backup-personal');
-    const msg = document.getElementById('msg-backup-personal');
-    btn.disabled = true;
-    msg.hidden = true;
-    try {
-      const s = await api('/api/yo/copias/backup', { method: 'POST', body: {} });
-      if (!s.ok) return alert(s.error);
-      msg.hidden = false;
-      msg.textContent = I18N_COPIAS_PERSONAL.copiaCreada
-        .replace('%s', s.filename || '')
-        .replace('%s', fmtBytes(s.bytes || 0))
-        .replace('%s', s.movimientos || 0);
-      await loadCopiasPersonal();
-    } finally {
-      btn.disabled = false;
-    }
-  });
+  document.getElementById('btn-backup-personal').addEventListener('click', () => crearCopiaPersonal(false));
+  document.getElementById('btn-backup-reemplazar-personal').addEventListener('click', () => crearCopiaPersonal(true));
   document.getElementById('form-restore-personal').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const msg = document.getElementById('msg-restore-personal');

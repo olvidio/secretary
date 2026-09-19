@@ -250,10 +250,15 @@
     return `613_${CUENTA}_${centro}_${cierre}.pdf`;
   }
 
+  function imprimirInforme613() {
+    document.body.classList.add('informe-613-imprimiendo');
+    window.print();
+  }
+
   async function generarPdf() {
     const el = document.getElementById('informe-613');
     if (!el || typeof html2pdf === 'undefined') {
-      window.print();
+      imprimirInforme613();
       return;
     }
     const btn = document.getElementById('btn-pdf');
@@ -273,6 +278,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
+    document.body.classList.add('informe-613-hoja');
     const r = await api('/api/informes/613/' + CUENTA);
     window.__resumen613 = r;
 
@@ -316,9 +322,10 @@
       });
     });
 
-    document.getElementById('btn-imprimir')?.addEventListener('click', () => {
-      window.print();
-    });
+    document.getElementById('btn-imprimir')?.addEventListener('click', imprimirInforme613);
     document.getElementById('btn-pdf')?.addEventListener('click', generarPdf);
+    window.addEventListener('afterprint', () => {
+      document.body.classList.remove('informe-613-imprimiendo');
+    });
   });
 })();

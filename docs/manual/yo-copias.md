@@ -13,14 +13,16 @@ No incluye nada del centro. Restaurar una copia no cambia las cuentas del centro
 ## Cómo se usa
 
 1. Pulsar «Crear copia ahora». Aparece el nombre del fichero, su tamaño y cuántos movimientos contiene.
-2. En «Copias guardadas» se ve la lista de copias, con su fecha y su tamaño.
-3. «Descargar» guarda el fichero en el ordenador o en el móvil, por si conviene tenerlo fuera del programa.
-4. «Restaurar» recupera esa copia; pide confirmación porque sustituye lo que haya ahora.
-5. «Borrar» quita la copia de la lista, también con confirmación.
-6. Si la copia está solo en el ordenador, se elige en «O fichero local» y se pulsa «Restaurar desde fichero local».
+2. Si ya hay 5 copias en el servidor, avisa «Solo se permite tener 5 copias en el servidor» y ofrece «Borrar la más antigua y guardar». Esa opción quita la copia más vieja y deja la nueva.
+3. En «Copias guardadas» se ve la lista de copias, con su fecha y su tamaño.
+4. «Descargar» guarda el fichero en el ordenador o en el móvil, por si conviene tenerlo fuera del programa.
+5. «Restaurar» recupera esa copia; pide confirmación porque sustituye lo que haya ahora.
+6. «Borrar» quita la copia de la lista, también con confirmación.
+7. Si la copia está solo en el ordenador, se elige en «O fichero local» y se pulsa «Restaurar desde fichero local».
 
 ## Reglas que conviene saber
 
+- En el servidor caben como máximo 5 copias de esa persona. Para hacer otra hay que borrar alguna o usar «Borrar la más antigua y guardar».
 - Restaurar sustituye **todos** los movimientos personales actuales por los de la copia. Lo que se haya anotado después se pierde.
 - Conviene crear una copia antes de restaurar otra.
 - Solo se puede restaurar una copia de la misma persona y del mismo centro.
@@ -29,6 +31,7 @@ No incluye nada del centro. Restaurar una copia no cambia las cuentas del centro
 
 ## Problemas frecuentes
 
+- **«Solo se permite tener 5 copias en el servidor»**: hay que borrar alguna de la lista o pulsar «Borrar la más antigua y guardar».
 - **«La copia pertenece a otra persona» o «La copia pertenece a otro centro»**: ese fichero es de otra cuenta y no se puede restaurar aquí.
 - **«El fichero debe ser una copia .json»**: se ha elegido otro tipo de fichero.
 - **«La copia personal no es JSON válido»**: el fichero está dañado o se editó a mano. Usar otra copia.
