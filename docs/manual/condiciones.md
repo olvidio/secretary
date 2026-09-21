@@ -21,6 +21,9 @@ de esos datos.
 
 - El servicio es gratuito y no se garantiza que no haya fallos ni pérdida de
   datos: hay que hacer copias.
+- El **programa** es software libre bajo GPL v3 o posterior; las condiciones
+  regulan el **servicio en línea**, no los derechos sobre el código fuente
+  (véase también `/licencia`).
 - Eso no quita lo que la ley no deja excluir (dolo, culpa grave, derechos de
   consumidor).
 - Quien crea o importa nombres asume que el **centro** es responsable de esos

@@ -13,7 +13,7 @@ El mapa completo de «dónde se hace cada cosa» está en la ayuda: se puede pre
 ## Cómo se usa
 
 1. Tras entrar como secretario, esta es la primera pantalla.
-2. Pulsar una tarjeta para ir a esa función.
+2. Pulsar una tarjeta para ir a esa función: Entrada de apuntes P, Entrada de apuntes G, Listado de apuntes, Resumen mensual 613 P, Resumen mensual 613 G, Apuntes de cierre de mes, Comprobaciones P / G, Remesas personales.
 3. El resto de pantallas está en el menú de arriba (cinta) o a la izquierda (menú burger).
 
 ## Reglas que conviene saber

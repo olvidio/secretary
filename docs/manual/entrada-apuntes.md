@@ -10,12 +10,22 @@ Es la pantalla de teclear. Se rellena una cabecera común —persona, procedenci
 
 ## Cómo se usa
 
+### Entrada G — extracto del banco
+
+En **Entrada G** hay un bloque **Importar extracto del banco** (mismo criterio que el banco personal en `/yo/banco`):
+
+1. Elegir el banco (N26 o CaixaBank) y, si hay varias cuentas de tesorería activas, cuál es.
+2. Elegir el fichero y pulsar **Importar**. Al volver a subir el mismo extracto no se duplican filas ya importadas. Hasta que no se categorice, no se crean asientos ni apuntes.
+3. Los movimientos nuevos quedan en **Por categorizar**: elegir concepto e iniciales si procede, observaciones y pulsar **Asignar**. **Cambiar a P** sustituye el desplegable por conceptos P (vuelve con **Cambiar a G**); al **Asignar** en modo P las iniciales son obligatorias. En el desplegable de concepto G, al final aparecen **Otra contabilidad** (registra el movimiento en el banco del centro sin apunte ni ingreso/gasto del plan) y **Traspaso a caja** (usa los conceptos 41/42); ambas se confirman con **Asignar**.
+
+### Teclear apuntes
+
 1. Elegir las iniciales de la persona.
 2. Elegir A, B o C: A si no toca la caja ni el banco del centro, B si es del banco, C si es de la caja. Con varias, se indica cuál.
 3. Comprobar la fecha: sale la de hoy si estamos en el mes de la fecha de cierre y, si no, esta última.
 4. Escribir las observaciones: a partir de dos letras se ofrecen las de esa persona, las más usadas primero, y al elegir una se copia el concepto.
 5. Elegir el concepto y teclear la cantidad; el tabulador salta de una a otra.
-6. Pulsar «Añadir», o Intro en la cantidad. La línea guardada se queda a la vista.
+6. Pulsar **Añadir**, o Intro en la cantidad. La línea guardada se queda a la vista.
 
 ## Reglas que conviene saber
 
@@ -25,7 +35,7 @@ Es la pantalla de teclear. Se rellena una cabecera común —persona, procedenci
 - Los conceptos 41 (banco a caja) y 42 (caja a banco) generan el movimiento completo de una vez, sin fecha de imputación distinta.
 - En Entrada G, un gasto con iniciales anota cuatro líneas: ingreso 111 y gasto 21 en el personal, ingreso 11 en el general, y el gasto. Si no aporta vivienda a generales, solo el gasto.
 - Las plantillas salen en el desplegable de concepto; al elegirlas, solo falta la cantidad.
-- En el libro personal con procedencia A, el pie avisa si los apuntes de esa persona no cuadran y ofrece un botón «Cuadrar», que añade el ingreso 111 que falta.
+- En el libro personal con procedencia A, el pie avisa si los apuntes de esa persona no cuadran y muestra **Cuadrar (concepto · importe)** —por ejemplo «Cuadrar (111 · 50,00)»—, que añade el ingreso 111 que falta con un clic (pide confirmación).
 
 ## Problemas frecuentes
 

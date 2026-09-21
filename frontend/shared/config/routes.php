@@ -12,6 +12,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/confirmar-email', [PageController::class, 'confirmarEmail']);
     $r->addRoute('GET', '/condiciones', [PageController::class, 'documentoLegal', ['tipo' => 'condiciones']]);
     $r->addRoute('GET', '/privacidad', [PageController::class, 'documentoLegal', ['tipo' => 'privacidad']]);
+    $r->addRoute('GET', '/licencia', [PageController::class, 'licencia']);
+    $r->addRoute('GET', '/changelog', [PageController::class, 'changelog']);
     $r->addRoute('GET', '/totp-activar', [PageController::class, 'totpActivar']);
     $r->addRoute('GET', '/totp-verificar', [PageController::class, 'totpVerificar']);
     $r->addRoute('GET', '/totp-codigos', [PageController::class, 'totpCodigos']);
@@ -29,6 +31,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/admin/planes', [PageController::class, 'adminPlanes']);
     $r->addRoute('GET', '/admin/centros', [PageController::class, 'adminCentros']);
     $r->addRoute('GET', '/admin/usuarios', [PageController::class, 'adminUsuarios']);
+    $r->addRoute('GET', '/admin/legal', [PageController::class, 'adminLegal']);
     $cuenta = [
         ['/cuenta/mail', 'acceso/view/cuenta_mail.php', 'cuenta-mail'],
         ['/cuenta/password', 'acceso/view/cuenta_password.php', 'cuenta-password'],

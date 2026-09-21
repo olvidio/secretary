@@ -2,6 +2,40 @@
 <h1><?= sprintf(_("Entrada apuntes %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
 <p class="muted"><?php if ($cuenta === 'G'): ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber. Un gasto de G con iniciales anota también P/111, P/211 y G/11.") ?><?php else: ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.") ?><?php endif; ?></p>
 
+<?php if ($cuenta === 'G'): ?>
+<details class="yo-ayuda-bloque" id="entrada-banco-bloque" open>
+    <summary><?= _("Importar extracto del banco") ?></summary>
+    <div class="yo-ayuda-cuerpo">
+        <p class="muted"><?= _("Sube el extracto del banco. Cada origen tiene un formato distinto. La siguiente vez solo se crean movimientos nuevos. Lo importado entra en Por categorizar hasta que le asignes concepto e iniciales si procede.") ?></p>
+        <p class="muted"><?= _("N26: en la web, cuenta → Descargas → actividad de la cuenta → CSV.") ?></p>
+        <p class="muted"><?= _("CaixaBank: CaixaBankNow → Cuentas → tu cuenta. Carga todo el periodo (pulsa «Ver más movimientos» si aparece) y elige Extraer movimientos / Descargar en Excel (.xls). También admite CSV si lo guardas así.") ?></p>
+    </div>
+    <form id="entrada-banco-form" class="yo-banco-form">
+        <label><?= _("Banco") ?>
+            <select name="banco" id="entrada-banco-sel" required></select>
+        </label>
+        <label id="wrap-banco-fisica" hidden><?= _("Cuenta de tesorería") ?>
+            <select name="cuenta_fisica_id" id="entrada-banco-fisica" disabled></select>
+        </label>
+        <label><?= _("Fichero") ?>
+            <input name="fichero" id="entrada-banco-fichero" type="file" accept=".csv,.xls,.xlsx,text/csv" required>
+        </label>
+        <button type="submit" id="entrada-banco-enviar"><?= _("Importar") ?></button>
+    </form>
+    <p class="ok" id="entrada-banco-msg" hidden></p>
+    <h2><?= _("Por categorizar") ?></h2>
+    <p class="error" id="entrada-banco-err" hidden></p>
+    <p class="muted" id="entrada-banco-vacio" hidden><?= _("No hay movimientos pendientes.") ?></p>
+    <ul id="entrada-banco-pend" class="yo-lista"></ul>
+    <details class="yo-ayuda-bloque" id="entrada-banco-otra-bloque">
+        <summary><?= _("Otra contabilidad") ?> <span class="muted entrada-banco-otra-cnt" id="entrada-banco-otra-cnt" hidden></span></summary>
+        <p class="muted"><?= _("No suman en ingresos y gastos del plan general; sí mueven el banco. Puedes asignarles un concepto más adelante.") ?></p>
+        <p class="muted" id="entrada-banco-otra-vacio" hidden><?= _("No hay movimientos en otra contabilidad.") ?></p>
+        <ul id="entrada-banco-otra" class="yo-lista"></ul>
+    </details>
+</details>
+<?php endif; ?>
+
 <div id="entrada-apuntes">
     <div class="entrada-cabecera">
         <label><?= _("Iniciales") ?>
@@ -92,6 +126,20 @@ const I18N_ENTRADA = {
   sugVivienda211: <?= json_encode(_("Sugerencia: añadir gasto 211 (vivienda general) por %s."), JSON_UNESCAPED_UNICODE) ?>,
   sugVivienda212: <?= json_encode(_("Sugerencia: añadir gasto 212 (vivienda personal) por %s."), JSON_UNESCAPED_UNICODE) ?>,
   sugNecesidades: <?= json_encode(_("Sugerencia: añadir gasto 6 (necesidades) por %s."), JSON_UNESCAPED_UNICODE) ?>,
+  importNuevos: <?= json_encode(_("Nuevos: %s. Ya estaban: %s."), JSON_UNESCAPED_UNICODE) ?>,
+  importOmitidos: <?= json_encode(_(" Omitidos: %s."), JSON_UNESCAPED_UNICODE) ?>,
+  elijaConcepto: <?= json_encode(_("Elija un concepto"), JSON_UNESCAPED_UNICODE) ?>,
+  traspasoCaja: <?= json_encode(_("Traspaso a caja"), JSON_UNESCAPED_UNICODE) ?>,
+  otraContabilidad: <?= json_encode(_("Otra contabilidad"), JSON_UNESCAPED_UNICODE) ?>,
+  conceptoG: <?= json_encode(_("Concepto G"), JSON_UNESCAPED_UNICODE) ?>,
+  conceptoP: <?= json_encode(_("Concepto P"), JSON_UNESCAPED_UNICODE) ?>,
+  cambiarAP: <?= json_encode(_("Cambiar a P"), JSON_UNESCAPED_UNICODE) ?>,
+  cambiarAG: <?= json_encode(_("Cambiar a G"), JSON_UNESCAPED_UNICODE) ?>,
+  elijaIniciales: <?= json_encode(_("Las iniciales son obligatorias"), JSON_UNESCAPED_UNICODE) ?>,
+  asignar: <?= json_encode(_("Asignar"), JSON_UNESCAPED_UNICODE) ?>,
+  iniciales: <?= json_encode(_("Iniciales"), JSON_UNESCAPED_UNICODE) ?>,
+  concepto: <?= json_encode(_("Concepto"), JSON_UNESCAPED_UNICODE) ?>,
+  observaciones: <?= json_encode(_("Observaciones"), JSON_UNESCAPED_UNICODE) ?>,
 };
 document.addEventListener('DOMContentLoaded', async () => {
   const cfg = await api('/api/configuracion');
@@ -660,5 +708,293 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   actualizarCuadre();
   actualizarPreviewContrapartidas();
+
+  if (CUENTA === 'G') {
+    await pintarImportBancoCentro();
+  }
 });
+
+async function pintarImportBancoCentro() {
+  const selBanco = document.getElementById('entrada-banco-sel');
+  const form = document.getElementById('entrada-banco-form');
+  if (!selBanco || !form) return;
+
+  const errBanco = document.getElementById('entrada-banco-err');
+  const msgBanco = document.getElementById('entrada-banco-msg');
+
+  function errApi(s) {
+    return s.error || s.mensaje || s.message || 'Error';
+  }
+
+  function limpiarErrBanco() {
+    document.querySelectorAll('.entrada-banco-ini-error').forEach(el => {
+      el.classList.remove('entrada-banco-ini-error');
+    });
+    if (errBanco) errBanco.hidden = true;
+  }
+
+  function mostrarErrBanco(msg, li) {
+    if (msgBanco) msgBanco.hidden = true;
+    document.querySelectorAll('.entrada-banco-ini-error').forEach(el => {
+      el.classList.remove('entrada-banco-ini-error');
+    });
+    if (errBanco) {
+      errBanco.hidden = false;
+      errBanco.textContent = msg;
+      errBanco.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    if (li) {
+      const ini = li.querySelector('.entrada-banco-ini');
+      const field = ini ? ini.closest('.entrada-banco-field') : null;
+      if (field) field.classList.add('entrada-banco-ini-error');
+      if (ini) ini.focus();
+    }
+  }
+
+  const b = await api('/api/banco-centro/bancos');
+  if (!b.ok) return mostrarErrBanco(b.error || 'Error');
+  (b.bancos || []).forEach(x => {
+    const o = document.createElement('option');
+    o.value = x.id;
+    o.textContent = x.nombre;
+    selBanco.appendChild(o);
+  });
+  if (b.banco && (b.bancos || []).some(x => x.id === b.banco)) selBanco.value = b.banco;
+
+  const tes = await api('/api/tesoreria');
+  const fisicas = (tes.cuentas_fisicas || []).filter(f => f.activo && f.tipo === 'banco');
+  const wrapFisica = document.getElementById('wrap-banco-fisica');
+  const selFisica = document.getElementById('entrada-banco-fisica');
+  function syncFisicaImport() {
+    if (!wrapFisica || !selFisica) return;
+    if (fisicas.length <= 1) {
+      wrapFisica.hidden = true;
+      selFisica.disabled = true;
+      return;
+    }
+    selFisica.innerHTML = fisicas.map(f =>
+      `<option value="${f.id}">${esc(f.nombre)}</option>`).join('');
+    selFisica.disabled = false;
+    wrapFisica.hidden = false;
+  }
+  syncFisicaImport();
+
+  const inputFichero = document.getElementById('entrada-banco-fichero');
+  function actualizarAcceptBanco() {
+    if (!inputFichero) return;
+    inputFichero.accept = selBanco.value === 'caixabank'
+      ? '.csv,.xls,.xlsx,text/csv' : '.csv,text/csv';
+  }
+  selBanco.onchange = () => {
+    actualizarAcceptBanco();
+    api('/api/banco-centro/preferencia', { method: 'POST', body: { banco: selBanco.value } });
+  };
+  actualizarAcceptBanco();
+
+  let conceptosG = [];
+  let conceptosP = [];
+  const consG = await api('/api/conceptos?cuenta=G');
+  conceptosG = (consG.conceptos || []).filter(c => c.naturaleza === 'ingreso' || c.naturaleza === 'gasto');
+  const consP = await api('/api/conceptos?cuenta=P');
+  conceptosP = (consP.conceptos || []).filter(c => c.naturaleza === 'ingreso' || c.naturaleza === 'gasto');
+
+  function opcionesConceptoG(sentido, sugerida, categoriaCodigo) {
+    const opts = conceptosG.filter(c => c.naturaleza === sentido);
+    const esOtra = categoriaCodigo === 'OTRA.gasto' || categoriaCodigo === 'OTRA.ingreso';
+    let html = `<option value="">${esc(I18N_ENTRADA.conceptoG)}…</option>`;
+    opts.forEach(c => {
+      const sel = !esOtra && c.codigo === sugerida ? ' selected' : '';
+      html += `<option value="${esc(c.codigo)}"${sel}>${esc(c.etiqueta)}</option>`;
+    });
+    html += '<option disabled>────────</option>';
+    html += `<option value="@otra"${esOtra ? ' selected' : ''}>${esc(I18N_ENTRADA.otraContabilidad)}</option>`;
+    html += `<option value="@traspaso">${esc(I18N_ENTRADA.traspasoCaja)}</option>`;
+    return html;
+  }
+
+  function opcionesConceptoP(sentido) {
+    const opts = conceptosP.filter(c => c.naturaleza === sentido);
+    let html = `<option value="">${esc(I18N_ENTRADA.conceptoP)}…</option>`;
+    opts.forEach(c => {
+      html += `<option value="${esc(c.codigo)}">${esc(c.etiqueta)}</option>`;
+    });
+    return html;
+  }
+
+  const optsIni = () => {
+    const hdr = document.getElementById('hdr-iniciales');
+    const iniHdr = hdr ? hdr.value : '';
+    return '<option value=""></option>' + Array.from(hdr.options)
+      .filter(o => o.value).map(o => {
+        const sel = o.value === iniHdr ? ' selected' : '';
+        return `<option value="${esc(o.value)}"${sel}>${esc(o.textContent)}</option>`;
+      }).join('');
+  };
+
+  function inicialesDeFila(ini) {
+    const v = ini ? String(ini.value || '').trim() : '';
+    if (v) return v;
+    const hdr = document.getElementById('hdr-iniciales');
+    return hdr ? String(hdr.value || '').trim() : '';
+  }
+
+  function pintarSelectConcepto(sel, sentido, modo, sugerida, categoriaCodigo) {
+    sel.innerHTML = modo === 'P'
+      ? opcionesConceptoP(sentido)
+      : opcionesConceptoG(sentido, sugerida, categoriaCodigo);
+  }
+
+  function syncModoConcepto(li, p, modo) {
+    li.dataset.modo = modo;
+    const label = li.querySelector('.entrada-banco-concepto-label');
+    const sel = li.querySelector('.entrada-banco-concepto');
+    const btnP = li.querySelector('.entrada-banco-a-p');
+    if (label) label.textContent = modo === 'P' ? I18N_ENTRADA.conceptoP : I18N_ENTRADA.conceptoG;
+    if (sel) pintarSelectConcepto(sel, p.sentido, modo, p.sugerida_codigo || '', p.categoria_codigo || '');
+    if (btnP) btnP.textContent = modo === 'P' ? I18N_ENTRADA.cambiarAG : I18N_ENTRADA.cambiarAP;
+  }
+
+  function filaBancoCentro(p, conIniciales) {
+    const imp = String(p.importe || '').replace('.', ',');
+    const texto = String(p.nota || p.concepto || '');
+    const iniHtml = conIniciales
+      ? `<label class="entrada-banco-field muted">${esc(I18N_ENTRADA.iniciales)}<select class="entrada-banco-ini">${optsIni()}</select></label>`
+      : '';
+    const btnPHtml = conIniciales
+      ? `<button type="button" class="entrada-banco-a-p">${esc(I18N_ENTRADA.cambiarAP)}</button>`
+      : '';
+    return `<span><strong>${esc(fmtFecha(p.fecha))} · ${esc(imp)}</strong></span>` +
+      `<div class="yo-banco-pend-acc"><div class="yo-banco-pend-row entrada-banco-pend-row">` +
+      iniHtml +
+      `<label class="entrada-banco-field muted"><span class="entrada-banco-concepto-label">${esc(I18N_ENTRADA.conceptoG)}</span>` +
+      `<div class="yo-banco-cat-wrap"><select class="entrada-banco-concepto">${opcionesConceptoG(p.sentido, p.sugerida_codigo || '', p.categoria_codigo || '')}</select></div></label>` +
+      `<div class="entrada-banco-acciones">` +
+      `<button type="button" class="yo-banco-asignar">${esc(I18N_ENTRADA.asignar)}</button>` +
+      btnPHtml +
+      `</div></div>` +
+      `<div class="yo-banco-obs-wrap">` +
+      `<input type="text" class="yo-banco-obs" placeholder="${esc(I18N_ENTRADA.observaciones)}" maxlength="250" autocomplete="off" value="${esc(texto)}">` +
+      `</div></div>`;
+  }
+
+  function enlazarFilaBancoCentro(li, p, conIniciales, refrescar) {
+    li.dataset.modo = 'G';
+    const btn = li.querySelector('.yo-banco-asignar');
+    const btnP = li.querySelector('.entrada-banco-a-p');
+    const choose = li.querySelector('.entrada-banco-concepto');
+    const ini = conIniciales ? li.querySelector('.entrada-banco-ini') : null;
+    const obs = li.querySelector('.yo-banco-obs');
+    if (btnP) {
+      btnP.onclick = () => syncModoConcepto(li, p, li.dataset.modo === 'P' ? 'G' : 'P');
+    }
+    if (!btn || !choose) return;
+    btn.onclick = async () => {
+      limpiarErrBanco();
+      const v = choose.value;
+      if (!v) return mostrarErrBanco(I18N_ENTRADA.elijaConcepto, li);
+      const modoP = li.dataset.modo === 'P';
+      const body = {
+        fila_id: p.fila_id,
+        observaciones: obs ? obs.value : '',
+      };
+      if (modoP) {
+        const iniVal = inicialesDeFila(ini);
+        if (!iniVal) return mostrarErrBanco(I18N_ENTRADA.elijaIniciales, li);
+        body.cambiar_a_p = true;
+        body.iniciales = iniVal;
+        body.concepto_codigo = v;
+      } else {
+        if (conIniciales && ini) {
+          const iniVal = inicialesDeFila(ini);
+          if (iniVal) body.iniciales = iniVal;
+        }
+        if (v === '@traspaso') body.traspaso_caja = true;
+        else if (v === '@otra') body.otra_contabilidad = true;
+        else body.concepto_codigo = v;
+      }
+      const s = await api('/api/banco-centro/categorizar', { method: 'POST', body });
+      if (!s.ok) return mostrarErrBanco(errApi(s), li);
+      limpiarErrBanco();
+      if (!modoP && v === '@otra') {
+        const bloque = document.getElementById('entrada-banco-otra-bloque');
+        if (bloque) bloque.open = true;
+      }
+      await refrescar();
+    };
+  }
+
+  function pintarFilasBancoCentro(ul, vacio, rows, conIniciales, refrescar) {
+    if (!ul) return;
+    if (vacio) vacio.hidden = rows.length > 0;
+    ul.innerHTML = '';
+    rows.forEach(p => {
+      const li = document.createElement('li');
+      li.innerHTML = filaBancoCentro(p, conIniciales);
+      enlazarFilaBancoCentro(li, p, conIniciales, refrescar);
+      ul.appendChild(li);
+    });
+  }
+
+  async function pintarPendientesBanco() {
+    const r = await api('/api/banco-centro/pendientes');
+    if (!r.ok) return mostrarErrBanco(r.error || 'Error');
+    limpiarErrBanco();
+    pintarFilasBancoCentro(
+      document.getElementById('entrada-banco-pend'),
+      document.getElementById('entrada-banco-vacio'),
+      r.pendientes || [],
+      true,
+      pintarPendientesBanco,
+    );
+    const otras = r.otras || [];
+    pintarFilasBancoCentro(
+      document.getElementById('entrada-banco-otra'),
+      document.getElementById('entrada-banco-otra-vacio'),
+      otras,
+      false,
+      pintarPendientesBanco,
+    );
+    const cntOtra = document.getElementById('entrada-banco-otra-cnt');
+    if (cntOtra) {
+      if (otras.length) {
+        cntOtra.hidden = false;
+        cntOtra.textContent = '(' + otras.length + ')';
+      } else {
+        cntOtra.hidden = true;
+        cntOtra.textContent = '';
+      }
+    }
+  }
+
+  await pintarPendientesBanco();
+
+  form.onsubmit = async (ev) => {
+    ev.preventDefault();
+    const btn = document.getElementById('entrada-banco-enviar');
+    if (btn) btn.disabled = true;
+    const fd = new FormData(form);
+    const r = await api('/api/banco-centro/csv', { method: 'POST', body: fd });
+    if (btn) btn.disabled = false;
+    const err = document.getElementById('entrada-banco-err');
+    const msg = document.getElementById('entrada-banco-msg');
+    if (msg) msg.hidden = true;
+    if (!r.ok) {
+      mostrarErrBanco(r.error || 'Error');
+      return;
+    }
+    limpiarErrBanco();
+    if (msg) {
+      msg.hidden = false;
+      let t = I18N_ENTRADA.importNuevos.replace('%s', r.nuevos).replace('%s', r.repetidos);
+      if (r.omitidos) t += I18N_ENTRADA.importOmitidos.replace('%s', r.omitidos);
+      msg.textContent = t;
+    }
+    const bancoId = selBanco.value;
+    form.reset();
+    selBanco.value = bancoId;
+    syncFisicaImport();
+    actualizarAcceptBanco();
+    await pintarPendientesBanco();
+  };
+}
 </script>

@@ -45,6 +45,9 @@ final class ListarApuntes
         $out = [];
         $vistosPar = [];
         foreach ($this->asientos->listar($contexto->ejercicioId, $filtros) as $asiento) {
+            if ($asiento->origen === 'banco') {
+                continue;
+            }
             $par = $this->parPeriodificacion($asiento);
             if ($par !== null) {
                 $clave = $this->clavePar($par['imputacion'], $par['tesoreria']);

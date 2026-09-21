@@ -191,6 +191,38 @@ final class AutorizarPeticionTest extends TestCase
         self::assertTrue($d->permitido);
     }
 
+    public function testChangelogEsPublico(): void
+    {
+        $d = $this->autorizar()->ejecutar(
+            self::PAGINA,
+            'changelog',
+            'GET',
+            true,
+            null,
+            null,
+            null,
+            '',
+            false,
+        );
+        self::assertTrue($d->permitido);
+    }
+
+    public function testLicenciaEsPublica(): void
+    {
+        $d = $this->autorizar()->ejecutar(
+            self::PAGINA,
+            'licencia',
+            'GET',
+            true,
+            null,
+            null,
+            null,
+            '',
+            false,
+        );
+        self::assertTrue($d->permitido);
+    }
+
     public function testLoginPublicoNoExigeSesion(): void
     {
         $d = $this->autorizar()->ejecutar(

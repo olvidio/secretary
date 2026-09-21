@@ -56,3 +56,13 @@ composer db:restore -- var/backups/secretario_YYYYMMDD_HHMMSS.sql --force
 Detalle: `docs/dev/backup.md`.
 
 Ver también `PENDIENTE_USUARIO.md` y `docs/manual/usuario.md`.
+
+## Licencia
+
+Copyright © 2026 Daniel Serrabou.
+
+Secretario es software libre: puede redistribuirlo y modificarlo bajo los
+términos de la [GNU General Public License v3.0 o posterior](LICENSE).
+
+El texto completo de la licencia está en `LICENSE`. Un aviso breve en
+`COPYRIGHT`.

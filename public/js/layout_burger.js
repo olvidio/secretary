@@ -23,11 +23,16 @@
       location.reload();
       return;
     }
+    const items = grupo.items || [];
+    if (items.length === 1) {
+      window.location.href = items[0].href;
+      return;
+    }
     document.querySelectorAll('#burgerGroups [data-group]').forEach((a) => {
       a.classList.toggle('active', a.getAttribute('data-group') === groupId);
     });
     itemsUl.innerHTML = '';
-    (grupo.items || []).forEach((item) => {
+    items.forEach((item) => {
       const li = document.createElement('li');
       const a = document.createElement('a');
       a.href = item.href;

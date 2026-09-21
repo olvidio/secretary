@@ -18,7 +18,8 @@ pregunta y bastaría con mandar los mejores.
 
 Un fichero por pantalla en `docs/manual/`, y **el nombre del fichero es la
 clave que la IA debe citar**. `DocumentacionEnDisco` lee `docs/manual/*.md`
-(ignora los que empiezan por `_`) y saca el título del primer `#`.
+(ignora los que empiezan por `_`, p. ej. `_administracion.md` solo para el
+usuario admin de plataforma) y saca el título del primer `#`.
 
 Reglas del corpus, que son las que hacen que la ayuda funcione:
 

@@ -14,6 +14,7 @@ use src\administracion\application\EliminarUsuario;
 use src\administracion\application\GuardarPlanContable;
 use src\administracion\infrastructure\http\AdminCentroController;
 use src\administracion\infrastructure\http\AdminPlanController;
+use src\administracion\infrastructure\http\AdminLegalController;
 use src\administracion\infrastructure\http\AdminUsuarioController;
 use src\ambito\application\CrearCentro;
 use src\ambito\application\VaciarDatosCentro;
@@ -52,14 +53,24 @@ use src\apuntes\application\BuscarSugerenciasObservacion;
 use src\apuntes\application\CrearApunte;
 use src\apuntes\application\CrearApuntesDeEntrada;
 use src\apuntes\application\GuardarPlantillaApunte;
+use src\apuntes\application\AsegurarPendienteBancoCentro;
+use src\apuntes\application\CategorizarMovimientoBancoCentro;
+use src\apuntes\application\ImportarCsvBancoCentro;
 use src\apuntes\application\ListarApuntes;
+use src\apuntes\application\ListarPendientesBancoCentro;
 use src\apuntes\application\ListarPlantillasApunte;
+use src\apuntes\application\PreferenciaBancoCentro;
 use src\apuntes\domain\contracts\ApunteRepository;
+use src\apuntes\domain\contracts\BancoCentroImportRepository;
+use src\apuntes\domain\contracts\CentroBancoRepository;
 use src\apuntes\domain\contracts\PlantillaApunteRepository;
 use src\apuntes\domain\services\ContrapartidasGastoGeneral;
 use src\apuntes\infrastructure\http\ApunteController;
+use src\apuntes\infrastructure\http\BancoCentroController;
 use src\apuntes\infrastructure\http\PlantillaApunteController;
 use src\apuntes\infrastructure\persistence\PdoApunteRepository;
+use src\apuntes\infrastructure\persistence\PdoBancoCentroImportRepository;
+use src\apuntes\infrastructure\persistence\PdoCentroBancoRepository;
 use src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository;
 use src\arqueo\application\BuscarCapuchinos;
 use src\ayuda\application\ListarTemasAyuda;
@@ -161,7 +172,9 @@ use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\infrastructure\crypto\CifradorSecretos as CifradorSecretosInfra;
 use src\acceso\infrastructure\http\AuthController;
 use src\acceso\infrastructure\http\PreferenciaController;
+use src\legal\application\BuscarExpedientesLegales;
 use src\legal\application\ExigirDeclaracionResponsableNombres;
+use src\legal\application\ObtenerExpedienteLegal;
 use src\legal\application\RegistrarAceptacion;
 use src\legal\domain\contracts\AceptacionLegalRepository;
 use src\legal\domain\services\CatalogoDocumentosLegales;
@@ -226,6 +239,7 @@ use src\shared\domain\contracts\EnviadorCorreo;
 use src\shared\infrastructure\mail\SmtpEnviadorCorreo;
 use src\shared\infrastructure\persistence\ConnectionFactory;
 use src\shared\infrastructure\persistence\PostgresDumper;
+use src\shared\infrastructure\VersiónDespliegue;
 use src\shared\infrastructure\persistence\RutasCopiasSeguridad;
 use function DI\autowire;
 use function DI\factory;
@@ -335,6 +349,8 @@ return [
     }),
     AceptacionLegalRepository::class => autowire(PdoAceptacionLegalRepository::class),
     RegistrarAceptacion::class => autowire(),
+    BuscarExpedientesLegales::class => autowire(),
+    ObtenerExpedienteLegal::class => autowire(),
     ExigirDeclaracionResponsableNombres::class => autowire(),
     PrepararTotp::class => autowire(),
     ConfirmarTotp::class => factory(static function (
@@ -403,6 +419,7 @@ return [
     AdminPlanController::class => autowire(),
     AdminCentroController::class => autowire(),
     AdminUsuarioController::class => autowire(),
+    AdminLegalController::class => autowire(),
     ObtenerResumen613::class => autowire(),
     GuardarInforme613Mes::class => autowire(),
     ObtenerE37::class => autowire(),
@@ -431,6 +448,14 @@ return [
     src\personas\infrastructure\http\VinculoCentroController::class => autowire(),
     ConceptoController::class => autowire(),
     ApunteController::class => autowire(),
+    BancoCentroImportRepository::class => autowire(PdoBancoCentroImportRepository::class),
+    CentroBancoRepository::class => autowire(PdoCentroBancoRepository::class),
+    AsegurarPendienteBancoCentro::class => autowire(),
+    ImportarCsvBancoCentro::class => autowire(),
+    ListarPendientesBancoCentro::class => autowire(),
+    CategorizarMovimientoBancoCentro::class => autowire(),
+    PreferenciaBancoCentro::class => autowire(),
+    BancoCentroController::class => autowire(),
     PlantillaApunteController::class => autowire(),
     CierreController::class => autowire(),
     InformeController::class => autowire(),
@@ -485,6 +510,7 @@ return [
     }),
     RemesaController::class => autowire(),
     frontend\shared\http\PageController::class => autowire(),
+    src\shared\infrastructure\VersiónDespliegue::class => factory([VersiónDespliegue::class, 'porDefecto']),
     src\importacion\application\ImportarExcelSecretario::class => autowire(),
     PostgresDumper::class => factory(static fn (PDO $pdo): PostgresDumper => PostgresDumper::fromEnv($pdo)),
     AlmacenCopiasSeguridad::class => factory(static fn (PDO $pdo): AlmacenCopiasSeguridad => new AlmacenCopiasSeguridad(

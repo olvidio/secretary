@@ -5,6 +5,8 @@ Dónde se hace cada cosa. Hay dos zonas distintas: la contabilidad **del centro*
 persona, que se abre en `/yo` y no mueve la caja del centro. Si no se recuerda
 la pantalla, se pregunta en **Ayuda**.
 
+Los **procesos que cruzan varias pantallas** (cierre mensual, remesa y disponible, importación del banco, alta de persona nueva) están en el apartado **Procesos contables habituales** del manual.
+
 ## Contabilidad del centro
 
 | Lo que quiere hacer | Pantalla |

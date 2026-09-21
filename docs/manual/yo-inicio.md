@@ -13,11 +13,11 @@ Desde aquí también se anota: un botón para el ingreso, otro para el gasto y u
 ## Cómo se usa
 
 1. Con las flechas ‹ y › se cambia de mes. El título indica el mes y el día en que cierra.
-2. Pulsar «+ Ingreso» o «− Gasto».
+2. Pulsar **+ Ingreso** o **− Gasto**: se abre una ventana con el formulario.
 3. Escribir el importe, elegir la categoría en la cuadrícula de colores y marcar si el dinero entra o sale por caja o por banco.
-4. Poner la fecha y, si hace falta, una nota. Para que el gasto cuente en otro mes, usar «Fecha de imputación».
-5. Guardar: el resumen y el gráfico se actualizan solos.
-6. Para mover dinero entre la caja y el banco, usar «Traspaso caja ↔ banco» y elegir origen y destino.
+4. Poner la fecha y, si hace falta, una nota. Para que el gasto cuente en otro mes, desplegar **Fecha de imputación (opcional)**.
+5. **Guardar** anota el movimiento y cierra la ventana; **Cancelar** la cierra sin guardar. El resumen y el gráfico se actualizan solos.
+6. **Traspaso caja ↔ banco** abre la misma ventana en modo traspaso: elegir origen y destino, importe y fecha; **Guardar** o **Cancelar** igual que arriba.
 
 ## Reglas que conviene saber
 

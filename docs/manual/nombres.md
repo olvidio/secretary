@@ -20,7 +20,11 @@ Desde aquí se abre también el libro personal de cada una, con solo poner su co
 6. Si se conoce, escribir la **base liquidable** del IRPF (casillas 0500 y 0510 de la renta). Si se deja vacío, el programa pone el **111 de la previsión** de esa persona; si aún no hay previsión guardada, el ingreso 111 real proyectado a fin de año. El 10 % de esa cifra es el tope de donativos que desgravan.
 7. Si llega o se va a mitad de año, marcar los meses en que no paga. Hay dos intervalos.
 8. «Editar» recupera una fila en el formulario, «Borrar» la quita del listado previa confirmación y «Nuevo» vacía el formulario. Si la persona tiene apuntes o remesas, no se borra del todo: se da de baja y deja de salir aquí, pero el histórico se conserva.
-9. En «Solicitudes de acceso personal», cada petición se resuelve creando un nombre nuevo, vinculándola a uno que ya existe o rechazándola.
+9. En «Solicitudes de acceso personal», cada petición pendiente muestra tres botones:
+   - **Dar de alta y vincular**: crea un nombre nuevo con los datos del solicitante y le abre el libro personal.
+   - **Vincular existente…**: muestra nombres parecidos del centro; en cada candidato, **Vincular** une la cuenta a ese nombre (pide confirmación).
+   - **Rechazar**: descarta la petición (pide confirmación).
+   En los dos primeros casos hay que tener marcada la casilla de que el centro es responsable de los datos personales.
 
 ## Reglas que conviene saber
 

@@ -112,6 +112,7 @@ final class CatalogoMenus
             ['nav' => 'admin-planes', 'href' => '/admin/planes', 'label' => _("Planes contables")],
             ['nav' => 'admin-centros', 'href' => '/admin/centros', 'label' => _("Centros")],
             ['nav' => 'admin-usuarios', 'href' => '/admin/usuarios', 'label' => _("Usuarios")],
+            ['nav' => 'admin-legal', 'href' => '/admin/legal', 'label' => _("Legal")],
         ];
     }
 

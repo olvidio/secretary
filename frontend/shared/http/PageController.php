@@ -20,6 +20,7 @@ use src\legal\infrastructure\markdown\RenderizadorMarkdownLegal;
 use src\personal\domain\services\CatalogoBancosCsv;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
+use src\shared\infrastructure\VersiónDespliegue;
 
 final class PageController
 {
@@ -31,6 +32,7 @@ final class PageController
         private readonly ConfirmarEmailRegistro $confirmarEmail,
         private readonly CatalogoDocumentosLegales $documentos,
         private readonly DatosOperador $operador,
+        private readonly VersiónDespliegue $versión,
     ) {
     }
 
@@ -147,6 +149,36 @@ final class PageController
             'version' => $doc->version,
             'cuerpoHtml' => RenderizadorMarkdownLegal::aHtml($texto),
             'operador' => $this->operador,
+        ]));
+    }
+
+    public function licencia(Request $request, array $vars = []): Response
+    {
+        $ruta = dirname(__DIR__, 3) . '/LICENSE';
+        if (!is_readable($ruta)) {
+            return Response::html($this->view->standalone('legal/view/licencia.php', [
+                'texto' => _('No se encuentra el fichero LICENSE.'),
+            ]), 500);
+        }
+
+        return Response::html($this->view->standalone('legal/view/licencia.php', [
+            'texto' => (string) file_get_contents($ruta),
+        ]));
+    }
+
+    public function changelog(Request $request, array $vars = []): Response
+    {
+        $texto = $this->versión->textoChangelog();
+        if ($texto === null) {
+            return Response::html($this->view->standalone('legal/view/changelog.php', [
+                'versionApp' => $this->versión->etiqueta(),
+                'cuerpoHtml' => '<p>' . htmlspecialchars(_('No hay changelog disponible.'), ENT_QUOTES) . '</p>',
+            ]), 404);
+        }
+
+        return Response::html($this->view->standalone('legal/view/changelog.php', [
+            'versionApp' => $this->versión->etiqueta(),
+            'cuerpoHtml' => RenderizadorMarkdownLegal::aHtml($texto),
         ]));
     }
 
@@ -352,6 +384,11 @@ final class PageController
     public function adminUsuarios(Request $request, array $vars = []): Response
     {
         return $this->paginaAdmin('admin/view/usuarios.php', 'admin-usuarios');
+    }
+
+    public function adminLegal(Request $request, array $vars = []): Response
+    {
+        return $this->paginaAdmin('admin/view/legal.php', 'admin-legal');
     }
 
     public function yoAyuda(Request $request, array $vars = []): Response

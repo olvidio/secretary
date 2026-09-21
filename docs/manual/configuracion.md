@@ -19,7 +19,7 @@ Conviene repasarla al empezar, porque la entrada de apuntes, el resumen mensual 
 5. Elegir el **tipo de cierre** (vivienda o necesidades).
 6. Elegir el **plan contable** (hoy solo H16n; las partidas del capítulo VII se personalizan en Ámbito → Centros).
 7. Pulsar «Guardar»; aparece el aviso «Guardado».
-8. En «Tramos de desgravación» se editan los tramos (p. ej. 250 € al 80 % y el resto al 40 %) y el **máximo** (% de la base liquidable; por defecto 10 %) y se pulsa «Guardar tramos». Sirven al proponer destinos 7.
+8. En «Tramos de desgravación» se editan los tramos (p. ej. 250 € al 80 % y el resto al 40 %) y el **máximo** (% de la base liquidable; por defecto 10 %). **Añadir tramo** agrega una fila; **Quitar** en una fila la elimina. Al terminar, **Guardar tramos** (aparece «Tramos guardados»). Sirven al proponer destinos 7.
 
 ## Reglas que conviene saber
 

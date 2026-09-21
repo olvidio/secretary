@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 use FastRoute\RouteCollector;
 use src\administracion\infrastructure\http\AdminCentroController;
+use src\administracion\infrastructure\http\AdminLegalController;
 use src\administracion\infrastructure\http\AdminPlanController;
 use src\administracion\infrastructure\http\AdminUsuarioController;
 use src\ambito\infrastructure\http\CentroController;
 use src\ambito\infrastructure\http\EjercicioController;
 use src\ambito\infrastructure\http\TesoreriaController;
 use src\apuntes\infrastructure\http\ApunteController;
+use src\apuntes\infrastructure\http\BancoCentroController;
 use src\apuntes\infrastructure\http\PlantillaApunteController;
 use src\arqueo\infrastructure\http\ArqueoController;
 use src\ayuda\infrastructure\http\AyudaController;
@@ -80,6 +82,9 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/admin/centros/{id:\d+}/borrar', [AdminCentroController::class, 'delete']);
     $r->addRoute('GET', '/api/admin/usuarios', [AdminUsuarioController::class, 'list']);
     $r->addRoute('POST', '/api/admin/usuarios/{id:\d+}/borrar', [AdminUsuarioController::class, 'delete']);
+    $r->addRoute('GET', '/api/admin/legal/buscar', [AdminLegalController::class, 'buscar']);
+    $r->addRoute('GET', '/api/admin/legal/expediente/{id:\d+}', [AdminLegalController::class, 'ver']);
+    $r->addRoute('GET', '/api/admin/legal/expediente/{id:\d+}/export', [AdminLegalController::class, 'exportar']);
     $r->addRoute('POST', '/api/centros/vaciar', [CentroController::class, 'vaciar']);
     $r->addRoute('POST', '/api/centros/usuarios', [CentroController::class, 'addUsuario']);
     $r->addRoute('GET', '/api/centros/partidas-labores', [PartidaLaboresController::class, 'list']);
@@ -103,6 +108,11 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/apuntes', [ApunteController::class, 'list']);
     $r->addRoute('GET', '/api/apuntes/sugerencias', [ApunteController::class, 'sugerencias']);
     $r->addRoute('GET', '/api/apuntes/cuadre', [ApunteController::class, 'cuadre']);
+    $r->addRoute('GET', '/api/banco-centro/bancos', [BancoCentroController::class, 'bancos']);
+    $r->addRoute('POST', '/api/banco-centro/preferencia', [BancoCentroController::class, 'guardarPreferencia']);
+    $r->addRoute('GET', '/api/banco-centro/pendientes', [BancoCentroController::class, 'pendientes']);
+    $r->addRoute('POST', '/api/banco-centro/csv', [BancoCentroController::class, 'importar']);
+    $r->addRoute('POST', '/api/banco-centro/categorizar', [BancoCentroController::class, 'categorizar']);
     $r->addRoute('POST', '/api/apuntes', [ApunteController::class, 'create']);
     $r->addRoute('PUT', '/api/apuntes/{id:\d+}', [ApunteController::class, 'update']);
     $r->addRoute('DELETE', '/api/apuntes/{id:\d+}', [ApunteController::class, 'delete']);

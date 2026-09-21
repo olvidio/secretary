@@ -12,7 +12,7 @@ Sirve para vincular la cuenta personal con **un solo centro** de tipo **n**. Has
 
 La pantalla muestra uno de tres estados:
 
-1. **Sin vínculo:** formulario para elegir un centro **n**, el año del ejercicio y un mensaje opcional. Solo cabe **una solicitud** a la vez.
+1. **Sin vínculo:** formulario «Solicitar acceso» para elegir un centro **n**, el año del ejercicio y un mensaje opcional. Pulsar **Enviar solicitud**. Solo cabe **una solicitud** a la vez.
 2. **Solicitud pendiente:** datos de la petición enviada; hay que esperar la aprobación del secretario.
 3. **Centro vinculado:** nombre del centro, iniciales y año. **Desvincular** corta el enlace; el nombre sigue en la lista del centro pero ya no queda ligado a la cuenta.
 

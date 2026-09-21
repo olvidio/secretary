@@ -15,9 +15,10 @@ Una plantilla solo describe la forma del movimiento: qué libro, de dónde sale 
 1. Abrir «Plantillas P» o «Plantillas G» según el libro desde el que se vaya a usar.
 2. Escribir un nombre reconocible, por ejemplo «Club».
 3. Rellenar cada movimiento: libro (P o G), procedencia (A si no toca caja ni banco, B si es banco, C si es caja), concepto y observaciones.
-4. Añadir o quitar movimientos con los botones correspondientes. El orden en que aparecen es el orden en que se anotarán.
-5. Pulsar «Guardar plantilla». Aparece en la tabla, con el resumen de sus movimientos.
-6. Para eliminarla, «Borrar» en su fila y confirmar.
+4. **Añadir movimiento** agrega otra línea; **Quitar** en una línea la elimina. El orden en que aparecen es el orden en que se anotarán.
+5. Pulsar **Guardar plantilla**. Aparece en la tabla, con el resumen de sus movimientos.
+6. En la tabla: **Editar** carga la plantilla en el formulario de arriba; el botón de envío pasa a **Guardar cambios** y aparece **Nueva plantilla** para volver al formulario vacío sin salir de la pantalla.
+7. **Borrar** en una fila elimina esa plantilla (pide confirmación).
 
 ## Reglas que conviene saber
 

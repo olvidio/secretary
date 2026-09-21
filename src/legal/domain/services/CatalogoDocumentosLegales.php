@@ -9,7 +9,7 @@ use src\legal\domain\entity\DocumentoLegal;
 
 final class CatalogoDocumentosLegales
 {
-    public const VERSION_VIGENTE = 'v1';
+    public const VERSION_VIGENTE = 'v2';
 
     /** @var list<string> */
     public const TIPOS = ['condiciones', 'privacidad'];

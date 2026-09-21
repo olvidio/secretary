@@ -194,7 +194,7 @@ final class PdoAsientoRepository implements AsientoRepository
     {
         $st = $this->pdo->prepare(
             "UPDATE asientos SET anulado_at = now(), updated_at = now()
-             WHERE id = :id AND origen = 'import' AND anulado_at IS NULL"
+             WHERE id = :id AND origen IN ('import', 'banco') AND anulado_at IS NULL"
         );
         $st->execute([':id' => $id]);
     }

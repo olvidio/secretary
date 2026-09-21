@@ -152,6 +152,9 @@ DID_CHECKOUT=1
 log "composer install --no-dev"
 en_php composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
+log "version.json"
+en_php php tools/release/escribir_version.php "$DESTINO"
+
 log "db:migrate"
 en_php php bin/console.php db:migrate
 

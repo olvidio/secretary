@@ -25,6 +25,8 @@
         ·
         <a href="/privacidad"><?= _("Privacidad") ?></a>
         ·
+        <a href="/licencia"><?= _("Licencia") ?></a>
+        ·
         <a href="/registro"><?= _("Registrarse") ?></a>
         ·
         <a href="/login"><?= _("Entrar") ?></a>

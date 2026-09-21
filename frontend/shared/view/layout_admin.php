@@ -26,6 +26,7 @@ if (!empty($contentView) && is_file($contentView)) {
 }
 ?>
 </main>
+<?php include __DIR__ . '/_pie_legal.php'; ?>
 <?php include __DIR__ . '/_js_i18n.php'; ?>
 <script src="/js/app.js?v=<?= (int) (@filemtime(dirname(__DIR__, 3) . '/public/js/app.js') ?: 0) ?>"></script>
 </body>

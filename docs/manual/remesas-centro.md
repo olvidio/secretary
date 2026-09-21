@@ -10,11 +10,11 @@ Es la bandeja donde llega lo que cada persona envía al cerrar su mes: sus ingre
 
 ## Cómo se usa
 
-1. Al entrar se ven las **Enviadas**, las pendientes. El desplegable **Estado** muestra también aceptadas, rechazadas, sustituidas o todas.
+1. El desplegable **Estado** filtra por recibidas, aceptadas, rechazadas, sustituidas o todas. Pulsar **Filtrar** actualiza la tabla.
 2. La tabla da el mes, la persona, la versión, el estado, el importe y la fecha de envío.
-3. Pulsar **Ver** en una fila: abajo se abre el detalle, con una línea por concepto. Si hay versión anterior, se indica qué conceptos han cambiado.
-4. Pulsar **Aceptar** o, escribiendo antes el motivo en «Nota al rechazar», **Rechazar**. Las dos piden confirmación. Si la persona envió el saldo de su caja y banco, aparece la casilla **Sustituir el disponible por esa tesorería**.
-5. Para ver cómo ha repartido la persona un concepto, pulsar **Solicitar detalle**. Queda pendiente hasta que ella autorice; entonces el botón pasa a **Ver detalle** y el desglose aparece en un panel debajo de la tabla (subcuentas, importes y gastos marcados como generales).
+3. **Ver** en una fila abre abajo el detalle de esa remesa, con una línea por concepto. Si hay versión anterior, se indica qué conceptos han cambiado. Volver a pulsar **Ver** en otra fila cambia el detalle.
+4. En el detalle: **Aceptar** o, escribiendo antes el motivo en «Nota al rechazar», **Rechazar**. Las dos piden confirmación. Si la persona envió el saldo de su caja y banco, aparece la casilla **Sustituir el disponible por esa tesorería**.
+5. En cada línea del detalle, **Solicitar detalle** pide permiso a la persona para ver el desglose. Cuando autoriza, el botón pasa a **Ver detalle** / **Ocultar detalle** (alterna el panel con subcuentas, importes y gastos marcados como generales).
 
 ## Reglas que conviene saber
 

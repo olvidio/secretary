@@ -15,12 +15,13 @@ Cada centro tiene sus propias cuentas, sus propios nombres y su propio secretari
 1. En «Este centro» se ven el nombre del centro y los usuarios que pueden llevarlo.
 2. Para dar acceso a otra persona, rellenar «Añadir usuario de este centro» (alias, correo y contraseña de al menos seis caracteres) y pulsar «Vincular».
 3. Para cargar el libro de Excel, elegir el fichero en «Excel de este centro», marcar que el centro es responsable de los nombres que se importan y pulsar «Importar Excel». Al acabar se indica cuántos nombres y apuntes se han cargado.
-4. En «VII. Otras labores apostólicas» se añaden o quitan partidas, se marca si **desgravan** y se pulsa «Guardar partidas».
+4. En «VII. Otras labores apostólicas»: **Añadir partida** crea una fila; **Quitar** en una fila la elimina. En cada partida se escribe código, etiqueta y si **desgrava**. **Guardar partidas** persiste los cambios.
+5. **Vaciar datos (pruebas)** borra apuntes, remesas y arqueos del centro para volver a cargar el Excel (pide confirmación); no toca usuarios ni nombres.
 
 ## Reglas que conviene saber
 
 - Las partidas del capítulo VII llevan código que empieza por 7 (71, 791…), etiqueta obligatoria y como máximo doce. Salen en el resumen 613 del libro personal y como conceptos de gasto de ese libro. La casilla «Desgrava» decide si entran en el primer tramo de donativos al proponer destinos.
-- «Vaciar datos» es para las pruebas: borra los apuntes, las remesas y los arqueos de este centro para poder recargar el Excel. El centro, los usuarios y los nombres se conservan. Pide confirmación.
+- «Vaciar datos (pruebas)» borra los apuntes, las remesas y los arqueos de este centro para poder recargar el Excel. El centro, los usuarios y los nombres se conservan.
 - Importar nombres es un alta de datos personales: el centro (el secretario) es el responsable; el programa solo aloja.
 - En el Excel antiguo, una **exención de 1 a 12** (todo el año) marcaba a quien no participa en el cierre. Al importar se deja la exención vacía y «Vivienda aporta a generales» pasa a **no**. Una exención de unos meses (llegada o salida a mitad de año) se conserva.
 
