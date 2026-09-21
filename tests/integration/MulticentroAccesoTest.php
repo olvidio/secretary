@@ -63,7 +63,7 @@ final class MulticentroAccesoTest extends TestCase
         $identidades = new PdoIdentidadRepository($this->pdo);
         $centros = new PdoCentroRepository($this->pdo);
         $personas = new PdoPersonaRepository($this->pdo);
-        $iniciar = new IniciarSesion($identidades, new \src\acceso\application\ResolverPersonaActiva($identidades));
+        $iniciar = \Tests\Soporte\ServiciosAcceso::iniciarSesion($this->pdo, $identidades);
 
         $loginScl = $iniciar->ejecutar('scl', 'cambiar');
         self::assertSame('centro', $loginScl->nivel);

@@ -22,6 +22,7 @@ use src\acceso\infrastructure\persistence\PdoIdentidadRepository;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\shared\infrastructure\persistence\SchemaInstaller;
 use Tests\Soporte\BaseDeDatosAislada;
+use Tests\Soporte\ServiciosAcceso;
 
 final class AutenticacionTest extends TestCase
 {
@@ -36,7 +37,7 @@ final class AutenticacionTest extends TestCase
         (new SchemaInstaller($pdo))->install();
         $repo = new PdoIdentidadRepository($pdo);
         $resolver = new ResolverPersonaActiva($repo);
-        $iniciar = new IniciarSesion($repo, $resolver);
+        $iniciar = ServiciosAcceso::iniciarSesion($pdo, $repo);
 
         $porAlias = $iniciar->ejecutar('scl', 'cambiar');
         self::assertSame('pendiente_activar', $porAlias->estado);
@@ -61,7 +62,7 @@ final class AutenticacionTest extends TestCase
         $despues = $iniciar->ejecutar('scl', 'cambiar');
         self::assertSame('pendiente_verificar', $despues->estado);
 
-        $verificar = new VerificarSegundoFactor($repo, $cifrador, $resolver, self::PIMIENTO);
+        $verificar = ServiciosAcceso::verificarSegundoFactor($pdo, $cifrador, self::PIMIENTO, $repo);
         $ok = $verificar->ejecutar((int) $porAlias->identidadId, TotpRfc6238::codigo($datos['secreto']));
         self::assertSame('autenticado', $ok->estado);
 
@@ -123,7 +124,7 @@ final class AutenticacionTest extends TestCase
         $repo->marcarEmailVerificado($id->id, new DateTimeImmutable());
 
         $resolver = new ResolverPersonaActiva($repo);
-        $login = (new IniciarSesion($repo, $resolver))->ejecutar('ana@example.test', 'clave');
+        $login = ServiciosAcceso::iniciarSesion($pdo, $repo)->ejecutar('ana@example.test', 'clave');
         self::assertSame('autenticado', $login->estado);
         self::assertSame('persona', $login->nivel);
         self::assertSame($personaId, $login->personaId);
@@ -165,7 +166,7 @@ final class AutenticacionTest extends TestCase
         $pdo = $this->prepararBaseDeTestVacia();
         (new SchemaInstaller($pdo))->install();
         $repo = new PdoIdentidadRepository($pdo);
-        $iniciar = new IniciarSesion($repo, new ResolverPersonaActiva($repo));
+        $iniciar = ServiciosAcceso::iniciarSesion($pdo, $repo);
         $ahora = new DateTimeImmutable('2026-09-09 12:00:00');
         for ($i = 0; $i < 5; $i++) {
             $r = $iniciar->ejecutar('scl', 'mal', $ahora);
@@ -192,7 +193,7 @@ final class AutenticacionTest extends TestCase
         $codigos = (new ConfirmarTotp($repo, $cifrador, self::PIMIENTO))
             ->ejecutar($id, TotpRfc6238::codigo($datos['secreto']));
         $resolver = new ResolverPersonaActiva($repo);
-        $verificar = new VerificarSegundoFactor($repo, $cifrador, $resolver, self::PIMIENTO);
+        $verificar = ServiciosAcceso::verificarSegundoFactor($pdo, $cifrador, self::PIMIENTO, $repo);
         $primero = $verificar->ejecutar($id, $codigos[0]);
         self::assertSame('autenticado', $primero->estado);
         $reuso = $verificar->ejecutar($id, $codigos[0]);
@@ -205,13 +206,11 @@ final class AutenticacionTest extends TestCase
         $pdo = $this->prepararBaseDeTestVacia();
         (new SchemaInstaller($pdo))->install();
         $identidades = new PdoIdentidadRepository($pdo);
-        $alta = (new RegistrarUsuario(
-            $identidades,
-            new PdoPersonaRepository($pdo),
-        ))->ejecutar('dani', 'dani@example.test', 'secret1', 'secret1', 'Dani', true);
+        $alta = ServiciosAcceso::registrarUsuario($pdo)
+            ->ejecutar('dani', 'dani@example.test', 'secret1', 'secret1', 'Dani', true);
         self::assertNotNull($alta['identidad']->id);
         $resolver = new ResolverPersonaActiva($identidades);
-        $pendiente = (new IniciarSesion($identidades, $resolver))->ejecutar('dani', 'secret1');
+        $pendiente = ServiciosAcceso::iniciarSesion($pdo, $identidades)->ejecutar('dani', 'secret1');
         self::assertSame('fallo', $pendiente->estado);
         self::assertStringContainsString('correo', strtolower($pendiente->mensaje));
         $catalogo = \src\legal\domain\services\CatalogoDocumentosLegales::porDefecto();
@@ -225,13 +224,18 @@ final class AutenticacionTest extends TestCase
             ),
             $catalogo,
         ))->ejecutar($alta['token_verificacion']);
-        $login = (new IniciarSesion($identidades, $resolver))->ejecutar('dani', 'secret1');
+        $login = ServiciosAcceso::iniciarSesion($pdo, $identidades)->ejecutar('dani', 'secret1');
         self::assertSame('autenticado', $login->estado);
         self::assertSame('persona', $login->nivel);
-        self::assertNull($login->personaId);
+        self::assertNotNull($login->personaId);
+        self::assertFalse($identidades->tienePersonaEnAlgunCentro((int) $alta['identidad']->id));
+        $centroPersonal = (int) $pdo->query(
+            "SELECT COUNT(*) FROM centros WHERE tipo = 'p'"
+        )->fetchColumn();
+        self::assertSame(1, $centroPersonal);
         $nAcept = (int) $pdo->query("SELECT COUNT(*) FROM aceptaciones_legales WHERE canal = 'confirmacion_email'")->fetchColumn();
         self::assertSame(1, $nAcept);
-        $desconocido = (new IniciarSesion($identidades, $resolver))->ejecutar('nadie', 'secret1');
+        $desconocido = ServiciosAcceso::iniciarSesion($pdo, $identidades)->ejecutar('nadie', 'secret1');
         self::assertSame('desconocido', $desconocido->estado);
     }
 }

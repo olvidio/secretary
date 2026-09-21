@@ -146,6 +146,7 @@ use src\plan\infrastructure\http\PartidaLaboresController;
 use src\plan\infrastructure\persistence\PdoPlanContableRepository;
 use src\plan\infrastructure\persistence\PdoPlanConceptoRepository;
 use src\acceso\application\AsegurarIdentidadCentro;
+use src\acceso\application\AsegurarLibroPersonalIdentidad;
 use src\acceso\application\AutorizarPeticion;
 use src\acceso\application\CambiarCentroUsuario;
 use src\acceso\application\CambiarPersonaUsuario;
@@ -332,6 +333,7 @@ return [
 
         return new SmtpEnviadorCorreo($host, $port, $from);
     }),
+    src\acceso\domain\contracts\LibroPersonalIdentidadPort::class => autowire(AsegurarLibroPersonalIdentidad::class),
     RegistrarUsuario::class => autowire(),
     RegistrarCentro::class => autowire(),
     NotificarRegistroUsuario::class => autowire(),

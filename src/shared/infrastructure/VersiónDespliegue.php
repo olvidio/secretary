@@ -17,9 +17,19 @@ final class VersiónDespliegue
 
     public function etiqueta(): string
     {
-        $datos = $this->datos();
+        $datos = $this->datosJson();
         if ($datos !== null && ($datos['version'] ?? '') !== '') {
             return (string) $datos['version'];
+        }
+
+        $fichero = $this->desdeFicheroVersion();
+        if ($fichero !== null) {
+            return $fichero;
+        }
+
+        $git = $this->desdeGit();
+        if ($git !== null) {
+            return $git;
         }
 
         return 'desarrollo';
@@ -41,7 +51,7 @@ final class VersiónDespliegue
     }
 
     /** @return array{version?: string, fecha?: string, commit?: string}|null */
-    private function datos(): ?array
+    private function datosJson(): ?array
     {
         $ruta = $this->raízProyecto . '/var/version.json';
         if (!is_readable($ruta)) {
@@ -50,5 +60,37 @@ final class VersiónDespliegue
         $json = json_decode((string) file_get_contents($ruta), true);
 
         return is_array($json) ? $json : null;
+    }
+
+    private function desdeFicheroVersion(): ?string
+    {
+        $ruta = $this->raízProyecto . '/VERSION';
+        if (!is_readable($ruta)) {
+            return null;
+        }
+        $linea = trim((string) file_get_contents($ruta));
+        if ($linea === '' || preg_match('/^v?[0-9]+(\.[0-9]+)*(-[0-9A-Za-z.-]+)?$/', $linea) !== 1) {
+            return null;
+        }
+
+        return str_starts_with($linea, 'v') ? $linea : 'v' . $linea;
+    }
+
+    private function desdeGit(): ?string
+    {
+        if (!is_dir($this->raízProyecto . '/.git')) {
+            return null;
+        }
+        $out = [];
+        $cmd = sprintf(
+            'git -c safe.directory=%s describe --tags --always 2>/dev/null',
+            escapeshellarg($this->raízProyecto),
+        );
+        exec($cmd, $out, $code);
+        if ($code !== 0 || ($out[0] ?? '') === '') {
+            return null;
+        }
+
+        return (string) $out[0];
     }
 }

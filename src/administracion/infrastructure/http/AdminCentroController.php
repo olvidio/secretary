@@ -6,6 +6,7 @@ namespace src\administracion\infrastructure\http;
 
 use InvalidArgumentException;
 use RuntimeException;
+use src\acceso\application\AsegurarLibroPersonalIdentidad;
 use src\administracion\application\EliminarCentro;
 use src\ambito\application\CrearCentro;
 use src\ambito\domain\contracts\CentroRepository;
@@ -30,7 +31,13 @@ final class AdminCentroController
     public function list(Request $request, array $vars = []): Response
     {
         return ContestarJson::ok([
-            'centros' => array_map(static fn ($c) => $c->toArray(), $this->centros->listar()),
+            'centros' => array_map(
+                static fn ($c) => $c->toArray(),
+                array_values(array_filter(
+                    $this->centros->listar(),
+                    static fn ($c) => $c->tipo !== AsegurarLibroPersonalIdentidad::TIPO_CENTRO,
+                )),
+            ),
             'planes' => $this->planes->listar(),
         ]);
     }
@@ -69,7 +76,13 @@ final class AdminCentroController
                 ],
                 'importacion' => $importacion,
                 'aviso_import' => $avisoImport,
-                'centros' => array_map(static fn ($c) => $c->toArray(), $this->centros->listar()),
+                'centros' => array_map(
+                static fn ($c) => $c->toArray(),
+                array_values(array_filter(
+                    $this->centros->listar(),
+                    static fn ($c) => $c->tipo !== AsegurarLibroPersonalIdentidad::TIPO_CENTRO,
+                )),
+            ),
             ]);
         } catch (InvalidArgumentException | RuntimeException $e) {
             return ContestarJson::error($e->getMessage());
@@ -85,7 +98,13 @@ final class AdminCentroController
             $this->eliminar->ejecutar((int) ($vars['id'] ?? 0), $confirmar);
 
             return ContestarJson::ok([
-                'centros' => array_map(static fn ($c) => $c->toArray(), $this->centros->listar()),
+                'centros' => array_map(
+                static fn ($c) => $c->toArray(),
+                array_values(array_filter(
+                    $this->centros->listar(),
+                    static fn ($c) => $c->tipo !== AsegurarLibroPersonalIdentidad::TIPO_CENTRO,
+                )),
+            ),
             ]);
         } catch (InvalidArgumentException | RuntimeException $e) {
             return ContestarJson::error($e->getMessage());

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace src\personas\application;
 
+use src\acceso\application\AsegurarLibroPersonalIdentidad;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\ambito\domain\contracts\CentroRepository;
 use src\personas\domain\contracts\PersonaRepository;
@@ -29,6 +30,9 @@ final class ListarVinculosPersona
                 continue;
             }
             $centro = $this->centros->porId($persona->centroId);
+            if ($centro !== null && $centro->tipo === AsegurarLibroPersonalIdentidad::TIPO_CENTRO) {
+                continue;
+            }
             $fila = $persona->toArray();
             $fila['centro_id'] = $persona->centroId;
             $fila['centro_nombre'] = $centro?->nombre ?? '';

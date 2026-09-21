@@ -7,6 +7,7 @@ namespace Tests\unit;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use src\acceso\application\RegistrarUsuario;
+use src\acceso\domain\contracts\LibroPersonalIdentidadPort;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\entity\Identidad;
 use src\personas\domain\contracts\PersonaRepository;
@@ -45,7 +46,18 @@ final class RegistrarUsuarioTest extends TestCase
 
         $identidades->method('porEmailOAlias')->willReturn(null);
         $personas->method('porEmail')->willReturn(null);
-        $identidades->expects(self::never())->method('vincularPersona');
+        $libro = new class implements LibroPersonalIdentidadPort {
+            public int $llamadas = 0;
+            public ?int $identidadId = null;
+
+            public function ejecutar(int $identidadId): ?\src\personas\domain\entity\Persona
+            {
+                $this->llamadas++;
+                $this->identidadId = $identidadId;
+
+                return null;
+            }
+        };
         $identidades->method('guardar')->willReturnCallback(
             static function (Identidad $i): Identidad {
                 return new Identidad(5, $i->email, $i->passwordHash, $i->nombre, true, 0, null, null, $i->alias);
@@ -58,8 +70,10 @@ final class RegistrarUsuarioTest extends TestCase
                 : null,
         );
 
-        $out = new RegistrarUsuario($identidades, $personas)
+        $out = new RegistrarUsuario($identidades, $personas, $libro)
             ->ejecutar('dani', 'dani@x.local', 'secret1', 'secret1', 'Dani', true);
+        self::assertSame(1, $libro->llamadas);
+        self::assertSame(5, $libro->identidadId);
         self::assertSame(5, $out['identidad']->id);
         self::assertSame('dani', $out['identidad']->alias);
         self::assertNotSame('', $out['token_verificacion']);
@@ -78,6 +92,13 @@ final class RegistrarUsuarioTest extends TestCase
         $identidades->method('porEmailOAlias')->willReturn($existente);
         $personas = $this->createStub(PersonaRepository::class);
 
-        return new RegistrarUsuario($identidades, $personas);
+        $libro = new class implements LibroPersonalIdentidadPort {
+            public function ejecutar(int $identidadId): ?\src\personas\domain\entity\Persona
+            {
+                return null;
+            }
+        };
+
+        return new RegistrarUsuario($identidades, $personas, $libro);
     }
 }

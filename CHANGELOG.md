@@ -3,9 +3,10 @@
 Cambios visibles para quien usa Secretario. El formato sigue
 [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
-La **versión** que aparece en el login se toma del tag desplegado (`v*`) y se
-escribe en `var/version.json` al ejecutar `deploy.sh`. El changelog se
-**actualiza a mano** al preparar un tag; no hace falta en cada push.
+La **versión** que aparece en el login se toma, en este orden, de `var/version.json`
+(generado en el deploy), del fichero `VERSION` del repositorio o del tag git
+del checkout. El changelog se **actualiza a mano** al preparar un tag; no hace
+falta en cada push.
 
 ## [Unreleased]
 

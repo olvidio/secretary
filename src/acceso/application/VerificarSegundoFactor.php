@@ -7,6 +7,7 @@ namespace src\acceso\application;
 use DateTimeImmutable;
 use src\acceso\domain\contracts\CifradorSecretos;
 use src\acceso\domain\contracts\IdentidadRepository;
+use src\acceso\domain\contracts\LibroPersonalIdentidadPort;
 use src\acceso\domain\services\TotpRfc6238;
 
 final class VerificarSegundoFactor
@@ -15,6 +16,7 @@ final class VerificarSegundoFactor
         private readonly IdentidadRepository $identidades,
         private readonly CifradorSecretos $cifrador,
         private readonly ResolverPersonaActiva $resolverPersona,
+        private readonly LibroPersonalIdentidadPort $libroPersonal,
         private readonly string $pimiento,
     ) {
     }
@@ -69,6 +71,7 @@ final class VerificarSegundoFactor
         $nivel = $centros !== [] ? 'centro' : 'persona';
         $personaId = null;
         if ($nivel === 'persona') {
+            $this->libroPersonal->ejecutar($identidad->id);
             $personaId = $this->resolverPersona->ejecutar($identidad->id, null)['persona_id'];
         }
 

@@ -7,6 +7,7 @@ namespace src\acceso\application;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use src\acceso\domain\contracts\IdentidadRepository;
+use src\acceso\domain\contracts\LibroPersonalIdentidadPort;
 use src\acceso\domain\entity\Identidad;
 use src\acceso\domain\services\GeneradorTokenVerificacion;
 use src\personas\domain\contracts\PersonaRepository;
@@ -20,6 +21,7 @@ final class RegistrarUsuario
     public function __construct(
         private readonly IdentidadRepository $identidades,
         private readonly PersonaRepository $personas,
+        private readonly LibroPersonalIdentidadPort $libroPersonal,
     ) {
     }
 
@@ -91,6 +93,7 @@ final class RegistrarUsuario
             $token,
             (new DateTimeImmutable())->modify('+48 hours'),
         );
+        $this->libroPersonal->ejecutar($creada->id);
 
         return [
             'identidad' => $this->identidades->porId($creada->id) ?? $creada,

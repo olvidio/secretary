@@ -125,10 +125,8 @@ final class Nivel1Test extends TestCase
     public function testIdentidadYoYAutorizacionCruzada(): void
     {
         $deps = $this->deps();
-        $login = (new IniciarSesion(
-            $deps['identidades'],
-            new \src\acceso\application\ResolverPersonaActiva($deps['identidades']),
-        ))->ejecutar('yo', 'cambiar');
+        $login = \Tests\Soporte\ServiciosAcceso::iniciarSesion($this->pdo, $deps['identidades'])
+            ->ejecutar('yo', 'cambiar');
         self::assertSame('autenticado', $login->estado);
         self::assertSame('persona', $login->nivel);
         self::assertSame($deps['personaA'], $login->personaId);

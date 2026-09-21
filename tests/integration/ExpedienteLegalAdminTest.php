@@ -48,10 +48,8 @@ final class ExpedienteLegalAdminTest extends TestCase
         $operador = new DatosOperador('Operador Test', 'op@test.local', 'Calle 1');
         $registrarAceptacion = new RegistrarAceptacion($aceptaciones, $catalogo, $operador);
 
-        $alta = (new RegistrarUsuario(
-            $identidades,
-            new PdoPersonaRepository($this->pdo),
-        ))->ejecutar('legal1', 'legal1@example.test', 'secret1', 'secret1', 'Usuario Legal', true);
+        $alta = \Tests\Soporte\ServiciosAcceso::registrarUsuario($this->pdo)
+            ->ejecutar('legal1', 'legal1@example.test', 'secret1', 'secret1', 'Usuario Legal', true);
         $identidadId = (int) $alta['identidad']->id;
 
         $registrarAceptacion->ejecutar(
@@ -94,7 +92,7 @@ final class ExpedienteLegalAdminTest extends TestCase
         self::assertStringContainsString('Confirmación de correo', $html);
         self::assertStringContainsString('SHA-256', $html);
 
-        $login = (new IniciarSesion($identidades, new ResolverPersonaActiva($identidades)))
+        $login = \Tests\Soporte\ServiciosAcceso::iniciarSesion($this->pdo, $identidades)
             ->ejecutar('legal1', 'secret1');
         self::assertSame('autenticado', $login->estado);
     }

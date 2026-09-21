@@ -363,9 +363,6 @@ final class AuthController
         }
         if ($res->nivel === 'persona') {
             $vinculos = $this->personasVinculoDeIdentidad($res->identidadId ?? 0);
-            if ($vinculos === []) {
-                return '/yo/centros';
-            }
             if (count($vinculos) > 1 && ($res->personaId === null || empty($_SESSION['persona_id']))) {
                 return '/elegir-persona';
             }

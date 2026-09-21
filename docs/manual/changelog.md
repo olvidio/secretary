@@ -17,7 +17,8 @@ Pulsar la versión (p. ej. `v0.1.3`) en el pie de entrar, registrarse o cualquie
 
 - El texto vive en `CHANGELOG.md` en el repositorio.
 - Se actualiza al preparar un tag de despliegue, no en cada commit.
-- `deploy.sh` escribe `var/version.json` con el tag desplegado.
+- `deploy.sh` escribe `var/version.json` con el tag desplegado; si falta, se usa
+  el fichero `VERSION` del repositorio o el tag git del checkout.
 
 ## Problemas frecuentes
 

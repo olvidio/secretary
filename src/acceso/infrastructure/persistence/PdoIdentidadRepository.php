@@ -151,7 +151,7 @@ final class PdoIdentidadRepository implements IdentidadRepository
              FROM identidad_persona ip
              INNER JOIN personas p ON p.id = ip.persona_id
              INNER JOIN centros c ON c.id = p.centro_id
-             WHERE ip.identidad_id = :id AND p.activo = TRUE
+             WHERE ip.identidad_id = :id AND p.activo = TRUE AND c.tipo <> \'p\'
              ORDER BY c.nombre, p.iniciales'
         );
         $st->execute([':id' => $identidadId]);
@@ -210,7 +210,8 @@ final class PdoIdentidadRepository implements IdentidadRepository
         $st = $this->pdo->prepare(
             'SELECT 1 FROM identidad_persona ip
              INNER JOIN personas p ON p.id = ip.persona_id
-             WHERE ip.identidad_id = :i AND p.centro_id IS NOT NULL AND p.activo = TRUE
+             INNER JOIN centros c ON c.id = p.centro_id
+             WHERE ip.identidad_id = :i AND p.activo = TRUE AND c.tipo <> \'p\'
              LIMIT 1'
         );
         $st->execute([':i' => $identidadId]);

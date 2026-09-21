@@ -23,7 +23,20 @@ final class VersiónDespliegueTest extends TestCase
         @rmdir($directorio);
     }
 
-    public function testSinVersionJsonDevuelveDesarrollo(): void
+    public function testUsaFicheroVersionSiFaltaJson(): void
+    {
+        $directorio = sys_get_temp_dir() . '/secretary-version-' . uniqid('', true);
+        mkdir($directorio, 0775, true);
+        file_put_contents($directorio . '/VERSION', "v0.1.4\n");
+
+        $servicio = new VersiónDespliegue($directorio);
+        self::assertSame('v0.1.4', $servicio->etiqueta());
+
+        @unlink($directorio . '/VERSION');
+        @rmdir($directorio);
+    }
+
+    public function testSinFuentesDevuelveDesarrollo(): void
     {
         $directorio = sys_get_temp_dir() . '/secretary-version-' . uniqid('', true);
         mkdir($directorio, 0775, true);

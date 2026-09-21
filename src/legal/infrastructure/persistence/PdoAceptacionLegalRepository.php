@@ -59,15 +59,18 @@ final class PdoAceptacionLegalRepository implements AceptacionLegalRepository
             return [];
         }
         $limite = max(1, min(100, $limite));
-        $params = [':lim' => $limite];
+        $params = [];
         $where = [];
         if (ctype_digit($consulta)) {
             $where[] = 'i.id = :id';
             $params[':id'] = (int) $consulta;
         }
-        $params[':pat'] = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $consulta) . '%';
-        $where[] = 'i.email ILIKE :pat ESCAPE \'\\\'';
-        $where[] = 'i.alias ILIKE :pat ESCAPE \'\\\'';
+        $patron = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $consulta) . '%';
+        // PDO+pgsql con prepares nativos no admite repetir el mismo nombre de parámetro.
+        $params[':pat_email'] = $patron;
+        $params[':pat_alias'] = $patron;
+        $where[] = 'i.email ILIKE :pat_email ESCAPE \'\\\'';
+        $where[] = 'i.alias ILIKE :pat_alias ESCAPE \'\\\'';
         $sql = 'SELECT i.id, i.email, i.alias, i.nombre, i.es_admin, i.email_verificado_at,
                        COUNT(a.id) AS aceptaciones,
                        MIN(a.momento) AS primera_aceptacion,
@@ -77,12 +80,9 @@ final class PdoAceptacionLegalRepository implements AceptacionLegalRepository
                 WHERE (' . implode(' OR ', $where) . ')
                 GROUP BY i.id
                 ORDER BY i.id DESC
-                LIMIT :lim';
+                LIMIT ' . $limite;
         $st = $this->pdo->prepare($sql);
-        foreach ($params as $k => $v) {
-            $st->bindValue($k, $v, is_int($v) ? PDO::PARAM_INT : PDO::PARAM_STR);
-        }
-        $st->execute();
+        $st->execute($params);
         $out = [];
         foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $row) {
             $out[] = [

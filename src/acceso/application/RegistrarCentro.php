@@ -85,7 +85,7 @@ final class RegistrarCentro
             'usuario' => $alias,
             'email' => $email,
             'password' => $password,
-            'nombre' => $nombre !== '' ? $nombre : $nombreCentro,
+            'nombre_usuario' => $nombre !== '' ? $nombre : $alias,
             'fecha_inicio' => sprintf('%d-01-01', $anio),
             'fecha_fin' => sprintf('%d-12-31', $anio),
             'verificar_email' => false,

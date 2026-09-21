@@ -269,7 +269,7 @@ final class PageController
             $_SESSION['personas_vinculo'] = $personas;
         }
         if ($personas === []) {
-            return Response::redirect('/yo/centros');
+            return Response::redirect('/yo');
         }
         if (count($personas) === 1) {
             $_SESSION['persona_id'] = (int) $personas[0]['persona_id'];

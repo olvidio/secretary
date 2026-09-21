@@ -6,6 +6,7 @@ namespace src\acceso\application;
 
 use DateTimeImmutable;
 use src\acceso\domain\contracts\IdentidadRepository;
+use src\acceso\domain\contracts\LibroPersonalIdentidadPort;
 
 final class IniciarSesion
 {
@@ -14,6 +15,7 @@ final class IniciarSesion
     public function __construct(
         private readonly IdentidadRepository $identidades,
         private readonly ResolverPersonaActiva $resolverPersona,
+        private readonly LibroPersonalIdentidadPort $libroPersonal,
     ) {
     }
 
@@ -88,6 +90,7 @@ final class IniciarSesion
             );
         }
 
+        $this->libroPersonal->ejecutar($identidad->id);
         $personaId = $this->resolverPersona->ejecutar($identidad->id, null)['persona_id'];
         if ($totpOk) {
             return new ResultadoLogin(

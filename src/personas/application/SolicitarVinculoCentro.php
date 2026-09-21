@@ -37,7 +37,7 @@ final class SolicitarVinculoCentro
         if ($this->identidades->centrosDe($identidadId) !== []) {
             throw new InvalidArgumentException(_("Las cuentas de secretario no solicitan acceso como persona"));
         }
-        if ($this->identidades->personasDe($identidadId) !== []) {
+        if ($this->identidades->tienePersonaEnAlgunCentro($identidadId)) {
             throw new InvalidArgumentException(_("Ya tiene un centro vinculado. Desvincúlese antes de solicitar otro."));
         }
         if ($this->solicitudes->pendienteDeIdentidad($identidadId) !== null) {
