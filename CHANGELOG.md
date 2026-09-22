@@ -10,6 +10,31 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.7] — 2026-09-22
+
+### Añadido
+- En **Previsión personal**, opción **Todos (imprimir)**: carga todas las hojas
+  del centro, con la columna Importe en blanco para rellenar a mano, e imprime
+  dos hojas tamaño A5 por página en A4 horizontal.
+- En **Previsión** y **Previsión personal**, la cabecera de impresión incluye
+  el **año del ejercicio siguiente** (el presupuesto que se está preparando),
+  después del nombre del centro.
+- **Dar de baja la cuenta personal** (menú del nombre → Dar de baja): resumen
+  de lo que se borra, confirmación en pantalla y enlace por correo (48 h) antes
+  del borrado definitivo.
+- En **administración → Usuarios**, borrado de cuentas con resumen previo:
+  cuentas **personales** de inmediato (con aviso por correo) y cuentas de
+  **secretario** en espera de 60 días (se puede **Reactivar** mientras dure;
+  después se purgan las credenciales sin tocar la contabilidad del centro).
+- En **Nombres**, al resolver una solicitud de acceso se puede **vincular** la
+  cuenta a un nombre que ya existía en el centro, además de dar de alta uno nuevo.
+
+### Cambiado
+- El mismo correo puede usarse en el libro personal y en el nombre de una persona
+  del centro (sigue sin repetirse entre dos nombres del mismo centro).
+- Al aprobar una solicitud de acceso, si el correo ya tenía libro propio, se
+  copia al nombre del centro al vincular.
+
 ## [0.1.6] — 2026-09-22
 
 ### Añadido
