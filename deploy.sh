@@ -115,6 +115,11 @@ if [[ -n "$ACTUAL_TAG" && -z "${DEPLOY_TAG:-}" && -z "${FORCE:-}" ]]; then
     fi
 fi
 
+# VERSION pudo quedar modificado por despliegues antiguos (escribir_version.php); no es un cambio real.
+if git diff --name-only -- VERSION 2>/dev/null | grep -qx VERSION; then
+    git restore -- VERSION 2>/dev/null || git checkout -- VERSION 2>/dev/null || true
+fi
+
 if [[ -n "$(git diff --name-only)" || -n "$(git diff --cached --name-only)" ]]; then
     log "El árbol de git tiene cambios locales. No despliego para no pisarlos."
     git status --short --untracked-files=no

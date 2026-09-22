@@ -10,6 +10,13 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.8] — 2026-09-22
+
+### Corregido
+- En producción, un despliegue dejaba modificado el fichero `VERSION` del clone y
+  el siguiente `./deploy.sh` se detenía por «cambios locales». Ahora solo se
+  escribe `var/version.json`; el script descarta restos de despliegues antiguos.
+
 ## [0.1.7] — 2026-09-22
 
 ### Añadido

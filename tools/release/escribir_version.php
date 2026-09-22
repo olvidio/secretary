@@ -4,7 +4,8 @@
 declare(strict_types=1);
 
 /**
- * Escribe var/version.json y VERSION a partir de un tag (p. ej. en deploy.sh) o de git describe.
+ * Escribe var/version.json a partir de un tag (p. ej. en deploy.sh) o de git describe.
+ * El fichero VERSION del repositorio no se toca (evita dejar el clone sucio en producción).
  *
  *   php tools/release/escribir_version.php           # git describe local
  *   php tools/release/escribir_version.php v0.1.4    # tag concreto (deploy)
@@ -55,6 +56,4 @@ if ($json === false) {
 
 file_put_contents($directorio . '/version.json', $json . "\n");
 @chmod($directorio . '/version.json', 0644);
-file_put_contents($root . '/VERSION', $tag . "\n");
-@chmod($root . '/VERSION', 0644);
-fwrite(STDOUT, "Escrito var/version.json y VERSION ($tag)\n");
+fwrite(STDOUT, "Escrito var/version.json ($tag)\n");
