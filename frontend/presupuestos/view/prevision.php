@@ -9,7 +9,7 @@
     <button type="button" id="btn-aplicar-presupuesto"><?= _("Aplicar al presupuesto P") ?></button>
 </p>
 <p id="msg-prevision" class="ok print-hide" hidden><?= _("Guardado en presupuesto P") ?></p>
-<p class="prevision-print-cab"><?= _("Previsión 613 P") ?><?php if (!empty($centroNombre)): ?> — <?= htmlspecialchars((string) $centroNombre, ENT_QUOTES) ?><?php endif; ?></p>
+<p class="prevision-print-cab" id="print-cab-prevision"></p>
 <div class="tabla-scroll informe-prevision-wrap">
 <table id="tabla-prevision" class="tabla-prevision" hidden>
     <thead></thead>
@@ -20,10 +20,16 @@
 const I18N_PREV_C = {
   total: <?= json_encode(_("Total"), JSON_UNESCAPED_UNICODE) ?>,
   concepto: <?= json_encode(_("Concepto"), JSON_UNESCAPED_UNICODE) ?>,
+  cabecera: <?= json_encode(_("Previsión 613 P"), JSON_UNESCAPED_UNICODE) ?>,
   errorCarga: <?= json_encode(_("No se pudo cargar la previsión"), JSON_UNESCAPED_UNICODE) ?>,
   pendientes: <?= json_encode(_("Falta guardar la previsión de:"), JSON_UNESCAPED_UNICODE) ?>,
   confirmar: <?= json_encode(_("¿Copiar la columna Total al presupuesto P? Se actualizan las líneas del 613 P."), JSON_UNESCAPED_UNICODE) ?>,
 };
+const CENTRO_PREV_C = <?= json_encode((string) ($centroNombre ?? ''), JSON_UNESCAPED_UNICODE) ?>;
+
+function cabeceraPrevision(anio) {
+  return [I18N_PREV_C.cabecera, CENTRO_PREV_C, anio ? String(anio) : ''].filter(Boolean).join(' — ');
+}
 
 function fmtPrev(valorEs) {
   if (!valorEs || valorEs === '0,00' || valorEs === '-0,00') return '';
@@ -31,6 +37,8 @@ function fmtPrev(valorEs) {
 }
 
 function pintarConsolidada(r) {
+  document.getElementById('print-cab-prevision').textContent =
+    cabeceraPrevision(r.anio_presupuesto);
   const tabla = document.getElementById('tabla-prevision');
   const thead = tabla.querySelector('thead');
   const tbody = tabla.querySelector('tbody');

@@ -74,6 +74,7 @@ final class CatalogoMenus
             ['nav' => 'cuenta-persona', 'href' => '/cuenta/persona', 'label' => _("Persona activa")],
             ['nav' => 'cuenta-tipo', 'href' => '/cuenta/tipo', 'label' => _("Tipo")],
             ['nav' => 'cuenta-copias', 'href' => '/cuenta/copias', 'label' => _("Copia personal")],
+            ['nav' => 'cuenta-baja', 'href' => '/cuenta/baja', 'label' => _("Dar de baja la cuenta")],
         ];
     }
 

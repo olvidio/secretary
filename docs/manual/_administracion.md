@@ -35,7 +35,7 @@ Gestiona la plataforma sin entrar en la contabilidad de ningún centro: planes c
 
 ### Usuarios (`/admin/usuarios`)
 
-7. Listado de cuentas. **Borrar** en una fila elimina esa identidad (pide confirmación). No aparece en el admin de plataforma.
+7. Listado de cuentas. **Borrar** en cuentas **personales** (borrado inmediato; correo al usuario) o de **secretario** (baja en standby 60 días: se desactiva el acceso, se desvincula del centro sin borrar contabilidad, se avisa por correo al secretario y a las cuentas personales vinculadas a ese centro). Si era el único secretario, el resumen lo advierte. **Reactivar** aparece mientras dure el standby. Tras el plazo, un job (`php bin/console.php cuentas:purga-bajas-centro`) elimina credenciales; si la identidad tenía también libro personal, queda solo como cuenta personal. No aparece **Borrar** en el admin de plataforma.
 
 ### Legal (`/admin/legal`)
 

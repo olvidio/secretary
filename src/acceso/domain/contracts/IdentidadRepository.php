@@ -24,6 +24,9 @@ interface IdentidadRepository
 
     public function esCuentaPersonal(int $identidadId): bool;
 
+    /** Secretario de al menos un centro, o en standby de baja de centro con respaldo. */
+    public function esCuentaSecretarioCentro(int $identidadId): bool;
+
     public function guardar(Identidad $identidad): Identidad;
 
     public function registrarFallo(Identidad $identidad, DateTimeImmutable $ahora): void;
@@ -119,8 +122,53 @@ interface IdentidadRepository
     /** Aplica email_pendiente como email definitivo; devuelve el nuevo correo o null si no había pendiente. */
     public function confirmarCambioEmailPendiente(int $identidadId, DateTimeImmutable $cuando): ?string;
 
-    /** @return list<array{id:int, email:string, alias:?string, nombre:string, es_admin:bool, centros:int, personas:int}> */
+    /** @return list<array{id:int, email:string, alias:?string, nombre:string, es_admin:bool, centros:int, personas:int, es_personal:bool}> */
     public function listarTodas(): array;
+
+    public function guardarTokenBajaCuenta(int $identidadId, string $token, DateTimeImmutable $expira): void;
+
+    /** @return array{identidad_id: int, expira: DateTimeImmutable}|null */
+    public function porTokenBajaCuenta(string $token): ?array;
+
+    public function limpiarTokenBajaCuenta(int $identidadId): void;
+
+    public function expiraBajaCuentaPendiente(int $identidadId): ?DateTimeImmutable;
+
+    public function contarSecretariosDeCentro(int $centroId): int;
+
+    public function desvincularTodosCentros(int $identidadId): void;
+
+    /** @param list<array{centro_id: int, rol: string}> $centros */
+    public function guardarRespaldoCentrosBaja(int $identidadId, array $centros): void;
+
+    /** @return list<array{centro_id: int, rol: string}> */
+    public function respaldoCentrosBaja(int $identidadId): array;
+
+    public function eliminarRespaldoCentrosBaja(int $identidadId): void;
+
+    public function programarBajaCentro(
+        int $identidadId,
+        DateTimeImmutable $programada,
+        DateTimeImmutable $ejecutar,
+    ): void;
+
+    /** @return array{programada: DateTimeImmutable, ejecutar: DateTimeImmutable}|null */
+    public function bajaCentroPendiente(int $identidadId): ?array;
+
+    public function cancelarBajaCentro(int $identidadId): void;
+
+    public function reactivarTrasBajaCentro(int $identidadId): void;
+
+    /** @return list<int> */
+    public function listarIdsBajaCentroVencida(DateTimeImmutable $ahora): array;
+
+    /**
+     * Cuentas personales vinculadas a centros del secretario (para aviso por correo).
+     *
+     * @param list<int> $centroIds
+     * @return list<array{identidad_id: int, email: string, nombre: string}>
+     */
+    public function cuentasPersonalesVinculadasACentros(array $centroIds, int $excluirIdentidadId): array;
 
     public function eliminar(int $id): void;
 }

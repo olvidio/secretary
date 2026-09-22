@@ -10,6 +10,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/registro', [PageController::class, 'registro']);
     $r->addRoute('GET', '/registro-enviado', [PageController::class, 'registroEnviado']);
     $r->addRoute('GET', '/confirmar-email', [PageController::class, 'confirmarEmail']);
+    $r->addRoute('GET', '/confirmar-baja', [PageController::class, 'confirmarBaja']);
     $r->addRoute('GET', '/condiciones', [PageController::class, 'documentoLegal', ['tipo' => 'condiciones']]);
     $r->addRoute('GET', '/privacidad', [PageController::class, 'documentoLegal', ['tipo' => 'privacidad']]);
     $r->addRoute('GET', '/licencia', [PageController::class, 'licencia']);
@@ -43,6 +44,7 @@ return static function (RouteCollector $r): void {
         ['/cuenta/persona', 'acceso/view/cuenta_persona.php', 'cuenta-persona'],
         ['/cuenta/tipo', 'acceso/view/cuenta_tipo.php', 'cuenta-tipo'],
         ['/cuenta/copias', 'acceso/view/cuenta_copias.php', 'cuenta-copias'],
+        ['/cuenta/baja', 'acceso/view/cuenta_baja.php', 'cuenta-baja'],
     ];
     foreach ($cuenta as [$path, $view, $nav]) {
         $r->addRoute('GET', $path, [PageController::class, 'cuenta', ['view' => $view, 'nav' => $nav]]);

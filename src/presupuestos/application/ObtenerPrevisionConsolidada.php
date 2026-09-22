@@ -92,6 +92,7 @@ final class ObtenerPrevisionConsolidada
 
         return [
             'ejercicio_id' => $ejercicioId,
+            'anio_presupuesto' => $this->hoja->anioPresupuesto(),
             'personas' => $personas,
             'lineas' => $lineas,
             'filas' => $filas,

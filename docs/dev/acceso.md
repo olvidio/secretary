@@ -74,7 +74,9 @@ confirmarlo sigue valiendo el correo anterior. Con `REGISTRO_AUTO_CONFIRMA_EMAIL
 (en `.env` de desarrollo) el cambio es inmediato, como en el registro.
 
 Páginas: `/cuenta/mail`, `/cuenta/password`, `/cuenta/totp`, `/cuenta/layout`,
-`/cuenta/idioma`, `/cuenta/centro`, `/cuenta/tipo`. APIs bajo `/api/preferencias`
+`/cuenta/idioma`, `/cuenta/centro`, `/cuenta/tipo`, `/cuenta/baja` (solo cuenta
+personal). La baja voluntaria envía enlace a `/confirmar-baja` (48 h) y reutiliza
+`EliminarCuentaPersonal` sin segundo correo. APIs bajo `/api/preferencias`
 (ámbito `autenticado`), incluidas `POST .../password` y `POST .../totp/preparar`
 + `.../totp/confirmar` para activar el segundo factor desde la cuenta ya iniciada.
 

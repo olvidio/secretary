@@ -39,6 +39,20 @@ set_exception_handler(static function (Throwable $e): void {
 $kernel = Kernel::boot();
 $pdo = $kernel->pdo();
 
+if ($cmd === 'cuentas:purga-bajas-centro') {
+    $purga = $kernel->container()->get(\src\administracion\application\PurgarBajasCentroProgramadas::class);
+    $resultado = $purga->ejecutar();
+    fwrite(
+        STDOUT,
+        sprintf(
+            "Purga credenciales: %d; convertidas a solo personal: %d\n",
+            $resultado['purga_total'],
+            $resultado['convertidas_personal'],
+        ),
+    );
+    exit(0);
+}
+
 if ($cmd === 'db:migrate') {
     $runner = new MigrationRunner($pdo, $root . '/migraciones');
     $antes = array_column($runner->estado()['aplicadas'], 'version');
@@ -236,5 +250,6 @@ fwrite(STDOUT, "Uso:\n"
     . "  php bin/console.php db:backup [--output=ruta.dump]\n"
     . "  php bin/console.php db:restore --file=ruta.dump [--force]\n"
     . "  php bin/console.php import:excel [fichero.xlsm] [--dry-run] [--centro=CODIGO] [--ejercicio=ETIQUETA]\n"
-    . "  php bin/console.php asientos:convertir\n");
+    . "  php bin/console.php asientos:convertir\n"
+    . "  php bin/console.php cuentas:purga-bajas-centro\n");
 exit(1);

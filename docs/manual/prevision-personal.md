@@ -10,12 +10,13 @@ Prepara el presupuesto del libro personal, persona a persona. Cada hoja replica 
 
 ## Cómo se usa
 
-1. Elegir la persona.
+1. Elegir la persona, o **Todos (imprimir)** para ver e imprimir las hojas de todas las personas activas del centro.
 2. Revisar el calculado de cada concepto. Debajo se ve lo acumulado hasta la fecha de corte; en los conceptos puntuales aparece «año anterior».
 3. Escribir el importe a mano si se quiere otra cifra. Dejar la casilla vacía equivale a aceptar el calculado.
 4. **Usar calculados** copia el calculado a todas las casillas, por si se quiere retocar solo algunas.
 5. **Guardar**. Esas cifras son las que luego salen en Previsión, en la columna de esa persona.
-6. **Imprimir** saca la hoja en A5 vertical, con los capítulos del 613 P. Si una casilla está vacía, se imprime el calculado.
+6. **Imprimir** saca la hoja en A5 vertical, con los capítulos del 613 P. La cabecera incluye persona, centro y el **año del ejercicio siguiente** (el mismo criterio que en Previsión). Si una casilla está vacía, se imprime el calculado.
+7. Con **Todos (imprimir)** no se edita ni guarda: se cargan todas las hojas con la columna **Importe** vacía (para rellenar a mano), el **Calculado** sí se imprime, y **Imprimir** usa **A4 horizontal** con **dos hojas tamaño A5** en cada página. Una sola persona sigue en **A5 vertical** con importe impreso como hasta ahora.
 
 ## Reglas que conviene saber
 

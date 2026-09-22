@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\entity\Identidad;
+use src\ambito\domain\contracts\CentroRepository;
 use src\personas\domain\contracts\PersonaRepository;
 use src\personas\domain\entity\Persona;
 
@@ -20,6 +21,7 @@ final class VincularEmailPersona
     public function __construct(
         private readonly IdentidadRepository $identidades,
         private readonly PersonaRepository $personas,
+        private readonly CentroRepository $centros,
     ) {
     }
 
@@ -39,9 +41,11 @@ final class VincularEmailPersona
             throw new InvalidArgumentException(_("El correo no es válido"));
         }
 
-        $otra = $this->personas->porEmail($email);
-        if ($otra !== null && $otra->id !== $persona->id) {
-            throw new InvalidArgumentException(_("Ese correo ya está asignado a otro nombre"));
+        if ($persona->centroId !== null) {
+            $otra = $this->personas->porEmailEnCentro($persona->centroId, $email);
+            if ($otra !== null && $otra->id !== $persona->id) {
+                throw new InvalidArgumentException(_("Ese correo ya está asignado a otro nombre"));
+            }
         }
 
         $actual = $this->identidades->identidadDePersona($persona->id);
@@ -73,9 +77,10 @@ final class VincularEmailPersona
         if ($existente !== null && $existente->id !== null) {
             $otras = $this->identidades->personasDe($existente->id);
             foreach ($otras as $pid) {
-                if ($pid !== $persona->id) {
-                    throw new InvalidArgumentException(_("Ese correo ya está vinculado a otra persona"));
+                if ($pid === $persona->id || $this->esLibroPersonal($pid)) {
+                    continue;
                 }
+                throw new InvalidArgumentException(_("Ese correo ya está vinculado a otra persona"));
             }
             $this->identidades->vincularPersona($existente->id, $persona->id);
             $this->personas->guardarEmail($persona->id, $email);
@@ -103,6 +108,17 @@ final class VincularEmailPersona
         $this->personas->guardarEmail($persona->id, $email);
 
         return $password;
+    }
+
+    private function esLibroPersonal(int $personaId): bool
+    {
+        $persona = $this->personas->porId($personaId);
+        if ($persona?->centroId === null) {
+            return false;
+        }
+        $centro = $this->centros->porId($persona->centroId);
+
+        return $centro !== null && $centro->tipo === AsegurarLibroPersonalIdentidad::TIPO_CENTRO;
     }
 
     private static function passwordInicial(): string

@@ -132,7 +132,7 @@ final class EliminarCentroTest extends TestCase
         return new GuardarPersona(
             $personas,
             new ResolverAmbitoActual($config, $centros, $ejercicios, $centroId),
-            new \src\acceso\application\VincularEmailPersona($identidades, $personas),
+            new \src\acceso\application\VincularEmailPersona($identidades, $personas, $centros),
             new AsegurarCuentaCorrientePersona($cuentas),
             new AsegurarCuentaDisponiblePersona($cuentas),
             new AsegurarPlanPersonal($cuentas),

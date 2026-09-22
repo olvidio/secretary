@@ -9,8 +9,16 @@ use src\administracion\application\GuardarConceptosPlan;
 use src\administracion\application\ImportarConceptosPlan;
 use src\administracion\application\ObtenerConceptosPlan;
 use src\administracion\application\EliminarCentro;
+use src\administracion\application\EliminarCuentaPersonal;
 use src\administracion\application\EliminarPlanContable;
 use src\administracion\application\EliminarUsuario;
+use src\administracion\application\ProgramarBajaCuentaCentro;
+use src\administracion\application\PurgarBajasCentroProgramadas;
+use src\administracion\application\PurgarIdentidadAcceso;
+use src\administracion\application\ReactivarCuentaCentro;
+use src\administracion\application\ResumenBajaCuentaCentro;
+use src\administracion\application\ResumenEliminacionCuentaPersonal;
+use src\administracion\application\ResumenEliminacionUsuario;
 use src\administracion\application\GuardarPlanContable;
 use src\administracion\infrastructure\http\AdminCentroController;
 use src\administracion\infrastructure\http\AdminPlanController;
@@ -154,7 +162,13 @@ use src\acceso\application\CambiarPasswordUsuario;
 use src\acceso\application\CambiarTipoUsuario;
 use src\acceso\application\ConfirmarEmailRegistro;
 use src\acceso\application\ConfirmarTotp;
+use src\acceso\application\ConfirmarBajaCuentaPersonal;
+use src\acceso\application\NotificarCancelacionCuentaPersonal;
+use src\acceso\application\NotificarBajaSecretarioAVinculados;
+use src\acceso\application\NotificarConfirmacionBajaCuenta;
+use src\acceso\application\NotificarInicioBajaCentro;
 use src\acceso\application\NotificarRegistroUsuario;
+use src\acceso\application\SolicitarBajaCuentaPersonal;
 use src\acceso\application\ReenviarCorreoVerificacion;
 use src\acceso\application\GuardarEmailUsuario;
 use src\acceso\application\GuardarIdiomaUsuario;
@@ -184,6 +198,7 @@ use src\legal\infrastructure\persistence\PdoAceptacionLegalRepository;
 use src\acceso\infrastructure\persistence\PdoAccesoRutaRepository;
 use src\acceso\infrastructure\persistence\PdoIdentidadRepository;
 use src\personal\application\AsegurarPlanPersonal;
+use src\personal\application\BorrarLibroPersonalDePersona;
 use src\personal\application\BorrarMovimientoPersonal;
 use src\personal\application\CategorizarMovimientoBanco;
 use src\personal\application\CrearSubcuentaPersonal;
@@ -337,6 +352,9 @@ return [
     RegistrarUsuario::class => autowire(),
     RegistrarCentro::class => autowire(),
     NotificarRegistroUsuario::class => autowire(),
+    NotificarConfirmacionBajaCuenta::class => autowire(),
+    SolicitarBajaCuentaPersonal::class => autowire(),
+    ConfirmarBajaCuentaPersonal::class => autowire(),
     ConfirmarEmailRegistro::class => autowire(),
     ReenviarCorreoVerificacion::class => autowire(),
     CatalogoDocumentosLegales::class => factory([CatalogoDocumentosLegales::class, 'porDefecto']),
@@ -420,6 +438,18 @@ return [
     EliminarPlanContable::class => autowire(),
     EliminarCentro::class => autowire(),
     EliminarUsuario::class => autowire(),
+    ResumenEliminacionUsuario::class => autowire(),
+    ResumenEliminacionCuentaPersonal::class => autowire(),
+    ResumenBajaCuentaCentro::class => autowire(),
+    ProgramarBajaCuentaCentro::class => autowire(),
+    ReactivarCuentaCentro::class => autowire(),
+    PurgarIdentidadAcceso::class => autowire(),
+    PurgarBajasCentroProgramadas::class => autowire(),
+    NotificarInicioBajaCentro::class => autowire(),
+    NotificarBajaSecretarioAVinculados::class => autowire(),
+    EliminarCuentaPersonal::class => autowire(),
+    NotificarCancelacionCuentaPersonal::class => autowire(),
+    BorrarLibroPersonalDePersona::class => autowire(),
     AdminPlanController::class => autowire(),
     AdminCentroController::class => autowire(),
     AdminUsuarioController::class => autowire(),

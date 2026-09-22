@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace src\personas\application;
 
 use InvalidArgumentException;
+use PDO;
+use PDOException;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\ambito\application\AsegurarCuentaCorrientePersona;
 use src\ambito\domain\contracts\CentroRepository;
@@ -23,6 +25,7 @@ final class AprobarSolicitudVinculoCentro
         private readonly CentroRepository $centros,
         private readonly AsegurarCuentaCorrientePersona $cuentaCorriente,
         private readonly AsegurarPlanPersonal $planPersonal,
+        private readonly PDO $pdo,
     ) {
     }
 
@@ -35,9 +38,6 @@ final class AprobarSolicitudVinculoCentro
         $solicitud = $this->solicitudes->porId($solicitudId);
         if ($solicitud === null || $solicitud->centroId !== $centroId || !$solicitud->esPendiente()) {
             throw new InvalidArgumentException(_("Solicitud no encontrada o ya resuelta"));
-        }
-        if ($this->identidades->tienePersonaEnCentro($solicitud->identidadId, $centroId)) {
-            throw new InvalidArgumentException(_("La identidad ya está vinculada a este centro"));
         }
 
         $identidad = $this->identidades->porId($solicitud->identidadId);
@@ -52,6 +52,13 @@ final class AprobarSolicitudVinculoCentro
         $personaId = isset($datos['persona_id']) && $datos['persona_id'] !== ''
             ? (int) $datos['persona_id']
             : null;
+        $yaEnCentro = $this->personaActivaEnCentro($solicitud->identidadId, $centroId);
+        if ($yaEnCentro !== null && $personaId !== null && $personaId !== $yaEnCentro) {
+            throw new InvalidArgumentException(_("La identidad ya está vinculada a este centro"));
+        }
+        if ($yaEnCentro !== null) {
+            $personaId = $yaEnCentro;
+        }
 
         if ($personaId !== null) {
             $persona = $this->personas->porId($personaId);
@@ -62,27 +69,45 @@ final class AprobarSolicitudVinculoCentro
             if ($otra !== null && $otra->id !== $solicitud->identidadId) {
                 throw new InvalidArgumentException(_("Ese nombre ya tiene otra cuenta personal vinculada"));
             }
-        } else {
-            $persona = $this->crearPersona($identidad->nombre, $centro, $identidad->alias ?? 'usr');
-            $personaId = $persona->id;
         }
 
-        if ($personaId === null) {
-            throw new InvalidArgumentException(_("No se pudo resolver la persona"));
-        }
-
-        $this->identidades->vincularPersona($solicitud->identidadId, $personaId, $solicitud->anio);
-        if (trim($identidad->email) !== '') {
-            $this->personas->guardarEmail($personaId, $identidad->email);
-        }
-        $this->solicitudes->marcarResuelta($solicitudId, 'aprobada', $personaId, $resolvedBy);
-
-        $persona = $this->personas->porId($personaId);
-        if ($persona !== null) {
-            $this->cuentaCorriente->ejecutar($persona);
-            if ($persona->centroId !== null && $persona->id !== null) {
-                $this->planPersonal->ejecutar($persona->centroId, $persona->id);
+        $this->pdo->beginTransaction();
+        try {
+            if ($personaId === null) {
+                $persona = $this->crearPersona($identidad->nombre, $centro, $identidad->alias ?? 'usr');
+                $personaId = $persona->id;
             }
+            if ($personaId === null) {
+                throw new InvalidArgumentException(_("No se pudo resolver la persona"));
+            }
+
+            $this->identidades->vincularPersona($solicitud->identidadId, $personaId, $solicitud->anio);
+            if (trim($identidad->email) !== '') {
+                $this->personas->guardarEmail($personaId, $identidad->email);
+            }
+            $this->solicitudes->marcarResuelta($solicitudId, 'aprobada', $personaId, $resolvedBy);
+
+            $persona = $this->personas->porId($personaId);
+            if ($persona !== null) {
+                $this->cuentaCorriente->ejecutar($persona);
+                if ($persona->centroId !== null && $persona->id !== null) {
+                    $this->planPersonal->ejecutar($persona->centroId, $persona->id);
+                }
+            }
+            $this->pdo->commit();
+        } catch (PDOException $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            if (str_contains($e->getMessage(), 'personas_email')) {
+                throw new InvalidArgumentException(_("Ese correo ya está asignado a otro nombre"));
+            }
+            throw $e;
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
         }
 
         $fila = $persona?->toArray() ?? [];
@@ -91,6 +116,18 @@ final class AprobarSolicitudVinculoCentro
         $fila['anio'] = $solicitud->anio;
 
         return $fila;
+    }
+
+    private function personaActivaEnCentro(int $identidadId, int $centroId): ?int
+    {
+        foreach ($this->identidades->personasDe($identidadId) as $personaId) {
+            $persona = $this->personas->porId($personaId);
+            if ($persona !== null && $persona->activo && $persona->centroId === $centroId) {
+                return $personaId;
+            }
+        }
+
+        return null;
     }
 
     private function crearPersona(string $nombre, Centro $centro, string $aliasBase): Persona

@@ -6,6 +6,7 @@ namespace frontend\shared\http;
 
 use frontend\shared\config\CatalogoMenus;
 use frontend\shared\view\View;
+use src\acceso\application\ConfirmarBajaCuentaPersonal;
 use src\acceso\application\ConfirmarEmailRegistro;
 use src\acceso\application\PrepararTotp;
 use src\acceso\domain\contracts\IdentidadRepository;
@@ -30,6 +31,7 @@ final class PageController
         private readonly IdentidadRepository $identidades,
         private readonly CentroRepository $centros,
         private readonly ConfirmarEmailRegistro $confirmarEmail,
+        private readonly ConfirmarBajaCuentaPersonal $confirmarBaja,
         private readonly CatalogoDocumentosLegales $documentos,
         private readonly DatosOperador $operador,
         private readonly VersiónDespliegue $versión,
@@ -134,6 +136,31 @@ final class PageController
         }
 
         return Response::redirect('/login');
+    }
+
+    public function confirmarBaja(Request $request, array $vars = []): Response
+    {
+        $token = trim((string) ($request->query('token', '') ?? ''));
+        if ($token === '') {
+            return Response::redirect('/login');
+        }
+        try {
+            $this->confirmarBaja->ejecutar($token);
+            $_SESSION = [];
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_destroy();
+            }
+            $ok = true;
+            $mensaje = _('Su cuenta ha sido dada de baja. Gracias por haber usado Secretario.');
+        } catch (\InvalidArgumentException $e) {
+            $ok = false;
+            $mensaje = $e->getMessage();
+        }
+
+        return Response::html($this->view->standalone('login/view/confirmar_baja.php', [
+            'ok' => $ok,
+            'mensaje' => $mensaje,
+        ]));
     }
 
     public function documentoLegal(Request $request, array $vars = []): Response
@@ -326,6 +353,7 @@ final class PageController
             'menuGrupoActivo' => $grupoActivo,
             'mostrarMenuTipo' => $this->puedeCambiarTipoSesion(),
             'mostrarMenuPersonaActiva' => $this->puedeElegirPersonaActivaSesion(),
+            'mostrarMenuBaja' => $this->puedeSolicitarBajaCuenta(),
             'cuentaEntrada' => $vars['cuenta'] ?? null,
             'cuentaInforme' => $vars['informe'] ?? null,
             'cuentaArqueo' => $vars['arqueo'] ?? null,
@@ -342,6 +370,9 @@ final class PageController
         }
         if ($nav === 'cuenta-persona' && !$this->puedeElegirPersonaActivaSesion()) {
             return Response::redirect('/yo');
+        }
+        if ($nav === 'cuenta-baja' && !$this->puedeSolicitarBajaCuenta()) {
+            return Response::redirect($this->siguienteHome());
         }
         if (($_SESSION['nivel'] ?? '') === 'persona') {
             return $this->paginaYo(
@@ -437,6 +468,7 @@ final class PageController
             'mostrarRemesas' => $this->mostrarRemesasPersona(),
             'mostrarMenuTipo' => $this->puedeCambiarTipoSesion(),
             'mostrarMenuPersonaActiva' => $this->puedeElegirPersonaActivaSesion(),
+            'mostrarMenuBaja' => $this->puedeSolicitarBajaCuenta(),
         ], $extra)));
     }
 
@@ -472,6 +504,16 @@ final class PageController
         }
 
         return count($this->identidades->personasVinculoDe($identidadId)) > 1;
+    }
+
+    private function puedeSolicitarBajaCuenta(): bool
+    {
+        $identidadId = isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : 0;
+        if ($identidadId <= 0) {
+            return false;
+        }
+
+        return $this->identidades->esCuentaPersonal($identidadId);
     }
 
     private function mostrarRemesasPersona(): bool

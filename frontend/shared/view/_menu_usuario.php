@@ -19,6 +19,9 @@ if ($esLibroPersonal) {
 } else {
     $itemsCuenta[] = ['cuenta-centro', '/cuenta/centro', _('Centro')];
 }
+if (!empty($mostrarMenuBaja)) {
+    $itemsCuenta[] = ['cuenta-baja', '/cuenta/baja', _('Dar de baja la cuenta')];
+}
 if (!empty($mostrarMenuTipo)) {
     $itemsCuenta[] = ['cuenta-tipo', '/cuenta/tipo', _('Tipo')];
 }

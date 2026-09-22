@@ -1,6 +1,6 @@
 # Preferencias de la cuenta
 
-- Ruta: `/cuenta/mail`, `/cuenta/password`, `/cuenta/layout`, `/cuenta/idioma`, `/cuenta/centro`, `/cuenta/persona`, `/cuenta/tipo`
+- Ruta: `/cuenta/mail`, `/cuenta/password`, `/cuenta/layout`, `/cuenta/idioma`, `/cuenta/centro`, `/cuenta/persona`, `/cuenta/tipo`, `/cuenta/baja`
 - Menú: menú del nombre (esquina de arriba) → Mail, Contraseña, 2FA, Layout, Idioma, Centro (secretario) o Copia personal (persona), y solo si aplica Persona activa o Tipo
 - Quién: cualquier persona; el apartado del centro, solo el secretario del centro
 
@@ -37,6 +37,10 @@ Solo sale en el menú si hay **más de un** vínculo aprobado a centros tipo n (
 ### Tipo
 
 Solo sale en el menú si **la misma identidad** es secretaria de algún centro **y** tiene libro personal o vínculo de persona. Cambia el modo de la sesión (centro o Mis cuentas), sin borrar datos. Las cuentas separadas (registro personal frente a registro de centro) deben usarse entrando con cada una; no hace falta «Tipo».
+
+### Dar de baja la cuenta
+
+Solo en **cuentas personales** (registro desde el login, sin rol de secretario). Resume qué se borrará y qué se conserva (remesas ya enviadas al centro, consentimientos legales). Tras confirmar en pantalla, llega un **correo con enlace** (48 h); hasta abrirlo la cuenta sigue activa. El enlace ejecuta el borrado definitivo y cierra la sesión si estaba abierta.
 
 ## Reglas que conviene saber
 

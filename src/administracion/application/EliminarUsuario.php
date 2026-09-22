@@ -9,8 +9,11 @@ use src\acceso\domain\contracts\IdentidadRepository;
 
 final class EliminarUsuario
 {
-    public function __construct(private readonly IdentidadRepository $identidades)
-    {
+    public function __construct(
+        private readonly IdentidadRepository $identidades,
+        private readonly EliminarCuentaPersonal $eliminarPersonal,
+        private readonly ProgramarBajaCuentaCentro $programarBajaCentro,
+    ) {
     }
 
     public function ejecutar(int $identidadId, int $operadorId, bool $confirmar): void
@@ -28,6 +31,16 @@ final class EliminarUsuario
         if ($identidad->esAdmin) {
             throw new InvalidArgumentException(_("No se puede eliminar al administrador de plataforma"));
         }
-        $this->identidades->eliminar($identidadId);
+        if ($this->identidades->esCuentaPersonal($identidadId)) {
+            $this->eliminarPersonal->ejecutar($identidadId, true, true);
+
+            return;
+        }
+        if ($this->identidades->esCuentaSecretarioCentro($identidadId)) {
+            $this->programarBajaCentro->ejecutar($identidadId, true);
+
+            return;
+        }
+        throw new InvalidArgumentException(_('Tipo de cuenta no reconocido; no se puede dar de baja.'));
     }
 }

@@ -107,6 +107,21 @@ final class PdoPersonaRepository implements PersonaRepository
         return is_array($row) ? $this->hydrate($row) : null;
     }
 
+    public function porEmailEnCentro(int $centroId, string $email): ?Persona
+    {
+        $email = strtolower(trim($email));
+        if ($email === '') {
+            return null;
+        }
+        $st = $this->pdo->prepare(
+            'SELECT * FROM personas WHERE centro_id = :c AND lower(email) = :e LIMIT 1'
+        );
+        $st->execute([':c' => $centroId, ':e' => $email]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
     public function guardar(Persona $persona): Persona
     {
         if ($persona->id === null) {

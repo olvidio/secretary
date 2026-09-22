@@ -60,6 +60,15 @@ final class ObtenerPreferenciasUsuario
             'personas' => ($vinculos = $this->identidades->personasVinculoDe($identidadId)),
             'puede_elegir_persona_activa' => count($vinculos) > 1,
             'email_pendiente' => $this->identidades->emailPendienteDe($identidadId),
+            'es_cuenta_personal' => $this->identidades->esCuentaPersonal($identidadId),
+            'baja_pendiente_hasta' => $this->formatExpira(
+                $this->identidades->expiraBajaCuentaPendiente($identidadId),
+            ),
         ];
+    }
+
+    private function formatExpira(?\DateTimeImmutable $expira): ?string
+    {
+        return $expira?->format('Y-m-d H:i:s');
     }
 }

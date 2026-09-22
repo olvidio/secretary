@@ -60,6 +60,19 @@ body.prevision-hoja main { max-width: none; }
 .tabla-prevision tr.prevision-hijo td.col-concepto { padding-left: 1.1rem; }
 .tabla-prevision tr.prevision-padre td.col-concepto { background: #ececec; }
 .tabla-prevision tr.prevision-total td.col-concepto { background: #e2e8f0; }
+body.prevision-personal-todos .prevision-todos-contenedor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-top: .75rem;
+  align-items: start;
+}
+body.prevision-personal-todos .prevision-hoja-mini .prevision-print-cab {
+  display: block;
+  font-weight: 700;
+  margin: 0 0 .35rem;
+  font-size: .9rem;
+}
 tr.cierre { background: #fffbeb; }
 .grid-form, .filters { display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: end; margin-bottom: 1rem; }
 .solicitudes-vinculo {
@@ -840,6 +853,32 @@ body.e37-hoja main { max-width: none; }
   }
   body.prevision-personal-hoja .tabla-prevision thead { display: table-header-group; }
   body.prevision-personal-hoja .tabla-prevision tr { break-inside: avoid; }
+  body.prevision-personal-hoja.prevision-personal-todos #form-prevision-personal,
+  body.prevision-personal-hoja.prevision-personal-todos #print-cab-personal {
+    display: none !important;
+  }
+  body.prevision-personal-hoja.prevision-personal-todos #prevision-todos-contenedor {
+    display: block !important;
+  }
+  body.prevision-personal-hoja.prevision-personal-todos .prevision-hoja-mini {
+    width: 50%;
+    max-width: 148mm;
+    float: left;
+    box-sizing: border-box;
+    padding: 0 1mm;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  body.prevision-personal-hoja.prevision-personal-todos .prevision-hoja-mini:nth-child(2n+1) {
+    clear: left;
+  }
+  body.prevision-personal-hoja.prevision-personal-todos .prevision-hoja-mini:nth-child(2n) {
+    break-after: page;
+    page-break-after: always;
+  }
+  body.prevision-personal-hoja.prevision-personal-todos .prevision-hoja-mini .tabla-prevision {
+    font-size: 7pt;
+  }
   body.informe-resumen-hoja .informe-print-cab {
     display: block;
     font-size: 11pt;

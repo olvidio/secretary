@@ -235,7 +235,7 @@ final class MulticentroAccesoTest extends TestCase
         return new GuardarPersona(
             $personas,
             $ambito,
-            new VincularEmailPersona($identidades, $personas),
+            new VincularEmailPersona($identidades, $personas, $centros),
             new AsegurarCuentaCorrientePersona($cuentas),
             new AsegurarCuentaDisponiblePersona($cuentas),
             new AsegurarPlanPersonal($cuentas),

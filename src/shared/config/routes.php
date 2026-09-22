@@ -64,6 +64,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/preferencias/centro', [PreferenciaController::class, 'guardarCentro']);
     $r->addRoute('POST', '/api/preferencias/persona', [PreferenciaController::class, 'guardarPersona']);
     $r->addRoute('POST', '/api/preferencias/tipo', [PreferenciaController::class, 'guardarTipo']);
+    $r->addRoute('GET', '/api/preferencias/baja', [PreferenciaController::class, 'resumenBaja']);
+    $r->addRoute('POST', '/api/preferencias/baja/solicitar', [PreferenciaController::class, 'solicitarBaja']);
 
     $r->addRoute('GET', '/api/configuracion', [ConfiguracionController::class, 'get']);
     $r->addRoute('POST', '/api/configuracion', [ConfiguracionController::class, 'save']);
@@ -82,7 +84,9 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/admin/centros', [AdminCentroController::class, 'create']);
     $r->addRoute('POST', '/api/admin/centros/{id:\d+}/borrar', [AdminCentroController::class, 'delete']);
     $r->addRoute('GET', '/api/admin/usuarios', [AdminUsuarioController::class, 'list']);
+    $r->addRoute('GET', '/api/admin/usuarios/{id:\d+}/borrar', [AdminUsuarioController::class, 'previewDelete']);
     $r->addRoute('POST', '/api/admin/usuarios/{id:\d+}/borrar', [AdminUsuarioController::class, 'delete']);
+    $r->addRoute('POST', '/api/admin/usuarios/{id:\d+}/reactivar', [AdminUsuarioController::class, 'reactivate']);
     $r->addRoute('GET', '/api/admin/legal/buscar', [AdminLegalController::class, 'buscar']);
     $r->addRoute('GET', '/api/admin/legal/expediente/{id:\d+}', [AdminLegalController::class, 'ver']);
     $r->addRoute('GET', '/api/admin/legal/expediente/{id:\d+}/export', [AdminLegalController::class, 'exportar']);

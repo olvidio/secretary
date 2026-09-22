@@ -42,6 +42,7 @@ Desde aquí se abre también el libro personal de cada una, con solo poner su co
 - **«Nombre e iniciales son obligatorios»**: faltan esos dos campos.
 - **«Ya hay un nombre con esas iniciales en este centro»**: buscar unas iniciales libres.
 - **«El mes debe estar entre 1 y 12»**: los meses de exención se escriben como número.
-- **«Ese correo ya está asignado a otro nombre»**: cada correo pertenece a una sola persona.
+- **«Ese correo ya está asignado a otro nombre»**: dentro del mismo centro, cada correo pertenece a un solo nombre. El libro propio de esa cuenta puede llevar el mismo correo; al aprobar la solicitud se copia al nombre del centro.
+- **«La identidad ya está vinculada a este centro»**: esa cuenta ya está unida a otro nombre de este centro. Hay que vincular ese nombre, o desvincular antes si el enlace es el que no corresponde.
 - **«Ese correo es de un usuario de centro; no puede usarse como cuenta personal»**: el correo de un secretario no sirve aquí.
 - **«Debe aceptar que el centro es responsable…»**: falta marcar la casilla de responsable de los datos.

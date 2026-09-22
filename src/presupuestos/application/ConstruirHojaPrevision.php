@@ -86,6 +86,27 @@ final class ConstruirHojaPrevision
         ];
     }
 
+    /** Año del ejercicio presupuestado (el siguiente al de trabajo en el centro). */
+    public function anioPresupuesto(): int
+    {
+        $ejercicio = $this->contextoEstructura()['ejercicio'];
+        $siguiente = $this->ejercicios->posteriorConAnteriorId((int) $ejercicio->id);
+        if ($siguiente !== null) {
+            return self::anioDeEjercicio($siguiente);
+        }
+
+        return self::anioDeEjercicio($ejercicio) + 1;
+    }
+
+    private static function anioDeEjercicio(Ejercicio $ejercicio): int
+    {
+        if (ctype_digit($ejercicio->etiqueta)) {
+            return (int) $ejercicio->etiqueta;
+        }
+
+        return (int) $ejercicio->fechaInicio->format('Y');
+    }
+
     /**
      * @return array{
      *   centro_id: int,

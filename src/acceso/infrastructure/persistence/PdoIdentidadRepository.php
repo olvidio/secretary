@@ -100,6 +100,23 @@ final class PdoIdentidadRepository implements IdentidadRepository
              WHERE i.id = :id
                AND EXISTS (SELECT 1 FROM identidad_persona ip WHERE ip.identidad_id = i.id)
                AND NOT EXISTS (SELECT 1 FROM identidad_centro ic WHERE ic.identidad_id = i.id)
+               AND i.baja_centro_programada_at IS NULL
+             LIMIT 1'
+        );
+        $st->execute([':id' => $identidadId]);
+
+        return (bool) $st->fetchColumn();
+    }
+
+    public function esCuentaSecretarioCentro(int $identidadId): bool
+    {
+        $st = $this->pdo->prepare(
+            'SELECT 1 FROM identidades i
+             WHERE i.id = :id
+               AND (
+                   EXISTS (SELECT 1 FROM identidad_centro ic WHERE ic.identidad_id = i.id)
+                   OR EXISTS (SELECT 1 FROM identidad_baja_centro_respaldo r WHERE r.identidad_id = i.id)
+               )
              LIMIT 1'
         );
         $st->execute([':id' => $identidadId]);
@@ -644,8 +661,18 @@ final class PdoIdentidadRepository implements IdentidadRepository
     {
         $rows = $this->pdo->query(
             'SELECT i.id, i.email, i.alias, i.nombre, i.es_admin,
+                    i.baja_centro_programada_at, i.baja_centro_ejecutar_at,
                     (SELECT COUNT(*) FROM identidad_centro ic WHERE ic.identidad_id = i.id) AS centros,
-                    (SELECT COUNT(*) FROM identidad_persona ip WHERE ip.identidad_id = i.id) AS personas
+                    (SELECT COUNT(*) FROM identidad_persona ip WHERE ip.identidad_id = i.id) AS personas,
+                    (
+                        EXISTS (SELECT 1 FROM identidad_persona ip2 WHERE ip2.identidad_id = i.id)
+                        AND NOT EXISTS (SELECT 1 FROM identidad_centro ic2 WHERE ic2.identidad_id = i.id)
+                        AND i.baja_centro_programada_at IS NULL
+                    ) AS es_personal,
+                    (
+                        EXISTS (SELECT 1 FROM identidad_centro ic3 WHERE ic3.identidad_id = i.id)
+                        OR i.baja_centro_programada_at IS NOT NULL
+                    ) AS es_secretario
              FROM identidades i
              ORDER BY i.es_admin DESC, i.alias NULLS LAST, i.email'
         )->fetchAll();
@@ -661,10 +688,242 @@ final class PdoIdentidadRepository implements IdentidadRepository
                 'es_admin' => self::booleano($row['es_admin'] ?? false),
                 'centros' => (int) $row['centros'],
                 'personas' => (int) $row['personas'],
+                'es_personal' => self::booleano($row['es_personal'] ?? false),
+                'es_secretario' => self::booleano($row['es_secretario'] ?? false),
+                'baja_centro' => !empty($row['baja_centro_programada_at']),
+                'baja_centro_ejecutar_at' => is_string($row['baja_centro_ejecutar_at'] ?? null)
+                    && $row['baja_centro_ejecutar_at'] !== ''
+                    ? (string) $row['baja_centro_ejecutar_at']
+                    : null,
             ];
         }
 
         return $out;
+    }
+
+    public function contarSecretariosDeCentro(int $centroId): int
+    {
+        $st = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM identidad_centro ic
+             INNER JOIN identidades i ON i.id = ic.identidad_id
+             WHERE ic.centro_id = :c AND i.activo = TRUE AND i.baja_centro_programada_at IS NULL'
+        );
+        $st->execute([':c' => $centroId]);
+
+        return (int) $st->fetchColumn();
+    }
+
+    public function desvincularTodosCentros(int $identidadId): void
+    {
+        $this->pdo->prepare('DELETE FROM identidad_centro WHERE identidad_id = :id')
+            ->execute([':id' => $identidadId]);
+    }
+
+    public function guardarRespaldoCentrosBaja(int $identidadId, array $centros): void
+    {
+        $json = json_encode($centros, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        $st = $this->pdo->prepare(
+            'INSERT INTO identidad_baja_centro_respaldo (identidad_id, centros_json)
+             VALUES (:id, :j::jsonb)
+             ON CONFLICT (identidad_id) DO UPDATE SET centros_json = excluded.centros_json'
+        );
+        $st->execute([':id' => $identidadId, ':j' => $json]);
+    }
+
+    public function respaldoCentrosBaja(int $identidadId): array
+    {
+        $st = $this->pdo->prepare(
+            'SELECT centros_json FROM identidad_baja_centro_respaldo WHERE identidad_id = :id'
+        );
+        $st->execute([':id' => $identidadId]);
+        $raw = $st->fetchColumn();
+        if (!is_string($raw) || $raw === '') {
+            return [];
+        }
+        $decoded = json_decode($raw, true);
+        if (!is_array($decoded)) {
+            return [];
+        }
+        $out = [];
+        foreach ($decoded as $fila) {
+            if (!is_array($fila)) {
+                continue;
+            }
+            $out[] = [
+                'centro_id' => (int) ($fila['centro_id'] ?? 0),
+                'rol' => (string) ($fila['rol'] ?? 'operador'),
+            ];
+        }
+
+        return $out;
+    }
+
+    public function eliminarRespaldoCentrosBaja(int $identidadId): void
+    {
+        $this->pdo->prepare('DELETE FROM identidad_baja_centro_respaldo WHERE identidad_id = :id')
+            ->execute([':id' => $identidadId]);
+    }
+
+    public function programarBajaCentro(
+        int $identidadId,
+        DateTimeImmutable $programada,
+        DateTimeImmutable $ejecutar,
+    ): void {
+        $st = $this->pdo->prepare(
+            'UPDATE identidades
+             SET activo = FALSE,
+                 baja_centro_programada_at = :p,
+                 baja_centro_ejecutar_at = :e
+             WHERE id = :id'
+        );
+        $st->execute([
+            ':p' => $programada->format('c'),
+            ':e' => $ejecutar->format('c'),
+            ':id' => $identidadId,
+        ]);
+    }
+
+    public function bajaCentroPendiente(int $identidadId): ?array
+    {
+        $st = $this->pdo->prepare(
+            'SELECT baja_centro_programada_at, baja_centro_ejecutar_at
+             FROM identidades WHERE id = :id AND baja_centro_programada_at IS NOT NULL'
+        );
+        $st->execute([':id' => $identidadId]);
+        $row = $st->fetch();
+        if (!is_array($row) || empty($row['baja_centro_programada_at']) || empty($row['baja_centro_ejecutar_at'])) {
+            return null;
+        }
+
+        return [
+            'programada' => new DateTimeImmutable((string) $row['baja_centro_programada_at']),
+            'ejecutar' => new DateTimeImmutable((string) $row['baja_centro_ejecutar_at']),
+        ];
+    }
+
+    public function cancelarBajaCentro(int $identidadId): void
+    {
+        $this->pdo->prepare(
+            'UPDATE identidades
+             SET activo = TRUE,
+                 baja_centro_programada_at = NULL,
+                 baja_centro_ejecutar_at = NULL
+             WHERE id = :id'
+        )->execute([':id' => $identidadId]);
+    }
+
+    public function reactivarTrasBajaCentro(int $identidadId): void
+    {
+        $this->cancelarBajaCentro($identidadId);
+        $this->eliminarRespaldoCentrosBaja($identidadId);
+    }
+
+    public function listarIdsBajaCentroVencida(DateTimeImmutable $ahora): array
+    {
+        $st = $this->pdo->prepare(
+            'SELECT id FROM identidades
+             WHERE baja_centro_ejecutar_at IS NOT NULL AND baja_centro_ejecutar_at <= :a'
+        );
+        $st->execute([':a' => $ahora->format('c')]);
+        $ids = [];
+        foreach ($st->fetchAll() as $row) {
+            $ids[] = (int) $row['id'];
+        }
+
+        return $ids;
+    }
+
+    public function cuentasPersonalesVinculadasACentros(array $centroIds, int $excluirIdentidadId): array
+    {
+        $centroIds = array_values(array_filter(array_map(intval(...), $centroIds), static fn (int $id) => $id > 0));
+        if ($centroIds === []) {
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($centroIds), '?'));
+        $sql = "SELECT DISTINCT i.id, i.email, i.nombre
+                FROM identidad_persona ip
+                INNER JOIN personas p ON p.id = ip.persona_id
+                INNER JOIN centros c ON c.id = p.centro_id
+                INNER JOIN identidades i ON i.id = ip.identidad_id
+                WHERE p.centro_id IN ($placeholders)
+                  AND p.activo = TRUE
+                  AND c.tipo <> 'p'
+                  AND i.id <> ?
+                  AND NOT EXISTS (SELECT 1 FROM identidad_centro ic WHERE ic.identidad_id = i.id)
+                ORDER BY i.email";
+        $st = $this->pdo->prepare($sql);
+        $params = [...$centroIds, $excluirIdentidadId];
+        $st->execute($params);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $out[] = [
+                'identidad_id' => (int) $row['id'],
+                'email' => (string) $row['email'],
+                'nombre' => (string) $row['nombre'],
+            ];
+        }
+
+        return $out;
+    }
+
+    public function guardarTokenBajaCuenta(int $identidadId, string $token, DateTimeImmutable $expira): void
+    {
+        $st = $this->pdo->prepare(
+            'UPDATE identidades
+             SET baja_cuenta_token = :t, baja_cuenta_expira = :e
+             WHERE id = :id'
+        );
+        $st->execute([
+            ':t' => $token,
+            ':e' => $expira->format('c'),
+            ':id' => $identidadId,
+        ]);
+    }
+
+    public function porTokenBajaCuenta(string $token): ?array
+    {
+        $token = trim($token);
+        if ($token === '') {
+            return null;
+        }
+        $st = $this->pdo->prepare(
+            'SELECT id, baja_cuenta_expira
+             FROM identidades
+             WHERE baja_cuenta_token = :t
+             LIMIT 1'
+        );
+        $st->execute([':t' => $token]);
+        $row = $st->fetch();
+        if (!is_array($row) || empty($row['baja_cuenta_expira'])) {
+            return null;
+        }
+
+        return [
+            'identidad_id' => (int) $row['id'],
+            'expira' => new DateTimeImmutable((string) $row['baja_cuenta_expira']),
+        ];
+    }
+
+    public function limpiarTokenBajaCuenta(int $identidadId): void
+    {
+        $st = $this->pdo->prepare(
+            'UPDATE identidades SET baja_cuenta_token = NULL, baja_cuenta_expira = NULL WHERE id = :id'
+        );
+        $st->execute([':id' => $identidadId]);
+    }
+
+    public function expiraBajaCuentaPendiente(int $identidadId): ?DateTimeImmutable
+    {
+        $st = $this->pdo->prepare(
+            'SELECT baja_cuenta_expira FROM identidades WHERE id = :id AND baja_cuenta_token IS NOT NULL'
+        );
+        $st->execute([':id' => $identidadId]);
+        $v = $st->fetchColumn();
+        if (!is_string($v) || $v === '') {
+            return null;
+        }
+
+        return new DateTimeImmutable($v);
     }
 
     public function eliminar(int $id): void

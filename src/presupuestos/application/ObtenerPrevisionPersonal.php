@@ -23,6 +23,7 @@ final class ObtenerPrevisionPersonal
     {
         $persona = $this->exigirPersonaDelCentro($personaId);
         $payload = $this->hoja->ejecutar($personaId);
+        $payload['anio_presupuesto'] = $this->hoja->anioPresupuesto();
         $payload['persona'] = [
             'id' => $persona->id,
             'iniciales' => $persona->iniciales,

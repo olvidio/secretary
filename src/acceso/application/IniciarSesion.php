@@ -41,7 +41,25 @@ final class IniciarSesion
 
         $validas = [];
         foreach ($candidatas as $identidad) {
-            if ($identidad->id === null || !$identidad->activo) {
+            if ($identidad->id === null) {
+                continue;
+            }
+            if (!$identidad->activo) {
+                if (
+                    count($candidatas) === 1
+                    && password_verify($password, $identidad->passwordHash)
+                ) {
+                    $baja = $this->identidades->bajaCentroPendiente($identidad->id);
+                    if ($baja !== null) {
+                        return new ResultadoLogin(
+                            'fallo',
+                            sprintf(
+                                _('Cuenta en baja programada. Purga prevista el %s. Contacte con el administrador para reactivarla.'),
+                                $baja['ejecutar']->format('Y-m-d'),
+                            ),
+                        );
+                    }
+                }
                 continue;
             }
             if ($identidad->estaBloqueada($ahora)) {

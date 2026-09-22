@@ -25,6 +25,8 @@ interface PersonaRepository
 
     public function porEmail(string $email): ?Persona;
 
+    public function porEmailEnCentro(int $centroId, string $email): ?Persona;
+
     public function guardar(Persona $persona): Persona;
 
     public function guardarEmail(int $id, ?string $email): void;

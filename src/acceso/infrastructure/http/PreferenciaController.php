@@ -15,6 +15,8 @@ use src\acceso\application\GuardarIdiomaUsuario;
 use src\acceso\application\GuardarLayoutUsuario;
 use src\acceso\application\ObtenerPreferenciasUsuario;
 use src\acceso\application\PrepararTotp;
+use src\acceso\application\SolicitarBajaCuentaPersonal;
+use src\administracion\application\ResumenEliminacionCuentaPersonal;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
@@ -32,6 +34,8 @@ final class PreferenciaController
         private readonly CambiarPasswordUsuario $cambiarPassword,
         private readonly PrepararTotp $prepararTotp,
         private readonly ConfirmarTotp $confirmarTotp,
+        private readonly ResumenEliminacionCuentaPersonal $resumenEliminacionCuenta,
+        private readonly SolicitarBajaCuentaPersonal $solicitarBajaCuenta,
     ) {
     }
 
@@ -51,6 +55,38 @@ final class PreferenciaController
         $datos['persona_id'] = !empty($_SESSION['persona_id']) ? (int) $_SESSION['persona_id'] : null;
 
         return ContestarJson::ok($datos);
+    }
+
+    public function resumenBaja(Request $request, array $vars = []): Response
+    {
+        $id = $this->identidadId();
+        if ($id === null) {
+            return ContestarJson::error(_("Sesión caducada"), 401);
+        }
+        try {
+            return ContestarJson::ok($this->resumenEliminacionCuenta->ejecutar($id));
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+    }
+
+    public function solicitarBaja(Request $request, array $vars = []): Response
+    {
+        $id = $this->identidadId();
+        if ($id === null) {
+            return ContestarJson::error(_("Sesión caducada"), 401);
+        }
+        $raw = $request->json()['confirmar'] ?? false;
+        $confirmar = $raw === true || $raw === 'true' || $raw === '1' || $raw === 1;
+        try {
+            $this->solicitarBajaCuenta->ejecutar($id, $confirmar);
+
+            return ContestarJson::ok([
+                'mensaje' => _('Le hemos enviado un correo con un enlace para confirmar la baja. El enlace caduca en 48 horas.'),
+            ]);
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
     }
 
     public function guardarLayout(Request $request, array $vars = []): Response
