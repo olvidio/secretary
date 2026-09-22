@@ -7,7 +7,6 @@ namespace Tests\integration;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\TestCase;
-use src\acceso\application\ConfirmarEmailRegistro;
 use src\acceso\application\IniciarSesion;
 use src\acceso\application\RegistrarUsuario;
 use src\acceso\application\ResolverPersonaActiva;
@@ -22,6 +21,7 @@ use src\legal\infrastructure\persistence\PdoAceptacionLegalRepository;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\shared\infrastructure\persistence\SchemaInstaller;
 use Tests\Soporte\BaseDeDatosAislada;
+use Tests\Soporte\ServiciosAcceso;
 
 final class ExpedienteLegalAdminTest extends TestCase
 {
@@ -65,8 +65,7 @@ final class ExpedienteLegalAdminTest extends TestCase
             ),
         );
 
-        (new ConfirmarEmailRegistro($identidades, $registrarAceptacion, $catalogo))
-            ->ejecutar($alta['token_verificacion']);
+        ServiciosAcceso::confirmarEmailRegistro($this->pdo, $alta['token_verificacion'], $identidades, $catalogo);
 
         $buscar = new BuscarExpedientesLegales($aceptaciones);
         $porCorreo = $buscar->ejecutar('legal1@example.test');

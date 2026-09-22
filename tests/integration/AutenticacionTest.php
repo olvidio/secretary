@@ -11,7 +11,6 @@ use src\acceso\application\ConfirmarTotp;
 use src\acceso\application\IniciarSesion;
 use src\acceso\application\ResolverPersonaActiva;
 use src\acceso\application\PrepararTotp;
-use src\acceso\application\ConfirmarEmailRegistro;
 use src\acceso\application\RegistrarUsuario;
 use src\acceso\application\VerificarSegundoFactor;
 use src\acceso\domain\entity\Identidad;
@@ -215,15 +214,7 @@ final class AutenticacionTest extends TestCase
         self::assertStringContainsString('correo', strtolower($pendiente->mensaje));
         $catalogo = \src\legal\domain\services\CatalogoDocumentosLegales::porDefecto();
         $aceptaciones = new \src\legal\infrastructure\persistence\PdoAceptacionLegalRepository($pdo);
-        (new ConfirmarEmailRegistro(
-            $identidades,
-            new \src\legal\application\RegistrarAceptacion(
-                $aceptaciones,
-                $catalogo,
-                new \src\legal\domain\services\DatosOperador('Op', 'op@test.local', 'Dir'),
-            ),
-            $catalogo,
-        ))->ejecutar($alta['token_verificacion']);
+        ServiciosAcceso::confirmarEmailRegistro($pdo, $alta['token_verificacion'], $identidades, $catalogo);
         $login = ServiciosAcceso::iniciarSesion($pdo, $identidades)->ejecutar('dani', 'secret1');
         self::assertSame('autenticado', $login->estado);
         self::assertSame('persona', $login->nivel);

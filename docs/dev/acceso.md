@@ -6,12 +6,16 @@ códigos de recuperación, CSRF y autorización por tabla.
 ## Flujo
 
 1. `GET /login` — usuario o email + contraseña. El alias `scl` sigue valiendo.
+   El **alias** es único; el **correo** puede repetirse en varias cuentas de
+   secretario (centros distintos), pero solo hay **una cuenta personal** por
+   correo. Si al entrar con correo hay varias cuentas válidas, `/elegir-cuenta`.
    Si el usuario no existe, se invita a `GET /registro`. El enlace **Registrarse**
    del login inicia el mismo alta: identidad de **persona** (nivel 1) en un centro
    (el único, o el elegido si hay varios). Tras crear la cuenta entra en `/yo`.
    Un secretario de centro no se auto-registra: se da de alta en `/centros`.
    El alta pública exige aceptar las Condiciones de uso (casilla + correo de
-   confirmación). Ver `docs/dev/legal.md`.
+   confirmación). Ver `docs/dev/legal.md`. En desarrollo local sin SMTP puede
+   poner `REGISTRO_AUTO_CONFIRMA_EMAIL=1` en el `.env` del stack (producción: `0`).
 2. Identidad de **centro** sin TOTP confirmado → `GET /totp-activar` (clave e URI
    `otpauth://`). Confirmar con 6 dígitos. Se muestran **una vez** 8 códigos
    `XXXX-XXXX`.
@@ -65,6 +69,10 @@ El centro de la sesión (`$_SESSION['centro_id']`) tiene preferencia en
 
 Cada identidad elige disposición de menús (`identidades.layout`: `excel` o `burger`)
 e idioma (`identidades.idioma`: `es` o `ca`) en el menú del nombre (esquina).
+Cambiar el correo en `/cuenta/mail` envía un enlace al **nuevo** buzón (48 h); hasta
+confirmarlo sigue valiendo el correo anterior. Con `REGISTRO_AUTO_CONFIRMA_EMAIL=1`
+(en `.env` de desarrollo) el cambio es inmediato, como en el registro.
+
 Páginas: `/cuenta/mail`, `/cuenta/password`, `/cuenta/totp`, `/cuenta/layout`,
 `/cuenta/idioma`, `/cuenta/centro`, `/cuenta/tipo`. APIs bajo `/api/preferencias`
 (ámbito `autenticado`), incluidas `POST .../password` y `POST .../totp/preparar`

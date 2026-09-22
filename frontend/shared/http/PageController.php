@@ -40,11 +40,14 @@ final class PageController
     {
         $error = $_SESSION['login_error'] ?? null;
         unset($_SESSION['login_error']);
+        $ok = $_SESSION['login_ok'] ?? null;
+        unset($_SESSION['login_ok']);
         $usuario = (string) ($_SESSION['login_usuario'] ?? $request->query('usuario', '') ?? '');
         unset($_SESSION['login_usuario']);
 
         return Response::html($this->view->standalone('login/view/login.php', [
             'error' => $error,
+            'ok' => $ok,
             'csrf' => ProteccionCsrf::renovarToken(),
             'usuario' => $usuario,
         ]));
@@ -238,6 +241,22 @@ final class PageController
         ]));
     }
 
+    public function elegirCuenta(Request $request, array $vars = []): Response
+    {
+        $cuentas = $_SESSION['login_cuentas_elegibles'] ?? null;
+        if (!is_array($cuentas) || $cuentas === []) {
+            return Response::redirect('/login');
+        }
+        $error = $_SESSION['login_error'] ?? null;
+        unset($_SESSION['login_error']);
+
+        return Response::html($this->view->standalone('login/view/elegir_cuenta.php', [
+            'error' => $error,
+            'csrf' => ProteccionCsrf::renovarToken(),
+            'cuentas' => $cuentas,
+        ]));
+    }
+
     public function elegirCentro(Request $request, array $vars = []): Response
     {
         if (empty($_SESSION['identidad_id'])) {
@@ -305,6 +324,8 @@ final class PageController
             'idioma' => $this->idiomaUsuario(),
             'menuGrupos' => CatalogoMenus::grupos($layout),
             'menuGrupoActivo' => $grupoActivo,
+            'mostrarMenuTipo' => $this->puedeCambiarTipoSesion(),
+            'mostrarMenuPersonaActiva' => $this->puedeElegirPersonaActivaSesion(),
             'cuentaEntrada' => $vars['cuenta'] ?? null,
             'cuentaInforme' => $vars['informe'] ?? null,
             'cuentaArqueo' => $vars['arqueo'] ?? null,
@@ -315,10 +336,17 @@ final class PageController
 
     public function cuenta(Request $request, array $vars): Response
     {
+        $nav = (string) ($vars['nav'] ?? 'cuenta-mail');
+        if ($nav === 'cuenta-tipo' && !$this->puedeCambiarTipoSesion()) {
+            return Response::redirect($this->siguienteHome());
+        }
+        if ($nav === 'cuenta-persona' && !$this->puedeElegirPersonaActivaSesion()) {
+            return Response::redirect('/yo');
+        }
         if (($_SESSION['nivel'] ?? '') === 'persona') {
             return $this->paginaYo(
                 (string) ($vars['view'] ?? 'acceso/view/cuenta_mail.php'),
-                (string) ($vars['nav'] ?? 'cuenta-mail'),
+                $nav,
             );
         }
 
@@ -407,6 +435,8 @@ final class PageController
             'csrf' => ProteccionCsrf::asegurarToken(),
             'idioma' => $this->idiomaUsuario(),
             'mostrarRemesas' => $this->mostrarRemesasPersona(),
+            'mostrarMenuTipo' => $this->puedeCambiarTipoSesion(),
+            'mostrarMenuPersonaActiva' => $this->puedeElegirPersonaActivaSesion(),
         ], $extra)));
     }
 
@@ -419,6 +449,29 @@ final class PageController
             'idioma' => $this->idiomaUsuario(),
             'menuItems' => CatalogoMenus::itemsAdmin(),
         ]));
+    }
+
+    private function puedeCambiarTipoSesion(): bool
+    {
+        $identidadId = isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : 0;
+        if ($identidadId <= 0) {
+            return false;
+        }
+        if ($this->identidades->centrosDe($identidadId) === []) {
+            return false;
+        }
+
+        return $this->identidades->personasDe($identidadId) !== [];
+    }
+
+    private function puedeElegirPersonaActivaSesion(): bool
+    {
+        $identidadId = isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : 0;
+        if ($identidadId <= 0) {
+            return false;
+        }
+
+        return count($this->identidades->personasVinculoDe($identidadId)) > 1;
     }
 
     private function mostrarRemesasPersona(): bool

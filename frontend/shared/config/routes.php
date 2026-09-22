@@ -18,6 +18,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/totp-verificar', [PageController::class, 'totpVerificar']);
     $r->addRoute('GET', '/totp-codigos', [PageController::class, 'totpCodigos']);
     $r->addRoute('GET', '/elegir-centro', [PageController::class, 'elegirCentro']);
+    $r->addRoute('GET', '/elegir-cuenta', [PageController::class, 'elegirCuenta']);
     $r->addRoute('GET', '/elegir-persona', [PageController::class, 'elegirPersona']);
     $r->addRoute('GET', '/yo', [PageController::class, 'yo']);
     $r->addRoute('GET', '/yo/movimientos', [PageController::class, 'yoMovimientos']);

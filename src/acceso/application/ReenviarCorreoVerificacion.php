@@ -24,19 +24,20 @@ final class ReenviarCorreoVerificacion
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
             throw new InvalidArgumentException(_('El correo no es válido'));
         }
-        $identidad = $this->identidades->porEmailOAlias($email);
-        if ($identidad === null || $identidad->id === null) {
+        if (PoliticaVerificacionEmailRegistro::confirmaAlInstante()) {
             return;
         }
-        if ($this->identidades->emailVerificado($identidad->id)) {
-            return;
+        foreach ($this->identidades->listarPorEmail($email) as $identidad) {
+            if ($identidad->id === null || $this->identidades->emailVerificado($identidad->id)) {
+                continue;
+            }
+            $token = GeneradorTokenVerificacion::generar();
+            $this->identidades->guardarVerificacionEmail(
+                $identidad->id,
+                $token,
+                $ahora->modify('+48 hours'),
+            );
+            $this->notificar->ejecutar($identidad->id, $token);
         }
-        $token = GeneradorTokenVerificacion::generar();
-        $this->identidades->guardarVerificacionEmail(
-            $identidad->id,
-            $token,
-            $ahora->modify('+48 hours'),
-        );
-        $this->notificar->ejecutar($identidad->id, $token);
     }
 }

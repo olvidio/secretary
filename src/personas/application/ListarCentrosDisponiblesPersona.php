@@ -12,6 +12,7 @@ final class ListarCentrosDisponiblesPersona
     public function __construct(
         private readonly CentroRepository $centros,
         private readonly IdentidadRepository $identidades,
+        private readonly EtiquetaCentroParaPersona $etiquetaCentro,
     ) {
     }
 
@@ -23,10 +24,15 @@ final class ListarCentrosDisponiblesPersona
             if ($centro->id === null || !$centro->activo || $centro->tipo !== 'n') {
                 continue;
             }
+            if (str_starts_with(strtolower($centro->codigo), 'p-')) {
+                continue;
+            }
             if ($this->identidades->tienePersonaEnCentro($identidadId, $centro->id)) {
                 continue;
             }
-            $out[] = $centro->toArray();
+            $fila = $centro->toArray();
+            $fila['nombre_listado'] = $this->etiquetaCentro->ejecutar($centro);
+            $out[] = $fila;
         }
 
         return $out;

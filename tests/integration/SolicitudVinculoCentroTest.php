@@ -14,9 +14,13 @@ use src\ambito\application\AsegurarCuentaCorrientePersona;
 use src\ambito\infrastructure\persistence\PdoCuentaRepository;
 use src\personal\application\AsegurarPlanPersonal;
 use src\personas\application\AprobarSolicitudVinculoCentro;
+use src\personas\application\EtiquetaCentroParaPersona;
 use src\personas\application\ListarCandidatosVinculoCentro;
+use src\personas\application\ListarCentrosDisponiblesPersona;
 use src\personas\application\ListarSolicitudesVinculoCentro;
 use src\personas\application\SolicitarVinculoCentro;
+use src\acceso\application\RegistrarCentro;
+use Tests\Soporte\ServiciosAcceso;
 use src\personas\domain\entity\Persona;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\personas\infrastructure\persistence\PdoSolicitudVinculoCentroRepository;
@@ -120,6 +124,64 @@ final class SolicitudVinculoCentroTest extends TestCase
         self::assertSame([], $listar->ejecutar($centro->id));
         $releida = $personas->porId($existente->id);
         self::assertSame('ana@test.local', $releida?->email);
+    }
+
+    public function testCentrosDisponiblesMuestranNombreDelCentroNoDelSecretario(): void
+    {
+        $centros = new PdoCentroRepository($this->pdo);
+        $identidades = new PdoIdentidadRepository($this->pdo);
+        $alta = (new RegistrarCentro(
+            ServiciosAcceso::crearCentro($this->pdo),
+            $identidades,
+        ))->ejecutar(
+            'casa-z',
+            'Casa Zeta',
+            'n',
+            'sec-z',
+            'sec-z@test.local',
+            'secret1',
+            'secret1',
+            'Nombre Secretario',
+            true,
+        );
+        self::assertSame('Casa Zeta', $alta['centro']->nombre);
+
+        $personaId = $identidades->guardar(new Identidad(
+            null,
+            'yo@test.local',
+            password_hash('secret', PASSWORD_DEFAULT),
+            'Yo Personal',
+            true,
+            0,
+            null,
+            null,
+            'yo',
+        ));
+        self::assertNotNull($personaId->id);
+
+        $listar = new ListarCentrosDisponiblesPersona(
+            $centros,
+            $identidades,
+            new EtiquetaCentroParaPersona($identidades),
+        );
+        $disponibles = $listar->ejecutar($personaId->id);
+        $casaZ = null;
+        foreach ($disponibles as $fila) {
+            if (($fila['codigo'] ?? '') === 'casa-z') {
+                $casaZ = $fila;
+                break;
+            }
+        }
+        self::assertNotNull($casaZ);
+        self::assertSame('Casa Zeta', $casaZ['nombre_listado']);
+
+        $this->pdo->prepare('UPDATE centros SET nombre = :n WHERE id = :id')->execute([
+            ':n' => 'Nombre Secretario',
+            ':id' => $alta['centro']->id,
+        ]);
+        $centroCorrupto = $centros->porId((int) $alta['centro']->id);
+        self::assertNotNull($centroCorrupto);
+        self::assertSame('Casa Z', (new EtiquetaCentroParaPersona($identidades))->ejecutar($centroCorrupto));
     }
 
     public function testSolicitudAprobadaAltaNuevaCopiaCorreo(): void

@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace src\acceso\application;
 
+use DateTimeImmutable;
 use InvalidArgumentException;
 use src\acceso\domain\contracts\IdentidadRepository;
-use src\acceso\domain\entity\Identidad;
-use src\personas\domain\contracts\PersonaRepository;
+use src\acceso\domain\services\GeneradorTokenVerificacion;
 
 final class GuardarEmailUsuario
 {
     public function __construct(
         private readonly IdentidadRepository $identidades,
-        private readonly PersonaRepository $personas,
+        private readonly AplicarEmailIdentidad $aplicarEmail,
+        private readonly NotificarCambioEmailUsuario $notificar,
     ) {
     }
 
-    public function ejecutar(int $identidadId, string $email): string
+    /**
+     * @return array{email: string, pendiente_confirmacion: bool}
+     */
+    public function ejecutar(int $identidadId, string $email): array
     {
         $email = strtolower(trim($email));
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
@@ -27,26 +31,33 @@ final class GuardarEmailUsuario
         if ($identidad === null || $identidad->id === null) {
             throw new InvalidArgumentException(_("Sesión caducada"));
         }
-        $otro = $this->identidades->porEmailOAlias($email);
-        if ($otro !== null && $otro->id !== $identidadId) {
-            throw new InvalidArgumentException(_("Ese correo ya tiene una cuenta"));
+        if ($email === strtolower(trim($identidad->email))) {
+            return [
+                'email' => $email,
+                'pendiente_confirmacion' => $this->identidades->emailPendienteDe($identidadId) !== null,
+            ];
         }
-        $this->identidades->guardar(new Identidad(
-            $identidad->id,
-            $email,
-            $identidad->passwordHash,
-            $identidad->nombre,
-            $identidad->activo,
-            $identidad->intentosFallidos,
-            $identidad->bloqueadoHasta,
-            $identidad->ultimoAcceso,
-            $identidad->alias,
-            $identidad->emailVerificadoAt,
-        ));
-        foreach ($this->identidades->personasDe($identidadId) as $personaId) {
-            $this->personas->guardarEmail($personaId, $email);
+        $this->aplicarEmail->comprobarDisponible($identidadId, $email);
+
+        if (PoliticaVerificacionEmailRegistro::confirmaAlInstante()) {
+            return [
+                'email' => $this->aplicarEmail->ejecutar($identidadId, $email),
+                'pendiente_confirmacion' => false,
+            ];
         }
 
-        return $email;
+        $token = GeneradorTokenVerificacion::generar();
+        $this->identidades->guardarCambioEmailPendiente(
+            $identidadId,
+            $email,
+            $token,
+            (new DateTimeImmutable())->modify('+48 hours'),
+        );
+        $this->notificar->ejecutar($identidadId, $token);
+
+        return [
+            'email' => strtolower(trim($identidad->email)),
+            'pendiente_confirmacion' => true,
+        ];
     }
 }

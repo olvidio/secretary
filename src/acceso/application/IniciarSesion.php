@@ -7,6 +7,7 @@ namespace src\acceso\application;
 use DateTimeImmutable;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\contracts\LibroPersonalIdentidadPort;
+use src\acceso\domain\entity\Identidad;
 
 final class IniciarSesion
 {
@@ -16,6 +17,7 @@ final class IniciarSesion
         private readonly IdentidadRepository $identidades,
         private readonly ResolverPersonaActiva $resolverPersona,
         private readonly LibroPersonalIdentidadPort $libroPersonal,
+        private readonly EtiquetaCuentaIdentidad $etiquetaCuenta,
     ) {
     }
 
@@ -26,24 +28,77 @@ final class IniciarSesion
         if ($identificador === '') {
             return new ResultadoLogin('fallo', _("Usuario o contraseña incorrectos"));
         }
-        $identidad = $this->identidades->porEmailOAlias($identificador);
-        $hash = $identidad !== null ? $identidad->passwordHash : self::HASH_FALSO;
-        $passwordOk = password_verify($password, $hash);
-        if ($identidad === null || $identidad->id === null) {
+
+        $candidatas = $this->candidatasDe($identificador);
+        if ($candidatas === []) {
+            password_verify($password, self::HASH_FALSO);
+
             return new ResultadoLogin(
                 'desconocido',
                 _("No hay cuenta con ese usuario. Puede registrarse."),
             );
         }
-        if (!$identidad->activo) {
+
+        $validas = [];
+        foreach ($candidatas as $identidad) {
+            if ($identidad->id === null || !$identidad->activo) {
+                continue;
+            }
+            if ($identidad->estaBloqueada($ahora)) {
+                continue;
+            }
+            if (password_verify($password, $identidad->passwordHash)) {
+                $validas[] = $identidad;
+            }
+        }
+
+        if ($validas === []) {
+            if (count($candidatas) === 1) {
+                $unica = $candidatas[0];
+                if ($unica->estaBloqueada($ahora)) {
+                    return new ResultadoLogin(
+                        'fallo',
+                        _("Cuenta temporalmente bloqueada. Pruebe más tarde."),
+                    );
+                }
+                $this->identidades->registrarFallo($unica, $ahora);
+            }
+
             return new ResultadoLogin('fallo', _("Usuario o contraseña incorrectos"));
         }
-        if ($identidad->estaBloqueada($ahora)) {
-            return new ResultadoLogin('fallo', _("Cuenta temporalmente bloqueada. Pruebe más tarde."));
-        }
-        if (!$passwordOk) {
-            $this->identidades->registrarFallo($identidad, $ahora);
 
+        if (count($validas) > 1) {
+            $cuentas = [];
+            foreach ($validas as $identidad) {
+                if ($identidad->id === null) {
+                    continue;
+                }
+                $cuentas[] = [
+                    'identidad_id' => $identidad->id,
+                    'etiqueta' => $this->etiquetaCuenta->ejecutar($identidad),
+                ];
+            }
+
+            return new ResultadoLogin(
+                'pendiente_elegir_cuenta',
+                '',
+                null,
+                '',
+                strtolower(trim($identificador)),
+                '',
+                [],
+                null,
+                $cuentas,
+            );
+        }
+
+        return $this->continuarConIdentidad($validas[0], $ahora);
+    }
+
+    public function continuarConIdentidad(Identidad $identidad, ?DateTimeImmutable $ahora = null): ResultadoLogin
+    {
+        $ahora ??= new DateTimeImmutable();
+        if ($identidad->id === null) {
             return new ResultadoLogin('fallo', _("Usuario o contraseña incorrectos"));
         }
         if (!$this->identidades->emailVerificado($identidad->id)) {
@@ -115,5 +170,16 @@ final class IniciarSesion
             [],
             $personaId,
         );
+    }
+
+    /** @return list<Identidad> */
+    private function candidatasDe(string $identificador): array
+    {
+        if (str_contains($identificador, '@')) {
+            return $this->identidades->listarPorEmail($identificador);
+        }
+        $porAlias = $this->identidades->porAlias($identificador);
+
+        return $porAlias !== null ? [$porAlias] : [];
     }
 }

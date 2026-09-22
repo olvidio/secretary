@@ -39,28 +39,11 @@ final class AsegurarIdentidadCentro
             throw new InvalidArgumentException(_("El correo no es válido"));
         }
 
-        $porAlias = $this->identidades->porEmailOAlias($alias);
-        $porEmail = $this->identidades->porEmailOAlias($email);
-        if ($porAlias !== null && $porEmail !== null && $porAlias->id !== $porEmail->id) {
-            throw new InvalidArgumentException(_("El usuario y el correo pertenecen a cuentas distintas"));
-        }
-        $identidad = $porAlias ?? $porEmail;
+        $identidad = $this->identidades->porAlias($alias);
 
         if ($identidad !== null && $identidad->id !== null) {
             if (strtolower($identidad->email) !== $email) {
                 throw new InvalidArgumentException(sprintf(_("El usuario «%s» ya existe con otro correo"), $alias));
-            }
-            if (
-                $identidad->alias !== null
-                && strtolower($identidad->alias) !== $alias
-            ) {
-                throw new InvalidArgumentException(sprintf(_("Ese correo ya existe con el usuario «%s»"), $identidad->alias));
-            }
-            if (
-                $this->identidades->centrosDe($identidad->id) === []
-                && $this->identidades->personasDe($identidad->id) !== []
-            ) {
-                throw new InvalidArgumentException(_("Ese correo o usuario ya es una cuenta personal; no puede ser secretario de un centro"));
             }
             if ($password !== '') {
                 if (strlen($password) < 6) {

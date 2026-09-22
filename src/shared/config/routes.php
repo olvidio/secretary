@@ -50,6 +50,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/totp-verificar', [AuthController::class, 'totpVerificar']);
     $r->addRoute('POST', '/api/totp/verificar', [AuthController::class, 'totpVerificar']);
     $r->addRoute('POST', '/elegir-centro', [AuthController::class, 'elegirCentro']);
+    $r->addRoute('POST', '/elegir-cuenta', [AuthController::class, 'elegirCuenta']);
     $r->addRoute('POST', '/api/centros/elegir', [AuthController::class, 'elegirCentro']);
     $r->addRoute('POST', '/elegir-persona', [AuthController::class, 'elegirPersona']);
     $r->addRoute('POST', '/api/personas/elegir', [AuthController::class, 'elegirPersona']);

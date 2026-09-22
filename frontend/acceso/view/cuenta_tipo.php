@@ -1,5 +1,5 @@
 <h1><?= _("Tipo") ?></h1>
-<p class="muted"><?= _("Nivel 2 es secretario de centro (el programa actual de scl). Nivel 1 es el libro personal de una persona.") ?></p>
+<p class="muted"><?= _("Solo para cuentas que son a la vez secretario de un centro y titular de un libro personal con la misma identidad. Cambia el modo de esta sesión (centro o Mis cuentas), sin borrar datos. Si tiene cuentas distintas (personal y secretario), salga y entre con la otra.") ?></p>
 <form id="form-tipo">
     <label class="cuenta-tipo-op">
         <input type="radio" name="tipo" value="centro" required>
@@ -16,11 +16,15 @@
 <script>
 const I18N_TIPO = {
   noCentro: <?= json_encode(_("Esta cuenta no es secretario de ningún centro."), JSON_UNESCAPED_UNICODE) ?>,
-  noPersona: <?= json_encode(_("No está vinculada a una persona; el libro personal se crea al poner el correo en Nombres."), JSON_UNESCAPED_UNICODE) ?>,
+  noPersona: <?= json_encode(_("Esta identidad no tiene libro personal ni vínculo de persona."), JSON_UNESCAPED_UNICODE) ?>,
 };
 document.addEventListener('DOMContentLoaded', async () => {
   const r = await api('/api/preferencias');
   if (!r.ok) return alert(r.error || <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>);
+  if (!r.puede_cambiar_tipo) {
+    location.href = r.nivel === 'persona' ? '/yo' : '/';
+    return;
+  }
   const form = document.getElementById('form-tipo');
   const aviso = document.getElementById('aviso');
   const radioCentro = form.querySelector('[value="centro"]');

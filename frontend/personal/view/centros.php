@@ -1,5 +1,13 @@
-<h1><?= _("Centro") ?></h1>
-<p class="muted"><?= _("Solo puede estar vinculado a un centro de tipo n. El secretario debe aprobar la petición.") ?></p>
+<div class="yo-con-ayuda">
+    <h1><?= _("Centro") ?></h1>
+    <details class="yo-ayuda">
+        <summary aria-label="<?= htmlspecialchars(_("Ayuda"), ENT_QUOTES) ?>">i</summary>
+        <div class="yo-ayuda-cuerpo">
+            <p class="muted"><?= _("Vincula tu cuenta personal con un centro de tipo n (un solo centro a la vez). El secretario debe aprobar la petición; hasta entonces sigues usando tu libro propio, pero no podrás enviar el resumen mensual al centro.") ?></p>
+            <p class="muted"><?= _("Los centros sg no admiten solicitudes desde aquí. Si ya estás vinculado, puedes desvincularte para pedir acceso a otro centro más adelante.") ?></p>
+        </div>
+    </details>
+</div>
 
 <section id="estado-vinculado" hidden>
     <h2><?= _("Centro vinculado") ?></h2>
@@ -109,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       lista.forEach((c) => {
         const o = document.createElement('option');
         o.value = c.id;
-        o.textContent = c.nombre || c.codigo;
+        o.textContent = c.nombre_listado || c.nombre || c.codigo;
         sel.appendChild(o);
       });
     }

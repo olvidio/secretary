@@ -60,6 +60,11 @@ final class AuthController
         $this->limpiarSesionParcial();
         session_regenerate_id(true);
         ProteccionCsrf::asegurarToken();
+        if ($res->estado === 'pendiente_elegir_cuenta') {
+            $_SESSION['login_cuentas_elegibles'] = $res->cuentas;
+
+            return $this->exitoLogin($request, '/elegir-cuenta');
+        }
         $_SESSION['pending_identidad_id'] = $res->identidadId;
         $_SESSION['usuario'] = $res->nombre !== '' ? $res->nombre : $res->email;
         $_SESSION['pending_centros'] = $res->centros;
@@ -156,6 +161,55 @@ final class AuthController
         $this->completarSesion($res);
 
         return $this->exitoLogin($request, $this->siguienteTrasAuth($res));
+    }
+
+    public function elegirCuenta(Request $request, array $vars = []): Response
+    {
+        $cuentas = $_SESSION['login_cuentas_elegibles'] ?? null;
+        if (!is_array($cuentas) || $cuentas === []) {
+            return Response::redirect('/login');
+        }
+        $identidadId = (int) $request->input('identidad_id', 0);
+        $permitida = false;
+        foreach ($cuentas as $c) {
+            if ((int) ($c['identidad_id'] ?? 0) === $identidadId) {
+                $permitida = true;
+                break;
+            }
+        }
+        if (!$permitida) {
+            if ($this->esJson($request)) {
+                return ContestarJson::error(_("Cuenta no permitida"), 403);
+            }
+            $_SESSION['login_error'] = _("Cuenta no permitida");
+
+            return Response::redirect('/elegir-cuenta');
+        }
+        unset($_SESSION['login_cuentas_elegibles']);
+        $identidad = $this->identidades->porId($identidadId);
+        if ($identidad === null) {
+            return Response::redirect('/login');
+        }
+        $res = $this->iniciar->continuarConIdentidad($identidad);
+        if (!$res->ok()) {
+            return $this->falloLogin($request, $res->mensaje);
+        }
+        $_SESSION['pending_identidad_id'] = $res->identidadId;
+        $_SESSION['usuario'] = $res->nombre !== '' ? $res->nombre : $res->email;
+        $_SESSION['pending_centros'] = $res->centros;
+        $_SESSION['pending_nivel'] = $res->nivel;
+        $_SESSION['pending_email'] = $res->email;
+        $_SESSION['pending_persona_id'] = $res->personaId;
+        if ($res->estado === 'autenticado') {
+            $this->completarSesion($res);
+
+            return $this->exitoLogin($request, $this->siguienteTrasAuth($res));
+        }
+        if ($res->estado === 'pendiente_activar') {
+            return $this->exitoLogin($request, '/totp-activar');
+        }
+
+        return $this->exitoLogin($request, '/totp-verificar');
     }
 
     public function elegirCentro(Request $request, array $vars = []): Response
@@ -261,7 +315,9 @@ final class AuthController
                     strtolower(trim($alias)),
                 ),
             );
-            $this->notificarRegistro->ejecutar((int) $alta['identidad']->id, $alta['token_verificacion']);
+            if ($alta['enviar_correo']) {
+                $this->notificarRegistro->ejecutar((int) $alta['identidad']->id, $alta['token_verificacion']);
+            }
         } catch (\InvalidArgumentException $e) {
             return $this->falloRegistro($request, $e->getMessage(), $previo);
         } catch (\Throwable $e) {
@@ -272,10 +328,24 @@ final class AuthController
             );
         }
         if ($this->esJson($request)) {
+            if (!$alta['enviar_correo']) {
+                return ContestarJson::ok([
+                    'siguiente' => '/login',
+                    'email' => strtolower(trim($email)),
+                    'mensaje' => _('Cuenta creada. Ya puede entrar.'),
+                ]);
+            }
+
             return ContestarJson::ok([
                 'siguiente' => '/registro-enviado',
                 'email' => strtolower(trim($email)),
             ]);
+        }
+        if (!$alta['enviar_correo']) {
+            $_SESSION['login_ok'] = _('Cuenta creada. Ya puede entrar.');
+            $_SESSION['login_usuario'] = strtolower(trim($alias));
+
+            return Response::redirect('/login');
         }
         $_SESSION['registro_email'] = strtolower(trim($email));
 

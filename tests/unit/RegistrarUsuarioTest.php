@@ -44,7 +44,8 @@ final class RegistrarUsuarioTest extends TestCase
         $identidades = $this->createMock(IdentidadRepository::class);
         $personas = $this->createStub(PersonaRepository::class);
 
-        $identidades->method('porEmailOAlias')->willReturn(null);
+        $identidades->method('porAlias')->willReturn(null);
+        $identidades->method('cuentaPersonalPorEmail')->willReturn(null);
         $personas->method('porEmail')->willReturn(null);
         $libro = new class implements LibroPersonalIdentidadPort {
             public int $llamadas = 0;
@@ -86,10 +87,30 @@ final class RegistrarUsuarioTest extends TestCase
         $this->caso()->ejecutar('dani', 'dani@x.local', 'secret1', 'secret1', 'Dani', false);
     }
 
+    public function testRechazaSegundaCuentaPersonalMismoCorreo(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('cuenta personal');
+        $identidades = $this->createStub(IdentidadRepository::class);
+        $identidades->method('porAlias')->willReturn(null);
+        $identidades->method('cuentaPersonalPorEmail')->willReturn(
+            new Identidad(9, 'compartido@x.local', 'h', 'Ya', true, 0, null, null, 'ya'),
+        );
+        $personas = $this->createStub(PersonaRepository::class);
+        $libro = new class implements LibroPersonalIdentidadPort {
+            public function ejecutar(int $identidadId): ?\src\personas\domain\entity\Persona
+            {
+                return null;
+            }
+        };
+        (new RegistrarUsuario($identidades, $personas, $libro))
+            ->ejecutar('nuevo', 'compartido@x.local', 'secret1', 'secret1', 'Nuevo', true);
+    }
+
     private function caso(?Identidad $existente = null): RegistrarUsuario
     {
         $identidades = $this->createStub(IdentidadRepository::class);
-        $identidades->method('porEmailOAlias')->willReturn($existente);
+        $identidades->method('porAlias')->willReturn($existente);
         $personas = $this->createStub(PersonaRepository::class);
 
         $libro = new class implements LibroPersonalIdentidadPort {

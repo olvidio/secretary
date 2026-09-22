@@ -14,6 +14,16 @@ interface IdentidadRepository
 
     public function porEmailOAlias(string $identificador): ?Identidad;
 
+    public function porAlias(string $alias): ?Identidad;
+
+    /** @return list<Identidad> */
+    public function listarPorEmail(string $email): array;
+
+    /** Cuenta de libro personal (sin vínculo a centro como secretario). */
+    public function cuentaPersonalPorEmail(string $email): ?Identidad;
+
+    public function esCuentaPersonal(int $identidadId): bool;
+
     public function guardar(Identidad $identidad): Identidad;
 
     public function registrarFallo(Identidad $identidad, DateTimeImmutable $ahora): void;
@@ -96,6 +106,18 @@ interface IdentidadRepository
     public function marcarEmailVerificado(int $identidadId, DateTimeImmutable $cuando): void;
 
     public function tokenVerificacionDe(int $identidadId): ?string;
+
+    public function emailPendienteDe(int $identidadId): ?string;
+
+    public function guardarCambioEmailPendiente(
+        int $identidadId,
+        string $emailPendiente,
+        string $token,
+        DateTimeImmutable $expira,
+    ): void;
+
+    /** Aplica email_pendiente como email definitivo; devuelve el nuevo correo o null si no había pendiente. */
+    public function confirmarCambioEmailPendiente(int $identidadId, DateTimeImmutable $cuando): ?string;
 
     /** @return list<array{id:int, email:string, alias:?string, nombre:string, es_admin:bool, centros:int, personas:int}> */
     public function listarTodas(): array;

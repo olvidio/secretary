@@ -76,12 +76,18 @@ final class PreferenciaController
             return ContestarJson::error(_("Sesión caducada"), 401);
         }
         try {
-            $email = $this->guardarEmail->ejecutar($id, (string) $request->input('email', ''));
+            $resultado = $this->guardarEmail->ejecutar($id, (string) $request->input('email', ''));
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
         }
 
-        return ContestarJson::ok(['email' => $email]);
+        return ContestarJson::ok([
+            'email' => $resultado['email'],
+            'pendiente_confirmacion' => $resultado['pendiente_confirmacion'],
+            'mensaje' => $resultado['pendiente_confirmacion']
+                ? _('Le hemos enviado un correo al nuevo buzón. Ábralo y pulse el enlace para confirmar el cambio.')
+                : _('Correo actualizado.'),
+        ]);
     }
 
     public function guardarIdioma(Request $request, array $vars = []): Response
@@ -124,6 +130,10 @@ final class PreferenciaController
             return ContestarJson::error(_("Sesión caducada"), 401);
         }
         try {
+            $prefs = $this->obtener->ejecutar($id);
+            if (!$prefs['puede_elegir_persona_activa']) {
+                return ContestarJson::error(_("No hay varios vínculos de persona entre los que elegir."), 403);
+            }
             $personaId = $this->cambiarPersona->ejecutar($id, (int) $request->input('persona_id', 0));
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage(), 403);
@@ -192,6 +202,10 @@ final class PreferenciaController
             return ContestarJson::error(_("Sesión caducada"), 401);
         }
         try {
+            $prefs = $this->obtener->ejecutar($id);
+            if (!$prefs['puede_cambiar_tipo']) {
+                return ContestarJson::error(_("Esta cuenta no puede cambiar de tipo. Use otra cuenta o cierre sesión."), 403);
+            }
             $cambio = $this->cambiarTipo->ejecutar($id, (string) $request->input('tipo', ''));
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());

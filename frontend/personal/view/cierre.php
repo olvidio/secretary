@@ -5,6 +5,15 @@
 </div>
 
 <section class="yo-cierre">
+    <div class="yo-con-ayuda">
+        <details class="yo-ayuda">
+            <summary aria-label="<?= htmlspecialchars(_("Ayuda"), ENT_QUOTES) ?>">i</summary>
+            <div class="yo-ayuda-cuerpo">
+                <p class="muted"><?= _("Aquí defines en qué día termina cada mes en tu libro (p. ej. el 25 si entregas cuentas entonces). Esa fecha afecta al resumen, a la lista de movimientos y al envío mensual al centro: lo posterior cuenta ya en el mes siguiente.") ?></p>
+            </div>
+        </details>
+    </div>
+
     <h2><?= _("Por defecto") ?></h2>
     <p class="muted"><?= _("Día del mes en que cierra el periodo. Vacío = último día del mes. Ejemplo habitual: 25.") ?></p>
     <form id="form-cierre-defecto" class="grid-form">

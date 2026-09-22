@@ -365,11 +365,13 @@ return [
         IdentidadRepository $identidades,
         CifradorSecretosContrato $cifrador,
         ResolverPersonaActiva $resolverPersona,
+        \src\acceso\domain\contracts\LibroPersonalIdentidadPort $libroPersonal,
     ): VerificarSegundoFactor {
         return new VerificarSegundoFactor(
             $identidades,
             $cifrador,
             $resolverPersona,
+            $libroPersonal,
             CifradorSecretosInfra::pimiento(),
         );
     }),

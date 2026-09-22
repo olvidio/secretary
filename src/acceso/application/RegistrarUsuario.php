@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace src\acceso\application;
 
-use DateTimeImmutable;
 use InvalidArgumentException;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\contracts\LibroPersonalIdentidadPort;
 use src\acceso\domain\entity\Identidad;
-use src\acceso\domain\services\GeneradorTokenVerificacion;
 use src\personas\domain\contracts\PersonaRepository;
 
 /**
@@ -26,7 +24,7 @@ final class RegistrarUsuario
     }
 
     /**
-     * @return array{identidad: Identidad, token_verificacion: string}
+     * @return array{identidad: Identidad, token_verificacion: string, enviar_correo: bool}
      */
     public function ejecutar(
         string $alias,
@@ -56,11 +54,11 @@ final class RegistrarUsuario
         if ($password !== $passwordConfirm) {
             throw new InvalidArgumentException(_("Las contraseñas no coinciden"));
         }
-        if ($this->identidades->porEmailOAlias($alias) !== null) {
+        if ($this->identidades->porAlias($alias) !== null) {
             throw new InvalidArgumentException(_("Ese usuario ya existe"));
         }
-        if ($this->identidades->porEmailOAlias($email) !== null) {
-            throw new InvalidArgumentException(_("Ese correo ya tiene una cuenta"));
+        if ($this->identidades->cuentaPersonalPorEmail($email) !== null) {
+            throw new InvalidArgumentException(_("Ese correo ya tiene una cuenta personal"));
         }
         if ($this->personas->porEmail($email) !== null) {
             throw new InvalidArgumentException(_("Ese correo ya está asignado a un nombre"));
@@ -87,17 +85,13 @@ final class RegistrarUsuario
             throw new InvalidArgumentException(_("No se pudo crear la cuenta"));
         }
 
-        $token = GeneradorTokenVerificacion::generar();
-        $this->identidades->guardarVerificacionEmail(
-            $creada->id,
-            $token,
-            (new DateTimeImmutable())->modify('+48 hours'),
-        );
+        $verificacion = PoliticaVerificacionEmailRegistro::prepararTrasAlta($this->identidades, $creada->id);
         $this->libroPersonal->ejecutar($creada->id);
 
         return [
             'identidad' => $this->identidades->porId($creada->id) ?? $creada,
-            'token_verificacion' => $token,
+            'token_verificacion' => $verificacion['token'],
+            'enviar_correo' => $verificacion['enviar_correo'],
         ];
     }
 }

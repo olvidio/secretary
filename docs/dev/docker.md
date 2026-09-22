@@ -10,6 +10,8 @@ El stack no comparte nada con Orbix. Vive en `/home/dani/docker_images/secretary
 
 Dentro de PHP-FPM el DSN es `pgsql:host=db;port=5432;dbname=secretario` (lo inyecta Compose). Desde el host (Composer, PHPUnit) se usa el `.env`: `127.0.0.1:5455`.
 
+El código se monta desde este repo; PHP lee `/var/www/secretary/.env`. Para desarrollo sin SMTP, `REGISTRO_AUTO_CONFIRMA_EMAIL=1` en ese fichero (en producción, `0` en el `.env` del servidor).
+
 ```bash
 cd /home/dani/docker_images/secretary
 docker compose up -d --build

@@ -47,9 +47,9 @@ final class VincularEmailPersona
         $actual = $this->identidades->identidadDePersona($persona->id);
         if ($actual !== null && $actual->id !== null) {
             if (strtolower($actual->email) !== $email) {
-                $conflicto = $this->identidades->porEmailOAlias($email);
+                $conflicto = $this->identidades->cuentaPersonalPorEmail($email);
                 if ($conflicto !== null && $conflicto->id !== $actual->id) {
-                    throw new InvalidArgumentException(_("Ese correo ya tiene una cuenta"));
+                    throw new InvalidArgumentException(_("Ese correo ya tiene una cuenta personal"));
                 }
                 $this->identidades->guardar(new Identidad(
                     $actual->id,
@@ -69,11 +69,8 @@ final class VincularEmailPersona
             return null;
         }
 
-        $existente = $this->identidades->porEmailOAlias($email);
+        $existente = $this->identidades->cuentaPersonalPorEmail($email);
         if ($existente !== null && $existente->id !== null) {
-            if ($this->identidades->centrosDe($existente->id) !== []) {
-                throw new InvalidArgumentException(_("Ese correo es de un usuario de centro; no puede usarse como cuenta personal"));
-            }
             $otras = $this->identidades->personasDe($existente->id);
             foreach ($otras as $pid) {
                 if ($pid !== $persona->id) {

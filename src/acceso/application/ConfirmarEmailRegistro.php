@@ -7,6 +7,7 @@ namespace src\acceso\application;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use src\acceso\domain\contracts\IdentidadRepository;
+use src\personas\domain\contracts\PersonaRepository;
 use src\legal\application\RegistrarAceptacion;
 use src\legal\domain\services\CatalogoDocumentosLegales;
 use src\legal\domain\value_objects\HuellaAceptacion;
@@ -15,6 +16,8 @@ final class ConfirmarEmailRegistro
 {
     public function __construct(
         private readonly IdentidadRepository $identidades,
+        private readonly PersonaRepository $personas,
+        private readonly AplicarEmailIdentidad $aplicarEmail,
         private readonly RegistrarAceptacion $registrarAceptacion,
         private readonly CatalogoDocumentosLegales $documentos,
     ) {
@@ -34,11 +37,25 @@ final class ConfirmarEmailRegistro
         if ($datos['expira'] < $ahora) {
             throw new InvalidArgumentException(_('El enlace ha caducado. Regístrese de nuevo o pida otro correo.'));
         }
-        if ($this->identidades->emailVerificado($datos['identidad_id'])) {
+        $identidadId = $datos['identidad_id'];
+        $pendiente = $this->identidades->emailPendienteDe($identidadId);
+        if ($pendiente !== null) {
+            $this->aplicarEmail->comprobarDisponible($identidadId, $pendiente);
+            $nuevo = $this->identidades->confirmarCambioEmailPendiente($identidadId, $ahora);
+            if ($nuevo === null) {
+                throw new InvalidArgumentException(_('Enlace de confirmación no válido o ya utilizado'));
+            }
+            foreach ($this->identidades->personasDe($identidadId) as $personaId) {
+                $this->personas->guardarEmail($personaId, $nuevo);
+            }
+
             return;
         }
-        $this->identidades->confirmarEmail($datos['identidad_id'], $ahora);
-        $identidad = $this->identidades->porId($datos['identidad_id']);
+        if ($this->identidades->emailVerificado($identidadId)) {
+            return;
+        }
+        $this->identidades->confirmarEmail($identidadId, $ahora);
+        $identidad = $this->identidades->porId($identidadId);
         $idioma = 'es';
         if ($huella !== null) {
             $idioma = $huella->idioma === 'ca' ? 'ca' : 'es';
@@ -62,7 +79,7 @@ final class ConfirmarEmailRegistro
             $base->extra,
         );
         $this->registrarAceptacion->ejecutar(
-            $datos['identidad_id'],
+            $identidadId,
             'confirmacion_email',
             $this->documentos->textoCasillaRegistro($idioma),
             $huellaFinal,

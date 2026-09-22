@@ -8,7 +8,6 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\entity\Identidad;
-use src\acceso\domain\services\GeneradorTokenVerificacion;
 use src\ambito\application\CrearCentro;
 use src\ambito\domain\entity\Centro;
 
@@ -25,7 +24,7 @@ final class RegistrarCentro
     }
 
     /**
-     * @return array{identidad: Identidad, centro: Centro, token_verificacion: string}
+     * @return array{identidad: Identidad, centro: Centro, token_verificacion: string, enviar_correo: bool}
      */
     public function ejecutar(
         string $codigo,
@@ -67,11 +66,8 @@ final class RegistrarCentro
         if ($password !== $passwordConfirm) {
             throw new InvalidArgumentException(_("Las contraseñas no coinciden"));
         }
-        if ($this->identidades->porEmailOAlias($alias) !== null) {
+        if ($this->identidades->porAlias($alias) !== null) {
             throw new InvalidArgumentException(_("Ese usuario ya existe"));
-        }
-        if ($this->identidades->porEmailOAlias($email) !== null) {
-            throw new InvalidArgumentException(_("Ese correo ya tiene una cuenta"));
         }
         if (!$aceptoCondiciones) {
             throw new InvalidArgumentException(_("Debe aceptar las Condiciones de uso"));
@@ -95,17 +91,13 @@ final class RegistrarCentro
             throw new InvalidArgumentException(_("No se pudo crear la cuenta del secretario"));
         }
 
-        $token = GeneradorTokenVerificacion::generar();
-        $this->identidades->guardarVerificacionEmail(
-            $identidad->id,
-            $token,
-            (new DateTimeImmutable())->modify('+48 hours'),
-        );
+        $verificacion = PoliticaVerificacionEmailRegistro::prepararTrasAlta($this->identidades, $identidad->id);
 
         return [
             'identidad' => $this->identidades->porId($identidad->id) ?? $identidad,
             'centro' => $alta['centro'],
-            'token_verificacion' => $token,
+            'token_verificacion' => $verificacion['token'],
+            'enviar_correo' => $verificacion['enviar_correo'],
         ];
     }
 }

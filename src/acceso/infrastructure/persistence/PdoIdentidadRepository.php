@@ -31,16 +31,80 @@ final class PdoIdentidadRepository implements IdentidadRepository
     public function porEmailOAlias(string $identificador): ?Identidad
     {
         $identificador = trim($identificador);
-        $st = $this->pdo->prepare(
-            'SELECT * FROM identidades WHERE email = :e OR alias = :a LIMIT 1'
-        );
-        $st->execute([
-            ':e' => strtolower($identificador),
-            ':a' => strtolower($identificador),
-        ]);
+        if ($identificador === '') {
+            return null;
+        }
+        $porAlias = $this->porAlias($identificador);
+        if ($porAlias !== null) {
+            return $porAlias;
+        }
+        $porEmail = $this->listarPorEmail($identificador);
+
+        return $porEmail[0] ?? null;
+    }
+
+    public function porAlias(string $alias): ?Identidad
+    {
+        $alias = strtolower(trim($alias));
+        if ($alias === '') {
+            return null;
+        }
+        $st = $this->pdo->prepare('SELECT * FROM identidades WHERE alias = :a LIMIT 1');
+        $st->execute([':a' => $alias]);
         $row = $st->fetch();
 
         return is_array($row) ? $this->hydrate($row) : null;
+    }
+
+    public function listarPorEmail(string $email): array
+    {
+        $email = strtolower(trim($email));
+        if ($email === '') {
+            return [];
+        }
+        $st = $this->pdo->prepare(
+            'SELECT * FROM identidades WHERE email = :e ORDER BY id'
+        );
+        $st->execute([':e' => $email]);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $out[] = $this->hydrate($row);
+        }
+
+        return $out;
+    }
+
+    public function cuentaPersonalPorEmail(string $email): ?Identidad
+    {
+        $email = strtolower(trim($email));
+        if ($email === '') {
+            return null;
+        }
+        $st = $this->pdo->prepare(
+            'SELECT i.* FROM identidades i
+             WHERE i.email = :e
+               AND EXISTS (SELECT 1 FROM identidad_persona ip WHERE ip.identidad_id = i.id)
+               AND NOT EXISTS (SELECT 1 FROM identidad_centro ic WHERE ic.identidad_id = i.id)
+             LIMIT 1'
+        );
+        $st->execute([':e' => $email]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
+    public function esCuentaPersonal(int $identidadId): bool
+    {
+        $st = $this->pdo->prepare(
+            'SELECT 1 FROM identidades i
+             WHERE i.id = :id
+               AND EXISTS (SELECT 1 FROM identidad_persona ip WHERE ip.identidad_id = i.id)
+               AND NOT EXISTS (SELECT 1 FROM identidad_centro ic WHERE ic.identidad_id = i.id)
+             LIMIT 1'
+        );
+        $st->execute([':id' => $identidadId]);
+
+        return (bool) $st->fetchColumn();
     }
 
     public function guardar(Identidad $identidad): Identidad
@@ -480,6 +544,66 @@ final class PdoIdentidadRepository implements IdentidadRepository
         }
 
         return $v;
+    }
+
+    public function emailPendienteDe(int $identidadId): ?string
+    {
+        $st = $this->pdo->prepare('SELECT email_pendiente FROM identidades WHERE id = :id');
+        $st->execute([':id' => $identidadId]);
+        $v = $st->fetchColumn();
+        if (!is_string($v) || trim($v) === '') {
+            return null;
+        }
+
+        return strtolower(trim($v));
+    }
+
+    public function guardarCambioEmailPendiente(
+        int $identidadId,
+        string $emailPendiente,
+        string $token,
+        DateTimeImmutable $expira,
+    ): void {
+        $st = $this->pdo->prepare(
+            'UPDATE identidades
+             SET email_pendiente = :p,
+                 email_verificacion_token = :t,
+                 email_verificacion_expira = :e
+             WHERE id = :id'
+        );
+        $st->execute([
+            ':p' => strtolower(trim($emailPendiente)),
+            ':t' => $token,
+            ':e' => $expira->format('c'),
+            ':id' => $identidadId,
+        ]);
+    }
+
+    public function confirmarCambioEmailPendiente(int $identidadId, DateTimeImmutable $cuando): ?string
+    {
+        $pendiente = $this->emailPendienteDe($identidadId);
+        if ($pendiente === null) {
+            return null;
+        }
+        $st = $this->pdo->prepare(
+            'UPDATE identidades
+             SET email = :email,
+                 email_pendiente = NULL,
+                 email_verificado_at = :v,
+                 email_verificacion_token = NULL,
+                 email_verificacion_expira = NULL
+             WHERE id = :id AND email_pendiente IS NOT NULL'
+        );
+        $st->execute([
+            ':email' => $pendiente,
+            ':v' => $cuando->format('c'),
+            ':id' => $identidadId,
+        ]);
+        if ($st->rowCount() === 0) {
+            return null;
+        }
+
+        return $pendiente;
     }
 
     /** @param array<string, mixed> $row */

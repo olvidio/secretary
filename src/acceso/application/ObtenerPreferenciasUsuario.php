@@ -23,8 +23,11 @@ final class ObtenerPreferenciasUsuario
      *     centros: list<array{centro_id:int, codigo:string, nombre:string, rol:string}>,
      *     puede_centro: bool,
      *     puede_persona: bool,
+     *     puede_cambiar_tipo: bool,
+     *     puede_elegir_persona_activa: bool,
      *     totp_activo: bool,
-     *     personas: list<array<string, mixed>>
+     *     personas: list<array<string, mixed>>,
+     *     email_pendiente: ?string
      * }
      */
     public function ejecutar(int $identidadId): array
@@ -51,9 +54,12 @@ final class ObtenerPreferenciasUsuario
             'idioma' => $this->identidades->idiomaDe($identidadId),
             'centros' => $centros,
             'puede_centro' => $centros !== [],
-            'puede_persona' => $this->identidades->personasDe($identidadId) !== [],
+            'puede_persona' => ($personas = $this->identidades->personasDe($identidadId)) !== [],
+            'puede_cambiar_tipo' => $centros !== [] && $personas !== [],
             'totp_activo' => $this->identidades->totpConfirmado($identidadId),
-            'personas' => $this->identidades->personasVinculoDe($identidadId),
+            'personas' => ($vinculos = $this->identidades->personasVinculoDe($identidadId)),
+            'puede_elegir_persona_activa' => count($vinculos) > 1,
+            'email_pendiente' => $this->identidades->emailPendienteDe($identidadId),
         ];
     }
 }

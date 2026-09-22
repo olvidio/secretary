@@ -9,6 +9,9 @@
 <body class="login">
 <form method="post" action="/login" class="login-box">
     <h1><?= _("Secretario") ?></h1>
+    <?php if (!empty($ok)): ?>
+        <p class="ok"><?= htmlspecialchars((string) $ok, ENT_QUOTES) ?></p>
+    <?php endif; ?>
     <?php if (!empty($error)): ?>
         <p class="error"><?= htmlspecialchars((string) $error, ENT_QUOTES) ?></p>
     <?php endif; ?>
