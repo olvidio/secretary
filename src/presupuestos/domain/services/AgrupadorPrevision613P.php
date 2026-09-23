@@ -135,6 +135,8 @@ final class AgrupadorPrevision613P
                 'etiqueta' => $etiqueta,
                 'total_cents' => $h['total_cents'],
                 'personas_cents' => $h['personas_cents'],
+                'acumulado_cents' => (int) ($h['acumulado_cents'] ?? 0),
+                'prev_actual_cents' => (int) ($h['prev_actual_cents'] ?? 0),
             ]];
         }
         $out = [[
@@ -144,6 +146,8 @@ final class AgrupadorPrevision613P
             'etiqueta' => $etiqueta,
             'total_cents' => $suma[0],
             'personas_cents' => $suma[1],
+            'acumulado_cents' => $suma[2],
+            'prev_actual_cents' => $suma[3],
         ]];
         foreach ($hijos as $h) {
             $out[] = [
@@ -153,6 +157,8 @@ final class AgrupadorPrevision613P
                 'etiqueta' => (string) $h['etiqueta'],
                 'total_cents' => $h['total_cents'],
                 'personas_cents' => $h['personas_cents'],
+                'acumulado_cents' => (int) ($h['acumulado_cents'] ?? 0),
+                'prev_actual_cents' => (int) ($h['prev_actual_cents'] ?? 0),
             ];
         }
 
@@ -172,31 +178,37 @@ final class AgrupadorPrevision613P
             'etiqueta' => self::ETIQUETAS[$id],
             'total_cents' => $suma[0],
             'personas_cents' => $suma[1],
+            'acumulado_cents' => $suma[2],
+            'prev_actual_cents' => $suma[3],
         ];
     }
 
     /**
-     * @param list<array{total_cents:int,personas_cents:list<int>}> $filas
-     * @return array{0:int,1:list<int>}
+     * @param list<array{total_cents:int,personas_cents:list<int>,acumulado_cents?:int,prev_actual_cents?:int}> $filas
+     * @return array{0:int,1:list<int>,2:int,3:int}
      */
     private static function sumar(array $filas): array
     {
         $total = 0;
+        $acum = 0;
+        $prevAct = 0;
         $personas = [];
         foreach ($filas as $f) {
             $total += $f['total_cents'];
+            $acum += (int) ($f['acumulado_cents'] ?? 0);
+            $prevAct += (int) ($f['prev_actual_cents'] ?? 0);
             foreach ($f['personas_cents'] as $i => $cents) {
                 $personas[$i] = ($personas[$i] ?? 0) + $cents;
             }
         }
 
-        return [$total, array_values($personas)];
+        return [$total, array_values($personas), $acum, $prevAct];
     }
 
     /**
-     * @param array{0:int,1:list<int>} $a
-     * @param array{0:int,1:list<int>} $b
-     * @return array{0:int,1:list<int>}
+     * @param array{0:int,1:list<int>,2:int,3:int} $a
+     * @param array{0:int,1:list<int>,2:int,3:int} $b
+     * @return array{0:int,1:list<int>,2:int,3:int}
      */
     private static function restar(array $a, array $b): array
     {
@@ -206,6 +218,6 @@ final class AgrupadorPrevision613P
             $personas[] = ($a[1][$i] ?? 0) - ($b[1][$i] ?? 0);
         }
 
-        return [$a[0] - $b[0], $personas];
+        return [$a[0] - $b[0], $personas, $a[2] - $b[2], $a[3] - $b[3]];
     }
 }

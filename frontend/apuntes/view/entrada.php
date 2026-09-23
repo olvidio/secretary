@@ -3,12 +3,14 @@
 <p class="muted"><?php if ($cuenta === 'G'): ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber. Un gasto de G con iniciales anota también P/111, P/211 y G/11.") ?><?php else: ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.") ?><?php endif; ?></p>
 
 <?php if ($cuenta === 'G'): ?>
-<details class="yo-ayuda-bloque" id="entrada-banco-bloque" open>
+<details class="yo-ayuda-bloque" id="entrada-banco-bloque">
     <summary><?= _("Importar extracto del banco") ?></summary>
     <div class="yo-ayuda-cuerpo">
         <p class="muted"><?= _("Sube el extracto del banco. Cada origen tiene un formato distinto. La siguiente vez solo se crean movimientos nuevos. Lo importado entra en Por categorizar hasta que le asignes concepto e iniciales si procede.") ?></p>
         <p class="muted"><?= _("N26: en la web, cuenta → Descargas → actividad de la cuenta → CSV.") ?></p>
         <p class="muted"><?= _("CaixaBank: CaixaBankNow → Cuentas → tu cuenta. Carga todo el periodo (pulsa «Ver más movimientos» si aparece) y elige Extraer movimientos / Descargar en Excel (.xls). También admite CSV si lo guardas así.") ?></p>
+        <p class="muted"><?= _("BBVA: Cuentas → la cuenta → Movimientos → Descargar en Excel o CSV.") ?></p>
+        <p class="muted"><?= _("Banco Sabadell: Operativa diaria → Cuentas → Saldos y movimientos → Descargar → Excel o CSV.") ?></p>
     </div>
     <form id="entrada-banco-form" class="yo-banco-form">
         <label><?= _("Banco") ?>

@@ -11,9 +11,9 @@ use src\ambito\domain\contracts\CuentaRepository;
 use src\ambito\domain\contracts\EjercicioRepository;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\personal\domain\contracts\BancoImportRepository;
+use src\personal\domain\contracts\LectorExtractoEnFilas;
 use src\personal\domain\services\CatalogoBancosCsv;
 use src\personal\domain\services\ConstructorAsientoPersonal;
-use src\personal\domain\services\LectorCsvCaixaBank;
 use src\personal\domain\value_objects\LineaExtractoBanco;
 use src\shared\domain\value_objects\Dinero;
 
@@ -31,7 +31,7 @@ final class ImportarCsvBanco
     }
 
     /**
-     * @param list<list<string>>|null $filas Excel ya tabulado (CaixaBank).
+     * @param list<list<string>>|null $filas Excel ya tabulado.
      * @return array{nuevos:int, repetidos:int, omitidos:int, pendientes:int}
      */
     public function ejecutar(string $banco, string $csv = '', ?array $filas = null): array
@@ -39,7 +39,7 @@ final class ImportarCsvBanco
         $banco = strtolower(trim($banco));
         $lector = CatalogoBancosCsv::lector($banco);
         if ($filas !== null) {
-            if (!$lector instanceof LectorCsvCaixaBank) {
+            if (!$lector instanceof LectorExtractoEnFilas) {
                 throw new InvalidArgumentException(_("Este banco solo admite CSV"));
             }
             $lineas = $lector->leerFilas($filas);

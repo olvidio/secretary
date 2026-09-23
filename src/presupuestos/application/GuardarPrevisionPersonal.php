@@ -14,6 +14,7 @@ final class GuardarPrevisionPersonal
     public function __construct(
         private readonly ObtenerPrevisionPersonal $obtener,
         private readonly PrevisionPersonalRepository $repo,
+        private readonly ConstruirHojaPrevision $hojaPrevision,
     ) {
     }
 
@@ -21,11 +22,16 @@ final class GuardarPrevisionPersonal
      * @param array<string, mixed> $lineas codigo => importe (vacío = valor calculado)
      * @return array<string, mixed>
      */
-    public function ejecutar(int $personaId, array $lineas): array
+    public function ejecutar(int $personaId, array $lineas, ?string $etiquetaObjetivo = null): array
     {
         $persona = $this->obtener->exigirPersonaDelCentro($personaId);
-        $hoja = $this->obtener->ejecutar($personaId);
-        $ejercicioId = (int) $hoja['ejercicio_id'];
+        $hoja = $this->obtener->ejecutar($personaId, $etiquetaObjetivo);
+        $etiqueta = (string) ($hoja['etiqueta_presupuesto'] ?? '');
+        $ejercicio = $this->hojaPrevision->asegurarEjercicioPrevision($etiqueta);
+        if ($ejercicio->id === null) {
+            throw new InvalidArgumentException(_("No hay ejercicio para el año elegido"));
+        }
+        $ejercicioId = $ejercicio->id;
         $guardadas = [];
         foreach ($hoja['lineas'] as $fila) {
             $codigo = (string) $fila['codigo'];
@@ -43,6 +49,6 @@ final class GuardarPrevisionPersonal
         }
         $this->repo->reemplazarDePersona($ejercicioId, (int) $persona->id, $guardadas);
 
-        return $this->obtener->ejecutar($personaId);
+        return $this->obtener->ejecutar($personaId, $etiqueta);
     }
 }

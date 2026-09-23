@@ -6,7 +6,7 @@ namespace src\personal\domain\services;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
-use src\personal\domain\contracts\LectorCsvBanco;
+use src\personal\domain\contracts\LectorExtractoEnFilas;
 use src\personal\domain\value_objects\LineaExtractoBanco;
 use src\shared\domain\value_objects\Dinero;
 
@@ -14,7 +14,7 @@ use src\shared\domain\value_objects\Dinero;
  * Extracto CaixaBank (CaixaBankNow: Extraer movimientos en Excel o CSV).
  * Cabeceras en castellano o catalán. Suele ir con punto y coma y decimales con coma.
  */
-final class LectorCsvCaixaBank implements LectorCsvBanco
+final class LectorCsvCaixaBank implements LectorExtractoEnFilas
 {
     public function leer(string $contenido): array
     {

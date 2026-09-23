@@ -45,15 +45,23 @@ final class CrearEjercicio
         }
 
         $nuevo = new Ejercicio(null, $centroId, $etiqueta, $fechaInicio, $fechaFin, $fechaCorte);
+        $reutilizar = null;
         foreach ($this->repo->listarDeCentro($centroId) as $existente) {
-            if ($existente->solapaCon($nuevo)) {
-                throw new InvalidArgumentException(sprintf(
-                    _("El ejercicio se solapa con «%s» (%s a %s)"),
-                    $existente->etiqueta,
-                    $existente->fechaInicio->format('Y-m-d'),
-                    $existente->fechaFin->format('Y-m-d'),
-                ));
+            if (!$existente->solapaCon($nuevo)) {
+                continue;
             }
+            $mismoPeriodo = $existente->fechaInicio->format('Y-m-d') === $fechaInicio->format('Y-m-d')
+                && $existente->fechaFin->format('Y-m-d') === $fechaFin->format('Y-m-d');
+            if ($existente->estado === 'planificado' && $mismoPeriodo) {
+                $reutilizar = $existente;
+                continue;
+            }
+            throw new InvalidArgumentException(sprintf(
+                _("El ejercicio se solapa con «%s» (%s a %s)"),
+                $existente->etiqueta,
+                $existente->fechaInicio->format('Y-m-d'),
+                $existente->fechaFin->format('Y-m-d'),
+            ));
         }
 
         $anterior = $this->repo->contiguoAnterior($centroId, $fechaInicio);
@@ -71,14 +79,14 @@ final class CrearEjercicio
         }
 
         $guardado = $this->repo->guardar(new Ejercicio(
-            null,
+            $reutilizar?->id,
             $centroId,
             $etiqueta,
             $fechaInicio,
             $fechaFin,
             $fechaCorte,
             'abierto',
-            $ejercicioAnteriorId,
+            $ejercicioAnteriorId ?? $reutilizar?->ejercicioAnteriorId,
         ));
 
         if ($ejercicioAnteriorId !== null && $guardado->id !== null) {

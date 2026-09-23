@@ -1,8 +1,11 @@
 <h1 class="print-hide"><?= _("Previsión personal") ?></h1>
-<p class="muted print-hide"><?= _("Hoja 613 P por persona: el calculado suma lo acumulado hasta la fecha de corte y proyecta el resto del ejercicio. En conceptos puntuales (12, 24 ca/crt/cv, 4, 51 y 52) se mira el ejercicio anterior. El importe se puede dejar en blanco: al guardar se usa el calculado.") ?></p>
+<p class="muted print-hide"><?= _("Hoja 613 P por persona. Calc.: acumulado del ejercicio abierto y, entre paréntesis, la previsión ya guardada para ese ejercicio. Previsión: importes del año elegido (por defecto el ejercicio siguiente). Casilla vacía al guardar: se usa la proyección calculada (lineal o puntuales según el concepto).") ?></p>
 <p class="filters print-hide">
     <label><?= _("Persona") ?>
         <select id="sel-persona"><option value=""><?= _("Elegir…") ?></option></select>
+    </label>
+    <label><?= _("Año") ?>
+        <select id="sel-anio-prevision" disabled></select>
     </label>
     <button type="button" id="btn-imprimir" hidden><?= _("Imprimir") ?></button>
 </p>
@@ -11,20 +14,27 @@
 <div id="prevision-todos-contenedor" class="prevision-todos-contenedor" hidden></div>
 <form id="form-prevision-personal" hidden>
 <table class="tabla-prevision tabla-prevision-personal">
+    <colgroup>
+        <col class="col-concepto">
+        <col class="col-calculado">
+        <col class="col-importe">
+    </colgroup>
     <thead>
     <tr>
         <th class="col-concepto"><?= _("Concepto") ?></th>
-        <th class="num"><?= _("Calculado") ?></th>
-        <th class="num"><?= _("Importe") ?></th>
+        <th class="num col-calculado" title="<?= htmlspecialchars(_("Acumulado del ejercicio abierto (previsión guardada de ese ejercicio)"), ENT_QUOTES) ?>"><?= _("Calc.") ?></th>
+        <th class="num col-importe"><?= _("Previsión") ?></th>
     </tr>
     </thead>
     <tbody></tbody>
 </table>
 <p class="filters print-hide">
+    <button type="button" id="btn-usar-prevision-actual"><?= _("Usar previsión del ejercicio actual") ?></button>
     <button type="button" id="btn-usar-calculados"><?= _("Usar calculados") ?></button>
     <button type="submit"><?= _("Guardar") ?></button>
 </p>
 <p id="msg-prevision-personal" class="ok print-hide" hidden><?= _("Guardado") ?></p>
+<p id="msg-prevision-personal-error" class="error print-hide" hidden></p>
 </form>
 <script>
 const I18N_PREV = {
@@ -34,6 +44,8 @@ const I18N_PREV = {
   cabecera: <?= json_encode(_("Previsión 613 P"), JSON_UNESCAPED_UNICODE) ?>,
 };
 const CENTRO_PREV = <?= json_encode((string) ($centroNombre ?? ''), JSON_UNESCAPED_UNICODE) ?>;
+
+let sincAniosPrevision = false;
 
 function prepararPaginaImpresion(todos) {
   let el = document.getElementById('prevision-print-page');
@@ -56,6 +68,97 @@ function fmtPrev(valorEs) {
   return valorEs.endsWith(',00') ? valorEs.slice(0, -3) : valorEs;
 }
 
+function parseImporteEs(valorEs) {
+  const s = String(valorEs).trim().replace(/\s/g, '');
+  if (!s) return NaN;
+  return s.includes(',')
+    ? Number(s.replace(/\./g, '').replace(',', '.'))
+    : Number(s.replace(',', '.'));
+}
+
+function fmtReferencia(l) {
+  if (l.referencia_es) return l.referencia_es;
+  const acum = fmtEntero(l.acumulado_es);
+  const prev = fmtEntero(l.previsto_ejercicio_actual_es);
+  if (!acum && !prev) return '';
+  if (!prev) return acum;
+  if (!acum) return '(' + prev + ')';
+  return acum + ' (' + prev + ')';
+}
+
+function fmtEntero(valorEs) {
+  if (!valorEs || valorEs === '0,00' || valorEs === '-0,00') return '';
+  const n = parseImporteEs(valorEs);
+  if (!Number.isFinite(n)) return fmtPrev(valorEs);
+  const redondo = Math.round(n);
+  if (redondo === 0) return '';
+  return redondo.toLocaleString(secretaryLocale(), {
+    useGrouping: true,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+}
+
+function etiquetaPrevisionSeleccionada() {
+  const sel = document.getElementById('sel-anio-prevision');
+  if (!sel || sel.disabled || !sel.value) return '';
+  return sel.value;
+}
+
+function urlPrevisionPersonal(personaId) {
+  let url = '/api/previsiones/personal/' + personaId;
+  const etiqueta = etiquetaPrevisionSeleccionada();
+  if (etiqueta) url += '?etiqueta=' + encodeURIComponent(etiqueta);
+  return url;
+}
+
+function listaEtiquetas(r) {
+  const etiquetas = [];
+  const push = (valor) => {
+    const et = String(valor || '').trim();
+    if (et && !etiquetas.includes(et)) etiquetas.push(et);
+  };
+  const raw = (r && (r.etiquetas || r.anios_disponibles)) || [];
+  (Array.isArray(raw) ? raw : Object.values(raw)).forEach(push);
+  if (r) {
+    push(r.etiqueta_trabajo);
+    push(r.etiqueta_defecto);
+    push(r.etiqueta_presupuesto);
+  }
+  return etiquetas;
+}
+
+function pintarEtiquetasPrevision(r, forzarDefecto) {
+  const sel = document.getElementById('sel-anio-prevision');
+  if (!sel) return;
+  const prev = sel.value;
+  const etiquetas = listaEtiquetas(r);
+  [...sel.options].forEach((o) => {
+    if (o.value && !etiquetas.includes(o.value)) etiquetas.push(o.value);
+  });
+  const defecto = r && (r.etiqueta_defecto || r.etiqueta_presupuesto || r.anio_presupuesto);
+  sincAniosPrevision = true;
+  sel.innerHTML = '';
+  etiquetas.forEach((et) => {
+    const o = document.createElement('option');
+    o.value = et;
+    o.textContent = et;
+    sel.appendChild(o);
+  });
+  if (forzarDefecto && defecto && etiquetas.includes(String(defecto))) sel.value = String(defecto);
+  else if (prev && etiquetas.includes(prev)) sel.value = prev;
+  else if (defecto && etiquetas.includes(String(defecto))) sel.value = String(defecto);
+  else if (etiquetas.length) sel.value = etiquetas[etiquetas.length - 1];
+  sel.disabled = etiquetas.length === 0;
+  sincAniosPrevision = false;
+}
+
+async function cargarOpcionesPrevision() {
+  const r = await api('/api/previsiones/personal/opciones');
+  if (!r.ok) return;
+  pintarEtiquetasPrevision(r, true);
+}
+
 function filasDeRespuesta(r) {
   return r.filas && r.filas.length
     ? r.filas
@@ -64,7 +167,7 @@ function filasDeRespuesta(r) {
 
 function cabeceraPersonal(r) {
   const nom = (r.persona && (r.persona.nombre || r.persona.iniciales)) || '';
-  const anio = r.anio_presupuesto ? String(r.anio_presupuesto) : '';
+  const anio = r.etiqueta_presupuesto || r.anio_presupuesto || '';
   return [I18N_PREV.cabecera, nom, CENTRO_PREV, anio].filter(Boolean).join(' — ');
 }
 
@@ -76,23 +179,24 @@ function appendFilasPrevision(tb, filas, editable) {
       ? esc(l.codigo) + ' ' + esc(l.etiqueta)
       : esc(l.etiqueta);
     const nota = modoEtiqueta(l.modo);
-    const detalle = l.acumulado_es
-      ? '<div class="muted detalle-acum">' + esc(I18N_PREV.acum + ' ' + l.acumulado_es + (nota ? ' · ' + nota : '')) + '</div>'
+    const detalle = nota
+      ? '<div class="muted detalle-acum">' + esc(nota) + '</div>'
       : '';
     const tdConc = document.createElement('td');
     tdConc.className = 'col-concepto';
     tdConc.innerHTML = etq + detalle;
     const tdCalc = document.createElement('td');
     tdCalc.className = 'num col-calculado';
-    tdCalc.textContent = fmtPrev(l.calculado_es);
+    tdCalc.textContent = fmtReferencia(l);
     const tdImp = document.createElement('td');
-    tdImp.className = 'num';
+    tdImp.className = 'num col-importe';
     if (editable && l.editable && l.codigo) {
       const inp = document.createElement('input');
       inp.name = l.codigo;
       inp.className = 'num print-hide';
       inp.value = l.previsto_es ? fmtImporteEs(l.previsto_es) : '';
       inp.dataset.calculado = l.calculado_es || '0,00';
+      inp.dataset.prevActual = l.previsto_ejercicio_actual_es || '';
       inp.addEventListener('blur', () => {
         if (inp.value.trim()) inp.value = fmtImporteEs(inp.value);
       });
@@ -114,11 +218,13 @@ function appendFilasPrevision(tb, filas, editable) {
 function crearTablaPrevision() {
   const table = document.createElement('table');
   table.className = 'tabla-prevision tabla-prevision-personal';
+  const titCalc = <?= json_encode(_("Acumulado del ejercicio abierto (previsión guardada de ese ejercicio)"), JSON_UNESCAPED_UNICODE) ?>;
   table.innerHTML =
-    '<thead><tr>'
+    '<colgroup><col class="col-concepto"><col class="col-calculado"><col class="col-importe"></colgroup>'
+    + '<thead><tr>'
     + '<th class="col-concepto">' + esc(<?= json_encode(_("Concepto"), JSON_UNESCAPED_UNICODE) ?>) + '</th>'
-    + '<th class="num col-calculado">' + esc(<?= json_encode(_("Calculado"), JSON_UNESCAPED_UNICODE) ?>) + '</th>'
-    + '<th class="num">' + esc(<?= json_encode(_("Importe"), JSON_UNESCAPED_UNICODE) ?>) + '</th>'
+    + '<th class="num col-calculado" title="' + esc(titCalc) + '">' + esc(<?= json_encode(_("Calc."), JSON_UNESCAPED_UNICODE) ?>) + '</th>'
+    + '<th class="num col-importe">' + esc(<?= json_encode(_("Previsión"), JSON_UNESCAPED_UNICODE) ?>) + '</th>'
     + '</tr></thead>';
   table.appendChild(document.createElement('tbody'));
   return table;
@@ -136,6 +242,7 @@ function pintarHojaPersonal(r) {
   document.getElementById('form-prevision-personal').hidden = false;
   document.getElementById('btn-imprimir').hidden = false;
   document.getElementById('print-cab-personal').textContent = cabeceraPersonal(r);
+  pintarEtiquetasPrevision(r, false);
 }
 
 function bloqueHojaSoloLectura(r) {
@@ -165,16 +272,19 @@ async function cargarTodos() {
   const sel = document.getElementById('sel-persona');
   const ids = [...sel.options].map((o) => o.value).filter((v) => v && v !== 'todos');
   if (!ids.length) return;
-  const respuestas = await Promise.all(ids.map((id) => api('/api/previsiones/personal/' + id)));
+  const respuestas = await Promise.all(ids.map((id) => api(urlPrevisionPersonal(id))));
   for (const r of respuestas) {
     if (!r.ok) return alert(r.error || I18N_PREV.errorCarga);
   }
+  if (respuestas.length) pintarEtiquetasPrevision(respuestas[0], false);
   respuestas.forEach((r) => cont.appendChild(bloqueHojaSoloLectura(r)));
   document.getElementById('btn-imprimir').hidden = false;
 }
 
 async function cargarPersona(id) {
   document.getElementById('msg-prevision-personal').hidden = true;
+  const msgErr = document.getElementById('msg-prevision-personal-error');
+  if (msgErr) msgErr.hidden = true;
   if (!id) {
     document.body.classList.remove('prevision-personal-todos');
     document.getElementById('hint-print-todos').hidden = true;
@@ -187,14 +297,22 @@ async function cargarPersona(id) {
     return;
   }
   if (id === 'todos') return cargarTodos();
-  const r = await api('/api/previsiones/personal/' + id);
-  if (!r.ok) return alert(r.error || I18N_PREV.errorCarga);
+  const r = await api(urlPrevisionPersonal(id));
+  if (!r.ok) {
+    const txt = r.error || I18N_PREV.errorCarga;
+    if (msgErr) {
+      msgErr.textContent = txt;
+      msgErr.hidden = false;
+    }
+    return alert(txt);
+  }
   pintarHojaPersonal(r);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
   document.body.classList.add('prevision-personal-hoja');
   prepararPaginaImpresion(false);
+  await cargarOpcionesPrevision();
   const pers = await api('/api/personas');
   if (!pers.ok) return alert(pers.error || I18N_PREV.errorCarga);
   const sel = document.getElementById('sel-persona');
@@ -211,6 +329,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(location.search);
   if (params.get('persona')) sel.value = params.get('persona');
   sel.addEventListener('change', () => cargarPersona(sel.value));
+  document.getElementById('sel-anio-prevision').addEventListener('change', () => {
+    if (sincAniosPrevision) return;
+    const personaId = sel.value;
+    if (personaId && personaId !== 'todos') cargarPersona(personaId);
+  });
   if (sel.value) await cargarPersona(sel.value);
 
   document.getElementById('btn-imprimir').addEventListener('click', () => {
@@ -224,6 +347,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
     window.print();
+  });
+
+  document.getElementById('btn-usar-prevision-actual').addEventListener('click', () => {
+    document.querySelectorAll('#form-prevision-personal input[name]').forEach((i) => {
+      const v = (i.dataset.prevActual || '').trim();
+      if (v) i.value = fmtImporteEs(v);
+    });
   });
 
   document.getElementById('btn-usar-calculados').addEventListener('click', () => {
@@ -240,7 +370,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     ev.target.querySelectorAll('input[name]').forEach((i) => {
       lineas[i.name] = i.value.trim() ? fmtImporteEs(i.value) : '';
     });
-    const s = await api('/api/previsiones/personal/' + id, { method: 'POST', body: { lineas } });
+    const body = { lineas };
+    const etiqueta = etiquetaPrevisionSeleccionada();
+    if (etiqueta) body.etiqueta = etiqueta;
+    const s = await api('/api/previsiones/personal/' + id, { method: 'POST', body });
     document.getElementById('msg-prevision-personal').hidden = !s.ok;
     if (!s.ok) return alert(s.error);
     pintarHojaPersonal(s);

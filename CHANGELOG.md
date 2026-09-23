@@ -10,6 +10,18 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.9] — 2026-09-23
+
+### Añadido
+- En **Previsión personal**, selector de **año** (etiqueta del ejercicio: `2027`, `2026-27`, etc.). Por defecto es el período siguiente al abierto, con la misma duración (enero–diciembre, septiembre–agosto u otra), aunque ese ejercicio aún no esté dado de alta.
+- Al guardar esa previsión se crea el ejercicio siguiente en estado **planificado** (el abierto no cambia). **Calc.** muestra el acumulado del ejercicio abierto y, entre paréntesis, la previsión ya guardada de ese ejercicio. **Usar previsión del ejercicio actual** copia esas cifras a la columna Previsión.
+- Importar extractos de **BBVA** y **Banco Sabadell** (Excel o CSV) en el libro personal y en Entrada G, junto a N26 y CaixaBank.
+
+### Cambiado
+- En **Previsión**, la hoja consolidada lee los importes del ejercicio siguiente (el que se está presupuestando).
+- En Entrada G, el bloque **Importar extracto del banco** queda cerrado al entrar.
+- Impresión de la previsión personal: la columna de concepto ocupa más ancho y las cifras van en columnas fijas.
+
 ## [0.1.8] — 2026-09-22
 
 ### Corregido

@@ -11,14 +11,14 @@ Permite subir el extracto del banco y convertirlo en movimientos del libro propi
 ## Cómo se usa
 
 1. En «Banco», elegir el banco del que viene el fichero. La elección se recuerda para la próxima vez.
-2. En «Fichero», elegir el extracto descargado: de N26, el CSV; de CaixaBank, el Excel (`.xls` o `.xlsx`) o un CSV.
+2. En «Fichero», elegir el extracto descargado: de N26, el CSV; de CaixaBank, BBVA o Banco Sabadell, el Excel (`.xls` o `.xlsx`) o un CSV.
 3. Pulsar **Importar**. Un aviso indica cuántos movimientos son nuevos, cuántos ya estaban y cuántos se omiten.
 4. En «Por categorizar», elegir la categoría en el desplegable de cada línea.
 5. Revisar el texto de «Observaciones», que viene con el concepto del banco, y corregirlo si se quiere.
 6. Elegir categoría en el desplegable y pulsar **Asignar**: la línea sale de «Por categorizar» y ya cuenta como ingreso o gasto. Al final del desplegable hay también **Otra contabilidad** y **Traspaso a caja** / **Traspaso desde caja** (según cobro o pago): se eligen igual y se confirman con **Asignar**.
 7. En observaciones, **×** borra el texto guardado de ese comercio para que no vuelva a preseleccionarse.
 
-En N26 el fichero se descarga desde la web: cuenta → Descargas → actividad de la cuenta → CSV. En CaixaBank, desde CaixaBankNow → Cuentas → la cuenta, cargando todo el periodo con «Ver más movimientos» antes de extraerlo.
+En N26 el fichero se descarga desde la web: cuenta → Descargas → actividad de la cuenta → CSV. En CaixaBank, desde CaixaBankNow → Cuentas → la cuenta, cargando todo el periodo con «Ver más movimientos» antes de extraerlo. En BBVA, Cuentas → la cuenta → Movimientos → Descargar en Excel o CSV. En Banco Sabadell, Operativa diaria → Cuentas → Saldos y movimientos → Descargar → Excel o CSV.
 
 ## Reglas que conviene saber
 

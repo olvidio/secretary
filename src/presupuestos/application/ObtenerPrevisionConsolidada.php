@@ -22,7 +22,9 @@ final class ObtenerPrevisionConsolidada
     public function ejecutar(): array
     {
         $datos = $this->hoja->contextoEstructura();
-        $ejercicioId = (int) $datos['ejercicio']->id;
+        $etiqueta = $this->hoja->etiquetaPresupuestoPorDefecto();
+        $objetivo = $this->hoja->ejercicioPorEtiqueta($etiqueta);
+        $ejercicioId = $objetivo !== null && $objetivo->id !== null ? (int) $objetivo->id : 0;
         $personas = [];
         foreach ($this->personas->listarDeCentro($datos['centro_id']) as $p) {
             if ($p->id === null) {
@@ -37,7 +39,8 @@ final class ObtenerPrevisionConsolidada
         }
         $guardado = [];
         $personasConPrevision = [];
-        foreach ($this->prevision->listarDeEjercicio($ejercicioId) as $l) {
+        $lineasGuardadas = $ejercicioId > 0 ? $this->prevision->listarDeEjercicio($ejercicioId) : [];
+        foreach ($lineasGuardadas as $l) {
             $guardado[$l->personaId][$l->conceptoCodigo] = $l->previstoCents;
             $personasConPrevision[$l->personaId] = true;
         }
@@ -91,8 +94,9 @@ final class ObtenerPrevisionConsolidada
         }
 
         return [
-            'ejercicio_id' => $ejercicioId,
-            'anio_presupuesto' => $this->hoja->anioPresupuesto(),
+            'ejercicio_id' => $ejercicioId > 0 ? $ejercicioId : null,
+            'etiqueta_presupuesto' => $etiqueta,
+            'anio_presupuesto' => $etiqueta,
             'personas' => $personas,
             'lineas' => $lineas,
             'filas' => $filas,

@@ -18,6 +18,8 @@ final class CatalogoBancosCsv
         return [
             ['id' => 'n26', 'nombre' => 'N26'],
             ['id' => 'caixabank', 'nombre' => 'CaixaBank'],
+            ['id' => 'bbva', 'nombre' => 'BBVA'],
+            ['id' => 'sabadell', 'nombre' => 'Banco Sabadell'],
         ];
     }
 
@@ -27,6 +29,8 @@ final class CatalogoBancosCsv
         return match ($id) {
             'n26' => new LectorCsvN26(),
             'caixabank' => new LectorCsvCaixaBank(),
+            'bbva' => new LectorCsvBbva(),
+            'sabadell' => new LectorCsvSabadell(),
             default => throw new InvalidArgumentException('Banco no soportado: elija uno de la lista'),
         };
     }

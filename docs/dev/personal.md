@@ -76,7 +76,7 @@ centro va a `/yo`.
 
 ## Extracto CSV
 
-En `/yo/banco` se elige el banco (hoy **N26**) y se sube el CSV. Cada fila se
+En `/yo/banco` se elige el banco (N26, CaixaBank, BBVA o Banco Sabadell) y se sube el extracto. Cada fila se
 identifica por una huella (fecha, importe, beneficiario, concepto, cuenta); al
 volver a subir el mismo extracto no se duplica. Los movimientos nuevos van a
 BANCO contra **Por categorizar** (`22.pendiente` / `113.pendiente`) hasta que se
@@ -96,5 +96,9 @@ N26: web → cuenta → Descargas → actividad → CSV
 CaixaBank: CaixaBankNow → Cuentas → cuenta → Extraer movimientos / Excel (.xls);
 si no es CSV, guardar como CSV (`;`) antes de subirlo. Cargar todo el periodo
 («Ver más movimientos») o el fichero se queda corto.
+BBVA: Cuentas → Movimientos → Excel o CSV
+(`Fecha`, `F.Valor`, `Concepto`, `Movimiento`, `Importe`, `Disponible`).
+Banco Sabadell: Saldos y movimientos → Excel o CSV
+(`Fecha oper.`, `Fecha valor`, `Concepto`, `Importe`, `Saldo`).
 Otros bancos se añadirán con su propio lector; más adelante se podrá detectar el
 formato por la cabecera.

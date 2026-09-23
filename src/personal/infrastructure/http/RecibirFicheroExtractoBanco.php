@@ -83,7 +83,7 @@ final class RecibirFicheroExtractoBanco
     private static function extensiones(string $banco): array
     {
         return match ($banco) {
-            'caixabank' => ['csv', 'xls', 'xlsx'],
+            'caixabank', 'bbva', 'sabadell' => ['csv', 'xls', 'xlsx'],
             default => ['csv'],
         };
     }

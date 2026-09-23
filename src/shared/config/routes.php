@@ -141,6 +141,7 @@ return static function (RouteCollector $r): void {
 
     $r->addRoute('GET', '/api/presupuestos/{cuenta:P|G}', [PresupuestoController::class, 'get']);
     $r->addRoute('POST', '/api/presupuestos/{cuenta:P|G}', [PresupuestoController::class, 'save']);
+    $r->addRoute('GET', '/api/previsiones/personal/opciones', [PrevisionController::class, 'opcionesPersonal']);
     $r->addRoute('GET', '/api/previsiones/personal/{personaId:\d+}', [PrevisionController::class, 'getPersonal']);
     $r->addRoute('POST', '/api/previsiones/personal/{personaId:\d+}', [PrevisionController::class, 'savePersonal']);
     $r->addRoute('GET', '/api/previsiones', [PrevisionController::class, 'getConsolidada']);

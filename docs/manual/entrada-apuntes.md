@@ -14,7 +14,7 @@ Es la pantalla de teclear. Se rellena una cabecera común —persona, procedenci
 
 En **Entrada G** hay un bloque **Importar extracto del banco** (mismo criterio que el banco personal en `/yo/banco`):
 
-1. Elegir el banco (N26 o CaixaBank) y, si hay varias cuentas de tesorería activas, cuál es.
+1. Elegir el banco (N26, CaixaBank, BBVA o Banco Sabadell) y, si hay varias cuentas de tesorería activas, cuál es.
 2. Elegir el fichero y pulsar **Importar**. Al volver a subir el mismo extracto no se duplican filas ya importadas. Hasta que no se categorice, no se crean asientos ni apuntes.
 3. Los movimientos nuevos quedan en **Por categorizar**: elegir concepto e iniciales si procede, observaciones y pulsar **Asignar**. **Cambiar a P** sustituye el desplegable por conceptos P (vuelve con **Cambiar a G**); al **Asignar** en modo P las iniciales son obligatorias. En el desplegable de concepto G, al final aparecen **Otra contabilidad** (registra el movimiento en el banco del centro sin apunte ni ingreso/gasto del plan) y **Traspaso a caja** (usa los conceptos 41/42); ambas se confirman con **Asignar**.
 

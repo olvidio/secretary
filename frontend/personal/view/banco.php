@@ -10,6 +10,8 @@
             <p class="muted">
                 <?= _("CaixaBank: CaixaBankNow → Cuentas → tu cuenta. Carga todo el periodo (pulsa «Ver más movimientos» si aparece) y elige Extraer movimientos / Descargar en Excel (.xls). También admite CSV si lo guardas así.") ?>
             </p>
+            <p class="muted"><?= _("BBVA: Cuentas → la cuenta → Movimientos → Descargar en Excel o CSV.") ?></p>
+            <p class="muted"><?= _("Banco Sabadell: Operativa diaria → Cuentas → Saldos y movimientos → Descargar → Excel o CSV.") ?></p>
         </div>
     </details>
 </div>

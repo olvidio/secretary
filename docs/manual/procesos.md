@@ -47,7 +47,7 @@ Las 7 que la persona ya hizo en su libro viajan en la remesa; las de la propuest
 
 Mismo criterio en el libro personal (`/yo/banco`) y en el centro (**Entrada G** → bloque Importar extracto).
 
-1. Descargar el extracto del banco (N26: CSV; CaixaBank: Excel o CSV).
+1. Descargar el extracto del banco (N26: CSV; CaixaBank, BBVA y Banco Sabadell: Excel o CSV).
 2. Elegir banco (y cuenta de tesorería en Entrada G si hay varias) → fichero → **Importar**.
 3. En **Por categorizar**, por cada línea:
    - Elegir categoría/concepto en el desplegable.
