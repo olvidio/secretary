@@ -94,9 +94,9 @@ final class ObtenerPrevisionPersonal
                 'calculado' => $calc->toString(),
                 'calculado_es' => $calc->formatEs(),
                 'calculado_cents' => $f['total_cents'],
-                'previsto' => $orig !== null ? $orig['previsto'] : $prev->toString(),
-                'previsto_es' => $orig !== null ? $orig['previsto_es'] : $prev->formatEs(),
-                'previsto_cents' => $orig !== null ? $orig['previsto_cents'] : $prevCents,
+                'previsto' => $orig !== null ? ($orig['previsto'] ?? null) : $prev->toString(),
+                'previsto_es' => $orig !== null ? ($orig['previsto_es'] ?? null) : $prev->formatEs(),
+                'previsto_cents' => $orig !== null ? ($orig['previsto_cents'] ?? null) : $prevCents,
                 'previsto_ejercicio_actual_cents' => $prevActCents,
             ];
         }

@@ -19,7 +19,7 @@ final class GuardarPrevisionPersonal
     }
 
     /**
-     * @param array<string, mixed> $lineas codigo => importe (vacío = valor calculado)
+     * @param array<string, mixed> $lineas codigo => importe (vacío = no guardar esa línea)
      * @return array<string, mixed>
      */
     public function ejecutar(int $personaId, array $lineas, ?string $etiquetaObjetivo = null): array
@@ -35,16 +35,18 @@ final class GuardarPrevisionPersonal
         $guardadas = [];
         foreach ($hoja['lineas'] as $fila) {
             $codigo = (string) $fila['codigo'];
-            $raw = $lineas[$codigo] ?? '';
+            if (!array_key_exists($codigo, $lineas)) {
+                continue;
+            }
+            $raw = $lineas[$codigo];
             if (is_array($raw)) {
                 throw new InvalidArgumentException(_("La cantidad debe ser numérica"));
             }
             $texto = trim((string) $raw);
             if ($texto === '') {
-                $cents = (int) $fila['calculado_cents'];
-            } else {
-                $cents = Dinero::fromInput($texto)->toCents();
+                continue;
             }
+            $cents = Dinero::fromInput($texto)->toCents();
             $guardadas[] = new LineaPrevisionPersonal($ejercicioId, (int) $persona->id, $codigo, $cents);
         }
         $this->repo->reemplazarDePersona($ejercicioId, (int) $persona->id, $guardadas);

@@ -91,6 +91,13 @@ body.prevision-personal-hoja .tabla-prevision-personal .col-calculado {
   width: var(--prev-ancho-calculado);
   white-space: nowrap;
 }
+body.prevision-personal-hoja .tabla-prevision-personal th.col-calculado {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 0.62em;
+  line-height: 1.05;
+  font-weight: 600;
+}
 body.prevision-personal-hoja .tabla-prevision-personal col.col-importe,
 body.prevision-personal-hoja .tabla-prevision-personal .col-importe {
   width: var(--prev-ancho-importe);
@@ -916,6 +923,12 @@ body.e37-hoja main { max-width: none; }
   body.prevision-personal-hoja .tabla-prevision-personal .col-calculado {
     width: var(--prev-ancho-calculado);
     white-space: nowrap;
+  }
+  body.prevision-personal-hoja .tabla-prevision-personal th.col-calculado {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 0.62em;
+    line-height: 1.05;
   }
   body.prevision-personal-hoja .tabla-prevision-personal col.col-importe,
   body.prevision-personal-hoja .tabla-prevision-personal .col-importe {

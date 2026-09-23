@@ -1,5 +1,5 @@
 <h1 class="print-hide"><?= _("Previsión personal") ?></h1>
-<p class="muted print-hide"><?= _("Hoja 613 P por persona. Calc.: acumulado del ejercicio abierto y, entre paréntesis, la previsión ya guardada para ese ejercicio. Previsión: importes del año elegido (por defecto el ejercicio siguiente). Casilla vacía al guardar: se usa la proyección calculada (lineal o puntuales según el concepto).") ?></p>
+<p class="muted print-hide"><?= _("Hoja 613 P por persona. acumulado(anterior): acumulado del ejercicio abierto y, entre paréntesis, la previsión ya guardada para ese ejercicio. Previsión: importes del año elegido (por defecto el ejercicio siguiente). Casilla vacía al guardar: no se guarda importe para ese concepto.") ?></p>
 <p class="filters print-hide">
     <label><?= _("Persona") ?>
         <select id="sel-persona"><option value=""><?= _("Elegir…") ?></option></select>
@@ -22,15 +22,13 @@
     <thead>
     <tr>
         <th class="col-concepto"><?= _("Concepto") ?></th>
-        <th class="num col-calculado" title="<?= htmlspecialchars(_("Acumulado del ejercicio abierto (previsión guardada de ese ejercicio)"), ENT_QUOTES) ?>"><?= _("Calc.") ?></th>
+        <th class="num col-calculado" title="<?= htmlspecialchars(_("Acumulado del ejercicio abierto (previsión guardada de ese ejercicio)"), ENT_QUOTES) ?>"><?= _("acumulado(anterior)") ?></th>
         <th class="num col-importe"><?= _("Previsión") ?></th>
     </tr>
     </thead>
     <tbody></tbody>
 </table>
 <p class="filters print-hide">
-    <button type="button" id="btn-usar-prevision-actual"><?= _("Usar previsión del ejercicio actual") ?></button>
-    <button type="button" id="btn-usar-calculados"><?= _("Usar calculados") ?></button>
     <button type="submit"><?= _("Guardar") ?></button>
 </p>
 <p id="msg-prevision-personal" class="ok print-hide" hidden><?= _("Guardado") ?></p>
@@ -71,9 +69,13 @@ function fmtPrev(valorEs) {
 function parseImporteEs(valorEs) {
   const s = String(valorEs).trim().replace(/\s/g, '');
   if (!s) return NaN;
-  return s.includes(',')
-    ? Number(s.replace(/\./g, '').replace(',', '.'))
-    : Number(s.replace(',', '.'));
+  if (s.includes(',')) {
+    return Number(s.replace(/\./g, '').replace(',', '.'));
+  }
+  if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) {
+    return Number(s.replace(/\./g, ''));
+  }
+  return Number(s.replace(',', '.'));
 }
 
 function fmtReferencia(l) {
@@ -97,6 +99,16 @@ function fmtEntero(valorEs) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });
+}
+
+/** Columna Previsión: euros enteros, sin céntimos ni separador de miles (evita confundir al guardar). */
+function fmtPrevisionEs(valor) {
+  if (valor === null || valor === undefined || String(valor).trim() === '') return '';
+  const n = parseImporteEs(String(valor).trim());
+  if (!Number.isFinite(n)) return String(valor).trim();
+  const entero = Math.round(n);
+  if (entero === 0) return '';
+  return String(entero);
 }
 
 function etiquetaPrevisionSeleccionada() {
@@ -194,19 +206,18 @@ function appendFilasPrevision(tb, filas, editable) {
       const inp = document.createElement('input');
       inp.name = l.codigo;
       inp.className = 'num print-hide';
-      inp.value = l.previsto_es ? fmtImporteEs(l.previsto_es) : '';
+      inp.value = l.previsto_es ? fmtPrevisionEs(l.previsto_es) : '';
       inp.dataset.calculado = l.calculado_es || '0,00';
-      inp.dataset.prevActual = l.previsto_ejercicio_actual_es || '';
       inp.addEventListener('blur', () => {
-        if (inp.value.trim()) inp.value = fmtImporteEs(inp.value);
+        if (inp.value.trim()) inp.value = fmtPrevisionEs(inp.value);
       });
       const impPrint = document.createElement('span');
       impPrint.className = 'prevision-print-imp';
-      impPrint.textContent = fmtPrev(l.previsto_es || l.calculado_es);
+      impPrint.textContent = fmtPrevisionEs(l.previsto_es || l.calculado_es);
       tdImp.appendChild(inp);
       tdImp.appendChild(impPrint);
     } else {
-      tdImp.textContent = editable ? fmtPrev(l.previsto_es) : '';
+      tdImp.textContent = editable ? fmtPrevisionEs(l.previsto_es) : '';
     }
     tr.appendChild(tdConc);
     tr.appendChild(tdCalc);
@@ -223,7 +234,7 @@ function crearTablaPrevision() {
     '<colgroup><col class="col-concepto"><col class="col-calculado"><col class="col-importe"></colgroup>'
     + '<thead><tr>'
     + '<th class="col-concepto">' + esc(<?= json_encode(_("Concepto"), JSON_UNESCAPED_UNICODE) ?>) + '</th>'
-    + '<th class="num col-calculado" title="' + esc(titCalc) + '">' + esc(<?= json_encode(_("Calc."), JSON_UNESCAPED_UNICODE) ?>) + '</th>'
+    + '<th class="num col-calculado" title="' + esc(titCalc) + '">' + esc(<?= json_encode(_("acumulado(anterior)"), JSON_UNESCAPED_UNICODE) ?>) + '</th>'
     + '<th class="num col-importe">' + esc(<?= json_encode(_("Previsión"), JSON_UNESCAPED_UNICODE) ?>) + '</th>'
     + '</tr></thead>';
   table.appendChild(document.createElement('tbody'));
@@ -342,24 +353,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.querySelectorAll('#form-prevision-personal input[name]').forEach((i) => {
         const span = i.parentElement && i.parentElement.querySelector('.prevision-print-imp');
         if (!span) return;
-        const v = i.value.trim() ? fmtImporteEs(i.value) : (i.dataset.calculado || '');
-        span.textContent = fmtPrev(v);
+        const v = i.value.trim() ? i.value : (i.dataset.calculado || '');
+        span.textContent = fmtPrevisionEs(v);
       });
     }
     window.print();
-  });
-
-  document.getElementById('btn-usar-prevision-actual').addEventListener('click', () => {
-    document.querySelectorAll('#form-prevision-personal input[name]').forEach((i) => {
-      const v = (i.dataset.prevActual || '').trim();
-      if (v) i.value = fmtImporteEs(v);
-    });
-  });
-
-  document.getElementById('btn-usar-calculados').addEventListener('click', () => {
-    document.querySelectorAll('#form-prevision-personal input[name]').forEach((i) => {
-      i.value = fmtImporteEs(i.dataset.calculado || '0,00');
-    });
   });
 
   document.getElementById('form-prevision-personal').onsubmit = async (ev) => {
@@ -368,7 +366,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!id || id === 'todos') return;
     const lineas = {};
     ev.target.querySelectorAll('input[name]').forEach((i) => {
-      lineas[i.name] = i.value.trim() ? fmtImporteEs(i.value) : '';
+      lineas[i.name] = i.value.trim() ? fmtPrevisionEs(i.value) : '';
     });
     const body = { lineas };
     const etiqueta = etiquetaPrevisionSeleccionada();

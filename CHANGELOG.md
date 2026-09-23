@@ -10,6 +10,17 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.10] — 2026-09-23 (pulir previsiones)
+
+### Cambiado
+- En **Previsión personal**, la columna de referencia pasa a llamarse **acumulado(anterior)**: muestra el acumulado del ejercicio abierto y, entre paréntesis, la previsión ya guardada de ese ejercicio (no la proyección).
+- **Guardar** solo persiste los importes escritos en **Previsión**; las casillas vacías dejan el concepto sin cifra guardada (ya no se rellena con la proyección calculada).
+- Los importes de **Previsión** se muestran y guardan en **euros enteros**, sin céntimos.
+- Se quitan los botones **Usar calculados** y **Usar previsión del ejercicio actual**.
+
+### Corregido
+- Al escribir **5000** en Previsión ya no se guardaba **5** por confundir el separador de miles español (`5.000`) con decimales.
+
 ## [0.1.9] — 2026-09-23
 
 ### Añadido
