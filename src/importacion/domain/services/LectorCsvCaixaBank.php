@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace src\personal\domain\services;
+namespace src\importacion\domain\services;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
-use src\personal\domain\contracts\LectorExtractoEnFilas;
-use src\personal\domain\value_objects\LineaExtractoBanco;
+use src\importacion\domain\contracts\LectorExtractoEnFilas;
+use src\importacion\domain\value_objects\LineaExtractoBanco;
 use src\shared\domain\value_objects\Dinero;
 
 /**

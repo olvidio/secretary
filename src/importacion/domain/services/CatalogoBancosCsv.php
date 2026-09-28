@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace src\personal\domain\services;
+namespace src\importacion\domain\services;
 
 use InvalidArgumentException;
-use src\personal\domain\contracts\LectorCsvBanco;
+use src\importacion\domain\contracts\LectorCsvBanco;
 
 /** Bancos con lector de extracto CSV. El desplegable sale de aquí; la detección automática vendrá después. */
 final class CatalogoBancosCsv

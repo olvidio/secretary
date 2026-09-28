@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace src\personal\domain\value_objects;
+namespace src\importacion\domain\value_objects;
 
 /** Fila normalizada de un extracto CSV, lista para asentar. */
 final class LineaExtractoBanco

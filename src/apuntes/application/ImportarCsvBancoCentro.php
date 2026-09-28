@@ -11,8 +11,8 @@ use src\ambito\domain\contracts\CuentaFisicaRepository;
 use src\ambito\domain\contracts\CuentaRepository;
 use src\ambito\domain\entity\Cuenta;
 use src\apuntes\domain\contracts\BancoCentroImportRepository;
-use src\personal\domain\contracts\LectorExtractoEnFilas;
-use src\personal\domain\services\CatalogoBancosCsv;
+use src\importacion\domain\contracts\LectorExtractoEnFilas;
+use src\importacion\domain\services\CatalogoBancosCsv;
 use src\shared\domain\value_objects\Dinero;
 
 final class ImportarCsvBancoCentro

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\unit;
 
 use PHPUnit\Framework\TestCase;
-use src\personal\domain\services\LectorCsvCaixaBank;
-use src\personal\infrastructure\excel\ExtractoCaixaBankDesdeArchivo;
+use src\importacion\domain\services\LectorCsvCaixaBank;
+use src\importacion\infrastructure\excel\ExtractoCaixaBankDesdeArchivo;
 use src\shared\infrastructure\excel\XlsReader;
 
 final class XlsReaderTest extends TestCase

@@ -10,6 +10,11 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.12] — 2026-09-28
+
+### Corregido
+- **Mis cuentas → Banco** dejaba de cargar la pestaña (error al preparar la lista de bancos para importar el extracto: N26, CaixaBank, BBVA, Sabadell). **Entrada G** ya funcionaba por la API; personal y centro comparten el mismo catálogo de formatos.
+
 ## [0.1.11] — 2026-09-28
 
 ### Añadido

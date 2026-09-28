@@ -6,8 +6,8 @@ namespace Tests\unit;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use src\personal\domain\services\CatalogoBancosCsv;
-use src\personal\domain\services\LectorCsvSabadell;
+use src\importacion\domain\services\CatalogoBancosCsv;
+use src\importacion\domain\services\LectorCsvSabadell;
 
 final class LectorCsvSabadellTest extends TestCase
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace src\personal\infrastructure\excel;
+namespace src\importacion\infrastructure\excel;
 
 use InvalidArgumentException;
 use src\importacion\infrastructure\excel\XlsxReader;

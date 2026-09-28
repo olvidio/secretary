@@ -11,10 +11,10 @@ use src\ambito\domain\contracts\CuentaRepository;
 use src\ambito\domain\contracts\EjercicioRepository;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\personal\domain\contracts\BancoImportRepository;
-use src\personal\domain\contracts\LectorExtractoEnFilas;
-use src\personal\domain\services\CatalogoBancosCsv;
+use src\importacion\domain\contracts\LectorExtractoEnFilas;
+use src\importacion\domain\services\CatalogoBancosCsv;
 use src\personal\domain\services\ConstructorAsientoPersonal;
-use src\personal\domain\value_objects\LineaExtractoBanco;
+use src\importacion\domain\value_objects\LineaExtractoBanco;
 use src\shared\domain\value_objects\Dinero;
 
 final class ImportarCsvBanco

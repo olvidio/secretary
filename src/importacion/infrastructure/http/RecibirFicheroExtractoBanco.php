@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace src\personal\infrastructure\http;
+namespace src\importacion\infrastructure\http;
 
 use InvalidArgumentException;
 use RuntimeException;
-use src\personal\domain\services\CatalogoBancosCsv;
+use src\importacion\domain\services\CatalogoBancosCsv;
 use src\shared\infrastructure\http\Request;
 
 final class RecibirFicheroExtractoBanco

@@ -6,7 +6,7 @@ namespace src\personal\application;
 
 use InvalidArgumentException;
 use src\personal\domain\contracts\PersonalBancoRepository;
-use src\personal\domain\services\CatalogoBancosCsv;
+use src\importacion\domain\services\CatalogoBancosCsv;
 
 final class PreferenciaBancoPersonal
 {

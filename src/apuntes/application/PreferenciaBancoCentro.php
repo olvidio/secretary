@@ -7,7 +7,7 @@ namespace src\apuntes\application;
 use InvalidArgumentException;
 use src\ambito\application\ResolverAmbitoActual;
 use src\apuntes\domain\contracts\CentroBancoRepository;
-use src\personal\domain\services\CatalogoBancosCsv;
+use src\importacion\domain\services\CatalogoBancosCsv;
 
 final class PreferenciaBancoCentro
 {

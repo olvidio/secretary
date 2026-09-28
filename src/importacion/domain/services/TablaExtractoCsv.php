@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace src\personal\domain\services;
+namespace src\importacion\domain\services;
 
 use DateTimeImmutable;
 use InvalidArgumentException;

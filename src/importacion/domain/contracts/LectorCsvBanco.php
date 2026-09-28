@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace src\personal\domain\contracts;
+namespace src\importacion\domain\contracts;
 
-use src\personal\domain\value_objects\LineaExtractoBanco;
+use src\importacion\domain\value_objects\LineaExtractoBanco;
 
 interface LectorCsvBanco
 {
