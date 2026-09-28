@@ -11,6 +11,7 @@ use src\ayuda\domain\contracts\RegistroConsultasAyuda;
 use src\ayuda\domain\contracts\RepositorioDocumentacion;
 use src\ayuda\domain\entity\DocumentoAyuda;
 use src\ayuda\domain\services\BuscadorDocumentacion;
+use src\ayuda\domain\services\ManualSinResumen613;
 use src\ayuda\domain\services\ConstructorPromptAyuda;
 use src\ayuda\domain\services\InterpreteRespuestaIA;
 use src\ayuda\domain\value_objects\OrigenRespuesta;
@@ -36,14 +37,18 @@ final class ResponderPreguntaAyuda
     ) {
     }
 
-    public function ejecutar(string $texto, ?int $identidadId = null, string $idioma = 'es'): RespuestaAyuda
+    public function ejecutar(string $texto, ?int $identidadId = null, string $idioma = 'es', bool $sinResumen613 = false): RespuestaAyuda
     {
         $pregunta = new PreguntaAyuda($texto);
         $documentos = $this->documentacion->todos();
+        if ($sinResumen613) {
+            $documentos = (new ManualSinResumen613())->aplicar($documentos);
+        }
         if ($documentos === []) {
             throw new RuntimeException(_("Todavía no hay manual que consultar"));
         }
-        $guardada = $this->registro->buscar($pregunta->huella($this->documentacion->version()));
+        $version = $this->documentacion->version() . ($sinResumen613 ? '|sin613' : '');
+        $guardada = $this->registro->buscar($pregunta->huella($version));
         if ($guardada !== null) {
             return $guardada->comoCache();
         }
@@ -68,7 +73,7 @@ final class ResponderPreguntaAyuda
         $this->registro->guardar(
             $identidadId,
             $pregunta,
-            $pregunta->huella($this->documentacion->version()),
+            $pregunta->huella($version),
             $respuesta,
         );
 

@@ -40,6 +40,7 @@ final class CatalogoMenus
             ['nav' => 'remesas', 'href' => '/remesas', 'label' => _("Remesas")],
             ['nav' => 'disponible', 'href' => '/disponible', 'label' => _("Disponible")],
             ['nav' => 'enviar-dl', 'href' => '/enviar-dl', 'label' => _("Enviar a DL")],
+            ['nav' => 'listados', 'href' => '/listados', 'label' => _("Listados")],
             ['nav' => '613-p', 'href' => '/613-p', 'label' => _("613 P")],
             ['nav' => '613-g', 'href' => '/613-g', 'label' => _("613 G")],
             ['nav' => 'e37', 'href' => '/e37', 'label' => _("Cuentas personales")],
@@ -65,6 +66,8 @@ final class CatalogoMenus
             ['nav' => 'inicio', 'href' => '/', 'label' => _("Inicio")],
             ['nav' => 'arqueo-p', 'href' => '/arqueo-p', 'label' => _("Arqueo P")],
             ['nav' => 'arqueo-g', 'href' => '/arqueo-g', 'label' => _("Arqueo G")],
+            ['nav' => 'arqueo', 'href' => '/arqueo', 'label' => _("Arqueo")],
+            ['nav' => 'aportaciones', 'href' => '/aportaciones', 'label' => _("Listado de aportaciones")],
             ['nav' => 'cuenta-mail', 'href' => '/cuenta/mail', 'label' => _("Mail")],
             ['nav' => 'cuenta-password', 'href' => '/cuenta/password', 'label' => _("Contraseña")],
             ['nav' => 'cuenta-totp', 'href' => '/cuenta/totp', 'label' => _("2FA")],
@@ -106,6 +109,178 @@ final class CatalogoMenus
         return $out;
     }
 
+    /**
+     * Pantallas que un centro con plan Club puede abrir. El resto del menú
+     * de casa (nombres, 613, libro P, remesas) no se muestra.
+     *
+     * @return list<string>
+     */
+    public static function navsClub(): array
+    {
+        return [
+            'inicio',
+            'configuracion',
+            'copias',
+            'ejercicios',
+            'tesoreria',
+            'entrada-g',
+            'apuntes',
+            'saldos',
+            'arqueo',
+            'listados',
+            'conceptos-g',
+            'plantillas-g',
+            'traspasos',
+            'ayuda',
+        ];
+    }
+
+    /**
+     * Pantallas de un centro sg (Excel Secretario sg): un libro, nombres, 613 y arqueo.
+     *
+     * @return list<string>
+     */
+    public static function navsCentroSg(): array
+    {
+        return [
+            'inicio',
+            'configuracion',
+            'copias',
+            'nombres',
+            'ejercicios',
+            'entrada-g',
+            'apuntes',
+            'presupuesto-g',
+            '613-g',
+            'aportaciones',
+            'arqueo-g',
+            'fecha-cierre',
+            'conceptos-g',
+            'ayuda',
+        ];
+    }
+
+    /**
+     * Menú propio del plan H16s. No es el de la casa con huecos.
+     *
+     * @return list<Grupo>
+     */
+    public static function gruposCentroSg(): array
+    {
+        $porNav = [];
+        foreach (array_merge(self::items(), self::pantallasSinMenu()) as $item) {
+            $porNav[$item['nav']] = $item;
+        }
+        $defs = [
+            ['id' => 'centro', 'label' => _("Centro"), 'items' => [
+                ['configuracion', null],
+                ['nombres', null],
+                ['copias', null],
+            ]],
+            ['id' => 'apuntes', 'label' => _("Apuntes"), 'items' => [
+                ['entrada-g', _("Entrada")],
+                ['apuntes', null],
+            ]],
+            ['id' => 'cuentas', 'label' => _("Cuentas"), 'items' => [
+                ['presupuesto-g', _("Presupuesto")],
+                ['613-g', _("613")],
+                ['aportaciones', null],
+            ]],
+            ['id' => 'caja', 'label' => _("Caja"), 'items' => [
+                ['arqueo-g', _("Arqueo")],
+                ['conceptos-g', _("Conceptos")],
+                ['fecha-cierre', null],
+                ['ejercicios', null],
+                ['ayuda', null],
+            ]],
+        ];
+        $out = [];
+        foreach ($defs as $def) {
+            $items = [];
+            foreach ($def['items'] as [$nav, $etiqueta]) {
+                $item = $porNav[$nav];
+                if ($etiqueta !== null) {
+                    $item['label'] = $etiqueta;
+                }
+                $items[] = $item;
+            }
+            $out[] = ['id' => $def['id'], 'label' => $def['label'], 'items' => $items];
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return list<Grupo>
+     */
+    public static function gruposPara(string $layout, bool $club, bool $centroSg = false): array
+    {
+        if ($centroSg) {
+            return self::gruposCentroSg();
+        }
+        if (!$club) {
+            return self::grupos($layout);
+        }
+        return self::gruposFiltrados($layout, self::navsClub(), [
+            'entrada-g' => _("Entrada"),
+            'conceptos-g' => _("Cuentas"),
+            'plantillas-g' => _("Plantillas"),
+        ], 'arqueo', _("Arqueo"));
+    }
+
+    /**
+     * @param list<string> $permitidos
+     * @param array<string, string> $etiquetas
+     * @return list<Grupo>
+     */
+    private static function gruposFiltrados(
+        string $layout,
+        array $permitidos,
+        array $etiquetas,
+        string $navTrasSaldos,
+        string $etiquetaTrasSaldos,
+    ): array {
+        $permitidos = array_flip($permitidos);
+        $hrefs = [];
+        foreach (array_merge(self::items(), self::pantallasSinMenu()) as $item) {
+            $hrefs[$item['nav']] = $item['href'];
+        }
+        $out = [];
+        foreach (self::grupos($layout) as $grupo) {
+            $items = [];
+            foreach ($grupo['items'] as $item) {
+                if (!isset($permitidos[$item['nav']])) {
+                    continue;
+                }
+                if (isset($etiquetas[$item['nav']])) {
+                    $item['label'] = $etiquetas[$item['nav']];
+                }
+                $items[] = $item;
+            }
+            if ($items === []) {
+                continue;
+            }
+            $conExtra = [];
+            foreach ($items as $item) {
+                $conExtra[] = $item;
+                if ($item['nav'] === 'saldos' && isset($permitidos[$navTrasSaldos])) {
+                    $conExtra[] = [
+                        'nav' => $navTrasSaldos,
+                        'href' => $hrefs[$navTrasSaldos] ?? '/' . $navTrasSaldos,
+                        'label' => $etiquetaTrasSaldos,
+                    ];
+                }
+            }
+            $out[] = [
+                'id' => $grupo['id'],
+                'label' => $grupo['label'],
+                'items' => $conExtra,
+            ];
+        }
+
+        return $out;
+    }
+
     /** @return list<Item> */
     public static function itemsAdmin(): array
     {
@@ -114,11 +289,26 @@ final class CatalogoMenus
             ['nav' => 'admin-centros', 'href' => '/admin/centros', 'label' => _("Centros")],
             ['nav' => 'admin-usuarios', 'href' => '/admin/usuarios', 'label' => _("Usuarios")],
             ['nav' => 'admin-legal', 'href' => '/admin/legal', 'label' => _("Legal")],
+            ['nav' => 'admin-copias', 'href' => '/admin/copias', 'label' => _("Copias de la base")],
         ];
     }
 
-    public static function grupoDe(string $layout, string $nav): string
+    public static function grupoDe(string $layout, string $nav, bool $centroSg = false): string
     {
+        if ($centroSg) {
+            foreach (self::gruposCentroSg() as $grupo) {
+                foreach ($grupo['items'] as $item) {
+                    if ($item['nav'] === $nav) {
+                        return $grupo['id'];
+                    }
+                }
+            }
+
+            return 'centro';
+        }
+        if ($nav === 'arqueo' || $nav === 'arqueo-g') {
+            return $layout === 'burger' ? 'movimientos' : 'utilidades';
+        }
         foreach (self::clavesGrupos($layout) as $grupo) {
             if (in_array($nav, $grupo['items'], true)) {
                 return $grupo['id'];
@@ -171,7 +361,7 @@ final class CatalogoMenus
             [
                 'id' => 'generales',
                 'label' => _("Generales"),
-                'items' => ['entrada-g'],
+                'items' => ['entrada-g', 'listados'],
             ],
             [
                 'id' => 'resumenes',
@@ -226,6 +416,7 @@ final class CatalogoMenus
                     'remesas',
                     'disponible',
                     'enviar-dl',
+                    'listados',
                 ],
             ],
             [

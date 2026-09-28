@@ -6,7 +6,7 @@
 
 ## Para qué sirve
 
-Es la lista de consulta de los códigos con los que se clasifica cada apunte. Hay una pantalla para el libro personal (P) y otra para el general (G).
+Es la lista de consulta de los códigos con los que se clasifica cada apunte. Hay una pantalla para el libro personal (P) y otra para el general (G). En una associació, Cuentas permite añadir cuentas propias, aplicar una plantilla de associació y guardar el plan actual como plantilla nueva.
 
 Sirve para recordar qué código toca antes de teclear un apunte, y para saber qué entra en cada uno: la descripción de cada concepto detalla los casos que recoge.
 

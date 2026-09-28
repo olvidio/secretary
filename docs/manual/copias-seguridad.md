@@ -6,7 +6,7 @@
 
 ## Para qué sirve
 
-Permite guardar una copia completa de todos los datos y volver a ella si algo se estropea. Conviene hacer una antes de una carga grande, antes de vaciar datos o antes de cualquier prueba que pueda salir mal.
+Permite guardar una copia de **este** centro o associació y volver a ella si algo se estropea. No mezcla las copias de otros centros aunque los lleve la misma persona. La copia de toda la base de datos está en la administración de la plataforma (`/admin/copias`).
 
 ## Cómo se usa
 
@@ -18,13 +18,14 @@ Permite guardar una copia completa de todos los datos y volver a ella si algo se
 
 ## Reglas que conviene saber
 
-- La copia es de todos los datos, no solo de un centro. Si en la instalación hay varios centros, la restauración afecta a todos.
-- Restaurar **sobrescribe** todo, y lo anotado después de esa copia se pierde. Conviene avisar, cerrar las demás sesiones y hacer una copia nueva justo antes, para poder deshacer.
+- La copia es solo de este centro: asientos y listados. Otro centro, aunque lo lleve el mismo usuario, tiene su propia lista y no se restaura con ésta.
+- Restaurar sustituye los asientos de este centro posteriores a la copia. Los demás centros no cambian.
+- Una copia de otro centro se rechaza: el fichero queda ligado a la sigla y al centro con el que se creó.
 - Conviene descargar de vez en cuando alguna copia y guardarla fuera del servidor: si se pierde la máquina, se pierden también las copias que solo estén allí.
 - La copia no incluye los ficheros de Excel: hay que archivarlos aparte.
 - Tampoco incluye la configuración del servidor, que es la que descifra los códigos del segundo factor. Al restaurar en otra máquina habrá que volver a configurarlo.
 - En el servidor caben como máximo 5 copias. Para hacer otra hay que borrar alguna o usar **Borrar la más antigua y guardar**.
-- Solo se admiten ficheros `.sql` o `.dump`, y como máximo de 256 MB.
+- En esta pantalla solo se admiten ficheros `.json` de este centro. El volcado completo `.sql` de toda la base está en `/admin/copias`.
 
 ## Problemas frecuentes
 

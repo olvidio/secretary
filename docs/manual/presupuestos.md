@@ -20,7 +20,8 @@ En el libro P, las cifras se pueden generar primero en **Previsión personal** (
 
 ## Reglas que conviene saber
 
-- La lista de conceptos viene dada: hay una fila por cada concepto del libro y no se pueden añadir ni quitar filas desde aquí.
+- En un centro de casa, la lista de conceptos viene dada: hay una fila por cada concepto del libro y no se pueden añadir ni quitar filas desde aquí.
+- En un centro sg, los destinos del 42 al 54 no salen hasta que el centro les pone nombre. Arriba del presupuesto hay «Destinos del centro»: se añade una fila (el programa propone el siguiente código libre), se escribe el nombre y se pulsa «Guardar destinos». Entonces esa partida aparece en el presupuesto, en el 613 y al anotar un apunte. El 41, Necesidades generales, es fijo. No se puede quitar un destino que ya tiene apuntes. Como máximo hay trece (del 42 al 54).
 - Lo que se teclea es el importe **anual**. El resumen 613 lo reparte en proporción a los meses transcurridos del ejercicio sobre los meses totales; en un ejercicio de enero a diciembre eso equivale a multiplicar por los meses y dividir entre doce.
 - Una casilla vacía cuenta como cero.
 - Los importes admiten coma o punto como separador de decimales.

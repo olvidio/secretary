@@ -33,12 +33,21 @@ final class GuardarConfiguracion
         if (!in_array($modo, ['Año', 'Curso'], true)) {
             throw new InvalidArgumentException(_("Modo: Año o Curso"));
         }
+        $centroActivo = $this->centroActivo();
+        $esClub = $centroActivo !== null && CatalogoPlanesContables::esClub($centroActivo->planContableCodigo);
+        $esCentroSg = $centroActivo !== null && CatalogoPlanesContables::esCentroSg($centroActivo->planContableCodigo);
+        $planFijo = $esClub || $esCentroSg;
         $tipoCierre = (string) ($datos['tipo_cierre'] ?? $actual->tipoCierre);
+        if ($planFijo && $centroActivo !== null) {
+            $tipoCierre = $centroActivo->tipoCierre;
+        }
         if (!in_array($tipoCierre, ['vivienda', 'necesidades'], true)) {
             throw new InvalidArgumentException(_("Tipo de cierre: vivienda o necesidades"));
         }
         $tipo = strtolower(trim((string) ($datos['tipo'] ?? '')));
-        if ($tipo === '') {
+        if ($planFijo && $centroActivo !== null) {
+            $tipo = $centroActivo->tipo;
+        } elseif ($tipo === '') {
             try {
                 $centro = $this->centros->porId($this->ambito->ejecutar()->centroId);
                 $tipo = $centro?->tipo ?? 'n';
@@ -50,7 +59,9 @@ final class GuardarConfiguracion
             throw new InvalidArgumentException(_("Tipo de centro: n o sg"));
         }
         $planContable = trim((string) ($datos['plan_contable'] ?? ''));
-        if ($planContable === '') {
+        if ($planFijo && $centroActivo !== null) {
+            $planContable = $centroActivo->planContableCodigo;
+        } elseif ($planContable === '') {
             try {
                 $centroPlan = $this->centros->porId($this->ambito->ejecutar()->centroId);
                 $planContable = $centroPlan?->planContableCodigo ?? CatalogoPlanesContables::H16N;
@@ -63,8 +74,18 @@ final class GuardarConfiguracion
         }
         $ini = $this->fecha((string) ($datos['fecha_inicio'] ?? $actual->fechaInicio->format('Y-m-d')));
         $cie = $this->fecha((string) ($datos['fecha_cierre'] ?? $actual->fechaCierre->format('Y-m-d')));
+        $sigla = trim((string) ($datos['centro'] ?? ''));
+        if ($planFijo) {
+            if ($sigla === '') {
+                throw new InvalidArgumentException(_("La sigla es obligatoria"));
+            }
+            $this->guardarSigla($centroActivo, $sigla);
+            $sigla = $actual->centro;
+        } elseif ($sigla === '') {
+            $sigla = $actual->centro;
+        }
         $cfg = new ConfiguracionCentro(
-            trim((string) ($datos['centro'] ?? $actual->centro)),
+            $sigla,
             $anio,
             $modo,
             $ini,
@@ -77,6 +98,35 @@ final class GuardarConfiguracion
         $this->sincronizarCentroActivo($tipo, $tipoCierre, $planContable);
 
         return $cfg;
+    }
+
+    private function centroActivo(): ?Centro
+    {
+        try {
+            return $this->centros->porId($this->ambito->ejecutar()->centroId);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private function guardarSigla(?Centro $centro, string $sigla): void
+    {
+        if ($centro === null || $centro->id === null || $sigla === $centro->codigo) {
+            return;
+        }
+        $otro = $this->centros->porCodigo($sigla);
+        if ($otro !== null && $otro->id !== $centro->id) {
+            throw new InvalidArgumentException(_("Ya existe un centro con esa sigla"));
+        }
+        $this->centros->guardar(new Centro(
+            $centro->id,
+            $sigla,
+            $centro->nombre,
+            $centro->tipo,
+            $centro->tipoCierre,
+            $centro->planContableCodigo,
+            $centro->activo,
+        ));
     }
 
     private function sincronizarCentroActivo(string $tipo, string $tipoCierre, string $planContable): void

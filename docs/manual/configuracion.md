@@ -6,7 +6,7 @@
 
 ## Para qué sirve
 
-Guarda los datos generales del centro: cómo se llama, qué ejercicio se está llevando, el **plan contable**, el **tipo de centro** (n o sg) y el **tipo de cierre** contable (vivienda o necesidades).
+Guarda los datos generales del centro: cómo se llama, qué ejercicio se está llevando, el **plan contable**, el **tipo de centro** (n o sg) y el **tipo de cierre** contable (vivienda o necesidades). En una associació (plan Club) no hay menú Centros: en esta misma pantalla se editan la **sigla**, el año, el modo y las fechas, y también los usuarios, la importación Grisbi y el vaciado de prueba. No hay tipo de centro, tipo de vivienda ni tramos de desgravación. En un centro sg (plan H16s) el campo **Centro** es la sigla de ese centro (p. ej. sgMontagut), no el nombre del centro H16n.
 
 Conviene repasarla al empezar, porque la entrada de apuntes, el resumen mensual y el cierre de mes toman de aquí sus valores por defecto.
 

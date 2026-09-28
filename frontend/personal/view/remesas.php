@@ -3,7 +3,7 @@
     <h1 id="yo-mes-titulo"><?= _("Mes") ?></h1>
     <button type="button" id="yo-mes-sig" aria-label="<?= htmlspecialchars(_("Mes siguiente"), ENT_QUOTES) ?>">›</button>
 </div>
-<p class="muted"><?= _("Envío mensual al centro. La caja y el banco propios no viajan como movimientos, pero se puede enviar el saldo de tesorería para que el centro actualice el disponible.") ?></p>
+<p class="muted"><?= _("Envío mensual al centro. La caja y el banco propios no viajan como movimientos. Se envía el disponible (saldo menos el remanente), para que el centro pueda actualizar el suyo.") ?></p>
 <p id="yo-remesa-msg" class="ok" hidden></p>
 <p id="yo-remesa-err" class="error" hidden></p>
 <section class="yo-remesa-resumen">
@@ -19,6 +19,9 @@
         <input id="yo-remesa-tesoreria" inputmode="decimal">
     </label>
 </p>
+<p><?= _("Remanente que se queda") ?>: <strong id="yo-remesa-remanente">0,00</strong>
+    <a href="/yo/remanente"><?= _("Cambiar") ?></a></p>
+<p><?= _("Disponible que se envía") ?>: <strong id="yo-remesa-disponible">0,00</strong></p>
 <p id="yo-asig" class="ok" hidden></p>
 <p>
     <button type="button" id="yo-remesa-enviar"><?= _("Cerrar y enviar mes") ?></button>

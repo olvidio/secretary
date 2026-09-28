@@ -28,6 +28,7 @@ if (!empty($contentView) && is_file($contentView)) {
     <?php if (!empty($mostrarRemesas)): ?>
     <a href="/yo/remesas" class="<?= ($nav ?? '') === 'yo-remesas' ? 'on' : '' ?>"><?= _("Remesa") ?></a>
     <?php endif; ?>
+    <a href="/yo/remanente" class="<?= ($nav ?? '') === 'yo-remanente' ? 'on' : '' ?>"><?= _("Remanente") ?></a>
     <a href="/yo/cierre" class="<?= ($nav ?? '') === 'yo-cierre' ? 'on' : '' ?>"><?= _("Cierre") ?></a>
     <a href="/yo/centros" class="<?= ($nav ?? '') === 'yo-centros' ? 'on' : '' ?>"><?= _("Centros") ?></a>
 </nav>

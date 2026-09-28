@@ -7,6 +7,7 @@ namespace src\acceso\application;
 use InvalidArgumentException;
 use src\acceso\domain\contracts\CifradorSecretos;
 use src\acceso\domain\contracts\IdentidadRepository;
+use src\acceso\domain\entity\Identidad;
 use src\acceso\domain\services\TotpRfc6238;
 
 final class PrepararTotp
@@ -34,8 +35,25 @@ final class PrepararTotp
 
         return [
             'secreto' => $secreto,
-            'uri' => TotpRfc6238::otpauthUri($identidad->email, $secreto),
+            'uri' => TotpRfc6238::otpauthUri($this->etiqueta($identidadId, $identidad), $secreto),
             'email' => $identidad->email,
         ];
+    }
+
+    private function etiqueta(int $identidadId, Identidad $identidad): string
+    {
+        $nombres = [];
+        foreach ($this->identidades->centrosDe($identidadId) as $centro) {
+            $nombres[] = $centro->nombre !== '' ? $centro->nombre : $centro->codigo;
+        }
+        if ($nombres !== []) {
+            $sitio = implode(', ', $nombres);
+        } elseif ($identidad->esAdmin) {
+            $sitio = _('Administrador');
+        } else {
+            $sitio = $identidad->alias ?? _('Libro personal');
+        }
+
+        return $sitio . ' - ' . $identidad->email;
     }
 }

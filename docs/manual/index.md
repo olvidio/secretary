@@ -45,6 +45,7 @@ Los **procesos que cruzan varias pantallas** (cierre mensual, remesa y disponibl
 | Cargar el extracto del banco y clasificarlo | Banco |
 | Organizar sus categorías propias | Categorías |
 | Cerrar el mes y enviarlo al centro | Remesa |
+| Dejar una cantidad en el banco y no enviarla | Remanente |
 | Fijar lo que se repite cada mes | Cierre |
 | Pedir unirse a un centro | Centros |
 | Guardar una copia de su libro | Copia personal |

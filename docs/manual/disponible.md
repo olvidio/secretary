@@ -16,7 +16,7 @@ Guarda, persona a persona, el dinero que aún hay que aplicar a labores apostól
 4. Revisar el texto («Deberías ingresar…») y pulsar **Confirmar y apuntar**. Eso anota las 7 en el libro P y baja el disponible.
 5. La persona ve el mismo texto en su pantalla de remesa.
 
-Al aceptar una remesa, si la persona envió el saldo de su caja/banco, se puede marcar **Sustituir el disponible por esa tesorería**.
+Al aceptar una remesa, si la persona envió el disponible (saldo de su caja y banco menos el remanente), se puede marcar **Sustituir el disponible por este importe**.
 
 ## Reglas que conviene saber
 

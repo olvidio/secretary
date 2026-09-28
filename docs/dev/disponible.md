@@ -2,8 +2,9 @@
 
 Tras aceptar una remesa, el neto (ingresos − gastos, tipo A) se **aparca** en
 `DISP.<INICIALES>` para dejar `CC.*` a cero. El valor operativo vive en
-`saldos_disponibles` (ajustable a mano). La tesorería enviada en la remesa
-puede **sustituir** ese disponible.
+`saldos_disponibles` (ajustable a mano). El disponible enviado en la remesa
+(saldo de caja y banco menos el remanente de la persona) puede **sustituir**
+ese disponible.
 
 La propuesta de destinos 7 reparte según presupuesto, tramos de desgravación
 (configurables: 250 € al 80 % y resto al 40 % por defecto) y el **tope** del

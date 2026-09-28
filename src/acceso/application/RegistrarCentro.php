@@ -10,6 +10,7 @@ use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\entity\Identidad;
 use src\ambito\application\CrearCentro;
 use src\ambito\domain\entity\Centro;
+use src\plan\domain\services\CatalogoPlanesContables;
 
 /**
  * Alta pública de un centro nuevo con su secretario (nivel 2).
@@ -36,6 +37,7 @@ final class RegistrarCentro
         string $passwordConfirm,
         string $nombre = '',
         bool $aceptoCondiciones = false,
+        string $planContable = CatalogoPlanesContables::H16N,
     ): array {
         $codigo = trim($codigo);
         $nombreCentro = trim($nombreCentro);
@@ -46,10 +48,13 @@ final class RegistrarCentro
         $passwordConfirm = trim($passwordConfirm);
         $nombre = trim($nombre);
         if ($codigo === '' || $nombreCentro === '') {
-            throw new InvalidArgumentException(_("Código y nombre del centro son obligatorios"));
+            throw new InvalidArgumentException(_("La sigla y el nombre son obligatorios"));
         }
         if (!in_array($tipo, ['n', 'sg'], true)) {
             throw new InvalidArgumentException(_("Indique el tipo de centro: n o sg"));
+        }
+        if (!CatalogoPlanesContables::esValido($planContable)) {
+            throw new InvalidArgumentException(_("Plan contable no válido"));
         }
         if ($alias === '' || $email === '') {
             throw new InvalidArgumentException(_("Usuario y correo del secretario son obligatorios"));
@@ -78,6 +83,7 @@ final class RegistrarCentro
             'codigo' => $codigo,
             'nombre' => $nombreCentro,
             'tipo' => $tipo,
+            'plan_contable' => $planContable,
             'usuario' => $alias,
             'email' => $email,
             'password' => $password,

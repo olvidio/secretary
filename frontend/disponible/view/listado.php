@@ -1,5 +1,5 @@
 <h1><?= _("Disponible") ?></h1>
-<p class="muted"><?= _("Saldo operativo de cada persona para aplicar a labores apostólicas (partidas 7). No es la cuenta corriente contable: se puede ajustar a mano y, al aceptar una remesa, se puede sustituir por el saldo de tesorería que envía la persona.") ?></p>
+<p class="muted"><?= _("Saldo operativo de cada persona para aplicar a labores apostólicas (partidas 7). No es la cuenta corriente contable: se puede ajustar a mano y, al aceptar una remesa, se puede sustituir por el disponible que envía la persona (saldo de su cuenta menos el remanente).") ?></p>
 <p id="disp-err" class="error" hidden></p>
 <p id="disp-ok" class="ok" hidden></p>
 <table id="tabla-disponible">

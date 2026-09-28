@@ -6,8 +6,10 @@ namespace src\conceptos\application;
 
 use src\conceptos\domain\entity\Concepto;
 use src\conceptos\domain\services\ReglasConceptoPlan;
+use src\plan\domain\contracts\DestinoSgRepository;
 use src\plan\domain\contracts\PartidaLaboresRepository;
 use src\plan\domain\contracts\PlanConceptoRepository;
+use src\plan\domain\services\DestinosCentroSg;
 
 /** Catálogo efectivo de un centro: plan (sin 7x) + partidas VII del centro. */
 final class ResolverConceptosCentro
@@ -15,6 +17,7 @@ final class ResolverConceptosCentro
     public function __construct(
         private readonly PlanConceptoRepository $planConceptos,
         private readonly PartidaLaboresRepository $partidasLabores,
+        private readonly ?DestinoSgRepository $destinos = null,
     ) {
     }
 
@@ -57,7 +60,7 @@ final class ResolverConceptosCentro
         usort($out, static fn (array $a, array $b): int => [$a['cuenta'], $a['orden'], $a['codigo']]
             <=> [$b['cuenta'], $b['orden'], $b['codigo']]);
 
-        return $out;
+        return DestinosCentroSg::aplicar($out, $this->destinos?->nombrados($centroId));
     }
 
     public function buscar(int $centroId, string $cuenta, string $codigo): ?Concepto

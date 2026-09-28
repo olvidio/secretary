@@ -20,8 +20,11 @@
 
   function qs(sel) { return document.querySelector(sel); }
   function fmtCents(cents) {
-    const n = (Math.abs(cents) / 100).toFixed(2).replace('.', ',');
-    return (cents < 0 ? '-' : '') + n;
+    return (cents / 100).toLocaleString(secretaryLocale(), {
+      useGrouping: true,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
   function colorDe(codigo) {
     let h = 0;
@@ -867,6 +870,29 @@
     }
   }
 
+  function centsDeImporte(raw) {
+    let s = String(raw || '').trim().replace(/[\s\u00A0]/g, '');
+    if (s === '') return null;
+    if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+    if (!/^-?\d+(\.\d+)?$/.test(s)) return null;
+    return Math.round(Number(s) * 100);
+  }
+
+  function pintarDisponibleRemesa() {
+    const inp = qs('#yo-remesa-tesoreria');
+    const out = qs('#yo-remesa-disponible');
+    if (!inp || !out) return;
+    const escrito = String(inp.value || '').trim();
+    const saldo = centsDeImporte(inp.value);
+    if (escrito !== '' && saldo === null) {
+      out.textContent = '—';
+      return;
+    }
+    const base = saldo === null ? Number(inp.dataset.saldoCents || 0) : saldo;
+    const rem = Math.max(0, Number(inp.dataset.remanenteCents || 0));
+    out.textContent = fmtCents(Math.max(0, base - rem));
+  }
+
   async function pintarRemesas() {
     const msg = qs('#yo-remesa-msg');
     const err = qs('#yo-remesa-err');
@@ -888,10 +914,23 @@
       estado.textContent = env + ace + (r.puede_enviar ? '' : (' · ' + (r.motivo || '')));
     }
     const inpTes = qs('#yo-remesa-tesoreria');
-    if (inpTes && (inpTes.value === '' || inpTes.dataset.auto === '1')) {
-      inpTes.value = r.saldo_tesoreria || '';
-      inpTes.dataset.auto = '1';
-      inpTes.oninput = () => { inpTes.dataset.auto = '0'; };
+    const remTxt = qs('#yo-remesa-remanente');
+    if (remTxt) remTxt.textContent = r.remanente_es || '0,00';
+    if (inpTes) {
+      inpTes.dataset.remanenteCents = String(r.remanente_cents || 0);
+      inpTes.dataset.saldoCents = String(r.saldo_tesoreria_cents || 0);
+      if (inpTes.value === '' || inpTes.dataset.auto === '1') {
+        inpTes.value = r.saldo_tesoreria || '';
+        inpTes.dataset.auto = '1';
+      }
+      if (!inpTes.dataset.bound) {
+        inpTes.dataset.bound = '1';
+        inpTes.addEventListener('input', () => {
+          inpTes.dataset.auto = '0';
+          pintarDisponibleRemesa();
+        });
+      }
+      pintarDisponibleRemesa();
     }
     const asigBox = qs('#yo-asig');
     if (asigBox) {
@@ -1169,6 +1208,34 @@
     if (nav === 'yo-cierre') {
       bindCierreForms();
       await pintarCierre();
+    }
+    if (nav === 'yo-remanente') {
+      await pintarRemanente();
+    }
+  }
+
+  async function pintarRemanente() {
+    const form = qs('#form-remanente');
+    const r = await api('/api/yo/remanente');
+    if (!r.ok) return alert(r.error || t('error'));
+    const inp = qs('#yo-remanente');
+    if (inp && document.activeElement !== inp) inp.value = r.remanente_es || '';
+    if (form && !form.dataset.bound) {
+      form.dataset.bound = '1';
+      form.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const msg = qs('#msg-remanente');
+        const err = qs('#err-remanente');
+        if (msg) msg.hidden = true;
+        if (err) err.hidden = true;
+        const s = await api('/api/yo/remanente', { method: 'POST', body: formObj(ev.target) });
+        if (!s.ok) {
+          if (err) { err.textContent = s.error || t('no_se_pudo_guardar'); err.hidden = false; }
+          return;
+        }
+        if (inp) inp.value = s.remanente_es || '';
+        if (msg) msg.hidden = false;
+      });
     }
   }
   if (document.readyState === 'loading') {

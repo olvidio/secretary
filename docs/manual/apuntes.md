@@ -10,7 +10,7 @@ Es el listado de todo lo anotado en el centro, con filtros. Sirve para buscar un
 
 ## Cómo se usa
 
-1. Ajustar los filtros: libro (P, G o los dos), procedencia (A, B o C), iniciales, concepto y fechas.
+1. Ajustar los filtros: libro (P, G o los dos), procedencia (A, B o C), iniciales, concepto y fechas. En un centro sg (plan H16s) los filtros son otros: nombre, concepto y fechas. La tabla es la del talonario: fecha, nombre, concepto, observaciones y cantidad. No hay libro P/G ni procedencia A/B/C.
 2. Pulsar «Filtrar». El listado sale ordenado por fecha.
 3. Para corregir una fila, pulsar «Editar»: se abre una ventana con todos los campos y el cursor puesto en observaciones. Guardar aplica el cambio; Escape o «Cancelar» lo descarta.
 4. Para quitar una fila, «Borrar» y confirmar.

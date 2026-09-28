@@ -11,10 +11,12 @@ use src\ambito\domain\entity\Ejercicio;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\personal\application\ResolverPeriodoPersonal;
 use src\personal\application\ResolverPersonaActual;
+use src\personal\domain\contracts\RemanenteRepository;
 use src\personal\domain\services\PeriodoPersonal;
 use src\personal\domain\value_objects\ContextoPersonal;
 use src\remesas\domain\entity\RemesaLinea;
 use src\remesas\domain\services\AgregadorRemesaPersonal;
+use src\remesas\domain\services\CalculoDisponibleRemesa;
 
 final class ResolverMesRemesa
 {
@@ -24,6 +26,7 @@ final class ResolverMesRemesa
         private readonly AsientoRepository $asientos,
         private readonly CuentaRepository $cuentas,
         private readonly ResolverPeriodoPersonal $periodoPersonal,
+        private readonly RemanenteRepository $remanentes,
     ) {
     }
 
@@ -35,6 +38,8 @@ final class ResolverMesRemesa
      *   mes: int,
      *   lineas: list<RemesaLinea>,
      *   tesoreria_cents: int,
+     *   remanente_cents: int,
+     *   disponible_cents: int,
      *   hasta: string
      * }
      */
@@ -85,6 +90,7 @@ final class ResolverMesRemesa
                 $tesoreria += (int) $row['saldo_cents'];
             }
         }
+        $remanente = $this->remanentes->dePersona($ctx->personaId);
 
         return [
             'ctx' => $ctx,
@@ -93,6 +99,8 @@ final class ResolverMesRemesa
             'mes' => $mes,
             'lineas' => $lineas,
             'tesoreria_cents' => $tesoreria,
+            'remanente_cents' => $remanente,
+            'disponible_cents' => CalculoDisponibleRemesa::cents($tesoreria, $remanente),
             'hasta' => $periodo['hasta'],
         ];
     }

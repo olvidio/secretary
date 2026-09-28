@@ -12,17 +12,41 @@ final class CatalogoPlanesContables
 {
     public const H16N = 'H16n';
 
+    /** Contabilidad de un club: un solo libro, plan propio, importación Grisbi. */
+    public const CLUB = 'Club';
+
+    /** Secretario de sg: un solo libro, conceptos y 613 del Excel sg-v5. */
+    public const CENTRO_SG = 'H16s';
+
     /** @return list<array{codigo:string,nombre:string}> */
     public static function todos(): array
     {
         return [
             ['codigo' => self::H16N, 'nombre' => 'H16n'],
+            ['codigo' => self::CLUB, 'nombre' => 'Club'],
+            ['codigo' => self::CENTRO_SG, 'nombre' => 'H16s'],
         ];
     }
 
     public static function esValido(string $codigo): bool
     {
-        return $codigo === self::H16N;
+        foreach (self::todos() as $plan) {
+            if ($plan['codigo'] === $codigo) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static function esClub(string $codigo): bool
+    {
+        return $codigo === self::CLUB;
+    }
+
+    public static function esCentroSg(string $codigo): bool
+    {
+        return $codigo === self::CENTRO_SG;
     }
 
     /** @return list<string> */

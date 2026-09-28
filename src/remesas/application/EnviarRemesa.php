@@ -7,6 +7,7 @@ namespace src\remesas\application;
 use InvalidArgumentException;
 use src\remesas\domain\contracts\RemesaRepository;
 use src\remesas\domain\entity\Remesa;
+use src\remesas\domain\services\CalculoDisponibleRemesa;
 use src\remesas\domain\services\HashRemesa;
 use src\shared\domain\value_objects\Dinero;
 
@@ -31,9 +32,10 @@ final class EnviarRemesa
         }
         $ctx = $preview['ctx'];
         $lineas = $preview['lineas'];
-        $tesoreria = array_key_exists('saldo_tesoreria', $datos) && $datos['saldo_tesoreria'] !== '' && $datos['saldo_tesoreria'] !== null
+        $saldo = array_key_exists('saldo_tesoreria', $datos) && $datos['saldo_tesoreria'] !== '' && $datos['saldo_tesoreria'] !== null
             ? Dinero::fromInput((string) $datos['saldo_tesoreria'])->toCents()
             : (int) $preview['tesoreria_cents'];
+        $tesoreria = CalculoDisponibleRemesa::cents($saldo, (int) $preview['remanente_cents']);
         $hash = HashRemesa::deLineas($lineas, $tesoreria);
         $enviada = $this->remesas->enviadaDe($ctx->personaId, $ejercicio->id, $anio, $mes);
         if ($enviada !== null && $enviada->hashContenido === $hash) {

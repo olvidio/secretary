@@ -6,6 +6,8 @@ namespace src\informes\application;
 
 use DateTimeImmutable;
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\domain\contracts\CentroRepository;
+use src\plan\domain\services\CatalogoPlanesContables;
 use src\apuntes\application\ListarApuntes;
 use src\apuntes\domain\services\SaldoCuadreApuntes;
 use src\asientos\domain\contracts\AsientoRepository;
@@ -23,6 +25,7 @@ final class CalcularSaldos
         private readonly ResolverAmbitoActual $ambito,
         private readonly ListarApuntes $listarApuntes,
         private readonly ResolverConceptosCentro $conceptos,
+        private readonly ?CentroRepository $centros = null,
     ) {
     }
 
@@ -42,8 +45,21 @@ final class CalcularSaldos
             $hastaStr,
         );
 
+        $centro = $this->centros?->porId($contexto->centroId);
+        $club = $centro !== null && CatalogoPlanesContables::esClub($centro->planContableCodigo);
         $caja = Dinero::zero();
         $banco = Dinero::zero();
+        if ($club) {
+            foreach ($this->asientos->saldosTesoreriaHasta($contexto->centroId, $hastaStr) as $row) {
+                $saldo = Dinero::fromCents($row['saldo_cents']);
+                if ($row['codigo_maestro'] === 'CAJA' && $row['libro'] !== 'X') {
+                    $caja = $caja->add($saldo);
+                }
+                if ($row['codigo_maestro'] === 'BANCO' && $row['libro'] !== 'X') {
+                    $banco = $banco->add($saldo);
+                }
+            }
+        }
         $saldoA = Dinero::zero();
         $porPersonaMap = [];
         $personasPorId = [];
@@ -55,10 +71,10 @@ final class CalcularSaldos
 
         foreach ($saldos as $row) {
             $saldo = Dinero::fromCents($row['saldo_cents']);
-            if ($row['tipo'] === 'tesoreria' && $row['codigo_maestro'] === 'CAJA' && $row['libro'] !== 'X') {
+            if (!$club && $row['tipo'] === 'tesoreria' && $row['codigo_maestro'] === 'CAJA' && $row['libro'] !== 'X') {
                 $caja = $caja->add($saldo);
             }
-            if ($row['tipo'] === 'tesoreria' && $row['codigo_maestro'] === 'BANCO' && $row['libro'] !== 'X') {
+            if (!$club && $row['tipo'] === 'tesoreria' && $row['codigo_maestro'] === 'BANCO' && $row['libro'] !== 'X') {
                 $banco = $banco->add($saldo);
             }
             if (

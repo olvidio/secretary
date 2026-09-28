@@ -7,6 +7,7 @@ namespace src\ambito\infrastructure\http;
 use InvalidArgumentException;
 use src\ambito\application\CrearCuentaFisica;
 use src\ambito\application\DesactivarCuentaFisica;
+use src\ambito\application\EditarCuentaFisica;
 use src\ambito\application\ListarCuentasFisicas;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
@@ -18,6 +19,7 @@ final class TesoreriaController
         private readonly ListarCuentasFisicas $listar,
         private readonly CrearCuentaFisica $crear,
         private readonly DesactivarCuentaFisica $desactivar,
+        private readonly EditarCuentaFisica $editar,
     ) {
     }
 
@@ -35,6 +37,17 @@ final class TesoreriaController
                 'fisica' => $resultado['fisica']->toArray(),
                 'cuentas' => array_map(static fn ($c) => $c->toArray(), $resultado['cuentas']),
             ]);
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+    }
+
+    public function editar(Request $request, array $vars): Response
+    {
+        try {
+            $fisica = $this->editar->ejecutar((int) ($vars['id'] ?? 0), $request->json());
+
+            return ContestarJson::ok(['fisica' => $fisica->toArray()]);
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
         }

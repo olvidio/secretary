@@ -112,6 +112,32 @@ final class PdoEjercicioRepository implements EjercicioRepository
         return $this->porId($id) ?? throw new RuntimeException('Ejercicio no encontrado tras guardar');
     }
 
+    public function eliminar(int $id): void
+    {
+        $this->pdo->beginTransaction();
+        try {
+            $this->pdo->prepare(
+                'UPDATE asientos SET asiento_par_id = NULL
+                 WHERE asiento_par_id IN (SELECT id FROM asientos WHERE ejercicio_id = :ej)'
+            )->execute([':ej' => $id]);
+            $this->pdo->prepare('UPDATE asientos SET asiento_par_id = NULL WHERE ejercicio_id = :ej')->execute([':ej' => $id]);
+            $this->pdo->prepare('DELETE FROM asientos WHERE ejercicio_id = :ej')->execute([':ej' => $id]);
+            $this->pdo->prepare('DELETE FROM remesas WHERE ejercicio_id = :ej')->execute([':ej' => $id]);
+            $this->pdo->prepare('DELETE FROM import_ejecuciones WHERE ejercicio_id = :ej')->execute([':ej' => $id]);
+            $this->pdo->prepare('DELETE FROM envios_dl WHERE ejercicio_id = :ej')->execute([':ej' => $id]);
+            $this->pdo->prepare('DELETE FROM asignaciones_labores WHERE ejercicio_id = :ej')->execute([':ej' => $id]);
+            $this->pdo->prepare('UPDATE arqueos SET ejercicio_id = NULL WHERE ejercicio_id = :ej')->execute([':ej' => $id]);
+            $this->pdo->prepare('UPDATE saldos_disponibles_mov SET ejercicio_id = NULL WHERE ejercicio_id = :ej')->execute([':ej' => $id]);
+            $this->pdo->prepare('DELETE FROM ejercicios WHERE id = :id')->execute([':id' => $id]);
+            $this->pdo->commit();
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
     /** @return array<string, mixed> */
     private function params(Ejercicio $e): array
     {

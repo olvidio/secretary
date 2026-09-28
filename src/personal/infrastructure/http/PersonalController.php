@@ -16,6 +16,7 @@ use src\personal\application\ListarCategoriasPersonales;
 use src\personal\application\ListarConceptosGenerales;
 use src\personal\application\ListarMovimientosPersonales;
 use src\personal\application\RegistrarMovimientoPersonal;
+use src\personal\application\RemanentePersonal;
 use src\personal\application\ResolverPeriodoPersonal;
 use src\personal\application\ResolverPersonaActual;
 use src\personal\application\ResumenMensualPersonal;
@@ -40,6 +41,7 @@ final class PersonalController
         private readonly GuardarCierrePersonalDefecto $guardarCierreDefecto,
         private readonly GuardarCierrePersonalMes $guardarCierreMes,
         private readonly BorrarCierrePersonalMes $borrarCierreMes,
+        private readonly RemanentePersonal $remanente,
     ) {
     }
 
@@ -86,6 +88,22 @@ final class PersonalController
     {
         try {
             $datos = $this->guardarCierreMes->ejecutar($request->json());
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+
+        return ContestarJson::ok($datos);
+    }
+
+    public function remanente(Request $request, array $vars = []): Response
+    {
+        return ContestarJson::ok($this->remanente->leer());
+    }
+
+    public function guardarRemanente(Request $request, array $vars = []): Response
+    {
+        try {
+            $datos = $this->remanente->guardar($request->json());
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
         }

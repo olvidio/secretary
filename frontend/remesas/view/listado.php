@@ -32,7 +32,7 @@
     <p id="remesa-detalle-meta" class="muted"></p>
     <p id="remesa-tesoreria" class="muted" hidden></p>
     <label id="remesa-sustituir-wrap" hidden>
-        <input type="checkbox" id="remesa-sustituir"> <?= _("Sustituir el disponible por esa tesorería") ?>
+        <input type="checkbox" id="remesa-sustituir"> <?= _("Sustituir el disponible por este importe") ?>
     </label>
     <table id="tabla-remesa-lineas">
         <thead>

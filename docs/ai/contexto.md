@@ -17,4 +17,4 @@
 - Comprobaciones P/G: cuadre P/21↔G/11 y meses sin movimiento hasta la fecha de cierre (`MesesSinMovimiento`; la exención de Nombres excluye meses). El cierre de vivienda automática solo reparte entre quien aporta a G.
 - Editar apunte: PUT `/api/apuntes/{id}` (`ActualizarApunte`). UI en Apuntes y Por concepto; foco en observaciones; confirmación si cambia otro campo.
 - Nivel 1 (D5): libro `X` por persona, pantallas `/yo`. TOTP no obligatorio. Demo `yo` / `cambiar`. Ver `docs/dev/personal.md`.
-- Remesas (D6, Fase 8): envío mensual X → P del centro, versionado, detalle bajo petición. Al aceptar se aparca el sobrante en DISP y se puede sustituir el disponible por la tesorería enviada. Ver `docs/dev/remesas.md` y `docs/dev/disponible.md`.
+- Remesas (D6, Fase 8): envío mensual X → P del centro, versionado, detalle bajo petición. Al aceptar se aparca el sobrante en DISP y se puede sustituir el disponible por el importe enviado (saldo de caja y banco menos el remanente de la persona). Ver `docs/dev/remesas.md` y `docs/dev/disponible.md`.

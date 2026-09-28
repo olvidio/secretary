@@ -29,6 +29,8 @@ final class ListarEjercicios
             $posterior = $id !== null ? $this->repo->posteriorConAnteriorId($id) : null;
 
             $row['asientos_apertura'] = $asientosApertura;
+            $row['asientos'] = $asientosApertura + ($id !== null ? $this->asientos->contarNoApertura($id) : 0);
+            $row['puede_eliminar'] = $posterior === null;
             $row['puede_cerrar'] = $e->estado === 'abierto';
             $row['puede_regenerar_apertura'] = $e->estado === 'abierto'
                 && $e->ejercicioAnteriorId !== null;

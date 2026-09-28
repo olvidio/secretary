@@ -621,6 +621,31 @@ final class PdoAsientoRepository implements AsientoRepository
         }
     }
 
+    public function saldosTesoreriaHasta(int $centroId, string $hasta): array
+    {
+        $st = $this->pdo->prepare(
+            "SELECT c.cuenta_fisica_id, c.libro, c.codigo_maestro,
+                    COALESCE(SUM(m.debe - m.haber), 0) AS saldo_cents
+             FROM cuentas c
+             JOIN movimientos m ON m.cuenta_id = c.id
+             JOIN asientos a ON a.id = m.asiento_id AND a.anulado_at IS NULL AND a.fecha <= :hasta
+             WHERE c.centro_id = :centro AND c.tipo = 'tesoreria'
+             GROUP BY c.cuenta_fisica_id, c.libro, c.codigo_maestro"
+        );
+        $st->execute([':centro' => $centroId, ':hasta' => $hasta]);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $out[] = [
+                'cuenta_fisica_id' => $row['cuenta_fisica_id'] !== null ? (int) $row['cuenta_fisica_id'] : null,
+                'libro' => (string) $row['libro'],
+                'codigo_maestro' => (string) $row['codigo_maestro'],
+                'saldo_cents' => (int) $row['saldo_cents'],
+            ];
+        }
+
+        return $out;
+    }
+
     public function saldosPorCuenta(
         int $centroId,
         int $ejercicioId,

@@ -6,9 +6,11 @@ namespace src\informes\application;
 
 use DateTimeImmutable;
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\contracts\CuentaFisicaRepository;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
+use src\plan\domain\services\CatalogoPlanesContables;
 use src\shared\domain\value_objects\Dinero;
 
 final class ObtenerSaldosTesoreria
@@ -18,6 +20,7 @@ final class ObtenerSaldosTesoreria
         private readonly CuentaFisicaRepository $fisicas,
         private readonly ConfiguracionRepository $config,
         private readonly ResolverAmbitoActual $ambito,
+        private readonly CentroRepository $centros,
     ) {
     }
 
@@ -30,20 +33,29 @@ final class ObtenerSaldosTesoreria
         $hastaStr = $fechaHasta->format('Y-m-d');
 
         $contexto = $this->ambito->ejecutar();
-        $saldos = $this->asientos->saldosPorCuenta(
-            $contexto->centroId,
-            $contexto->ejercicioId,
-            $desde,
-            $hastaStr,
-        );
-
+        $centro = $this->centros->porId($contexto->centroId);
+        $club = $centro !== null && CatalogoPlanesContables::esClub($centro->planContableCodigo);
         $porFisicaLibro = [];
-        foreach ($saldos as $row) {
-            if ($row['tipo'] !== 'tesoreria' || $row['cuenta_fisica_id'] === null) {
-                continue;
+        if ($club) {
+            foreach ($this->asientos->saldosTesoreriaHasta($contexto->centroId, $hastaStr) as $row) {
+                if ($row['cuenta_fisica_id'] === null) {
+                    continue;
+                }
+                $porFisicaLibro[$row['cuenta_fisica_id']][$row['libro']] = Dinero::fromCents($row['saldo_cents']);
             }
-            $fid = $row['cuenta_fisica_id'];
-            $porFisicaLibro[$fid][$row['libro']] = Dinero::fromCents($row['saldo_cents']);
+        } else {
+            $saldos = $this->asientos->saldosPorCuenta(
+                $contexto->centroId,
+                $contexto->ejercicioId,
+                $desde,
+                $hastaStr,
+            );
+            foreach ($saldos as $row) {
+                if ($row['tipo'] !== 'tesoreria' || $row['cuenta_fisica_id'] === null) {
+                    continue;
+                }
+                $porFisicaLibro[$row['cuenta_fisica_id']][$row['libro']] = Dinero::fromCents($row['saldo_cents']);
+            }
         }
 
         $out = [];

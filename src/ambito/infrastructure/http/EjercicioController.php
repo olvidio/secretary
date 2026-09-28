@@ -7,6 +7,7 @@ namespace src\ambito\infrastructure\http;
 use InvalidArgumentException;
 use RuntimeException;
 use src\ambito\application\CrearEjercicio;
+use src\ambito\application\EliminarEjercicio;
 use src\ambito\application\ListarEjercicios;
 use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\domain\contracts\CentroRepository;
@@ -31,6 +32,7 @@ final class EjercicioController
         private readonly CerrarEjercicio $cerrar,
         private readonly ReabrirEjercicio $reabrir,
         private readonly GenerarApertura $generarApertura,
+        private readonly EliminarEjercicio $eliminar,
         private readonly CentroRepository $centros,
         private readonly ResolverAmbitoActual $ambito,
     ) {
@@ -83,6 +85,21 @@ final class EjercicioController
             $ejercicio = $this->reabrir->ejecutar((int) ($vars['id'] ?? 0));
 
             return ContestarJson::ok(['ejercicio' => $ejercicio->toArray()]);
+        } catch (InvalidArgumentException | RuntimeException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+    }
+
+    public function eliminar(Request $request, array $vars = []): Response
+    {
+        $centro = $this->centroActual();
+        if ($centro === null) {
+            return ContestarJson::error(_('No hay ningún centro dado de alta todavía'));
+        }
+        try {
+            $this->eliminar->ejecutar((int) ($vars['id'] ?? 0), $centro->id);
+
+            return ContestarJson::ok(['eliminado' => true]);
         } catch (InvalidArgumentException | RuntimeException $e) {
             return ContestarJson::error($e->getMessage());
         }

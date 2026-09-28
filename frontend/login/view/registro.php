@@ -10,6 +10,10 @@
 <?php
 $tipoCuenta = (string) ($tipoCuenta ?? 'persona');
 $centroTipo = (string) ($centroTipo ?? 'n');
+$esCentro = $tipoCuenta === 'centro';
+$esClub = $tipoCuenta === 'club';
+$esCentroSg = $tipoCuenta === 'centro-sg';
+$esOrganizacion = $esCentro || $esClub || $esCentroSg;
 ?>
 <form method="post" action="/registro" class="login-box" id="form-registro">
     <h1><?= _("Registrarse") ?></h1>
@@ -21,28 +25,40 @@ $centroTipo = (string) ($centroTipo ?? 'n');
     <fieldset class="registro-tipo">
         <legend><?= _("Tipo de cuenta") ?></legend>
         <label class="inline">
-            <input type="radio" name="tipo_cuenta" value="persona"<?= $tipoCuenta !== 'centro' ? ' checked' : '' ?>>
+            <input type="radio" name="tipo_cuenta" value="persona"<?= $esOrganizacion ? '' : ' checked' ?>>
             <?= _("Personal (libro propio)") ?>
         </label>
         <label class="inline">
-            <input type="radio" name="tipo_cuenta" value="centro"<?= $tipoCuenta === 'centro' ? ' checked' : '' ?>>
+            <input type="radio" name="tipo_cuenta" value="centro"<?= $esCentro ? ' checked' : '' ?>>
             <?= _("Centro (secretario)") ?>
+        </label>
+        <label class="inline">
+            <input type="radio" name="tipo_cuenta" value="centro-sg"<?= $esCentroSg ? ' checked' : '' ?>>
+            <?= _("Centro sg") ?>
+        </label>
+        <label class="inline">
+            <input type="radio" name="tipo_cuenta" value="club"<?= $esClub ? ' checked' : '' ?>>
+            <?= _("Associació (club)") ?>
         </label>
     </fieldset>
 
-    <div id="bloque-centro"<?= $tipoCuenta === 'centro' ? '' : ' hidden' ?>>
-        <p class="muted"><?= _("Crea un centro nuevo y la cuenta de su secretario. Tras confirmar el correo deberá activar el segundo factor.") ?></p>
-        <label><?= _("Código del centro") ?> <input name="codigo_centro" autocomplete="off" value="<?= htmlspecialchars((string) ($codigoCentro ?? ''), ENT_QUOTES) ?>"></label>
-        <label><?= _("Nombre del centro") ?> <input name="nombre_centro" autocomplete="organization" value="<?= htmlspecialchars((string) ($nombreCentro ?? ''), ENT_QUOTES) ?>"></label>
-        <label><?= _("Tipo de centro") ?>
-            <select name="centro_tipo">
-                <option value="n"<?= $centroTipo === 'n' ? ' selected' : '' ?>><?= _("n") ?></option>
-                <option value="sg"<?= $centroTipo === 'sg' ? ' selected' : '' ?>><?= _("sg") ?></option>
-            </select>
-        </label>
+    <div id="bloque-centro"<?= $esOrganizacion ? '' : ' hidden' ?>>
+        <p class="muted" id="ayuda-centro"<?= $esCentro ? '' : ' hidden' ?>><?= _("Crea un centro nuevo y la cuenta de su secretario. Tras confirmar el correo deberá activar el segundo factor.") ?></p>
+        <p class="muted" id="ayuda-centro-sg"<?= $esCentroSg ? '' : ' hidden' ?>><?= _("Crea la contabilidad de un centro sg (un solo libro, como el Excel Secretario sg) y la cuenta de quien la lleva. Tras confirmar el correo deberá activar el segundo factor.") ?></p>
+        <p class="muted" id="ayuda-club"<?= $esClub ? '' : ' hidden' ?>><?= _("Crea la contabilidad de una associació y la cuenta de quien la lleva. Tras confirmar el correo deberá activar el segundo factor.") ?></p>
+        <label><?= _("Sigla") ?> <input name="codigo_centro" autocomplete="off" value="<?= htmlspecialchars((string) ($codigoCentro ?? ''), ENT_QUOTES) ?>"></label>
+        <label><?= _("Nombre") ?> <input name="nombre_centro" autocomplete="organization" value="<?= htmlspecialchars((string) ($nombreCentro ?? ''), ENT_QUOTES) ?>"></label>
+        <div id="bloque-tipo-centro"<?= $esCentro ? '' : ' hidden' ?>>
+            <label><?= _("Tipo de centro") ?>
+                <select name="centro_tipo">
+                    <option value="n"<?= $centroTipo === 'n' ? ' selected' : '' ?>><?= _("n") ?></option>
+                    <option value="sg"<?= $centroTipo === 'sg' ? ' selected' : '' ?>><?= _("sg") ?></option>
+                </select>
+            </label>
+        </div>
     </div>
 
-    <div id="bloque-persona"<?= $tipoCuenta === 'centro' ? ' hidden' : '' ?>>
+    <div id="bloque-persona"<?= $esOrganizacion ? ' hidden' : '' ?>>
         <p class="muted"><?= _("Cuenta personal sin centro. Tras confirmar el correo podrá solicitar acceso a un centro de tipo n.") ?></p>
     </div>
 
@@ -69,11 +85,16 @@ $centroTipo = (string) ($centroTipo ?? 'n');
 <script>
 document.querySelectorAll('[name=tipo_cuenta]').forEach((r) => {
   r.addEventListener('change', () => {
-    const esCentro = document.querySelector('[name=tipo_cuenta]:checked').value === 'centro';
-    document.getElementById('bloque-centro').hidden = !esCentro;
-    document.getElementById('bloque-persona').hidden = esCentro;
-    document.querySelector('[name=codigo_centro]').required = esCentro;
-    document.querySelector('[name=nombre_centro]').required = esCentro;
+    const tipo = document.querySelector('[name=tipo_cuenta]:checked').value;
+    const esOrganizacion = tipo === 'centro' || tipo === 'club' || tipo === 'centro-sg';
+    document.getElementById('bloque-centro').hidden = !esOrganizacion;
+    document.getElementById('bloque-persona').hidden = esOrganizacion;
+    document.getElementById('bloque-tipo-centro').hidden = tipo !== 'centro';
+    document.getElementById('ayuda-centro').hidden = tipo !== 'centro';
+    document.getElementById('ayuda-centro-sg').hidden = tipo !== 'centro-sg';
+    document.getElementById('ayuda-club').hidden = tipo !== 'club';
+    document.querySelector('[name=codigo_centro]').required = esOrganizacion;
+    document.querySelector('[name=nombre_centro]').required = esOrganizacion;
   });
 });
 document.querySelector('[name=tipo_cuenta]:checked')?.dispatchEvent(new Event('change'));

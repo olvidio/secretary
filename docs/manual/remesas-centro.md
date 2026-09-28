@@ -13,7 +13,7 @@ Es la bandeja donde llega lo que cada persona envía al cerrar su mes: sus ingre
 1. El desplegable **Estado** filtra por recibidas, aceptadas, rechazadas, sustituidas o todas. Pulsar **Filtrar** actualiza la tabla.
 2. La tabla da el mes, la persona, la versión, el estado, el importe y la fecha de envío.
 3. **Ver** en una fila abre abajo el detalle de esa remesa, con una línea por concepto. Si hay versión anterior, se indica qué conceptos han cambiado. Volver a pulsar **Ver** en otra fila cambia el detalle.
-4. En el detalle: **Aceptar** o, escribiendo antes el motivo en «Nota al rechazar», **Rechazar**. Las dos piden confirmación. Si la persona envió el saldo de su caja y banco, aparece la casilla **Sustituir el disponible por esa tesorería**.
+4. En el detalle: **Aceptar** o, escribiendo antes el motivo en «Nota al rechazar», **Rechazar**. Las dos piden confirmación. Si la persona envió el disponible (saldo de su caja y banco menos el remanente que se queda), aparece la casilla **Sustituir el disponible por este importe**.
 5. En cada línea del detalle, **Solicitar detalle** pide permiso a la persona para ver el desglose. Cuando autoriza, el botón pasa a **Ver detalle** / **Ocultar detalle** (alterna el panel con subcuentas, importes y gastos marcados como generales).
 
 ## Reglas que conviene saber
@@ -23,7 +23,7 @@ Es la bandeja donde llega lo que cada persona envía al cerrar su mes: sus ingre
 - Rechazar una remesa enviada no deja rastro. Rechazar una ya aceptada borra lo que hubiera anotado y deshace el disponible de esa remesa.
 - Los gastos que la persona marque como generales generan además los apuntes del libro general.
 - Los apuntes que vienen de una remesa no se editan ni se borran a mano: se corrigen pidiendo a la persona que reenvíe el mes.
-- La caja y el banco propios de la persona no viajan como movimientos; sí puede enviarse el saldo de tesorería.
+- La caja y el banco propios de la persona no viajan como movimientos. Sí se envía el disponible: el saldo de caja y banco menos el remanente que la persona deja en su cuenta.
 - Lo aceptado sale en el 613 P y en Cuentas personales, cortado por la fecha de cierre.
 - Las 7 que la persona ya hizo viajan en la remesa. Las de la propuesta de Disponible se apuntaron al confirmar y no se vuelven a cargar.
 

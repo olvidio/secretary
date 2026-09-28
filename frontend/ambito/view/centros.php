@@ -1,6 +1,11 @@
+<?php $esClub = !empty($esClub); ?>
 <h1><?= _("Centros") ?></h1>
 <p>
-    <?= _("Este centro tiene sus propias cuentas, nombres y secretario. Un usuario como scl2 se vincula a otro centro y no ve los datos de éste.") ?>
+    <?php if ($esClub): ?>
+        <?= _("Esta associació tiene sus propias cuentas y su secretario. Quien lleve otra no ve los datos de ésta.") ?>
+    <?php else: ?>
+        <?= _("Este centro tiene sus propias cuentas, nombres y secretario. Un usuario como scl2 se vincula a otro centro y no ve los datos de éste.") ?>
+    <?php endif; ?>
 </p>
 
 <section>
@@ -20,6 +25,16 @@
         <label><?= _("Nombre del usuario") ?> <input name="nombre" autocomplete="name"></label>
         <button type="submit"><?= _("Vincular") ?></button>
     </form>
+    <?php if ($esClub): ?>
+    <h3><?= _("Importar Grisbi") ?></h3>
+    <p class="muted"><?= _("Carga un fichero .gsb en esta associació. Las categorías nuevas se crean como cuentas y los movimientos como asientos. Volver a importar el mismo fichero no duplica.") ?></p>
+    <form id="form-grisbi" class="grid-form">
+        <label><?= _("Fichero .gsb") ?> <input name="grisbi" type="file" accept=".gsb,.xml,text/xml" required></label>
+        <button type="submit"><?= _("Importar") ?></button>
+    </form>
+    <p class="ok" id="msg-import" hidden></p>
+    <p class="muted"><?= _("Mientras estemos de pruebas: vaciar asientos para volver a cargar un fichero. Quedan la associació y los usuarios.") ?></p>
+    <?php else: ?>
     <h3><?= _("Excel de este centro") ?></h3>
     <p class="muted"><?= _("Carga el .xlsm en el libro de este centro, sin tocar el de los demás.") ?></p>
     <form id="form-import" class="grid-form">
@@ -32,9 +47,11 @@
     </form>
     <p class="ok" id="msg-import" hidden></p>
     <p class="muted"><?= _("Mientras estemos de pruebas: vaciar asientos, remesas y arqueos para volver a cargar el Excel. Quedan el centro, los usuarios y los nombres.") ?></p>
+    <?php endif; ?>
     <button type="button" id="btn-vaciar" class="peligro"><?= _("Vaciar datos (pruebas)") ?></button>
     <p class="ok" id="msg-vaciar" hidden></p>
 
+    <?php if (!$esClub): ?>
     <section id="sec-labores" hidden>
         <h3><?= _("VII. Otras labores apostólicas (613 P)") ?></h3>
         <p class="muted" id="labores-ayuda"><?= _("Partidas del capítulo VII en el plan H16n. Aparecen en el 613 P y como conceptos de gasto en P.") ?></p>
@@ -50,6 +67,7 @@
         </p>
         <p class="ok" id="msg-labores" hidden></p>
     </section>
+    <?php endif; ?>
 </section>
 <script>
 const I18N_CENTROS = {
@@ -59,6 +77,10 @@ const I18N_CENTROS = {
   noCentro: <?= json_encode(_("No se pudo cargar el centro"), JSON_UNESCAPED_UNICODE) ?>,
   partidasGuardadas: <?= json_encode(_("Partidas guardadas."), JSON_UNESCAPED_UNICODE) ?>,
   excelImportado: <?= json_encode(_("Excel importado."), JSON_UNESCAPED_UNICODE) ?>,
+  grisbiImportado: <?= json_encode(_("Grisbi importado."), JSON_UNESCAPED_UNICODE) ?>,
+  confirmVaciarClub: <?= json_encode(_("Esto borra los asientos de ESTA associació para poder volver a importar. Quedan la associació y los usuarios. ¿Seguro?"), JSON_UNESCAPED_UNICODE) ?>,
+  vaciadosClub: <?= json_encode(_("Vaciados %s asientos en %s ejercicio(s). Ya puedes importar el fichero."), JSON_UNESCAPED_UNICODE) ?>,
+  esClub: <?= $esClub ? 'true' : 'false' ?>,
   faltaResponsable: <?= json_encode(_("Marque que el centro es responsable de los datos de las personas que da de alta."), JSON_UNESCAPED_UNICODE) ?>,
   confirmVaciar: <?= json_encode(_("Esto borra asientos, remesas y arqueos de ESTE centro para poder recargar el Excel. Quedan el centro, los usuarios y los nombres. ¿Seguro?"), JSON_UNESCAPED_UNICODE) ?>,
   vaciados: <?= json_encode(_("Vaciados %s asientos en %s ejercicio(s). Ya puedes importar el Excel."), JSON_UNESCAPED_UNICODE) ?>,
@@ -136,7 +158,7 @@ async function loadCentro() {
 }
 document.addEventListener('DOMContentLoaded', () => {
   loadCentro();
-  loadLabores();
+  if (!I18N_CENTROS.esClub) loadLabores();
   document.getElementById('btn-add-labor')?.addEventListener('click', () => {
     const tb = document.querySelector('#tabla-labores tbody');
     tb.appendChild(filaLabor({ codigo: sugerirCodigoLabor(), etiqueta: '' }));
@@ -159,7 +181,25 @@ document.addEventListener('DOMContentLoaded', () => {
     ev.target.reset();
     loadCentro();
   };
-  document.getElementById('form-import').onsubmit = async (ev) => {
+  document.getElementById('form-grisbi')?.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const btn = ev.target.querySelector('button[type=submit]');
+    const msg = document.getElementById('msg-import');
+    btn.disabled = true;
+    msg.hidden = true;
+    try {
+      const s = await api('/api/grisbi/importar', { method: 'POST', body: new FormData(ev.target) });
+      if (!s.ok) return alert(s.error || 'Error');
+      msg.hidden = false;
+      msg.textContent = I18N_CENTROS.grisbiImportado
+        + ' Altas: ' + (s.altas || 0) + '. Omitidos: ' + (s.omitidos || 0) + '. Listados: ' + (s.listados || 0)
+        + ((s.avisos && s.avisos.length) ? ' ' + s.avisos.join(' ') : '');
+      ev.target.reset();
+    } finally {
+      btn.disabled = false;
+    }
+  });
+  document.getElementById('form-import')?.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     if (!ev.target.querySelector('[name=asumo_responsable_nombres]')?.checked) {
       return alert(I18N_CENTROS.faltaResponsable);
@@ -177,16 +217,18 @@ document.addEventListener('DOMContentLoaded', () => {
     } finally {
       btn.disabled = false;
     }
-  };
+  });
   document.getElementById('btn-vaciar').onclick = async () => {
-    if (!confirm(I18N_CENTROS.confirmVaciar)) {
+    const pregunta = I18N_CENTROS.esClub ? I18N_CENTROS.confirmVaciarClub : I18N_CENTROS.confirmVaciar;
+    if (!confirm(pregunta)) {
       return;
     }
     const s = await api('/api/centros/vaciar', {method:'POST', body: {confirmar: true}});
     if (!s.ok) return alert(s.error);
     const msg = document.getElementById('msg-vaciar');
     msg.hidden = false;
-    msg.textContent = I18N_CENTROS.vaciados
+    const plantilla = I18N_CENTROS.esClub ? I18N_CENTROS.vaciadosClub : I18N_CENTROS.vaciados;
+    msg.textContent = plantilla
       .replace('%s', s.asientos || 0)
       .replace('%s', s.ejercicios || 0);
   };

@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       enlazarAccionesApunte(tr, a, () => document.getElementById('form-conc').requestSubmit());
       tb.appendChild(tr);
     });
-    document.getElementById('suma').textContent = sumaLabel + s.toFixed(2);
+    document.getElementById('suma').textContent = sumaLabel + fmtImporteEs(s);
   };
 });
 </script>

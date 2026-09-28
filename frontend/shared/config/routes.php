@@ -27,6 +27,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/yo/banco', [PageController::class, 'yoBanco']);
     $r->addRoute('GET', '/yo/remesas', [PageController::class, 'yoRemesas']);
     $r->addRoute('GET', '/yo/cierre', [PageController::class, 'yoCierre']);
+    $r->addRoute('GET', '/yo/remanente', [PageController::class, 'yoRemanente']);
     $r->addRoute('GET', '/yo/centros', [PageController::class, 'yoCentros']);
     $r->addRoute('GET', '/yo/ayuda', [PageController::class, 'yoAyuda']);
     $r->addRoute('GET', '/admin', [PageController::class, 'admin']);
@@ -34,6 +35,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/admin/centros', [PageController::class, 'adminCentros']);
     $r->addRoute('GET', '/admin/usuarios', [PageController::class, 'adminUsuarios']);
     $r->addRoute('GET', '/admin/legal', [PageController::class, 'adminLegal']);
+    $r->addRoute('GET', '/admin/copias', [PageController::class, 'adminCopias']);
     $cuenta = [
         ['/cuenta/mail', 'acceso/view/cuenta_mail.php', 'cuenta-mail'],
         ['/cuenta/password', 'acceso/view/cuenta_password.php', 'cuenta-password'],
@@ -78,12 +80,15 @@ return static function (RouteCollector $r): void {
         ['/ayuda', 'ayuda/view/ayuda.php', 'ayuda'],
         ['/arqueo-p', 'arqueo/view/form.php', 'arqueo-p'],
         ['/arqueo-g', 'arqueo/view/form.php', 'arqueo-g'],
+        ['/arqueo', 'arqueo/view/club.php', 'arqueo'],
         ['/ejercicios', 'ambito/view/ejercicios.php', 'ejercicios'],
         ['/tesoreria', 'ambito/view/tesoreria.php', 'tesoreria'],
         ['/traspasos', 'asientos/view/traspasos.php', 'traspasos'],
         ['/remesas', 'remesas/view/listado.php', 'remesas'],
         ['/disponible', 'disponible/view/listado.php', 'disponible'],
         ['/enviar-dl', 'envio_dl/view/form.php', 'enviar-dl'],
+        ['/listados', 'listados/view/listado.php', 'listados'],
+        ['/aportaciones', 'listados/view/aportaciones.php', 'aportaciones'],
     ];
     foreach ($pages as [$path, $view, $nav]) {
         $extra = ['view' => $view, 'nav' => $nav];

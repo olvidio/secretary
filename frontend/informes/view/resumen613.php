@@ -1,6 +1,9 @@
-<?php $cuenta = $cuentaInforme ?? 'P'; ?>
+<?php
+$cuenta = $cuentaInforme ?? 'P';
+$codigo613 = ($cuenta === 'G' && !empty($esCentroSg)) ? 'G-D' : $cuenta;
+?>
 <div class="informe-613-wrap">
-    <h1 class="print-hide"><?= sprintf(_("Resumen mensual 613 %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
+    <h1 class="print-hide"><?= sprintf(_("Resumen mensual 613 %s"), htmlspecialchars($codigo613, ENT_QUOTES)) ?></h1>
     <p class="print-hide informe-613-ayuda"><?= _("Las celdas azules admiten valores introducidos manualmente; se guardan al salir del campo.") ?></p>
     <p class="print-hide informe-613-acciones">
         <a href="/arqueo-<?= strtolower($cuenta) ?>?from=613"><?= sprintf(_("Arqueo %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></a>
@@ -40,7 +43,27 @@
             <tbody id="informe-613-body"></tbody>
         </table>
 
-        <?php if ($cuenta === 'G'): ?>
+        <?php if ($cuenta === 'G' && !empty($esCentroSg)): ?>
+        <p class="informe-613-nota">* <?= _("Supone 100% aportaciones (nº s × 12)") ?></p>
+        <section class="informe-613-resumen-g informe-613-cierre-sg" id="informe-613-resumen-g">
+            <div class="informe-613-vb-fila">
+                <span><?= _("VºBº El d") ?></span>
+                <span class="informe-613-vb-scl"><?= _("VºBº El scl") ?></span>
+                <div class="informe-613-arqueo-bloque">
+                    <span class="informe-613-resumen-negrita"><?= _("Arqueo fin de mes") ?></span>
+                    <div class="informe-613-arqueo-dato">
+                        <span><?= _("Saldo contable") ?></span>
+                        <span class="num" id="rg-saldo-sg"></span>
+                    </div>
+                    <div class="informe-613-arqueo-dato">
+                        <span><?= _("Dinero y vales") ?></span>
+                        <input type="text" name="dinero_arqueo_caja" id="rg-dinero-caja"
+                               class="num informe-613-cocina-input" aria-label="<?= htmlspecialchars(_("Dinero y vales"), ENT_QUOTES) ?>">
+                    </div>
+                </div>
+            </div>
+        </section>
+        <?php elseif ($cuenta === 'G'): ?>
         <section class="informe-613-resumen-g" id="informe-613-resumen-g">
             <div class="informe-613-resumen-fila">
                 <span><?= _("Número de personas") ?></span>
@@ -88,12 +111,14 @@
         </section>
 
         <div class="informe-613-pie">
+            <?php if ($cuenta !== 'G' || empty($esCentroSg)): ?>
             <div class="informe-613-firmas">
                 <div class="informe-613-firma informe-613-firma-d"><?= _("VºBº El d") ?></div>
                 <div class="informe-613-firma informe-613-firma-scl"><?= _("VºBº El scl") ?></div>
             </div>
+            <?php endif; ?>
             <div class="informe-613-pie-meta">
-                <span id="codigo-informe">613 <?= htmlspecialchars($cuenta, ENT_QUOTES) ?></span>
+                <span id="codigo-informe">613 <?= htmlspecialchars($codigo613, ENT_QUOTES) ?></span>
                 <span id="fecha-impresion"></span>
             </div>
         </div>

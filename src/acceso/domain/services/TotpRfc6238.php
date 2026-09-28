@@ -50,7 +50,8 @@ final class TotpRfc6238
 
     public static function otpauthUri(string $cuenta, string $secretBase32, string $emisor = 'Secretario'): string
     {
-        $label = rawurlencode($emisor . ':' . $cuenta);
+        // El emisor va solo en el parámetro issuer: la app ya lo muestra aparte.
+        $label = rawurlencode($cuenta);
         $query = http_build_query([
             'secret' => $secretBase32,
             'issuer' => $emisor,

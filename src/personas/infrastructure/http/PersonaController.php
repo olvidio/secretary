@@ -6,6 +6,9 @@ namespace src\personas\infrastructure\http;
 
 use InvalidArgumentException;
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\domain\contracts\CentroRepository;
+use src\personas\infrastructure\persistence\PdoPersonaSg;
+use src\plan\domain\services\CatalogoPlanesContables;
 use src\legal\application\ExigirDeclaracionResponsableNombres;
 use src\legal\application\LecturaAceptacion;
 use src\legal\infrastructure\http\HuellaAceptacionHttp;
@@ -24,14 +27,24 @@ final class PersonaController
         private readonly BorrarPersona $borrar,
         private readonly ResolverAmbitoActual $ambito,
         private readonly ExigirDeclaracionResponsableNombres $declaracionNombres,
+        private readonly PdoPersonaSg $fichasSg,
+        private readonly CentroRepository $centros,
     ) {
     }
 
     public function list(Request $request, array $vars = []): Response
     {
         $centroId = $this->ambito->ejecutar()->centroId;
+        $personas = $this->listar->ejecutarDeCentro($centroId);
+        $fichas = $this->fichasSg->deCentro($centroId);
+        foreach ($personas as &$fila) {
+            $ficha = $fichas[(int) ($fila['id'] ?? 0)] ?? null;
+            $fila['grupo'] = $ficha['grupo'] ?? '';
+            $fila['clase'] = $ficha['clase'] ?? '';
+        }
+        unset($fila);
 
-        return ContestarJson::ok(['personas' => $this->listar->ejecutarDeCentro($centroId)]);
+        return ContestarJson::ok(['personas' => $personas]);
     }
 
     public function save(Request $request, array $vars = []): Response
@@ -60,7 +73,18 @@ final class PersonaController
                     ),
                 );
             }
+            $personaId = $resultado['persona']->id;
+            if ($personaId !== null && $this->esCentroSg() && (isset($datos['grupo']) || isset($datos['clase']))) {
+                $this->fichasSg->guardar(
+                    $personaId,
+                    (int) ($datos['grupo'] ?? 1),
+                    (string) ($datos['clase'] ?? 's'),
+                );
+            }
             $fila = $resultado['persona']->toArray();
+            $ficha = $personaId !== null ? ($this->fichasSg->deCentro($this->ambito->ejecutar()->centroId)[$personaId] ?? null) : null;
+            $fila['grupo'] = $ficha['grupo'] ?? '';
+            $fila['clase'] = $ficha['clase'] ?? '';
             $fila['email'] = $resultado['persona']->email ?? '';
             $fila['vivienda_aporta_generales'] = $resultado['persona']->viviendaAportaGenerales;
             $fila['puede_desgravar'] = $resultado['persona']->puedeDesgravar;
@@ -74,6 +98,17 @@ final class PersonaController
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
         }
+    }
+
+    private function esCentroSg(): bool
+    {
+        try {
+            $centro = $this->centros->porId($this->ambito->ejecutar()->centroId);
+        } catch (\Throwable) {
+            return false;
+        }
+
+        return $centro !== null && CatalogoPlanesContables::esCentroSg($centro->planContableCodigo);
     }
 
     public function delete(Request $request, array $vars): Response

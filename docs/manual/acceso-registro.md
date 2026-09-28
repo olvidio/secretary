@@ -6,18 +6,20 @@
 
 ## Para qué sirve
 
-Sirve para crear una cuenta en el programa. Hay dos modalidades:
+Sirve para crear una cuenta en el programa. Hay cuatro modalidades:
 
 - **Personal:** libro propio sin centro. Tras confirmar el correo puede solicitar acceso a un centro de tipo **n** desde Centros.
-- **Centro (secretario):** crea un centro nuevo (tipo **n** o **sg**) y la cuenta del secretario. Tras confirmar el correo debe activar el segundo factor para operar.
+- **Centro (secretario):** crea un centro nuevo (tipo **n** o **sg**, plan H16n) y la cuenta del secretario. Tras confirmar el correo debe activar el segundo factor para operar.
+- **Centro sg:** crea un centro con el plan **H16s** (un solo libro: aportaciones, gastos, destinos 41–54 y resumen 613). El tipo queda **sg**. Tras confirmar el correo debe activar el segundo factor.
+- **Associació (club):** crea un centro con plan Club (un solo libro) y la cuenta de quien lo lleva. Tras confirmar el correo debe activar el segundo factor.
 
 Tras registrarse, el programa envía un correo con enlace de confirmación (48 horas). No se puede entrar hasta confirmarlo. Al marcar la casilla y abrir el enlace se aceptan las [Condiciones de uso](/condiciones) y se informa de la [Política de privacidad](/privacidad).
 
 ## Cómo se usa
 
 1. En la pantalla de entrada, pulsar «Registrarse».
-2. Elegir **Personal** o **Centro (secretario)**.
-3. Si es centro: escribir código, nombre y tipo (**n** o **sg**).
+2. Elegir **Personal**, **Centro (secretario)**, **Centro sg** o **Associació (club)**.
+3. Si es centro H16n: escribir sigla, nombre y tipo (**n** o **sg**). Si es centro sg o associació: sigla y nombre.
 4. Escribir usuario, correo, nombre (opcional) y contraseña (dos veces).
 5. Marcar que se aceptan las condiciones (la casilla viene vacía) y pulsar «Crear cuenta».
 6. Confirmar el correo recibido. El mensaje recuerda la versión de las condiciones.

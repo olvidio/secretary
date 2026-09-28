@@ -25,14 +25,20 @@ final class PlanContableSeeder
             return;
         }
 
-        $pdo->prepare('UPDATE centros SET plan_contable_id = :p')->execute([':p' => $h16nId]);
+        $pdo->prepare(
+            'UPDATE centros SET plan_contable_id = :p WHERE plan_contable_id IS NULL'
+        )->execute([':p' => $h16nId]);
         PlanConceptoSeeder::sembrar($pdo);
         self::backfillPartidasLegacy($pdo);
     }
 
     private static function backfillPartidasLegacy(PDO $pdo): void
     {
-        $centros = $pdo->query('SELECT id FROM centros')->fetchAll();
+        $centros = $pdo->query(
+            "SELECT c.id FROM centros c
+             LEFT JOIN planes_contables p ON p.id = c.plan_contable_id
+             WHERE COALESCE(p.codigo, 'H16n') NOT IN ('Club', 'H16s')"
+        )->fetchAll();
         foreach ($centros as $row) {
             PdoPartidaLaboresRepository::sembrarLegacy($pdo, (int) $row['id']);
         }

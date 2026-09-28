@@ -58,7 +58,12 @@ final class AmbitoSeeder
     {
         [$cajaId, $bancoId] = self::sembrarCuentasFisicas($pdo, $centroId);
         self::sembrarPlanMaestro($pdo, $centroId);
-        self::sembrarCuentasTesoreria($pdo, $centroId, $cajaId, $bancoId);
+        $plan = self::codigoPlanCentro($pdo, $centroId);
+        $unLibro = $plan === CatalogoPlanesContables::CLUB || $plan === CatalogoPlanesContables::CENTRO_SG;
+        self::sembrarCuentasTesoreria($pdo, $centroId, $cajaId, $bancoId, $unLibro ? ['G'] : ['P', 'G']);
+        if ($unLibro) {
+            return;
+        }
         self::sembrarPuenteEntreLibros($pdo, $centroId);
         self::sembrarPuentePeriodificacion($pdo, $centroId);
         self::sembrarResultadoEjerciciosAnteriores($pdo, $centroId);
@@ -209,6 +214,8 @@ final class AmbitoSeeder
             [$tipo, $naturaleza, $imputable] = match ($c['naturaleza']) {
                 'ingreso' => ['ingreso', 'acreedora', true],
                 'gasto' => ['gasto', 'deudora', true],
+                'grupo-gasto' => ['gasto', 'deudora', false],
+                'grupo-ingreso' => ['ingreso', 'acreedora', false],
                 'saldo' => ['personal', 'deudora', false],
                 'disponible' => ['patrimonio', 'acreedora', true],
                 'transferencia' => ['puente', 'deudora', true],
@@ -231,6 +238,16 @@ final class AmbitoSeeder
             ]);
         }
 
+        $plan = self::codigoPlanCentro($pdo, $centroId);
+        if ($plan === CatalogoPlanesContables::CENTRO_SG) {
+            self::aplicarDestinosSg($pdo, $centroId);
+
+            return;
+        }
+        if ($plan === CatalogoPlanesContables::CLUB) {
+            return;
+        }
+
         foreach ($partidasLabores as $p) {
             self::upsertCuenta($pdo, [
                 'centro_id' => $centroId,
@@ -246,6 +263,32 @@ final class AmbitoSeeder
                 'codigo_maestro' => $p['codigo'],
                 'imputable' => true,
                 'orden' => $p['orden'],
+            ]);
+        }
+    }
+
+    private static function aplicarDestinosSg(PDO $pdo, int $centroId): void
+    {
+        $st = $pdo->prepare(
+            'SELECT codigo, etiqueta, orden FROM centro_destinos_sg
+             WHERE centro_id = :c ORDER BY orden, codigo'
+        );
+        $st->execute([':c' => $centroId]);
+        foreach ($st->fetchAll() as $row) {
+            self::upsertCuenta($pdo, [
+                'centro_id' => $centroId,
+                'persona_id' => null,
+                'cuenta_fisica_id' => null,
+                'padre_id' => null,
+                'libro' => 'G',
+                'codigo' => (string) $row['codigo'],
+                'nombre' => (string) $row['etiqueta'],
+                'descripcion' => (string) $row['etiqueta'],
+                'tipo' => 'gasto',
+                'naturaleza' => 'deudora',
+                'codigo_maestro' => (string) $row['codigo'],
+                'imputable' => true,
+                'orden' => (int) $row['orden'],
             ]);
         }
     }
@@ -333,14 +376,33 @@ final class AmbitoSeeder
      * viene de `CatalogoConceptos` porque la tesorería no es un concepto del 613:
      * es la contrapartida de todos ellos.
      */
-    private static function sembrarCuentasTesoreria(PDO $pdo, int $centroId, int $cajaId, int $bancoId): void
+    private static function codigoPlanCentro(PDO $pdo, int $centroId): string
     {
+        $st = $pdo->prepare(
+            "SELECT COALESCE(p.codigo, 'H16n') FROM centros c
+             LEFT JOIN planes_contables p ON p.id = c.plan_contable_id
+             WHERE c.id = :id"
+        );
+        $st->execute([':id' => $centroId]);
+        $codigo = $st->fetchColumn();
+
+        return is_string($codigo) ? $codigo : CatalogoPlanesContables::H16N;
+    }
+
+    /** @param list<string> $libros */
+    private static function sembrarCuentasTesoreria(
+        PDO $pdo,
+        int $centroId,
+        int $cajaId,
+        int $bancoId,
+        array $libros = ['P', 'G'],
+    ): void {
         $fisicas = [
             ['id' => $cajaId, 'maestro' => 'CAJA', 'nombre' => 'Caja', 'orden' => 1],
             ['id' => $bancoId, 'maestro' => 'BANCO', 'nombre' => 'Banco', 'orden' => 1],
         ];
         foreach ($fisicas as $f) {
-            foreach (['P', 'G'] as $libro) {
+            foreach ($libros as $libro) {
                 $codigo = sprintf('%s.%d/%s', $f['maestro'], $f['orden'], $libro);
                 self::upsertCuenta($pdo, [
                     'centro_id' => $centroId,

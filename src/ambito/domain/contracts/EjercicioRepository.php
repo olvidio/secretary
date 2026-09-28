@@ -27,4 +27,7 @@ interface EjercicioRepository
     public function posteriorConAnteriorId(int $ejercicioId): ?Ejercicio;
 
     public function guardar(Ejercicio $ejercicio): Ejercicio;
+
+    /** Borra el ejercicio y los asientos, remesas e importaciones que cuelgan de él. */
+    public function eliminar(int $id): void;
 }

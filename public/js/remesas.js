@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const wrapSust = document.getElementById('remesa-sustituir-wrap');
     if (m.saldo_tesoreria_es != null) {
       tes.hidden = false;
-      tes.textContent = 'Tesorería enviada (caja+banco personal a la fecha de cierre): '
+      tes.textContent = 'Disponible enviado (saldo de caja y banco menos el remanente): '
         + m.saldo_tesoreria_es + ' €';
       wrapSust.hidden = m.estado !== 'enviada';
       document.getElementById('remesa-sustituir').checked = false;

@@ -10,6 +10,7 @@ use src\acceso\application\NotificarRegistroUsuario;
 use src\acceso\application\PrepararTotp;
 use src\acceso\application\ReenviarCorreoVerificacion;
 use src\acceso\application\RegistrarCentro;
+use src\plan\domain\services\CatalogoPlanesContables;
 use src\acceso\application\RegistrarUsuario;
 use src\acceso\application\ResolverPersonaActiva;
 use src\acceso\application\ResultadoLogin;
@@ -288,20 +289,28 @@ final class AuthController
             'centro_tipo' => $tipoCentro,
         ];
         try {
-            if ($tipoCuenta === 'centro') {
+            if ($tipoCuenta === 'centro' || $tipoCuenta === 'club' || $tipoCuenta === 'centro-sg') {
+                $plan = match ($tipoCuenta) {
+                    'club' => CatalogoPlanesContables::CLUB,
+                    'centro-sg' => CatalogoPlanesContables::CENTRO_SG,
+                    default => CatalogoPlanesContables::H16N,
+                };
                 $alta = $this->registrarCentro->ejecutar(
                     $codigoCentro,
                     $nombreCentro,
-                    $tipoCentro,
+                    $tipoCuenta === 'centro' ? $tipoCentro : ($tipoCuenta === 'centro-sg' ? 'sg' : 'n'),
                     $alias,
                     $email,
                     $pass,
                     $confirm,
                     $nombre,
                     $acepto,
+                    $plan,
                 );
-            } else {
+            } elseif ($tipoCuenta === 'persona') {
                 $alta = $this->registrar->ejecutar($alias, $email, $pass, $confirm, $nombre, $acepto);
+            } else {
+                throw new \InvalidArgumentException(_("Tipo de cuenta no válido"));
             }
             $idioma = (string) ($_SESSION['idioma'] ?? 'es');
             $this->registrarAceptacion->ejecutar(

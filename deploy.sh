@@ -10,11 +10,15 @@
 # exporta COMPOSE_DIR. El servicio PHP se llama php-fpm (PHP_SERVICE).
 #
 # Cron, como el usuario dueño del clone (no root):
-#   */5 * * * * /ruta/secretary/deploy.sh >> /var/log/secretary-deploy.log 2>&1
+#   */5 * * * * LC_ALL=C.UTF-8 /ruta/secretary/deploy.sh >> /var/log/secretary-deploy.log 2>&1
 #
 # Repo privado: clave de despliegue en el CT, p. ej.
 #   GIT_SSH_COMMAND="ssh -i ~/.ssh/secretary_deploy -o IdentitiesOnly=yes"
 set -euo pipefail
+
+# Cron/SSH suelen tener LANG=C; sin UTF-8 la salida se ve mal en logs y correos.
+export LANG="${LANG:-C.UTF-8}"
+export LC_ALL="${LC_ALL:-C.UTF-8}"
 
 DRY_RUN=0
 if [[ "${1:-}" == "--dry-run" ]]; then
@@ -94,7 +98,7 @@ if [[ -z "$DESTINO" ]]; then
 fi
 
 if ! git rev-parse "refs/tags/$DESTINO" >/dev/null 2>&1; then
-    log "El tag $DESTINO no existe (¿olvidaste git push origin $DESTINO?)"
+    log "El tag $DESTINO no existe (olvidaste git push origin $DESTINO?)"
     exit 1
 fi
 
@@ -103,14 +107,14 @@ HEAD_SHA="$(git rev-parse HEAD)"
 ACTUAL_TAG="$(git describe --tags --exact-match HEAD 2>/dev/null || true)"
 
 if [[ "$HEAD_SHA" == "$DESTINO_SHA" ]]; then
-    log "Ya está en $DESTINO ($DESTINO_SHA). Nada que hacer."
+    log "Ya esta en $DESTINO ($DESTINO_SHA). Nada que hacer."
     exit 0
 fi
 
 if [[ -n "$ACTUAL_TAG" && -z "${DEPLOY_TAG:-}" && -z "${FORCE:-}" ]]; then
     MAS_NUEVO="$(printf '%s\n%s\n' "$ACTUAL_TAG" "$DESTINO" | sort -V | tail -n 1)"
     if [[ "$MAS_NUEVO" == "$ACTUAL_TAG" ]]; then
-        log "El clone está en $ACTUAL_TAG, más nuevo o igual que $DESTINO. No bajo de versión (FORCE=1 para forzar)."
+        log "El clone esta en $ACTUAL_TAG, mas nuevo o igual que $DESTINO. No bajo de version (FORCE=1 para forzar)."
         exit 0
     fi
 fi
@@ -121,12 +125,12 @@ if git diff --name-only -- VERSION 2>/dev/null | grep -qx VERSION; then
 fi
 
 if [[ -n "$(git diff --name-only)" || -n "$(git diff --cached --name-only)" ]]; then
-    log "El árbol de git tiene cambios locales. No despliego para no pisarlos."
+    log "El arbol de git tiene cambios locales. No despliego para no pisarlos."
     git status --short --untracked-files=no
     exit 1
 fi
 
-log "Despliegue $ACTUAL_TAG ($HEAD_SHA) → $DESTINO ($DESTINO_SHA)"
+log "Despliegue $ACTUAL_TAG ($HEAD_SHA) -> $DESTINO ($DESTINO_SHA)"
 if [[ "$DRY_RUN" -eq 1 ]]; then
     log "(dry-run: no toco nada)"
     exit 0
@@ -138,7 +142,7 @@ DID_CHECKOUT=0
 rollback() {
     local codigo=$?
     if [[ "$DID_CHECKOUT" -eq 1 && -n "$PREV_SHA" ]]; then
-        log "Fallo (código $codigo). Vuelvo a $PREV_SHA"
+        log "Fallo (codigo $codigo). Vuelvo a $PREV_SHA"
         git checkout --detach "$PREV_SHA" || true
         en_php composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader || true
         compose restart "$PHP_SERVICE" || true
@@ -147,7 +151,7 @@ rollback() {
 }
 trap rollback ERR
 
-log "Copia de seguridad de la base (código actual)"
+log "Copia de seguridad de la base (codigo actual)"
 en_php php bin/console.php db:backup
 
 log "Checkout $DESTINO"

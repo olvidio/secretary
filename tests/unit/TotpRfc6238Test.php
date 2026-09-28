@@ -44,6 +44,9 @@ final class TotpRfc6238Test extends TestCase
     {
         $uri = TotpRfc6238::otpauthUri('scl@secretario.local', 'MFRGGZDF');
         self::assertStringStartsWith('otpauth://totp/', $uri);
+        self::assertStringContainsString('otpauth://totp/' . rawurlencode('scl@secretario.local') . '?', $uri);
+        self::assertStringNotContainsString(rawurlencode('Secretario - '), $uri);
+        self::assertStringContainsString('issuer=Secretario', $uri);
         self::assertStringContainsString('secret=MFRGGZDF', $uri);
         self::assertStringContainsString('digits=6', $uri);
         self::assertStringContainsString('period=30', $uri);

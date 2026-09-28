@@ -6,7 +6,7 @@
 
 ## Para qué sirve
 
-Reúne lo que afecta al centro como entidad: quién puede entrar a llevar sus cuentas, la carga del libro de Excel del que se viene y las partidas del capítulo VII. El alta de centros nuevos la hace el administrador de plataforma.
+Reúne lo que afecta al centro como entidad: quién puede entrar a llevar sus cuentas, la carga del libro de Excel del que se viene y las partidas del capítulo VII. En una associació (plan Club) no hay labores apostólicas: en su lugar se importa un fichero Grisbi (`.gsb`). El alta de centros nuevos la hace el administrador de plataforma.
 
 Cada centro tiene sus propias cuentas, sus propios nombres y su propio secretario. Un secretario de otro centro no ve nada de este.
 
@@ -14,8 +14,8 @@ Cada centro tiene sus propias cuentas, sus propios nombres y su propio secretari
 
 1. En «Este centro» se ven el nombre del centro y los usuarios que pueden llevarlo.
 2. Para dar acceso a otra persona, rellenar «Añadir usuario de este centro» (alias, correo y contraseña de al menos seis caracteres) y pulsar «Vincular».
-3. Para cargar el libro de Excel, elegir el fichero en «Excel de este centro», marcar que el centro es responsable de los nombres que se importan y pulsar «Importar Excel». Al acabar se indica cuántos nombres y apuntes se han cargado.
-4. En «VII. Otras labores apostólicas»: **Añadir partida** crea una fila; **Quitar** en una fila la elimina. En cada partida se escribe código, etiqueta y si **desgrava**. **Guardar partidas** persiste los cambios.
+3. Para cargar el libro de Excel, elegir el fichero en «Excel de este centro», marcar que el centro es responsable de los nombres que se importan y pulsar «Importar Excel». Al acabar se indica cuántos nombres y apuntes se han cargado. En una associació, el bloque es «Importar Grisbi»: se elige el `.gsb` y se pulsa «Importar».
+4. En «VII. Otras labores apostólicas» (solo centros con plan H16n): **Añadir partida** crea una fila; **Quitar** en una fila la elimina. En cada partida se escribe código, etiqueta y si **desgrava**. **Guardar partidas** persiste los cambios.
 5. **Vaciar datos (pruebas)** borra apuntes, remesas y arqueos del centro para volver a cargar el Excel (pide confirmación); no toca usuarios ni nombres.
 
 ## Reglas que conviene saber

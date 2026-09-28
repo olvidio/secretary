@@ -8,20 +8,27 @@ use src\administracion\infrastructure\http\AdminLegalController;
 use src\administracion\infrastructure\http\AdminPlanController;
 use src\administracion\infrastructure\http\AdminUsuarioController;
 use src\ambito\infrastructure\http\CentroController;
+use src\ambito\infrastructure\http\CopiaCentroController;
 use src\ambito\infrastructure\http\EjercicioController;
 use src\ambito\infrastructure\http\TesoreriaController;
 use src\apuntes\infrastructure\http\ApunteController;
 use src\apuntes\infrastructure\http\BancoCentroController;
 use src\apuntes\infrastructure\http\PlantillaApunteController;
 use src\arqueo\infrastructure\http\ArqueoController;
+use src\arqueo\infrastructure\http\ClubArqueoController;
 use src\ayuda\infrastructure\http\AyudaController;
 use src\asientos\infrastructure\http\TraspasoController;
 use src\cierre\infrastructure\http\CierreController;
 use src\conceptos\infrastructure\http\ConceptoController;
 use src\configuracion\infrastructure\http\ConfiguracionController;
+use src\grisbi\infrastructure\http\GrisbiController;
 use src\informes\infrastructure\http\InformeController;
+use src\listados\infrastructure\http\AportacionesSgController;
+use src\listados\infrastructure\http\ListadoController;
 use src\personas\infrastructure\http\PersonaController;
 use src\personas\infrastructure\http\VinculoCentroController;
+use src\plan\infrastructure\http\ClubCuentasController;
+use src\plan\infrastructure\http\DestinosSgController;
 use src\plan\infrastructure\http\PartidaLaboresController;
 use src\presupuestos\infrastructure\http\PresupuestoController;
 use src\presupuestos\infrastructure\http\PrevisionController;
@@ -109,6 +116,10 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/yo/vinculos-centro/{id:\d+}/desvincular', [VinculoCentroController::class, 'desvincularYo']);
 
     $r->addRoute('GET', '/api/conceptos', [ConceptoController::class, 'list']);
+    $r->addRoute('GET', '/api/club/cuentas', [ClubCuentasController::class, 'list']);
+    $r->addRoute('POST', '/api/club/cuentas', [ClubCuentasController::class, 'crear']);
+    $r->addRoute('POST', '/api/club/plantillas', [ClubCuentasController::class, 'guardarPlantilla']);
+    $r->addRoute('POST', '/api/club/plantillas/aplicar', [ClubCuentasController::class, 'aplicar']);
 
     $r->addRoute('GET', '/api/apuntes', [ApunteController::class, 'list']);
     $r->addRoute('GET', '/api/apuntes/sugerencias', [ApunteController::class, 'sugerencias']);
@@ -139,6 +150,9 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/informes/comprobaciones', [InformeController::class, 'comprobaciones']);
     $r->addRoute('GET', '/api/informes/tesoreria', [InformeController::class, 'tesoreria']);
 
+    $r->addRoute('GET', '/api/destinos-sg', [DestinosSgController::class, 'list']);
+    $r->addRoute('POST', '/api/destinos-sg', [DestinosSgController::class, 'save']);
+
     $r->addRoute('GET', '/api/presupuestos/{cuenta:P|G}', [PresupuestoController::class, 'get']);
     $r->addRoute('POST', '/api/presupuestos/{cuenta:P|G}', [PresupuestoController::class, 'save']);
     $r->addRoute('GET', '/api/previsiones/personal/opciones', [PrevisionController::class, 'opcionesPersonal']);
@@ -152,9 +166,12 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/arqueos/{cuenta:P|G}', [ArqueoController::class, 'save']);
     $r->addRoute('GET', '/api/arqueos/fisica/{id:\d+}', [ArqueoController::class, 'getFisica']);
     $r->addRoute('POST', '/api/arqueos/fisica/{id:\d+}', [ArqueoController::class, 'saveFisica']);
+    $r->addRoute('GET', '/api/arqueo-club', [ClubArqueoController::class, 'estado']);
+    $r->addRoute('POST', '/api/arqueo-club/cuadrar', [ClubArqueoController::class, 'cuadrar']);
 
     $r->addRoute('GET', '/api/tesoreria', [TesoreriaController::class, 'list']);
     $r->addRoute('POST', '/api/tesoreria', [TesoreriaController::class, 'create']);
+    $r->addRoute('POST', '/api/tesoreria/{id:\d+}', [TesoreriaController::class, 'editar']);
     $r->addRoute('POST', '/api/tesoreria/{id:\d+}/desactivar', [TesoreriaController::class, 'desactivar']);
 
     $r->addRoute('POST', '/api/traspasos', [TraspasoController::class, 'traspaso']);
@@ -165,6 +182,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/ejercicios/{id:\d+}/cerrar', [EjercicioController::class, 'cerrar']);
     $r->addRoute('POST', '/api/ejercicios/{id:\d+}/reabrir', [EjercicioController::class, 'reabrir']);
     $r->addRoute('POST', '/api/ejercicios/{id:\d+}/apertura', [EjercicioController::class, 'apertura']);
+    $r->addRoute('POST', '/api/ejercicios/{id:\d+}/eliminar', [EjercicioController::class, 'eliminar']);
 
     $r->addRoute('GET', '/api/yo/resumen', [PersonalController::class, 'resumen']);
     $r->addRoute('GET', '/api/yo/movimientos', [PersonalController::class, 'movimientos']);
@@ -184,6 +202,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/yo/cierre/defecto', [PersonalController::class, 'guardarCierreDefecto']);
     $r->addRoute('POST', '/api/yo/cierre/mes', [PersonalController::class, 'guardarCierreMes']);
     $r->addRoute('POST', '/api/yo/cierre/mes/borrar', [PersonalController::class, 'borrarCierreMes']);
+    $r->addRoute('GET', '/api/yo/remanente', [PersonalController::class, 'remanente']);
+    $r->addRoute('POST', '/api/yo/remanente', [PersonalController::class, 'guardarRemanente']);
     $r->addRoute('GET', '/api/yo/banco/bancos', [BancoPersonalController::class, 'bancos']);
     $r->addRoute('POST', '/api/yo/banco/preferencia', [BancoPersonalController::class, 'guardarPreferencia']);
     $r->addRoute('GET', '/api/yo/banco/pendientes', [BancoPersonalController::class, 'pendientes']);
@@ -217,9 +237,25 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/ayuda/temas', [AyudaController::class, 'listarTemas']);
     $r->addRoute('POST', '/api/ayuda/preguntar', [AyudaController::class, 'preguntar']);
 
+    $r->addRoute('GET', '/api/centros/copias', [CopiaCentroController::class, 'list']);
+    $r->addRoute('POST', '/api/centros/copias/backup', [CopiaCentroController::class, 'backup']);
+    $r->addRoute('GET', '/api/centros/copias/descargar', [CopiaCentroController::class, 'descargar']);
+    $r->addRoute('POST', '/api/centros/copias/restore', [CopiaCentroController::class, 'restore']);
+    $r->addRoute('POST', '/api/centros/copias/borrar', [CopiaCentroController::class, 'borrar']);
+
     $r->addRoute('GET', '/api/copias', [CopiaSeguridadController::class, 'list']);
     $r->addRoute('POST', '/api/copias/backup', [CopiaSeguridadController::class, 'backup']);
     $r->addRoute('GET', '/api/copias/descargar', [CopiaSeguridadController::class, 'descargar']);
     $r->addRoute('POST', '/api/copias/restore', [CopiaSeguridadController::class, 'restore']);
     $r->addRoute('POST', '/api/copias/borrar', [CopiaSeguridadController::class, 'borrar']);
+
+    $r->addRoute('POST', '/api/grisbi/importar', [GrisbiController::class, 'importar']);
+    $r->addRoute('GET', '/api/grisbi/movimientos', [GrisbiController::class, 'movimientos']);
+    $r->addRoute('POST', '/api/grisbi/movimientos/{id:\d+}', [GrisbiController::class, 'editar']);
+    $r->addRoute('POST', '/api/grisbi/movimientos/{id:\d+}/borrar', [GrisbiController::class, 'borrar']);
+    $r->addRoute('GET', '/api/aportaciones-sg', [AportacionesSgController::class, 'list']);
+    $r->addRoute('GET', '/api/listados', [ListadoController::class, 'list']);
+    $r->addRoute('POST', '/api/listados', [ListadoController::class, 'save']);
+    $r->addRoute('POST', '/api/listados/{id:\d+}/borrar', [ListadoController::class, 'delete']);
+    $r->addRoute('GET', '/api/listados/{id:\d+}', [ListadoController::class, 'run']);
 };

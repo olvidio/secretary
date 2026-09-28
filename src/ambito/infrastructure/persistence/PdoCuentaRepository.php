@@ -133,6 +133,15 @@ final class PdoCuentaRepository implements CuentaRepository
         $st->execute([':f' => $cuentaFisicaId]);
     }
 
+    public function renombrarTesoreriaDeFisica(int $cuentaFisicaId, string $nombre): void
+    {
+        $st = $this->pdo->prepare(
+            "UPDATE cuentas SET nombre = :n || ' · ' || libro
+             WHERE cuenta_fisica_id = :f AND tipo = 'tesoreria'"
+        );
+        $st->execute([':n' => $nombre, ':f' => $cuentaFisicaId]);
+    }
+
     public function personalDe(int $centroId, int $personaId): ?Cuenta
     {
         $st = $this->pdo->prepare(

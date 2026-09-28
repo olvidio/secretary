@@ -98,6 +98,14 @@ interface AsientoRepository
      *
      * @return list<array{id:int, libro:string, codigo:string, codigo_maestro:string, tipo:string, persona_id:?int, cuenta_fisica_id:?int, saldo_cents:int}>
      */
+    /**
+     * Saldo de caja y banco (debe − haber) de todos los ejercicios, hasta una fecha.
+     * En una associació no hay apertura que arrastre el saldo del año anterior.
+     *
+     * @return list<array{cuenta_fisica_id:?int, libro:string, codigo_maestro:string, saldo_cents:int}>
+     */
+    public function saldosTesoreriaHasta(int $centroId, string $hasta): array;
+
     public function saldosPorCuenta(
         int $centroId,
         int $ejercicioId,

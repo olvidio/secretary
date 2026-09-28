@@ -124,6 +124,8 @@ use src\informes\domain\contracts\Informe613MesRepository;
 use src\informes\domain\services\CuadreViviendaGenerales;
 use src\informes\domain\services\MesesSinMovimiento;
 use src\informes\infrastructure\http\InformeController;
+use src\informes\domain\contracts\EstadisticasSg;
+use src\informes\infrastructure\persistence\PdoEstadisticasSg;
 use src\informes\infrastructure\persistence\PdoInforme613MesRepository;
 use src\personas\application\BorrarPersona;
 use src\personas\application\EstimarBasesLiquidables;
@@ -139,18 +141,25 @@ use src\presupuestos\application\GuardarPrevisionPersonal;
 use src\presupuestos\application\ObtenerPrevisionConsolidada;
 use src\presupuestos\application\ObtenerPrevisionPersonal;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
+use src\presupuestos\domain\contracts\PresupuestoSgRepository;
 use src\presupuestos\domain\contracts\PrevisionPersonalRepository;
 use src\presupuestos\infrastructure\http\PresupuestoController;
 use src\presupuestos\infrastructure\http\PrevisionController;
 use src\presupuestos\infrastructure\persistence\PdoPresupuestoRepository;
+use src\presupuestos\infrastructure\persistence\PdoPresupuestoSg;
 use src\presupuestos\infrastructure\persistence\PdoPrevisionPersonalRepository;
+use src\plan\domain\contracts\DestinoSgRepository;
 use src\plan\domain\contracts\PartidaLaboresRepository;
 use src\plan\domain\contracts\PlanContableRepository;
 use src\plan\domain\contracts\PlanConceptoRepository;
 use src\plan\infrastructure\persistence\PdoPartidaLaboresRepository;
+use src\plan\application\GuardarDestinosSg;
 use src\plan\application\GuardarPartidasLabores;
+use src\plan\application\ListarDestinosSg;
 use src\plan\application\ListarPartidasLabores;
+use src\plan\infrastructure\http\DestinosSgController;
 use src\plan\infrastructure\http\PartidaLaboresController;
+use src\plan\infrastructure\persistence\PdoDestinoSgRepository;
 use src\plan\infrastructure\persistence\PdoPlanContableRepository;
 use src\plan\infrastructure\persistence\PdoPlanConceptoRepository;
 use src\acceso\application\AsegurarIdentidadCentro;
@@ -217,17 +226,20 @@ use src\personal\application\ResumenMensualPersonal;
 use src\personal\application\BorrarCierrePersonalMes;
 use src\personal\application\GuardarCierrePersonalDefecto;
 use src\personal\application\GuardarCierrePersonalMes;
+use src\personal\application\RemanentePersonal;
 use src\personal\application\ResolverPeriodoPersonal;
 use src\personal\domain\contracts\BancoImportRepository;
 use src\personal\domain\contracts\CopiaPersonalRepository;
 use src\personal\domain\contracts\PersonalBancoRepository;
 use src\personal\domain\contracts\PersonalCierreRepository;
+use src\personal\domain\contracts\RemanenteRepository;
 use src\personal\infrastructure\http\BancoPersonalController;
 use src\personal\infrastructure\http\CopiaPersonalController;
 use src\personal\infrastructure\http\PersonalController;
 use src\personal\infrastructure\persistence\PdoCopiaPersonalRepository;
 use src\personal\infrastructure\persistence\PdoBancoImportRepository;
 use src\personal\infrastructure\persistence\PdoPersonalBancoRepository;
+use src\personal\infrastructure\persistence\PdoRemanenteRepository;
 use src\personal\infrastructure\persistence\PdoPersonalCierreRepository;
 use src\remesas\application\AceptarRemesa;
 use src\remesas\application\EnviarRemesa;
@@ -259,6 +271,7 @@ use src\shared\infrastructure\VersiónDespliegue;
 use src\shared\infrastructure\persistence\RutasCopiasSeguridad;
 use function DI\autowire;
 use function DI\factory;
+use function DI\get;
 
 return [
     PDO::class => factory([ConnectionFactory::class, 'fromEnv']),
@@ -268,6 +281,7 @@ return [
     ApunteRepository::class => autowire(PdoApunteRepository::class),
     PlantillaApunteRepository::class => autowire(PdoPlantillaApunteRepository::class),
     PresupuestoRepository::class => autowire(PdoPresupuestoRepository::class),
+    PresupuestoSgRepository::class => autowire(PdoPresupuestoSg::class),
     PrevisionPersonalRepository::class => autowire(PdoPrevisionPersonalRepository::class),
     ConstruirHojaPrevision::class => autowire(),
     ObtenerPrevisionPersonal::class => autowire(),
@@ -279,12 +293,17 @@ return [
     CentroRepository::class => autowire(PdoCentroRepository::class),
     PlanContableRepository::class => autowire(PdoPlanContableRepository::class),
     PlanConceptoRepository::class => autowire(PdoPlanConceptoRepository::class),
-    ResolverConceptosCentro::class => autowire(),
+    ResolverConceptosCentro::class => autowire()
+        ->constructorParameter('destinos', get(DestinoSgRepository::class)),
     ObtenerConceptosPlan::class => autowire(),
     ExportarConceptosPlan::class => autowire(),
     ImportarConceptosPlan::class => autowire(),
     GuardarConceptosPlan::class => autowire(),
     PartidaLaboresRepository::class => autowire(PdoPartidaLaboresRepository::class),
+    DestinoSgRepository::class => autowire(PdoDestinoSgRepository::class),
+    ListarDestinosSg::class => autowire(),
+    GuardarDestinosSg::class => autowire(),
+    DestinosSgController::class => autowire(),
     ListarPartidasLabores::class => autowire(),
     GuardarPartidasLabores::class => autowire(),
     PartidaLaboresController::class => autowire(),
@@ -332,6 +351,8 @@ return [
     BancoImportRepository::class => autowire(PdoBancoImportRepository::class),
     PersonalCierreRepository::class => autowire(PdoPersonalCierreRepository::class),
     PersonalBancoRepository::class => autowire(PdoPersonalBancoRepository::class),
+    RemanenteRepository::class => autowire(PdoRemanenteRepository::class),
+    RemanentePersonal::class => autowire(),
     ResolverPeriodoPersonal::class => autowire(),
     GuardarCierrePersonalDefecto::class => autowire(),
     GuardarCierrePersonalMes::class => autowire(),
@@ -454,7 +475,12 @@ return [
     AdminCentroController::class => autowire(),
     AdminUsuarioController::class => autowire(),
     AdminLegalController::class => autowire(),
-    ObtenerResumen613::class => autowire(),
+    EstadisticasSg::class => autowire(PdoEstadisticasSg::class),
+    ObtenerResumen613::class => autowire()
+        ->constructorParameter('centros', get(CentroRepository::class))
+        ->constructorParameter('destinosSg', get(DestinoSgRepository::class))
+        ->constructorParameter('presupuestoSg', get(PresupuestoSgRepository::class))
+        ->constructorParameter('estadisticasSg', get(EstadisticasSg::class)),
     GuardarInforme613Mes::class => autowire(),
     ObtenerE37::class => autowire(),
     CalcularSaldos::class => autowire(),

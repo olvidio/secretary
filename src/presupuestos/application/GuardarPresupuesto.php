@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace src\presupuestos\application;
 
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\domain\contracts\CentroRepository;
 use src\conceptos\application\ResolverConceptosCentro;
+use src\plan\domain\services\CatalogoPlanesContables;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
+use src\presupuestos\domain\contracts\PresupuestoSgRepository;
 use src\presupuestos\domain\entity\LineaPresupuesto;
 use src\shared\domain\value_objects\Dinero;
 
@@ -16,29 +19,55 @@ final class GuardarPresupuesto
         private readonly PresupuestoRepository $repo,
         private readonly ResolverConceptosCentro $conceptos,
         private readonly ResolverAmbitoActual $ambito,
+        private readonly CentroRepository $centros,
+        private readonly PresupuestoSgRepository $presupuestoSg,
     ) {
     }
 
     /**
      * @param array<string, mixed> $lineas codigo => previsto
      */
-    public function ejecutar(string $cuenta, array $lineas): void
+    public function ejecutar(string $cuenta, array $lineas, ?int $numS = null): void
     {
+        $centroId = $this->ambito->ejecutar()->centroId;
+        $propio = $this->esCentroSg($centroId) && strtoupper($cuenta) === 'G';
         foreach ($lineas as $codigo => $previsto) {
             $codigo = (string) $codigo;
-            if ($this->conceptos->buscar($this->ambito->ejecutar()->centroId, $cuenta, $codigo) === null) {
+            if ($this->conceptos->buscar($centroId, $cuenta, $codigo) === null) {
                 continue;
             }
             $imp = $previsto === '' || $previsto === null ? Dinero::zero() : Dinero::fromInput((string) $previsto);
-            $this->repo->guardar(new LineaPresupuesto($cuenta, $codigo, $imp));
+            $linea = new LineaPresupuesto($cuenta, $codigo, $imp);
+            if ($propio) {
+                $this->presupuestoSg->guardar($centroId, $linea);
+            } else {
+                $this->repo->guardar($linea);
+            }
         }
+        if ($propio && $numS !== null) {
+            $this->presupuestoSg->guardarNumS($centroId, $numS);
+        }
+    }
+
+    public function numS(string $cuenta): ?int
+    {
+        $centroId = $this->ambito->ejecutar()->centroId;
+        if (!$this->esCentroSg($centroId) || strtoupper($cuenta) !== 'G') {
+            return null;
+        }
+
+        return $this->presupuestoSg->numS($centroId);
     }
 
     /** @return list<array<string, mixed>> */
     public function listar(string $cuenta): array
     {
+        $centroId = $this->ambito->ejecutar()->centroId;
+        $guardadas = $this->esCentroSg($centroId) && strtoupper($cuenta) === 'G'
+            ? $this->presupuestoSg->listar($centroId)
+            : $this->repo->listar($cuenta);
         $index = [];
-        foreach ($this->repo->listar($cuenta) as $l) {
+        foreach ($guardadas as $l) {
             $index[$l->conceptoCodigo] = $l;
         }
         $out = [];
@@ -48,5 +77,12 @@ final class GuardarPresupuesto
         }
 
         return $out;
+    }
+
+    private function esCentroSg(int $centroId): bool
+    {
+        $centro = $this->centros->porId($centroId);
+
+        return $centro !== null && CatalogoPlanesContables::esCentroSg($centro->planContableCodigo);
     }
 }

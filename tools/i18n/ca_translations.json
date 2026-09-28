@@ -1215,5 +1215,17 @@
   "— Elija —": "— Trieu —",
   "— concepto —": "CONCEPTE",
   "← Volver": "← Tornar",
-  "← Volver al resumen 613 %s": "← Tornar al resum 613 %s"
+  "← Volver al resumen 613 %s": "← Tornar al resum 613 %s",
+  "Remanente": "Romanent",
+  "Cantidad que se queda en el banco o en la cuenta personal y no se envía al centro. En la remesa se manda el disponible: el saldo de caja y banco menos este remanente.": "Quantitat que es queda al banc o al compte personal i no s'envia al centre. A la remesa s'envia el disponible: el saldo de caixa i banc menys aquest romanent.",
+  "Cantidad que se queda": "Quantitat que es queda",
+  "Cero significa enviar todo el saldo. El remanente es fijo: no cambia solo cada mes.": "Zero vol dir enviar tot el saldo. El romanent és fix: no canvia sol cada mes.",
+  "Envío mensual al centro. La caja y el banco propios no viajan como movimientos. Se envía el disponible (saldo menos el remanente), para que el centro pueda actualizar el suyo.": "Enviament mensual al centre. La caixa i el banc propis no viatgen com a moviments. S'envia el disponible (saldo menys el romanent), perquè el centre pugui actualitzar el seu.",
+  "Remanente que se queda": "Romanent que es queda",
+  "Cambiar": "Canviar",
+  "Disponible que se envía": "Disponible que s'envia",
+  "Sustituir el disponible por este importe": "Substituir el disponible per aquest import",
+  "Saldo operativo de cada persona para aplicar a labores apostólicas (partidas 7). No es la cuenta corriente contable: se puede ajustar a mano y, al aceptar una remesa, se puede sustituir por el disponible que envía la persona (saldo de su cuenta menos el remanente).": "Saldo operatiu de cada persona per aplicar a labors apostòliques (partides 7). No és el compte corrent comptable: es pot ajustar a mà i, en acceptar una remesa, es pot substituir pel disponible que envia la persona (saldo del seu compte menys el romanent).",
+  "¿Enviar este mes al centro? Se manda el disponible (saldo menos remanente), no todo el saldo.": "Enviar aquest mes al centre? S'envia el disponible (saldo menys el romanent), no tot el saldo.",
+  "El remanente no puede ser negativo": "El romanent no pot ser negatiu"
 }

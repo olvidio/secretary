@@ -52,4 +52,42 @@ final class CatalogoMenusTest extends TestCase
             $ids
         );
     }
+
+    public function testClubOcultaLoDeLaCasa(): void
+    {
+        $navs = [];
+        foreach (CatalogoMenus::gruposPara('excel', true) as $grupo) {
+            self::assertNotSame([], $grupo['items']);
+            foreach ($grupo['items'] as $item) {
+                $navs[] = $item['nav'];
+            }
+        }
+        foreach (['nombres', '613-p', '613-g', 'e37', 'e37-resumen', 'entrada-p', 'remesas', 'disponible', 'enviar-dl', 'conceptos-p', 'presupuesto-p', 'prevision-personal', 'cierre'] as $fuera) {
+            self::assertNotContains($fuera, $navs);
+        }
+        self::assertNotContains('grisbi', $navs);
+        self::assertNotContains('centros', $navs);
+        self::assertContains('configuracion', $navs);
+        self::assertContains('listados', $navs);
+        self::assertContains('entrada-g', $navs);
+    }
+
+    public function testCentroSgMuestraElLibroDelExcel(): void
+    {
+        $ids = [];
+        $navs = [];
+        foreach (CatalogoMenus::gruposCentroSg() as $grupo) {
+            $ids[] = $grupo['id'];
+            foreach ($grupo['items'] as $item) {
+                $navs[] = $item['nav'];
+            }
+        }
+        self::assertSame(['centro', 'apuntes', 'cuentas', 'caja'], $ids);
+        foreach (['613-p', 'entrada-p', 'remesas', 'e37', 'centros', 'cierre', 'tesoreria', 'saldos'] as $fuera) {
+            self::assertNotContains($fuera, $navs);
+        }
+        foreach (['nombres', 'entrada-g', 'presupuesto-g', '613-g', 'aportaciones', 'arqueo-g'] as $dentro) {
+            self::assertContains($dentro, $navs);
+        }
+    }
 }

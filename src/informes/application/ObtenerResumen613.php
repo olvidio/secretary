@@ -5,18 +5,23 @@ declare(strict_types=1);
 namespace src\informes\application;
 
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\contracts\CuentaFisicaRepository;
 use src\arqueo\domain\contracts\ArqueoRepository;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\informes\domain\contracts\Informe613MesRepository;
 use src\cierre\domain\services\RepartoCierre;
+use src\informes\domain\contracts\EstadisticasSg;
 use src\informes\domain\services\Calculadora613;
+use src\informes\domain\services\Estadistica613Sg;
+use src\plan\domain\contracts\DestinoSgRepository;
 use src\plan\domain\contracts\PartidaLaboresRepository;
 use src\plan\domain\services\CatalogoPlanesContables;
 use src\plan\domain\services\Estructura613P;
 use src\personas\domain\contracts\PersonaRepository;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
+use src\presupuestos\domain\contracts\PresupuestoSgRepository;
 use src\shared\domain\value_objects\Dinero;
 
 final class ObtenerResumen613
@@ -31,6 +36,10 @@ final class ObtenerResumen613
         private readonly Informe613MesRepository $informes613Mes,
         private readonly ArqueoRepository $arqueos,
         private readonly CuentaFisicaRepository $fisicas,
+        private readonly ?CentroRepository $centros = null,
+        private readonly ?DestinoSgRepository $destinosSg = null,
+        private readonly ?PresupuestoSgRepository $presupuestoSg = null,
+        private readonly ?EstadisticasSg $estadisticasSg = null,
     ) {
     }
 
@@ -69,13 +78,18 @@ final class ObtenerResumen613
             }
         }
 
-        $presu = $this->presupuesto->listar($cuenta);
+        $centroSg = $this->esCentroSg($contexto->centroId);
+        $presu = ($centroSg && $cuenta === 'G' && $this->presupuestoSg !== null)
+            ? $this->presupuestoSg->listar($contexto->centroId)
+            : $this->presupuesto->listar($cuenta);
         $partidasLabores = [];
         $codigosLabores = [];
         if ($cuenta === 'P') {
             $partidasLabores = $this->partidasLabores->paraCentro($contexto->centroId);
             $codigosLabores = Estructura613P::codigosLabores($partidasLabores);
             $defs = Calculadora613::estructuraP($partidasLabores);
+        } elseif ($this->esCentroSg($contexto->centroId)) {
+            $defs = Calculadora613::estructuraCentroSg($this->destinosNombrados($contexto->centroId));
         } else {
             $defs = Calculadora613::estructuraG();
         }
@@ -164,6 +178,72 @@ final class ObtenerResumen613
             $this->aplicarCamposManuales($payload, $contexto->ejercicioId, $cfg->fechaCierre, 'P');
             $payload['plan_contable'] = CatalogoPlanesContables::H16N;
             $payload['partidas_labores'] = $codigosLabores;
+        } elseif ($this->esCentroSg($contexto->centroId)) {
+            $ingresos = $sum(['11', '12', '13', '14']);
+            $gastos = $sum(['21', '22', '23', '24', '25', '26', '27', '28']);
+            $ini = $index['32'] ?? $sum(['32']);
+            $destinosCodigos = [];
+            foreach ($defs as $d) {
+                $n = (int) $d['codigo'];
+                if ($n >= 41 && $n <= 54) {
+                    $destinosCodigos[] = (string) $d['codigo'];
+                }
+            }
+            $destinos = $sum($destinosCodigos);
+            $saldoIngGastosPrev = (new Dinero($ingresos['previsto']))->sub(new Dinero($gastos['previsto']));
+            $saldoIngGastosReal = (new Dinero($ingresos['realizado']))->sub(new Dinero($gastos['realizado']));
+            $dispPrev = $saldoIngGastosPrev->add(new Dinero($ini['previsto']));
+            $dispReal = $saldoIngGastosReal->add(new Dinero($ini['realizado']));
+            $saldoPrev = $dispPrev->sub(new Dinero($destinos['previsto']));
+            $saldoReal = $dispReal->sub(new Dinero($destinos['realizado']));
+            $pctDe = static function (Dinero $prev, Dinero $real): ?float {
+                return $prev->isZero() ? null : (float) $real->toString() / (float) $prev->toString();
+            };
+            $payload['totales'] = [
+                'ingresos' => $ingresos,
+                'gastos' => $gastos,
+                'destinos' => $destinos,
+                'saldo_ingresos_gastos' => [
+                    'previsto' => $saldoIngGastosPrev->toString(),
+                    'previsto_es' => $saldoIngGastosPrev->formatEs(),
+                    'realizado' => $saldoIngGastosReal->toString(),
+                    'realizado_es' => $saldoIngGastosReal->formatEs(),
+                    'pct' => $pctDe($saldoIngGastosPrev, $saldoIngGastosReal),
+                ],
+                'disponible' => [
+                    'previsto' => $dispPrev->toString(),
+                    'previsto_es' => $dispPrev->formatEs(),
+                    'realizado' => $dispReal->toString(),
+                    'realizado_es' => $dispReal->formatEs(),
+                    'pct' => $pctDe($dispPrev, $dispReal),
+                ],
+                'saldo_final' => [
+                    'previsto' => $saldoPrev->toString(),
+                    'previsto_es' => $saldoPrev->formatEs(),
+                    'realizado' => $saldoReal->toString(),
+                    'realizado_es' => $saldoReal->formatEs(),
+                ],
+            ];
+            $payload['plan_contable'] = CatalogoPlanesContables::CENTRO_SG;
+            $centro = $this->centros?->porId($contexto->centroId);
+            if ($centro !== null) {
+                $payload['config']['centro'] = $centro->codigo;
+            }
+            $payload['resumen_sg'] = $this->resumenSg(
+                $contexto->centroId,
+                $contexto->ejercicioId,
+                $desde,
+                $hasta,
+                $presu,
+                $index,
+                $periodo->mesesTranscurridos(),
+            );
+            $payload['saldo_caja'] = $caja->toString();
+            $payload['saldo_caja_es'] = $caja->formatEs();
+            $payload['saldo_banco'] = $banco->toString();
+            $payload['saldo_banco_es'] = $banco->formatEs();
+            $this->aplicarCamposManuales($payload, $contexto->ejercicioId, $cfg->fechaCierre, 'G');
+            $this->aplicarArqueoCaja($payload, $contexto, $cfg->fechaCierre, $caja);
         } else {
             $ingresos = $sum(['11', '12', '13', '14', '15']);
             $gastos = $sum(['201', '202', '203', '204', '205', '206', '207', '208', '209', '210', '211', '212', '213', '214', '215']);
@@ -251,5 +331,67 @@ final class ObtenerResumen613
         if ($manual === '') {
             $payload['dinero_arqueo_caja'] = $arqueo->total->formatEs();
         }
+    }
+
+    /**
+     * @param list<\src\presupuestos\domain\entity\LineaPresupuesto> $presu
+     * @param array<string, array<string, mixed>> $index
+     * @return array<string, mixed>
+     */
+    private function resumenSg(
+        int $centroId,
+        int $ejercicioId,
+        string $desde,
+        string $hasta,
+        array $presu,
+        array $index,
+        int $meses,
+    ): array {
+        $stats = $this->estadisticasSg?->aportacionesOrdinarias($centroId, $ejercicioId, $desde, $hasta)
+            ?? ['num_s' => 0, 'aportaciones' => 0, 'sin_aportacion' => 0];
+        $anual = Dinero::zero();
+        foreach ($presu as $linea) {
+            if ($linea->conceptoCodigo === '11') {
+                $anual = $linea->previsto;
+            }
+        }
+        $realizado = isset($index['11']['realizado'])
+            ? new Dinero((string) $index['11']['realizado'])
+            : Dinero::zero();
+
+        return Estadistica613Sg::armar(
+            $this->presupuestoSg?->numS($centroId) ?? 0,
+            $stats['num_s'],
+            $stats['aportaciones'],
+            $stats['sin_aportacion'],
+            $anual,
+            $realizado,
+            $meses,
+        );
+    }
+
+    /** @return list<array{codigo:string,etiqueta:string}> */
+    private function destinosNombrados(int $centroId): array
+    {
+        $map = $this->destinosSg?->nombrados($centroId);
+        if (!is_array($map)) {
+            return [];
+        }
+        $out = [];
+        foreach ($map as $codigo => $etiqueta) {
+            $out[] = ['codigo' => (string) $codigo, 'etiqueta' => $etiqueta];
+        }
+
+        return $out;
+    }
+
+    private function esCentroSg(int $centroId): bool
+    {
+        if ($this->centros === null) {
+            return false;
+        }
+        $centro = $this->centros->porId($centroId);
+
+        return $centro !== null && CatalogoPlanesContables::esCentroSg($centro->planContableCodigo);
     }
 }

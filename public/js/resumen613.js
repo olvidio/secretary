@@ -3,8 +3,9 @@
 
   function enteroEs(valor) {
     if (valor === null || valor === undefined || valor === '') return '';
-    const n = Math.round(Number(String(valor).replace(',', '.')));
+    let n = Math.round(Number(String(valor).replace(',', '.')));
     if (!Number.isFinite(n)) return '';
+    if (n === 0) n = 0;
     return n.toLocaleString(secretaryLocale(), {
       useGrouping: true,
       minimumFractionDigits: 0,
@@ -178,11 +179,11 @@
   function bloquesG(r) {
     const tot = r.totales || {};
     const out = [];
-    out.push(fila('sec sec-cab', 'I. Ingresos', tot.ingresos));
+    out.push(fila('sec sec-cab sec-total', 'I. Ingresos', tot.ingresos));
     lineas(r, ['11', '12', '13', '14', '15']).forEach((l) => {
       out.push(fila('sub', etiquetaSub(l, '1'), l));
     });
-    out.push(fila('sec sec-cab sec-divide', 'II. Gastos', tot.gastos));
+    out.push(fila('sec sec-cab sec-total sec-divide', 'II. Gastos', tot.gastos));
     lineas(r, GASTOS_G).forEach((l) => {
       out.push(fila('sub', etiquetaGastoG(l), l));
     });
@@ -192,11 +193,74 @@
     return out.join('');
   }
 
+  /** 613 del centro sg: ingresos, gastos, disponible y los destinos que el centro ha nombrado. */
+  function bloquesCentroSg(r) {
+    const tot = r.totales || {};
+    const out = [];
+    out.push(fila('sec sec-cab sec-total', 'I. Ingresos', tot.ingresos));
+    lineas(r, ['11', '12', '13', '14']).forEach((l) => {
+      out.push(fila('sub', etiquetaSub(l, '1'), l));
+    });
+    out.push(fila('sec sec-cab sec-total sec-divide', 'II. Gastos', tot.gastos));
+    lineas(r, ['21', '22', '23', '24', '25', '26', '27', '28']).forEach((l) => {
+      out.push(fila('sub', etiquetaSub(l, '2'), l));
+    });
+    out.push(fila('sec sec-cab sec-total sec-divide', 'III. Disponible', tot.disponible));
+    out.push(fila('sub', '1. Saldo (ingresos-gastos)', tot.saldo_ingresos_gastos));
+    out.push(fila('sub', '2. Disponible a 1 de enero', linea(r, '32')));
+    out.push(fila('sec sec-cab sec-total sec-divide', 'IV. Destinos', tot.destinos));
+    (r.lineas || []).filter((l) => {
+      const n = parseInt(String(l.codigo), 10);
+      return n >= 41 && n <= 54;
+    }).forEach((l) => {
+      out.push(fila('sub', etiquetaSub(l, '4'), l));
+    });
+    out.push(fila('sec sec-cab sec-total', 'V. Saldo final (III-IV)', tot.saldo_final));
+    const s = r.resumen_sg || {};
+    out.push(fila('sub sec-divide', 'Nº de s del ctr', {
+      previsto: s.num_s_previsto,
+      realizado: s.num_s,
+      pct: null,
+    }));
+    out.push(fila('sub', 'Nº acumulado de aportaciones ordinarias', {
+      previsto: s.aportaciones_previsto,
+      realizado: s.aportaciones,
+      pct: s.aportaciones_pct,
+    }));
+    out.push(`<tr class="sub"><td>Media de las aportaciones ordinarias *</td>${SEP}
+      <td class="num">${esc(s.media_prevista_es || '')}</td>${SEP}
+      <td class="num">${esc(s.media_es || '')}</td>${SEP}
+      <td class="num pct">${esc(pct(s.media_pct))}</td></tr>`);
+    out.push(fila('sub', 'Nº de s sin aportación en el año', {
+      previsto: '',
+      realizado: s.sin_aportacion,
+      pct: null,
+    }));
+    return out.join('');
+  }
+
+  function renderResumenSg(r) {
+    const saldo = document.getElementById('rg-saldo-sg');
+    if (saldo) saldo.textContent = decimalEs(r.totales?.saldo_final?.realizado);
+    const vales = document.getElementById('rg-dinero-caja');
+    if (vales) {
+      vales.value = r.dinero_arqueo_caja
+        ? decimalEs(r.dinero_arqueo_caja, { vacio: '' }) : '';
+    }
+  }
+
   function renderResumenG(r) {
     const el = document.getElementById('informe-613-resumen-g');
     if (!el) return;
-    document.getElementById('rg-personas').textContent = enteroEs(r.num_personas);
-    document.getElementById('rg-gasto-viv').textContent = enteroEs(r.gasto_vivienda_persona_mes);
+    if (r.plan_contable === 'H16s') {
+      ['rg-personas', 'rg-gasto-viv', 'rg-cocina-mes', 'rg-cocina-acum'].forEach((id) => {
+        document.getElementById(id)?.closest('.informe-613-resumen-fila')?.setAttribute('hidden', '');
+      });
+    }
+    const personas = document.getElementById('rg-personas');
+    const gastoViv = document.getElementById('rg-gasto-viv');
+    if (personas) personas.textContent = enteroEs(r.num_personas);
+    if (gastoViv) gastoViv.textContent = enteroEs(r.gasto_vivienda_persona_mes);
     document.getElementById('rg-arqueo').textContent =
       r.arqueo_diferencia != null && r.arqueo_diferencia !== ''
         ? enteroEs(Math.round(Number(String(r.arqueo_diferencia).replace(',', '.'))))
@@ -244,10 +308,16 @@
     return s.ok;
   }
 
+  function etiqueta613(r) {
+    if (CUENTA === 'G' && r?.plan_contable === 'H16s') return '613 G-D';
+    return '613 ' + CUENTA;
+  }
+
   function nombrePdf(r) {
     const centro = (r.config?.centro || 'centro').replace(/\s+/g, '_');
     const cierre = (r.config?.fecha_cierre || '').slice(0, 7);
-    return `613_${CUENTA}_${centro}_${cierre}.pdf`;
+    const libro = CUENTA === 'G' && r?.plan_contable === 'H16s' ? 'G-D' : CUENTA;
+    return `613_${libro}_${centro}_${cierre}.pdf`;
   }
 
   function imprimirInforme613() {
@@ -285,12 +355,15 @@
     document.getElementById('ctr-nombre').textContent = r.config.centro;
     document.getElementById('fecha-cierre').textContent = fmtFecha(r.config.fecha_cierre);
     document.getElementById('fecha-impresion').textContent = hoyEs();
-    document.getElementById('codigo-informe').textContent = '613 ' + CUENTA;
+    document.getElementById('codigo-informe').textContent = etiqueta613(r);
 
     const tb = document.getElementById('informe-613-body');
-    tb.innerHTML = CUENTA === 'P' ? bloquesP(r) : bloquesG(r);
+    tb.innerHTML = CUENTA === 'P'
+      ? bloquesP(r)
+      : (r.plan_contable === 'H16s' ? bloquesCentroSg(r) : bloquesG(r));
 
-    if (CUENTA === 'G') renderResumenG(r);
+    if (CUENTA === 'G' && r.plan_contable === 'H16s') renderResumenSg(r);
+    else if (CUENTA === 'G') renderResumenG(r);
 
     const obs = document.getElementById('obs-print');
     const scc = document.getElementById('saldo-cc-personales');

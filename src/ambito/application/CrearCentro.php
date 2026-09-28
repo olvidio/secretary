@@ -69,7 +69,9 @@ final class CrearCentro
             if ($centro->id === null) {
                 throw new InvalidArgumentException(_("No se pudo crear el centro"));
             }
-            $this->partidasLabores->sembrarPorDefecto($centro->id);
+            if (!CatalogoPlanesContables::esClub($planCodigo) && !CatalogoPlanesContables::esCentroSg($planCodigo)) {
+                $this->partidasLabores->sembrarPorDefecto($centro->id);
+            }
             $ejercicio = $this->crearEjercicio->ejecutar([
                 'centro_id' => $centro->id,
                 'etiqueta' => (string) ($datos['etiqueta'] ?? ''),

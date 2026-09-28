@@ -30,13 +30,13 @@ Flujo mensual entre el libro personal y el centro.
 **Persona (Mis cuentas):**
 
 1. Anotar ingresos, gastos y traspasos del mes en Resumen, Lista o Banco.
-2. Ir a **Remesa**, elegir el mes con ‹ ›, revisar las líneas y el saldo de tesorería.
+2. Si hay que dejar dinero en el banco, fijarlo antes en **Remanente**. Ir a **Remesa**, elegir el mes con ‹ ›, revisar las líneas, el saldo y el disponible (saldo menos remanente).
 3. **Cerrar y enviar mes** (pide confirmación). Si el centro ya propuso destinos 7, el texto «Deberías ingresar…» aparece encima del botón.
 
 **Secretario (centro):**
 
 4. **Remesas** → **Filtrar** por recibidas → **Ver** el detalle.
-5. Revisar conceptos e importes. Si la persona mandó saldo de caja/banco, valorar **Sustituir el disponible por esa tesorería**.
+5. Revisar conceptos e importes. Si la persona mandó el disponible (saldo menos remanente), valorar **Sustituir el disponible por este importe**.
 6. **Aceptar** (o **Rechazar** con nota). Aceptar anota P contra la cuenta personal y suma al **disponible** (salvo sustitución por tesorería).
 7. **Disponible** → revisar saldos → **Proponer destinos 7** → revisar el reparto → **Confirmar y apuntar**. Eso anota las 7 en P y baja el disponible.
 8. La persona ve el mismo texto de destinos 7 en su pantalla Remesa.

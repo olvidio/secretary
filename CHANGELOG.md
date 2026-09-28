@@ -10,6 +10,23 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.11] — 2026-09-28
+
+### Añadido
+- **Centro sg** (plan contable H16s): alta como «Centro sg» en el registro, menús y pantallas adaptados al Excel Secretario sg (un solo libro general). Importación de datos desde `.xlsm`, personas con **grupo** y clase **s** / **cp**, **Listado de aportaciones** (E 32), **destinos** del 42 al 54 con nombre por centro, presupuesto anual propio del centro con **nº de s**, resumen **613 G-D** (ingresos, gastos, disponible, destinos, estadísticas de aportaciones y arqueo fin de mes).
+- **Associació (club)** (plan Club): alta en el registro, importación de ficheros **Grisbi** (`.gsb`) desde Configuración, pantalla **Listados** para crear y consultar informes, arqueo del club.
+- En **Mis cuentas → Remanente**, fijar la cantidad que no se envía al centro en la remesa; el **disponible** del mes es el saldo de caja y banco menos ese remanente.
+- **Copias de seguridad** del centro (`/copias`): crear, descargar, restaurar y borrar copias (hasta cinco en el servidor).
+
+### Cambiado
+- En **Remesas** y **Disponible**, el importe enviable usa el **disponible** (saldo menos remanente), no el saldo bruto de caja y banco.
+- En **Configuración**, el campo **Centro** muestra la sigla del centro activo (no el nombre genérico del singleton).
+- En **Apuntes** y **Nombres**, filtros y columnas adaptados al centro sg; en **Presupuesto G** del sg, editor de destinos y campo compacto de nº de s.
+- El pie del **613 G-D** identifica el informe como **613 G-D**; totales de ingresos, gastos y destinos en negrita; nota de aportaciones y bloque VºBº / arqueo al estilo del Excel.
+
+### Corregido
+- El resumen 613 de un centro sg ya no reutiliza la hoja del centro de casa ni el presupuesto global de Montagut: previsto, destinos visibles y pie del informe salen del centro H16s.
+
 ## [0.1.10] — 2026-09-23 (pulir previsiones)
 
 ### Cambiado

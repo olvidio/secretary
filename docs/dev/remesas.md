@@ -1,23 +1,25 @@
 # Remesas (D6, Fase 8)
 
 Envío mensual del libro personal (`X`) al libro P del centro. La tesorería del
-nivel 1 **no viaja como movimientos**. Sí puede enviarse el **saldo** de
-caja+banco (a la fecha de cierre del mes) para que el centro actualice el
+nivel 1 **no viaja como movimientos**. Se envía el **disponible**: saldo de
+caja+banco (a la fecha de cierre del mes) menos el **remanente** fijo de la
+persona (`personas.remanente_cents`), para que el centro actualice el
 disponible operativo. El grano es el total por `codigo_maestro`; el desglose de
 subcuentas queda en el nivel 1 y el centro solo lo ve si la persona autoriza.
 
 ## Flujo
 
 1. La persona previsualiza el mes (`GET /api/yo/remesas`) y envía
-   (`POST /api/yo/remesas`), con el saldo de tesorería. Nace una remesa
-   `enviada`, versión 1, 2, …
+   (`POST /api/yo/remesas`). `saldo_tesoreria` es el saldo de caja+banco
+   (opcional; si falta, el del libro). Se guarda el disponible
+   `max(0, saldo − remanente)`. Nace una remesa `enviada`, versión 1, 2, …
 2. El centro ve la bandeja en `/remesas`. Puede aceptar o rechazar.
 3. Aceptar **borra en transacción** los asientos de la versión aceptada previa
    del mismo mes y persona, y crea **dos** asientos P (`tipo`/`origen` = `remesa`)
    contra `CC.<INICIALES>`: el de conceptos y el de aparcamiento del sobrante
    (CC → `DISP.<INICIALES>`), para dejar la c/c a cero. Cero duplicados.
 4. Si se marca **Sustituir el disponible**, `saldos_disponibles` pasa a ser
-   exactamente esa tesorería; si no, se le suma el sobrante.
+   exactamente ese disponible enviado; si no, se le suma el sobrante.
 5. Rechazar una `enviada` no deja asientos. Rechazar una `aceptada` borra los
    que hubiera generado (devolver) y deshace el disponible de esa remesa.
 6. Reenviar el mismo mes: si hay una `enviada` pendiente, pasa a `sustituida` y

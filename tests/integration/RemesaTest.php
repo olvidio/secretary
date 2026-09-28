@@ -34,6 +34,7 @@ use src\personal\application\ResolverPeriodoPersonal;
 use src\personal\application\ResolverPersonaActual;
 use src\personal\infrastructure\persistence\Nivel1Seeder;
 use src\personal\infrastructure\persistence\PdoPersonalCierreRepository;
+use src\personal\infrastructure\persistence\PdoRemanenteRepository;
 use src\personas\domain\entity\Persona;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\remesas\application\AceptarRemesa;
@@ -113,7 +114,11 @@ final class RemesaTest extends TestCase
             'tesoreria_destino' => 'BANCO',
         ]);
 
+        (new PdoRemanenteRepository($this->pdo))->guardar($d['personaId'], 1000);
         $prev = $d['preview']->ejecutar($anio, 1);
+        self::assertSame(3750, $prev['saldo_tesoreria_cents']);
+        self::assertSame(1000, $prev['remanente_cents']);
+        self::assertSame(2750, $prev['disponible_cents']);
         $codigos = array_column($prev['lineas'], 'codigo_maestro');
         self::assertContains('22', $codigos);
         self::assertContains('111', $codigos);
@@ -126,6 +131,7 @@ final class RemesaTest extends TestCase
         self::assertSame(5000, $porCodigo['111']);
 
         $enviada = $d['enviar']->ejecutar(['anio' => $anio, 'mes' => 1]);
+        self::assertSame(2750, $enviada->saldoTesoreriaCents);
         self::assertSame('enviada', $enviada->estado);
         self::assertSame(1, $enviada->version);
         self::assertNotNull($enviada->id);
@@ -276,7 +282,14 @@ final class RemesaTest extends TestCase
         );
         $cierres = new PdoPersonalCierreRepository($this->pdo);
         $periodoPersonal = new ResolverPeriodoPersonal($cierres);
-        $mes = new ResolverMesRemesa($resolver, $ejercicios, $asientos, $cuentas, $periodoPersonal);
+        $mes = new ResolverMesRemesa(
+            $resolver,
+            $ejercicios,
+            $asientos,
+            $cuentas,
+            $periodoPersonal,
+            new PdoRemanenteRepository($this->pdo),
+        );
         $conceptosRepo = new PdoConceptoRepository($this->pdo);
         $conceptos = ConceptosCentro::resolver($this->pdo);
         $gastosGenerales = $this->gastosGeneralesDeRemesa(

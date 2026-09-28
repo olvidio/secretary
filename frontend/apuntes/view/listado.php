@@ -1,3 +1,357 @@
+<?php if (!empty($esCentroSg)): ?>
+<h1><?= _("Apuntes") ?></h1>
+<form id="filtros" class="filters">
+    <label><?= _("Nombre") ?>
+        <select name="iniciales">
+            <option value=""><?= _("Todos") ?></option>
+        </select>
+    </label>
+    <label><?= _("Concepto") ?>
+        <select name="concepto">
+            <option value=""><?= _("Todos") ?></option>
+        </select>
+    </label>
+    <label><?= _("Desde") ?> <input type="date" name="desde"></label>
+    <label><?= _("Hasta") ?> <input type="date" name="hasta"></label>
+    <button type="submit"><?= _("Filtrar") ?></button>
+</form>
+<p id="msg-apuntes" class="muted" hidden></p>
+<table id="tabla-apuntes">
+    <thead>
+    <tr>
+        <th><?= _("Fecha") ?></th>
+        <th><?= _("Nombre") ?></th>
+        <th><?= _("Concepto") ?></th>
+        <th><?= _("Observaciones") ?></th>
+        <th class="num"><?= _("Cantidad") ?></th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<script>
+const I18N_APUNTES_SG = {
+  error: <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>,
+  vacio: <?= json_encode(_("No hay apuntes con estos filtros."), JSON_UNESCAPED_UNICODE) ?>,
+};
+const nombres = new Map();
+const conceptos = new Map();
+function nombreDe(ini) {
+  return nombres.get(ini) || ini || '';
+}
+function conceptoDe(cod) {
+  const n = conceptos.get(cod);
+  return n ? cod + ' ' + n : (cod || '');
+}
+async function loadApuntesSg() {
+  const form = document.getElementById('filtros');
+  const q = new URLSearchParams(formObj(form));
+  q.set('cuenta', 'G');
+  const r = await api('/api/apuntes?' + q.toString());
+  const tb = document.querySelector('#tabla-apuntes tbody');
+  const msg = document.getElementById('msg-apuntes');
+  tb.innerHTML = '';
+  if (!r.ok) {
+    msg.hidden = false;
+    msg.textContent = r.error || I18N_APUNTES_SG.error;
+    return;
+  }
+  const apuntes = r.apuntes || [];
+  msg.hidden = apuntes.length > 0;
+  msg.textContent = apuntes.length ? '' : I18N_APUNTES_SG.vacio;
+  apuntes.forEach((a) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + esc(a.fecha_es || a.fecha) + '</td><td>' + esc(nombreDe(a.iniciales || '')) + '</td><td>'
+      + esc(conceptoDe(a.concepto_codigo)) + '</td><td>' + esc(a.observaciones || '') + '</td><td class="num">'
+      + esc(a.cantidad_es) + '</td><td class="col-acc">' + accionesApunteHtml(a) + '</td>';
+    enlazarAccionesApunte(tr, a, loadApuntesSg);
+    tb.appendChild(tr);
+  });
+}
+document.addEventListener('DOMContentLoaded', async () => {
+  const form = document.getElementById('filtros');
+  const [pers, cons] = await Promise.all([
+    api('/api/personas'),
+    api('/api/conceptos?cuenta=G'),
+  ]);
+  if (!pers.ok) return alert(pers.error || I18N_APUNTES_SG.error);
+  const selN = form.querySelector('[name=iniciales]');
+  (pers.personas || []).forEach((p) => {
+    const etiqueta = [p.apellidos, p.nombre].filter(Boolean).join(', ') || p.iniciales;
+    nombres.set(p.iniciales, etiqueta);
+    const o = document.createElement('option');
+    o.value = p.iniciales;
+    o.textContent = etiqueta;
+    selN.appendChild(o);
+  });
+  const selC = form.querySelector('[name=concepto]');
+  (cons.conceptos || []).forEach((c) => {
+    conceptos.set(c.codigo, c.nombre || '');
+    const o = document.createElement('option');
+    o.value = c.codigo;
+    o.textContent = c.codigo + ' ' + (c.nombre || '');
+    selC.appendChild(o);
+  });
+  form.onsubmit = (ev) => {
+    ev.preventDefault();
+    loadApuntesSg();
+  };
+  loadApuntesSg();
+});
+</script>
+<?php elseif (!empty($esClub)): ?>
+<h1><?= _("Apuntes") ?></h1>
+<form id="filtros" class="filters">
+    <label><?= _("Ejercicio") ?>
+        <select name="ejercicio" id="sel-ejercicio"></select>
+    </label>
+    <input type="date" name="desde">
+    <input type="date" name="hasta">
+    <label><?= _("Cuenta") ?>
+        <select name="qcuenta" id="sel-filtro-cuenta">
+            <option value=""><?= _("Todas") ?></option>
+        </select>
+    </label>
+    <label><?= _("Tesorería") ?>
+        <select name="qtesoreria" id="sel-filtro-tesoreria">
+            <option value=""><?= _("Todas") ?></option>
+        </select>
+    </label>
+    <input name="qglosa" placeholder="<?= htmlspecialchars(_("Observaciones"), ENT_QUOTES) ?>">
+    <button type="submit"><?= _("Filtrar") ?></button>
+</form>
+<hr class="separa-apunte">
+<form id="form-apunte" class="grid-form" hidden>
+    <input type="hidden" name="id" value="">
+    <label><?= _("Fecha") ?> <input name="fecha" type="date" required></label>
+    <label><?= _("Cuenta") ?> <select name="cuenta_id" id="sel-cuenta"></select></label>
+    <label><?= _("Observaciones") ?> <input name="glosa"></label>
+    <label><?= _("Cantidad") ?> <input name="importe" required></label>
+    <button type="submit"><?= _("Guardar") ?></button>
+    <button type="button" id="btn-cancelar-apunte"><?= _("Cancelar") ?></button>
+</form>
+<p id="total-apuntes" class="muted"></p>
+<table id="tabla-apuntes">
+    <thead>
+    <tr>
+        <th data-ord="fecha"><?= _("Fecha") ?></th>
+        <th data-ord="cuenta"><?= _("Cuenta") ?></th>
+        <th data-ord="nombre"><?= _("Nombre") ?></th>
+        <th data-ord="glosa"><?= _("Observaciones") ?></th>
+        <th class="num" data-ord="cents"><?= _("Cantidad") ?></th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<script>
+const I18N_APUNTES = {
+  modificar: <?= json_encode(_("Modificar"), JSON_UNESCAPED_UNICODE) ?>,
+  borrar: <?= json_encode(_("Borrar"), JSON_UNESCAPED_UNICODE) ?>,
+  confirm: <?= json_encode(_("¿Borrar este apunte?"), JSON_UNESCAPED_UNICODE) ?>,
+  total: <?= json_encode(_("Total"), JSON_UNESCAPED_UNICODE) ?>,
+  otros: <?= json_encode(_("No hay apuntes en este ejercicio. Hay en: "), JSON_UNESCAPED_UNICODE) ?>,
+  todas: <?= json_encode(_("Todas"), JSON_UNESCAPED_UNICODE) ?>,
+};
+let movimientos = [];
+let cuentas = [];
+let orden = { campo: 'fecha', desc: false };
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('filtros');
+  const tb = document.querySelector('#tabla-apuntes tbody');
+  const sel = document.getElementById('sel-ejercicio');
+  const formApunte = document.getElementById('form-apunte');
+  function encajaCuenta(codigo, filtro) {
+    if (!filtro) return true;
+    return codigo === filtro || codigo.startsWith(filtro + '.');
+  }
+  function visibles() {
+    const cuenta = form.qcuenta.value || '';
+    const glosa = (form.qglosa.value || '').trim().toLowerCase();
+    const lista = movimientos.filter(m => {
+      if (!encajaCuenta(m.codigo || '', cuenta)) return false;
+      if (form.qtesoreria.value && (m.tesoreria || '') !== form.qtesoreria.value) return false;
+      if (glosa && !(m.glosa || '').toLowerCase().includes(glosa)) return false;
+      return true;
+    });
+    const campo = orden.campo;
+    lista.sort((a, b) => {
+      const va = campo === 'cuenta' ? a.codigo : a[campo];
+      const vb = campo === 'cuenta' ? b.codigo : b[campo];
+      const cmp = campo === 'cents' ? va - vb : String(va).localeCompare(String(vb), 'es');
+      return orden.desc ? -cmp : cmp;
+    });
+    return lista;
+  }
+  function pintar() {
+    const lista = visibles();
+    tb.replaceChildren();
+    if (lista.length === 0 && movimientos.length === 0) {
+      const otros = form.dataset.otros || '';
+      if (otros) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="6">' + esc(I18N_APUNTES.otros + otros) + '</td>';
+        tb.appendChild(tr);
+      }
+    }
+    let total = 0;
+    lista.forEach(m => {
+      total += m.cents || 0;
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + esc(m.fecha) + '</td><td>' + esc(m.codigo) + '</td><td>' + esc(m.nombre) + '</td><td>'
+        + esc(m.glosa) + '</td><td class="num">' + esc(m.importe) + '</td><td class="acc">'
+        + '<button type="button" data-act="editar" data-id="' + m.id + '">' + esc(I18N_APUNTES.modificar) + '</button> '
+        + '<button type="button" data-act="borrar" data-id="' + m.id + '">' + esc(I18N_APUNTES.borrar) + '</button></td>';
+      tb.appendChild(tr);
+    });
+    document.getElementById('total-apuntes').textContent = lista.length
+      ? I18N_APUNTES.total + ' ' + fmtImporteEs(total / 100)
+      : '';
+  }
+  function llenarCuentas(seleccion) {
+    const box = document.getElementById('sel-cuenta');
+    box.replaceChildren();
+    cuentas.forEach(c => {
+      if (c.grupo) return;
+      const o = document.createElement('option');
+      o.value = c.id;
+      o.textContent = c.codigo + ' ' + c.nombre;
+      box.appendChild(o);
+    });
+    if (seleccion) box.value = String(seleccion);
+  }
+  async function cargar() {
+    const datos = formObj(form);
+    if (datos.desde || datos.hasta) delete datos.ejercicio;
+    delete datos.qcuenta;
+    delete datos.qtesoreria;
+    delete datos.qglosa;
+    const r = await api('/api/grisbi/movimientos?' + new URLSearchParams(datos).toString());
+    if (!r.ok) { alert(r.error || 'Error'); return; }
+    movimientos = r.movimientos || [];
+    cuentas = r.cuentas || cuentas;
+    form.dataset.otros = (r.otros || []).join(', ');
+    llenarFiltroCuenta();
+    llenarFiltroTesoreria();
+    pintar();
+  }
+  function llenarFiltroTesoreria() {
+    const box = document.getElementById('sel-filtro-tesoreria');
+    const elegido = box.value;
+    const nombres = [...new Set(movimientos.map(m => m.tesoreria).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, 'es'));
+    box.replaceChildren();
+    const todas = document.createElement('option');
+    todas.value = '';
+    todas.textContent = I18N_APUNTES.todas;
+    box.appendChild(todas);
+    nombres.forEach(nombre => {
+      const o = document.createElement('option');
+      o.value = nombre;
+      o.textContent = nombre;
+      box.appendChild(o);
+    });
+    if (nombres.includes(elegido)) box.value = elegido;
+  }
+  function llenarFiltroCuenta() {
+    const box = document.getElementById('sel-filtro-cuenta');
+    const elegido = box.value;
+    const porCodigo = new Map(cuentas.map(c => [c.codigo, c]));
+    const codigos = new Set();
+    movimientos.forEach(m => { if (m.codigo) codigos.add(m.codigo); });
+    [...codigos].forEach(codigo => {
+      const partes = codigo.split('.');
+      if (!/^(60|61|70|80|90)$/.test(partes[0])) return;
+      let prefijo = '';
+      for (let i = 0; i < partes.length - 1; i++) {
+        prefijo = prefijo ? prefijo + '.' + partes[i] : partes[i];
+        codigos.add(prefijo);
+      }
+    });
+    const ordenados = [...codigos].sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+    box.replaceChildren();
+    const todas = document.createElement('option');
+    todas.value = '';
+    todas.textContent = I18N_APUNTES.todas;
+    box.appendChild(todas);
+    ordenados.forEach(codigo => {
+      const c = porCodigo.get(codigo);
+      const o = document.createElement('option');
+      o.value = codigo;
+      o.textContent = c && c.nombre ? codigo + ' ' + c.nombre : codigo;
+      box.appendChild(o);
+    });
+    if (ordenadoIncluye(ordenados, elegido)) box.value = elegido;
+  }
+  function ordenadoIncluye(lista, valor) {
+    return valor !== '' && lista.includes(valor);
+  }
+  form.addEventListener('submit', (ev) => { ev.preventDefault(); cargar(); });
+  form.qcuenta.addEventListener('change', pintar);
+  form.qtesoreria.addEventListener('change', pintar);
+  form.qglosa.addEventListener('input', pintar);
+  document.querySelector('#tabla-apuntes thead').addEventListener('click', (ev) => {
+    const th = ev.target.closest('th[data-ord]');
+    if (!th) return;
+    if (orden.campo === th.dataset.ord) orden.desc = !orden.desc;
+    else { orden.campo = th.dataset.ord; orden.desc = false; }
+    pintar();
+  });
+  document.getElementById('btn-cancelar-apunte').onclick = () => {
+    formApunte.reset();
+    formApunte.id.value = '';
+    formApunte.cuenta_id.disabled = false;
+    formApunte.hidden = true;
+  };
+  formApunte.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const f = ev.target;
+    const s = await api('/api/grisbi/movimientos/' + f.id.value, {
+      method: 'POST',
+      body: { fecha: f.fecha.value, cuenta_id: Number(f.cuenta_id.value), glosa: f.glosa.value, importe: f.importe.value },
+    });
+    if (!s.ok) return alert(s.error || 'Error');
+    if ((s.avisos || []).length) alert(s.avisos.join('\n'));
+    f.hidden = true;
+    cargar();
+  });
+  tb.addEventListener('click', async (ev) => {
+    const btn = ev.target.closest('button');
+    if (!btn) return;
+    const m = movimientos.find(x => x.id === Number(btn.dataset.id));
+    if (!m) return;
+    if (btn.dataset.act === 'editar') {
+      formApunte.hidden = false;
+      formApunte.id.value = m.id;
+      formApunte.fecha.value = m.fecha;
+      formApunte.glosa.value = m.glosa || '';
+      formApunte.importe.value = fmtImporteEs(Math.abs(m.cents || 0) / 100);
+      llenarCuentas(m.cuenta_id);
+      if (!m.cuenta_id) formApunte.cuenta_id.disabled = true;
+      else formApunte.cuenta_id.disabled = false;
+      formApunte.fecha.focus();
+    }
+    if (btn.dataset.act === 'borrar') {
+      if (!confirm(I18N_APUNTES.confirm)) return;
+      const s = await api('/api/grisbi/movimientos/' + m.id + '/borrar', { method: 'POST', body: {} });
+      if (!s.ok) return alert(s.error || 'Error');
+      if ((s.avisos || []).length) alert(s.avisos.join('\n'));
+      cargar();
+    }
+  });
+  api('/api/ejercicios').then(r => {
+    (r.ejercicios || []).forEach(e => {
+      const o = document.createElement('option');
+      o.value = e.id;
+      o.textContent = e.etiqueta;
+      if (e.estado === 'abierto') o.selected = true;
+      sel.appendChild(o);
+    });
+    cargar();
+  });
+});
+</script>
+<?php else: ?>
 <h1><?= _("Apuntes") ?></h1>
 <p class="print-hide arqueo-volver" id="apuntes-volver" hidden>
     <a href="#"><?= _("← Volver") ?></a>
@@ -423,3 +777,4 @@ function fechaCelda(a) {
   return esc(a.fecha_es);
 }
 </script>
+<?php endif; ?>

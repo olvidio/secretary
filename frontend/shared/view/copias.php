@@ -1,11 +1,11 @@
 <h1><?= _("Copias de seguridad") ?></h1>
 <p class="muted">
-    <?= _("Volcado completo de PostgreSQL") ?> (<span id="db-name">…</span>). <?= _("Afecta a todos los centros de esta base. Los Excel (.xlsm) no se incluyen; guarde también el .env si usa TOTP.") ?>
+    <?= _("Copia solo de este centro o associació") ?> (<span id="db-name">…</span>). <?= _("No incluye los demás centros aunque los lleve el mismo usuario. La copia de toda la base está en la administración de la plataforma.") ?>
 </p>
 
 <section>
     <h2><?= _("Nueva copia") ?></h2>
-    <p class="muted"><?= _("Genera un fichero SQL (.sql) en el servidor y lo añade al listado.") ?></p>
+    <p class="muted"><?= _("Genera un fichero de este centro (.json) en el servidor y lo añade al listado.") ?></p>
     <button type="button" id="btn-backup"><?= _("Crear copia ahora") ?></button>
     <p class="peligro" id="aviso-limite-copias" hidden><?= _("Solo se permite tener 5 copias en el servidor") ?></p>
     <button type="button" id="btn-backup-reemplazar" hidden><?= _("Borrar la más antigua y guardar") ?></button>
@@ -26,12 +26,12 @@
 <section>
     <h2><?= _("Restaurar") ?></h2>
     <p class="muted peligro">
-        <?= _("La restauración sobrescribe toda la base. Cierre otras sesiones antes de continuar.") ?>
+        <?= _("La restauración sustituye los asientos y los listados de este centro. El resto de centros no se toca.") ?>
     </p>
     <p class="muted"><?= _("Elija una copia ya guardada en el servidor y pulse Restaurar en la tabla.") ?></p>
     <form id="form-restore" class="grid-form">
-        <label><?= _("O fichero local (.sql o .dump)") ?>
-            <input name="dump" type="file" accept=".sql,.dump,text/plain,application/octet-stream">
+        <label><?= _("O fichero local (.json)") ?>
+            <input name="dump" type="file" accept=".json,application/json">
         </label>
         <button type="submit" class="peligro"><?= _("Restaurar desde fichero local") ?></button>
     </form>
@@ -45,11 +45,11 @@ const I18N_COPIAS = {
   borrar: <?= json_encode(_("Borrar"), JSON_UNESCAPED_UNICODE) ?>,
   noListado: <?= json_encode(_("No se pudo cargar el listado"), JSON_UNESCAPED_UNICODE) ?>,
   confirmBorrar: <?= json_encode(_("¿Borrar «%s» del servidor? Esta acción no se puede deshacer."), JSON_UNESCAPED_UNICODE) ?>,
-  confirmRestaurar: <?= json_encode(_("¿Restaurar «%s»? Se sobrescribirá toda la base %s."), JSON_UNESCAPED_UNICODE) ?>,
+  confirmRestaurar: <?= json_encode(_("¿Restaurar «%s» en %s? Se sustituyen los asientos de este centro."), JSON_UNESCAPED_UNICODE) ?>,
   restauracionOk: <?= json_encode(_("Restauración completada."), JSON_UNESCAPED_UNICODE) ?>,
   copiaCreada: <?= json_encode(_("Copia creada: %s (%s)."), JSON_UNESCAPED_UNICODE) ?>,
-  elijaFichero: <?= json_encode(_("Elija un fichero .sql o .dump"), JSON_UNESCAPED_UNICODE) ?>,
-  confirmLocal: <?= json_encode(_("¿Restaurar desde el fichero local? Se sobrescribirá toda la base."), JSON_UNESCAPED_UNICODE) ?>,
+  elijaFichero: <?= json_encode(_("Elija un fichero .json de este centro"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmLocal: <?= json_encode(_("¿Restaurar desde el fichero local? Se sustituyen los asientos de este centro."), JSON_UNESCAPED_UNICODE) ?>,
   errorRestaurar: <?= json_encode(_("Error al restaurar"), JSON_UNESCAPED_UNICODE) ?>,
   respuestaNoJson: <?= json_encode(_("Respuesta no JSON"), JSON_UNESCAPED_UNICODE) ?>,
   limiteCopias: <?= json_encode(_("Solo se permite tener 5 copias en el servidor"), JSON_UNESCAPED_UNICODE) ?>,
@@ -62,9 +62,9 @@ function fmtBytes(n) {
 }
 
 async function loadCopias() {
-  const r = await api('/api/copias');
+  const r = await api('/api/centros/copias');
   if (!r.ok) return alert(r.error || I18N_COPIAS.noListado);
-  document.getElementById('db-name').textContent = r.database || 'secretario';
+  document.getElementById('db-name').textContent = r.sigla || r.nombre || '';
   const tb = document.querySelector('#tabla-copias tbody');
   const vacio = document.getElementById('sin-copias');
   tb.innerHTML = '';
@@ -77,7 +77,7 @@ async function loadCopias() {
       '<td>' + esc(c.fecha) + '</td>' +
       '<td>' + esc(fmtBytes(c.bytes || 0)) + '</td>' +
       '<td class="acciones">' +
-        '<a href="/api/copias/descargar?fichero=' + encodeURIComponent(c.filename) + '">' + esc(I18N_COPIAS.descargar) + '</a> ' +
+        '<a href="/api/centros/copias/descargar?fichero=' + encodeURIComponent(c.filename) + '">' + esc(I18N_COPIAS.descargar) + '</a> ' +
         '<button type="button" class="btn-restore-server peligro" data-fichero="' + esc(c.filename) + '">' + esc(I18N_COPIAS.restaurar) + '</button> ' +
         '<button type="button" class="btn-borrar-server peligro" data-fichero="' + esc(c.filename) + '">' + esc(I18N_COPIAS.borrar) + '</button>' +
       '</td>';
@@ -97,7 +97,7 @@ async function borrarServidor(fichero) {
   if (!confirm(msg)) {
     return;
   }
-  const s = await api('/api/copias/borrar', { method: 'POST', body: { fichero } });
+  const s = await api('/api/centros/copias/borrar', { method: 'POST', body: { fichero } });
   if (!s.ok) return alert(s.error);
   await loadCopias();
 }
@@ -111,7 +111,7 @@ async function restaurarServidor(fichero) {
   }
   const msgEl = document.getElementById('msg-restore');
   msgEl.hidden = true;
-  const s = await api('/api/copias/restore', { method: 'POST', body: { fichero, confirmar: true } });
+  const s = await api('/api/centros/copias/restore', { method: 'POST', body: { fichero, confirmar: true } });
   if (!s.ok) return alert(s.error);
   msgEl.hidden = false;
   msgEl.textContent = s.mensaje || I18N_COPIAS.restauracionOk;
@@ -131,7 +131,7 @@ async function crearCopia(borrarMasAntigua) {
   }
   try {
     const body = borrarMasAntigua ? { borrar_mas_antigua: true } : {};
-    const s = await api('/api/copias/backup', { method: 'POST', body });
+    const s = await api('/api/centros/copias/backup', { method: 'POST', body });
     if (!s.ok) {
       if (s.codigo === 'limite_copias') {
         aviso.textContent = s.error || I18N_COPIAS.limiteCopias;
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fd = new FormData(ev.target);
     fd.append('confirmar', '1');
     const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-    const res = await fetch('/api/copias/restore', {
+    const res = await fetch('/api/centros/copias/restore', {
       method: 'POST',
       headers: { 'Accept': 'application/json', 'X-CSRF-Token': csrf },
       body: fd,

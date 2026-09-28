@@ -6,6 +6,7 @@ namespace Tests\support;
 
 use PDO;
 use src\conceptos\application\ResolverConceptosCentro;
+use src\plan\infrastructure\persistence\PdoDestinoSgRepository;
 use src\plan\infrastructure\persistence\PdoPartidaLaboresRepository;
 use src\plan\infrastructure\persistence\PdoPlanConceptoRepository;
 
@@ -15,6 +16,10 @@ final class ConceptosCentro
     {
         $plan = new PdoPlanConceptoRepository($pdo);
 
-        return new ResolverConceptosCentro($plan, new PdoPartidaLaboresRepository($pdo, $plan));
+        return new ResolverConceptosCentro(
+            $plan,
+            new PdoPartidaLaboresRepository($pdo, $plan),
+            new PdoDestinoSgRepository($pdo),
+        );
     }
 }

@@ -43,6 +43,9 @@ interface CuentaRepository
 
     public function desactivarPorCuentaFisicaId(int $cuentaFisicaId): void;
 
+    /** Alinea el nombre de las cuentas de mayor de esa caja o banco. */
+    public function renombrarTesoreriaDeFisica(int $cuentaFisicaId, string $nombre): void;
+
     /** Cuenta corriente personal (libro P) de una persona. */
     public function personalDe(int $centroId, int $personaId): ?Cuenta;
 

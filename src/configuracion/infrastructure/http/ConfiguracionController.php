@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use src\configuracion\application\GuardarConfiguracion;
 use src\configuracion\application\ObtenerConfiguracion;
 use src\plan\domain\contracts\PlanContableRepository;
+use src\plan\domain\services\CatalogoPlanesContables;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
@@ -25,7 +26,10 @@ final class ConfiguracionController
     {
         return ContestarJson::ok([
             'config' => $this->obtener->ejecutar(),
-            'planes' => $this->planes->listar(),
+            'planes' => array_values(array_filter(
+                $this->planes->listar(),
+                static fn (array $p): bool => ($p['codigo'] ?? '') === CatalogoPlanesContables::H16N,
+            )),
         ]);
     }
 
@@ -36,7 +40,10 @@ final class ConfiguracionController
 
             return ContestarJson::ok([
                 'config' => $this->obtener->ejecutar(),
-                'planes' => $this->planes->listar(),
+                'planes' => array_values(array_filter(
+                $this->planes->listar(),
+                static fn (array $p): bool => ($p['codigo'] ?? '') === CatalogoPlanesContables::H16N,
+            )),
             ]);
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());

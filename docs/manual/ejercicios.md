@@ -16,7 +16,8 @@ La tabla muestra sus fechas, cuántos meses abarca, cuántos han transcurrido y 
 2. Si se quiere, indicar la fecha de corte y una etiqueta.
 3. Pulsar «Crear ejercicio».
 4. Cuando el ejercicio termina y no hay que anotar nada más, pulsar «Cerrar» en su fila.
-5. Para corregir algo de un ejercicio cerrado, «Reabrir»; para recalcular su saldo de partida, «Regenerar apertura». Las tres acciones piden confirmación.
+5. Para corregir algo de un ejercicio cerrado, «Reabrir»; para recalcular su saldo de partida, «Regenerar apertura».
+6. «Eliminar» borra el ejercicio y sus asientos. Si otro ejercicio parte de él, hay que eliminar primero ese posterior. Pide confirmación y no se puede deshacer.
 
 ## Reglas que conviene saber
 
@@ -34,3 +35,4 @@ La tabla muestra sus fechas, cuántos meses abarca, cuántos han transcurrido y 
 - **«Este ejercicio no tiene anterior: la apertura es manual»**: en el primer ejercicio el disponible de partida se teclea.
 - **«El ejercicio anterior tiene … descuadrados; corríjalos antes de generar la apertura»**: hay apuntes del ejercicio anterior a los que les falta su pareja; revisarlos en Apuntes.
 - **«No hay ningún centro dado de alta todavía»**: primero hay que crear el centro.
+- **«Elimine antes el ejercicio posterior …»**: ese ejercicio es el anterior de otro. Borre primero el más reciente.

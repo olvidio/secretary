@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace src\informes\domain\services;
 
 use src\plan\domain\services\CatalogoPlanesContables;
+use src\plan\domain\services\DestinosCentroSg;
 use src\plan\domain\services\Estructura613P;
 use src\presupuestos\domain\entity\LineaPresupuesto;
 use src\shared\domain\value_objects\Dinero;
@@ -105,5 +106,45 @@ final class Calculadora613
             ['codigo' => '215', 'etiqueta' => 'Otros', 'codigos' => ['215']],
             ['codigo' => '32', 'etiqueta' => 'Disponible al inicio', 'codigos' => ['32']],
         ];
+    }
+
+    /**
+     * Resumen 613 del Secretario de sg: un solo libro, como la hoja «613 G-D».
+     *
+     * @param list<array{codigo:string,etiqueta:string}> $destinos
+     * @return list<array{codigo:string,etiqueta:string,codigos:list<string>}>
+     */
+    public static function estructuraCentroSg(array $destinos = []): array
+    {
+        $lineas = [
+            ['11', 'Aportaciones ordinarias'],
+            ['12', 'Aportaciones extraordinarias'],
+            ['13', 'Ayudas varias (cp)'],
+            ['14', 'Otros donativos'],
+            ['21', 'Suministros'],
+            ['22', 'Alquiler, com. vecinos, seguros e impuestos'],
+            ['23', 'Instalación y conservación'],
+            ['24', 'Limpieza, etc.'],
+            ['25', 'Asociación'],
+            ['26', 'Suscripciones, papelería, libros, otros'],
+            ['27', 'Atención cv, crt, etc.'],
+            ['28', 'Déficit actividades'],
+            ['32', 'Disponible a 1 de enero'],
+            ['41', 'Necesidades generales'],
+        ];
+        $out = [];
+        foreach ($lineas as [$codigo, $etiqueta]) {
+            $out[] = ['codigo' => $codigo, 'etiqueta' => $etiqueta, 'codigos' => [$codigo]];
+        }
+        foreach ($destinos as $d) {
+            $codigo = (string) $d['codigo'];
+            $etiqueta = trim((string) $d['etiqueta']);
+            if (!DestinosCentroSg::esVariable($codigo) || $etiqueta === '' || $etiqueta === $codigo) {
+                continue;
+            }
+            $out[] = ['codigo' => $codigo, 'etiqueta' => $etiqueta, 'codigos' => [$codigo]];
+        }
+
+        return $out;
     }
 }

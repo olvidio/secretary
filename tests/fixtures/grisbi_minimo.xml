@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Grisbi>
+  <General Date_format="%d/%m/%Y"/>
+  <Account Number="1" Name="Caja" Kind="1" Initial_balance="0.00"/>
+  <Account Number="2" Name="Banco" Kind="0" Initial_balance="0.00"/>
+  <Category Nb="60" Na="Material" Kd="1"/>
+  <Category Nb="70" Na="Cuotas" Kd="0"/>
+  <Sub_category Nbc="60" Nb="1" Na="Papel"/>
+  <Party Nb="1" Na="Socis"/>
+  <Transaction Ac="1" Nb="1" Dt="03/15/2024" Am="-10.50" Ca="60" Sca="1" Pa="1" No="Material" Trt="0"/>
+  <Transaction Ac="2" Nb="1" Dt="04/01/2024" Am="20.00" Ca="70" Sca="0" Pa="1" No="(null)" Trt="0"/>
+  <Report Name="Cuotas" Categ_use="1" Categ_selected="70/0" Payee_use_selection="1" Payee_selected="1" Show_transaction="1" Categ_show_amount="1" Date_beginning="01/01/2024" Date_end="12/31/2024"/>
+</Grisbi>

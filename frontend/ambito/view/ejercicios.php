@@ -1,9 +1,18 @@
+<?php $esClub = !empty($esClub); ?>
 <h1><?= _("Ejercicios") ?></h1>
 <p>
-    <?= _("Alta de ejercicios de período libre (D11). fecha_inicio/fecha_fin delimitan el ejercicio contable completo; fecha_corte es sólo la fecha hasta la que hay datos introducidos (p. ej. para informes 613 a mitad de ejercicio) y puede coincidir con fecha_fin cuando el ejercicio ya está cerrado del todo.") ?>
+    <?php if ($esClub): ?>
+        <?= _("La fecha de inicio y la de fin delimitan el ejercicio. La fecha de corte es hasta dónde hay datos introducidos; cuando el ejercicio está cerrado del todo, coincide con la fecha de fin.") ?>
+    <?php else: ?>
+        <?= _("Alta de ejercicios de período libre (D11). fecha_inicio/fecha_fin delimitan el ejercicio contable completo; fecha_corte es sólo la fecha hasta la que hay datos introducidos (p. ej. para informes 613 a mitad de ejercicio) y puede coincidir con fecha_fin cuando el ejercicio ya está cerrado del todo.") ?>
+    <?php endif; ?>
 </p>
 <p class="muted">
-    <?= _("El concepto 32 del 613 G lo calcula la apertura automática al abrir el ejercicio siguiente. En el primer ejercicio importado (sin anterior) el disponible a 1 de enero se sigue tecleando a mano.") ?>
+    <?php if ($esClub): ?>
+        <?= _("Al abrir el ejercicio siguiente, el saldo de partida se arrastra del anterior. En el primero, ese saldo se anota a mano.") ?>
+    <?php else: ?>
+        <?= _("El concepto 32 del 613 G lo calcula la apertura automática al abrir el ejercicio siguiente. En el primer ejercicio importado (sin anterior) el disponible a 1 de enero se sigue tecleando a mano.") ?>
+    <?php endif; ?>
 </p>
 <form id="form-ejercicio" class="grid-form">
     <label><?= _("Etiqueta") ?> <input name="etiqueta" placeholder="<?= htmlspecialchars(_("p. ej. 2026 o 2026-27"), ENT_QUOTES) ?>"></label>
@@ -30,6 +39,8 @@ const I18N_EJERCICIOS = {
   confirmCerrar: <?= json_encode(_("¿Cerrar este ejercicio? No se podrán registrar más asientos."), JSON_UNESCAPED_UNICODE) ?>,
   confirmReabrir: <?= json_encode(_("¿Reabrir este ejercicio para correcciones?"), JSON_UNESCAPED_UNICODE) ?>,
   confirmApertura: <?= json_encode(_("¿Regenerar los asientos de apertura? Se borrarán los actuales tipo apertura."), JSON_UNESCAPED_UNICODE) ?>,
+  eliminar: <?= json_encode(_("Eliminar"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmEliminar: <?= json_encode(_("¿Eliminar el ejercicio %s? Se borran sus %s asientos y no se puede deshacer."), JSON_UNESCAPED_UNICODE) ?>,
   continuar: <?= json_encode(_("¿Continuar?"), JSON_UNESCAPED_UNICODE) ?>,
 };
 async function loadEjercicios() {
@@ -51,6 +62,9 @@ async function loadEjercicios() {
     }
     if (e.puede_regenerar_apertura) {
       acciones.push(`<button type="button" data-accion="apertura" data-id="${e.id}">${esc(I18N_EJERCICIOS.regenerar)}</button>`);
+    }
+    if (e.puede_eliminar) {
+      acciones.push(`<button type="button" data-accion="eliminar" data-id="${e.id}" data-etiqueta="${esc(e.etiqueta)}" data-asientos="${e.asientos || 0}">${esc(I18N_EJERCICIOS.eliminar)}</button>`);
     }
     tr.innerHTML = `<td>${i+1}</td><td>${esc(e.etiqueta)}</td><td>${esc(e.fecha_inicio)}</td>
       <td>${esc(e.fecha_fin)}</td><td>${esc(e.fecha_corte)}</td>
@@ -77,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cerrar: I18N_EJERCICIOS.confirmCerrar,
       reabrir: I18N_EJERCICIOS.confirmReabrir,
       apertura: I18N_EJERCICIOS.confirmApertura,
+      eliminar: I18N_EJERCICIOS.confirmEliminar.replace('%s', btn.dataset.etiqueta || '').replace('%s', btn.dataset.asientos || '0'),
     };
     if (!confirm(textos[accion] || I18N_EJERCICIOS.continuar)) return;
     const s = await api(`/api/ejercicios/${id}/${accion}`, {method:'POST'});

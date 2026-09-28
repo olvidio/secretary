@@ -16,7 +16,8 @@ Una misma caja o un mismo banco sirve para los dos libros, el personal y el gene
 2. Poner un nombre reconocible (por ejemplo, «Banc Sabadell»).
 3. En las cuentas de banco, si se quiere, escribir el IBAN.
 4. Pulsar «Alta». La cuenta aparece en la tabla como activa.
-5. Para dejar de usar una cuenta, pulsar «Desactivar» en su fila y confirmar.
+5. «Editar» carga el nombre y el IBAN en el formulario. El tipo no cambia. «Guardar» actualiza la cuenta y el nombre de sus cuentas de mayor.
+6. Para dejar de usar una cuenta, pulsar «Desactivar» en su fila y confirmar.
 
 ## Reglas que conviene saber
 

@@ -2,7 +2,7 @@
 
 > Este fichero lleva prefijo `_`: **no entra en la ayuda con IA** del centro ni del libro personal. Documentación interna para quien entra con el usuario admin de plataforma.
 
-- Ruta: `/admin`, `/admin/planes`, `/admin/centros`, `/admin/usuarios`, `/admin/legal`
+- Ruta: `/admin`, `/admin/planes`, `/admin/centros`, `/admin/usuarios`, `/admin/legal`, `/admin/copias`
 - Menú: Administración (solo usuario admin)
 - Quién: administrador de plataforma (`APP_ADMIN_USER` / `APP_ADMIN_PASSWORD` en `.env`)
 

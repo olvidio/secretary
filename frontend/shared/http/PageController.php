@@ -18,7 +18,7 @@ use src\legal\domain\services\CatalogoDocumentosLegales;
 use src\legal\domain\services\DatosOperador;
 use src\legal\infrastructure\http\HuellaAceptacionHttp;
 use src\legal\infrastructure\markdown\RenderizadorMarkdownLegal;
-use src\personal\domain\services\CatalogoBancosCsv;
+use src\plan\domain\services\CatalogoPlanesContables;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
 use src\shared\infrastructure\VersiónDespliegue;
@@ -338,9 +338,20 @@ final class PageController
         $nav = (string) ($vars['nav'] ?? '');
 
         $layout = $this->layoutUsuario();
+        $club = $this->esPlanClub();
+        $centroSg = $this->esPlanCentroSg();
+        if ($club && $nav !== '' && !str_starts_with($nav, 'cuenta-') && !in_array($nav, CatalogoMenus::navsClub(), true)) {
+            return Response::redirect('/');
+        }
+        if ($centroSg && $nav !== '' && !str_starts_with($nav, 'cuenta-') && !in_array($nav, CatalogoMenus::navsCentroSg(), true)) {
+            return Response::redirect('/');
+        }
+        if (!$club && $nav === 'arqueo') {
+            return Response::redirect('/arqueo-g');
+        }
         $grupoActivo = str_starts_with($nav, 'cuenta-')
             ? ''
-            : CatalogoMenus::grupoDe($layout, $nav);
+            : CatalogoMenus::grupoDe($layout, $nav, $centroSg);
 
         return Response::html($this->view->page($view, [
             'usuario' => $_SESSION['usuario'] ?? '',
@@ -349,7 +360,7 @@ final class PageController
             'csrf' => ProteccionCsrf::asegurarToken(),
             'layout' => $layout,
             'idioma' => $this->idiomaUsuario(),
-            'menuGrupos' => CatalogoMenus::grupos($layout),
+            'menuGrupos' => CatalogoMenus::gruposPara($layout, $club, $centroSg),
             'menuGrupoActivo' => $grupoActivo,
             'mostrarMenuTipo' => $this->puedeCambiarTipoSesion(),
             'mostrarMenuPersonaActiva' => $this->puedeElegirPersonaActivaSesion(),
@@ -359,6 +370,8 @@ final class PageController
             'cuentaArqueo' => $vars['arqueo'] ?? null,
             'cuentaPresupuesto' => $vars['presupuesto'] ?? null,
             'textoAsumoNombres' => $this->documentos->textoCasillaNombres($this->idiomaUsuario()),
+            'esClub' => $club,
+            'esCentroSg' => $centroSg,
         ]));
     }
 
@@ -420,6 +433,11 @@ final class PageController
         return $this->paginaYo('personal/view/cierre.php', 'yo-cierre');
     }
 
+    public function yoRemanente(Request $request, array $vars = []): Response
+    {
+        return $this->paginaYo('personal/view/remanente.php', 'yo-remanente');
+    }
+
     public function yoCentros(Request $request, array $vars = []): Response
     {
         return $this->paginaYo('personal/view/centros.php', 'yo-centros');
@@ -448,6 +466,11 @@ final class PageController
     public function adminLegal(Request $request, array $vars = []): Response
     {
         return $this->paginaAdmin('admin/view/legal.php', 'admin-legal');
+    }
+
+    public function adminCopias(Request $request, array $vars = []): Response
+    {
+        return $this->paginaAdmin('admin/view/copias.php', 'admin-copias');
     }
 
     public function yoAyuda(Request $request, array $vars = []): Response
@@ -609,5 +632,27 @@ final class PageController
         }
 
         return '';
+    }
+
+    private function esPlanClub(): bool
+    {
+        $id = isset($_SESSION['centro_id']) ? (int) $_SESSION['centro_id'] : 0;
+        if ($id <= 0) {
+            return false;
+        }
+        $centro = $this->centros->porId($id);
+
+        return $centro !== null && CatalogoPlanesContables::esClub($centro->planContableCodigo);
+    }
+
+    private function esPlanCentroSg(): bool
+    {
+        $id = isset($_SESSION['centro_id']) ? (int) $_SESSION['centro_id'] : 0;
+        if ($id <= 0) {
+            return false;
+        }
+        $centro = $this->centros->porId($id);
+
+        return $centro !== null && CatalogoPlanesContables::esCentroSg($centro->planContableCodigo);
     }
 }

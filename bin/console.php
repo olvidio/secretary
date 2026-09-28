@@ -8,6 +8,7 @@ use src\ambito\infrastructure\persistence\AmbitoSeeder;
 use src\legal\infrastructure\persistence\LegalSeeder;
 use src\plan\infrastructure\persistence\PlanContableSeeder;
 use src\asientos\application\ConvertirApuntesAAsientos;
+use src\importacion\application\ImportarExcelCentroSg;
 use src\importacion\application\ImportarExcelSecretario;
 use src\personal\infrastructure\persistence\Nivel1Seeder;
 use src\shared\infrastructure\Kernel;
@@ -165,6 +166,37 @@ if ($cmd === 'import:excel') {
     exit(0);
 }
 
+if ($cmd === 'import:excel-sg') {
+    $path = '';
+    $centro = '';
+    for ($i = 2; $i < count($argv); $i++) {
+        $arg = $argv[$i];
+        if (!is_string($arg)) {
+            continue;
+        }
+        if (str_starts_with($arg, '--centro=')) {
+            $centro = substr($arg, strlen('--centro='));
+            continue;
+        }
+        if (!str_starts_with($arg, '--')) {
+            $path = $arg;
+        }
+    }
+    if ($path === '' || $centro === '') {
+        fwrite(STDERR, "Uso: php bin/console.php import:excel-sg fichero.xlsm --centro=CODIGO\n");
+        exit(1);
+    }
+    $imp = $kernel->container()->get(ImportarExcelCentroSg::class);
+    $res = $imp->ejecutar($path, $centro);
+    fwrite(STDOUT, sprintf(
+        "Importados %d nombres y %d apuntes. Fecha de cierre %s.\n",
+        $res['personas'],
+        $res['apuntes'],
+        $res['fecha_cierre'],
+    ));
+    exit(0);
+}
+
 if ($cmd === 'asientos:convertir') {
     (new SchemaInstaller($pdo))->install();
     $convertir = $kernel->container()->get(ConvertirApuntesAAsientos::class);
@@ -250,6 +282,7 @@ fwrite(STDOUT, "Uso:\n"
     . "  php bin/console.php db:backup [--output=ruta.dump]\n"
     . "  php bin/console.php db:restore --file=ruta.dump [--force]\n"
     . "  php bin/console.php import:excel [fichero.xlsm] [--dry-run] [--centro=CODIGO] [--ejercicio=ETIQUETA]\n"
+    . "  php bin/console.php import:excel-sg fichero.xlsm --centro=CODIGO\n"
     . "  php bin/console.php asientos:convertir\n"
     . "  php bin/console.php cuentas:purga-bajas-centro\n");
 exit(1);

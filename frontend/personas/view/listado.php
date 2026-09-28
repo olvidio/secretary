@@ -1,10 +1,24 @@
 <h1><?= _("Nombres") ?></h1>
+<?php if (!empty($esCentroSg)): ?>
+<p class="muted"><?= _("Apellidos y nombre, como en el Excel. El grupo y la clase (s o cp) ordenan el listado de aportaciones. El correo no abre un libro personal: un centro sg no admite cuentas personales.") ?></p>
+<?php else: ?>
 <p class="muted"><?= _("El correo convierte a esa persona en usuario del libro personal de este centro. Si el correo es nuevo, se muestra una contraseña inicial para comunicársela una vez. «Vivienda aporta a generales» indica si entra en el cierre automático (P/211, típico de n); quien no aporta puede igualmente imputar a generales puntualmente (P/211 y G/11). P/212 (vivienda personal) es un gasto propio, sin G/11. La exención de meses es para quien llega o se va a mitad de año (no se le pide movimiento ni entra en el cierre esos meses).") ?></p>
+<?php endif; ?>
 <form id="form-persona" class="grid-form">
     <input type="hidden" name="id">
     <label><?= _("Nombre") ?> <input name="nombre" required></label>
     <label><?= _("Apellidos") ?> <input name="apellidos"></label>
     <label><?= _("Iniciales") ?> <input name="iniciales" required maxlength="6"></label>
+    <?php if (!empty($esCentroSg)): ?>
+    <label><?= _("Grupo") ?> <input name="grupo" type="number" min="1" value="1" required></label>
+    <label><?= _("s / cp") ?>
+        <select name="clase">
+            <option value="s">s</option>
+            <option value="cp">cp</option>
+        </select>
+    </label>
+    <?php endif; ?>
+    <div id="campos-casa"<?= !empty($esCentroSg) ? ' hidden' : '' ?>>
     <label><?= _("Correo") ?> <input name="email" type="email" autocomplete="off"></label>
     <label><?= _("No paga desde mes") ?> <input name="mes_exento_inicio" type="number" min="1" max="12"></label>
     <label><?= _("No paga hasta mes") ?> <input name="mes_exento_fin" type="number" min="1" max="12"></label>
@@ -27,6 +41,7 @@
         <input name="base_liquidable" inputmode="decimal">
         <span class="muted"><?= _("Si se deja vacío, se usa el 111 de la previsión personal; si aún no está guardada, el ingreso 111 proyectado a fin de año.") ?></span>
     </label>
+    </div>
     <label class="inline casilla-legal">
         <input type="checkbox" name="asumo_responsable_nombres" value="1" id="asumo-responsable-nombres">
         <span><?= htmlspecialchars((string) ($textoAsumoNombres ?? _('Declaro que el centro, y yo como secretario, somos responsables del tratamiento de los datos de las personas que doy de alta, importo o vinculo. Secretario es un programa gratuito que solo aloja la información. Tengo base legal para ese tratamiento.')), ENT_QUOTES) ?></span>
@@ -42,14 +57,20 @@
 <table id="tabla-personas">
     <thead>
     <tr>
-        <th>#</th><th><?= _("Código") ?></th><th><?= _("Nombre") ?></th><th><?= _("Apellidos") ?></th><th><?= _("Iniciales") ?></th><th><?= _("Correo") ?></th>
-        <th><?= _("Exención") ?></th><th><?= _("Vivienda fija") ?></th><th><?= _("Aporta a G") ?></th><th><?= _("Desgrava") ?></th><th><?= _("Base liq.") ?></th><th></th>
+        <th>#</th><th><?= _("Código") ?></th><th><?= _("Nombre") ?></th><th><?= _("Apellidos") ?></th><th><?= _("Iniciales") ?></th>
+        <?php if (!empty($esCentroSg)): ?><th><?= _("Grupo") ?></th><th><?= _("s / cp") ?></th><?php endif; ?>
+        <?php if (empty($esCentroSg)): ?>
+        <th><?= _("Correo") ?></th>
+        <th><?= _("Exención") ?></th><th><?= _("Vivienda fija") ?></th><th><?= _("Aporta a G") ?></th><th><?= _("Desgrava") ?></th><th><?= _("Base liq.") ?></th>
+        <?php endif; ?>
+        <th></th>
     </tr>
     </thead>
     <tbody></tbody>
 </table>
 </section>
 <script>
+const ES_CENTRO_SG = <?= !empty($esCentroSg) ? 'true' : 'false' ?>;
 const I18N_PERSONAS = {
   si: <?= json_encode(_("sí"), JSON_UNESCAPED_UNICODE) ?>,
   no: <?= json_encode(_("no"), JSON_UNESCAPED_UNICODE) ?>,
@@ -80,13 +101,17 @@ async function loadPersonas() {
   tb.innerHTML = '';
   (r.personas || []).forEach((p, i) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${i+1}</td><td>${esc(p.centro_codigo || '')}</td><td>${esc(p.nombre)}</td><td>${esc(p.apellidos)}</td>
-      <td>${esc(p.iniciales)}</td><td>${esc(p.email)}</td>
+    const sg = ES_CENTRO_SG
+      ? `<td>${esc(String(p.grupo || ''))}</td><td>${esc(p.clase || '')}</td>`
+      : '';
+    const casa = ES_CENTRO_SG ? '' : `<td>${esc(p.email)}</td>
       <td>${p.mes_exento_inicio || ''}–${p.mes_exento_fin || ''} ${p.mes_exento2_inicio || ''}–${p.mes_exento2_fin || ''}</td>
       <td>${p.importe_vivienda_fijo || ''}</td>
       <td>${p.vivienda_aporta_generales ? esc(I18N_PERSONAS.si) : esc(I18N_PERSONAS.no)}</td>
       <td>${p.puede_desgravar ? esc(I18N_PERSONAS.si) : esc(I18N_PERSONAS.no)}</td>
-      <td>${esc(etiquetaBaseLiquidable(p))}</td>
+      <td>${esc(etiquetaBaseLiquidable(p))}</td>`;
+    tr.innerHTML = `<td>${i+1}</td><td>${esc(p.centro_codigo || '')}</td><td>${esc(p.nombre)}</td><td>${esc(p.apellidos)}</td>
+      <td>${esc(p.iniciales)}</td>${sg}${casa}
       <td><button data-id="${p.id}">${esc(I18N_PERSONAS.editar)}</button> <button data-del="${p.id}">${esc(I18N_PERSONAS.borrar)}</button></td>`;
     tr.querySelector('[data-id]').onclick = () => {
       const form = document.getElementById('form-persona');
