@@ -26,7 +26,7 @@ final class IniciarSesion
         $ahora ??= new DateTimeImmutable();
         $identificador = trim($identificador);
         if ($identificador === '') {
-            return new ResultadoLogin('fallo', _("Usuario o contraseña incorrectos"));
+            return new ResultadoLogin('fallo', _("Alias o contraseña incorrectos"));
         }
 
         $candidatas = $this->candidatasDe($identificador);
@@ -35,7 +35,7 @@ final class IniciarSesion
 
             return new ResultadoLogin(
                 'desconocido',
-                _("No hay cuenta con ese usuario. Puede registrarse."),
+                _("No hay cuenta con ese alias. Puede registrarse."),
             );
         }
 
@@ -82,7 +82,7 @@ final class IniciarSesion
                 $this->identidades->registrarFallo($unica, $ahora);
             }
 
-            return new ResultadoLogin('fallo', _("Usuario o contraseña incorrectos"));
+            return new ResultadoLogin('fallo', _("Alias o contraseña incorrectos"));
         }
 
         if (count($validas) > 1) {
@@ -117,7 +117,7 @@ final class IniciarSesion
     {
         $ahora ??= new DateTimeImmutable();
         if ($identidad->id === null) {
-            return new ResultadoLogin('fallo', _("Usuario o contraseña incorrectos"));
+            return new ResultadoLogin('fallo', _("Alias o contraseña incorrectos"));
         }
         if (!$this->identidades->emailVerificado($identidad->id)) {
             return new ResultadoLogin(

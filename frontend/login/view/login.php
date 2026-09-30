@@ -16,7 +16,7 @@
         <p class="error"><?= htmlspecialchars((string) $error, ENT_QUOTES) ?></p>
     <?php endif; ?>
     <input type="hidden" name="_csrf" value="<?= htmlspecialchars((string) ($csrf ?? ''), ENT_QUOTES) ?>">
-    <label><?= _("Usuario o email") ?> <input name="usuario" required autofocus autocomplete="username" value="<?= htmlspecialchars((string) ($usuario ?? ''), ENT_QUOTES) ?>"></label>
+    <label><?= _("Alias o correo") ?> <input name="usuario" required autofocus autocomplete="username" value="<?= htmlspecialchars((string) ($usuario ?? ''), ENT_QUOTES) ?>"></label>
     <label><?= _("Contraseña") ?> <input type="password" name="password" required autocomplete="current-password"></label>
     <button type="submit"><?= _("Entrar") ?></button>
     <p class="login-alt"><a href="/registro" id="ir-registro"><?= _("Registrarse") ?></a></p>

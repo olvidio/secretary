@@ -3,8 +3,8 @@
     <details class="yo-ayuda">
         <summary aria-label="<?= htmlspecialchars(_("Ayuda"), ENT_QUOTES) ?>">i</summary>
         <div class="yo-ayuda-cuerpo">
-            <p class="muted"><?= _("Vincula tu cuenta personal con un centro de tipo n (un solo centro a la vez). El secretario debe aprobar la petición; hasta entonces sigues usando tu libro propio, pero no podrás enviar el resumen mensual al centro.") ?></p>
-            <p class="muted"><?= _("Los centros sg no admiten solicitudes desde aquí. Si ya estás vinculado, puedes desvincularte para pedir acceso a otro centro más adelante.") ?></p>
+            <p class="muted"><?= _("Vincula tu cuenta personal con un centro n (un solo centro a la vez). El secretario debe aprobar la petición; hasta entonces sigues usando tu libro propio, pero no podrás enviar el resumen mensual al centro.") ?></p>
+            <p class="muted"><?= _("Los centros sg, las asociaciones y las fundaciones no salen aquí. Si ya estás vinculado, puedes desvincularte para pedir acceso a otro centro n más adelante.") ?></p>
         </div>
     </details>
 </div>
@@ -24,7 +24,7 @@
 <section id="estado-solicitar" hidden>
     <h2><?= _("Solicitar acceso") ?></h2>
     <form id="form-solicitud" class="grid-form">
-        <label><?= _("Centro (tipo n)") ?>
+        <label><?= _("Centro n") ?>
             <select name="centro_id" required></select>
         </label>
         <label><?= _("Año del ejercicio") ?> <input name="anio" type="number" min="2000" max="2100" required></label>
@@ -47,7 +47,7 @@ const I18N_YO_CENTROS = {
   nombre: <?= json_encode(_("Nombre"), JSON_UNESCAPED_UNICODE) ?>,
   anio: <?= json_encode(_("Año"), JSON_UNESCAPED_UNICODE) ?>,
   mensaje: <?= json_encode(_("Mensaje"), JSON_UNESCAPED_UNICODE) ?>,
-  sinCentros: <?= json_encode(_("No hay centros de tipo n disponibles."), JSON_UNESCAPED_UNICODE) ?>,
+  sinCentros: <?= json_encode(_("No hay centros n disponibles."), JSON_UNESCAPED_UNICODE) ?>,
 };
 document.addEventListener('DOMContentLoaded', async () => {
   const anio = new Date().getFullYear();

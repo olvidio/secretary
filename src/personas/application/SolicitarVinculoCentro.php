@@ -7,6 +7,7 @@ namespace src\personas\application;
 use InvalidArgumentException;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\ambito\domain\contracts\CentroRepository;
+use src\ambito\domain\services\TipoEntidad;
 use src\personas\domain\contracts\SolicitudVinculoCentroRepository;
 use src\personas\domain\entity\SolicitudVinculoCentro;
 
@@ -47,8 +48,8 @@ final class SolicitarVinculoCentro
         if ($centro === null || !$centro->activo) {
             throw new InvalidArgumentException(_("Centro no encontrado"));
         }
-        if ($centro->tipo !== 'n') {
-            throw new InvalidArgumentException(_("Solo puede solicitarse acceso a centros de tipo n"));
+        if (!TipoEntidad::esCentroParaPersona($centro->tipo)) {
+            throw new InvalidArgumentException(_("Solo puede solicitarse acceso a un centro n"));
         }
 
         $solicitud = $this->solicitudes->guardar(new SolicitudVinculoCentro(

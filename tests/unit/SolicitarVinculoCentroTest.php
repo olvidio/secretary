@@ -32,6 +32,24 @@ final class SolicitarVinculoCentroTest extends TestCase
         ]);
     }
 
+    public function testRechazaAsociacion(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('centro n');
+        $centros = $this->createStub(CentroRepository::class);
+        $centros->method('porId')->willReturn(new Centro(1, 'club', 'Club', 'asociacion', 'vivienda', CatalogoPlanesContables::CLUB));
+        $identidades = $this->createStub(IdentidadRepository::class);
+        $identidades->method('centrosDe')->willReturn([]);
+        $identidades->method('tienePersonaEnAlgunCentro')->willReturn(false);
+        $solicitudes = $this->createStub(SolicitudVinculoCentroRepository::class);
+        $solicitudes->method('pendienteDeIdentidad')->willReturn(null);
+
+        (new SolicitarVinculoCentro($solicitudes, $identidades, $centros))->ejecutar(5, [
+            'centro_id' => 1,
+            'anio' => 2026,
+        ]);
+    }
+
     public function testRechazaSiYaHayVinculo(): void
     {
         $this->expectException(InvalidArgumentException::class);

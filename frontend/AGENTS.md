@@ -24,7 +24,7 @@ public/
 
 Las APIs REST están en `src/shared/config/routes.php` (controladores en `src/.../infrastructure/http/`).
 
-El layout del centro lo elige cada usuario (`identidades.layout`: `excel` o `burger`) en **usuario → Layout**. El nombre de la esquina abre Mail, Layout, Idioma, Centro y Tipo. `/yo` sigue con `layout_yo.php` y el mismo menú de usuario.
+El layout del centro lo elige cada usuario (`identidades.layout`: `excel` o `burger`) en **usuario → Layout**. El nombre de la esquina abre Mail, Contraseña, Layout, Idioma, Centro y Tipo; en el libro personal, también Remanente. `/yo` sigue con `layout_yo.php` y el mismo menú de usuario. La barra inferior de Mis cuentas lleva Remesa (si hay centro), no Remanente.
 
 ## Añadir una pantalla nueva
 

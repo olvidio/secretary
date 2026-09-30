@@ -10,6 +10,24 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.13] — 2026-09-30
+
+### Añadido
+- En **Mis cuentas**, al editar un movimiento de banco se puede pasar a **Traspaso a caja** (un pago) o **Traspaso desde caja** (un cobro). El botón queda junto a Caja y Banco.
+- Al **desdoblar** un gasto se puede usar una plantilla del centro (p. ej. Club), igual que al anotar el gasto.
+- Tipos de **entidad**: centro n, centro sg, asociación y fundación. Club Montagut pasa a asociación. Una persona solo puede vincularse a un **centro n**.
+- En **administración → Usuarios**, **Borrar** también en cuentas que no tienen libro personal ni entidad.
+
+### Cambiado
+- **Remanente** pasa al menú del nombre (junto a Mail y Contraseña). **Remesa** sigue en la barra inferior cuando la persona está vinculada a un centro que no es el libro personal.
+- El mes del libro personal empieza el **día siguiente al cierre del mes anterior**. Si ese cierre cae en fin de mes, el siguiente sigue empezando el día 1.
+- En la administración, la lista de centros se llama **Entidades**. La sigla de la entidad ya no se llama código. Para entrar se pide **alias o correo**; el nombre de la persona y la sigla de la entidad van en campos distintos.
+- Alta de asociación y de fundación en el registro. Dentro de una fundación los textos dicen fundación.
+
+### Corregido
+- Al importar un extracto, dos líneas iguales (misma fecha, importe y concepto) ya no se funden en una. Volver a importar el mismo fichero no las duplica.
+- Desdoblar con la categoría Club ya no responde «Categoría no válida».
+
 ## [0.1.12] — 2026-09-28
 
 ### Corregido

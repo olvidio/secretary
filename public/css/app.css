@@ -1524,6 +1524,7 @@ body.admin { margin: 0; background: #f8fafc; }
 .yo-tesoreria {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: .65rem 1.25rem;
   border: 0;
   padding: 0;
@@ -1548,9 +1549,26 @@ body.admin { margin: 0; background: #f8fafc; }
   font-size: .9rem;
 }
 .yo-traspaso-campos select { width: auto; min-width: 6rem; }
+.yo-tesoreria button.yo-traspaso-caja {
+  width: auto;
+  flex: none;
+  margin: 0;
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: .15rem .5rem;
+  min-height: 0;
+  font-size: .82rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
 .yo-sheet.yo-es-traspaso .yo-traspaso-campos { display: flex; }
 .yo-sheet.yo-es-traspaso .yo-tesoreria,
 .yo-sheet.yo-es-traspaso .yo-cats-grid,
+.yo-sheet.yo-es-traspaso .yo-plantillas-wrap,
+.yo-sheet.yo-es-traspaso .yo-traspaso-caja,
+.yo-sheet.yo-es-traspaso #yo-pill-generales,
 .yo-sheet.yo-es-traspaso #yo-imputacion-wrap { display: none !important; }
 .yo-sheet.yo-es-generales .yo-cats-grid { display: none !important; }
 .yo-desdoblar-parte {

@@ -134,7 +134,7 @@ final class CorreoMulticuentaTest extends TestCase
         $login = $this->iniciarSesion($ctx)->ejecutar('fin@multi.test', 'mal-clave');
         self::assertSame('fallo', $login->estado);
         self::assertFalse($login->desconocido());
-        self::assertSame('Usuario o contraseña incorrectos', $login->mensaje);
+        self::assertSame('Alias o contraseña incorrectos', $login->mensaje);
     }
 
     /** @return array{pdo: \PDO, identidades: IdentidadRepository, catalogo: CatalogoDocumentosLegales, aceptaciones: PdoAceptacionLegalRepository} */

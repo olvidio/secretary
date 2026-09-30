@@ -13,6 +13,7 @@ final class EliminarUsuario
         private readonly IdentidadRepository $identidades,
         private readonly EliminarCuentaPersonal $eliminarPersonal,
         private readonly ProgramarBajaCuentaCentro $programarBajaCentro,
+        private readonly EliminarCuentaSinVinculos $eliminarSinVinculos,
     ) {
     }
 
@@ -41,6 +42,6 @@ final class EliminarUsuario
 
             return;
         }
-        throw new InvalidArgumentException(_('Tipo de cuenta no reconocido; no se puede dar de baja.'));
+        $this->eliminarSinVinculos->ejecutar($identidadId, true);
     }
 }

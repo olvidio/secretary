@@ -286,7 +286,7 @@ final class CatalogoMenus
     {
         return [
             ['nav' => 'admin-planes', 'href' => '/admin/planes', 'label' => _("Planes contables")],
-            ['nav' => 'admin-centros', 'href' => '/admin/centros', 'label' => _("Centros")],
+            ['nav' => 'admin-centros', 'href' => '/admin/centros', 'label' => _("Entidades")],
             ['nav' => 'admin-usuarios', 'href' => '/admin/usuarios', 'label' => _("Usuarios")],
             ['nav' => 'admin-legal', 'href' => '/admin/legal', 'label' => _("Legal")],
             ['nav' => 'admin-copias', 'href' => '/admin/copias', 'label' => _("Copias de la base")],

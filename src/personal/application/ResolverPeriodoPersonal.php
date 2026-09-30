@@ -32,12 +32,15 @@ final class ResolverPeriodoPersonal
         PeriodoPersonal::validar($anio, $mes);
         $defecto = $this->cierres->defectoDe($personaId);
         $fechaMes = $this->cierres->fechaMes($personaId, $anio, $mes);
+        [$anioAnt, $mesAnt] = PeriodoPersonal::mesAnterior($anio, $mes);
+        $fechaAnt = $this->cierres->fechaMes($personaId, $anioAnt, $mesAnt);
         $periodo = PeriodoPersonal::periodo(
             $anio,
             $mes,
             $defecto['dia_cierre'],
             $defecto['dia_habil'],
             $fechaMes,
+            $fechaAnt,
         );
 
         return [

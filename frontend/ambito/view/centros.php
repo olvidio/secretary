@@ -1,8 +1,10 @@
-<?php $esClub = !empty($esClub); ?>
+<?php $esClub = !empty($esClub); $esFundacion = !empty($esFundacion); ?>
 <h1><?= _("Centros") ?></h1>
 <p>
     <?php if ($esClub): ?>
-        <?= _("Esta associació tiene sus propias cuentas y su secretario. Quien lleve otra no ve los datos de ésta.") ?>
+        <?= $esFundacion
+            ? _("Esta fundación tiene sus propias cuentas y su secretario. Quien lleve otra no ve los datos de ésta.")
+            : _("Esta associació tiene sus propias cuentas y su secretario. Quien lleve otra no ve los datos de ésta.") ?>
     <?php else: ?>
         <?= _("Este centro tiene sus propias cuentas, nombres y secretario. Un usuario como scl2 se vincula a otro centro y no ve los datos de éste.") ?>
     <?php endif; ?>
@@ -13,27 +15,31 @@
     <p id="centro-actual" class="muted"><?= _("Cargando…") ?></p>
     <table id="tabla-usuarios">
         <thead>
-        <tr><th><?= _("Usuario") ?></th><th><?= _("Correo") ?></th><th><?= _("Nombre del usuario") ?></th><th><?= _("Rol") ?></th></tr>
+        <tr><th><?= _("Alias") ?></th><th><?= _("Correo") ?></th><th><?= _("Nombre") ?></th><th><?= _("Rol") ?></th></tr>
         </thead>
         <tbody></tbody>
     </table>
     <h3><?= _("Añadir usuario de este centro") ?></h3>
     <form id="form-usuario" class="grid-form">
-        <label><?= _("Usuario (alias)") ?> <input name="usuario" required placeholder="<?= htmlspecialchars(_("p. ej. scl"), ENT_QUOTES) ?>"></label>
+        <label><?= _("Alias") ?> <input name="usuario" required placeholder="<?= htmlspecialchars(_("p. ej. scl"), ENT_QUOTES) ?>"></label>
         <label><?= _("Correo") ?> <input name="email" type="email" required></label>
         <label><?= _("Contraseña") ?> <input name="password" type="password" required minlength="6"></label>
-        <label><?= _("Nombre del usuario") ?> <input name="nombre" autocomplete="name"></label>
+        <label><?= _("Nombre") ?> <input name="nombre" autocomplete="name"></label>
         <button type="submit"><?= _("Vincular") ?></button>
     </form>
     <?php if ($esClub): ?>
     <h3><?= _("Importar Grisbi") ?></h3>
-    <p class="muted"><?= _("Carga un fichero .gsb en esta associació. Las categorías nuevas se crean como cuentas y los movimientos como asientos. Volver a importar el mismo fichero no duplica.") ?></p>
+    <p class="muted"><?= $esFundacion
+        ? _("Carga un fichero .gsb en esta fundación. Las categorías nuevas se crean como cuentas y los movimientos como asientos. Volver a importar el mismo fichero no duplica.")
+        : _("Carga un fichero .gsb en esta associació. Las categorías nuevas se crean como cuentas y los movimientos como asientos. Volver a importar el mismo fichero no duplica.") ?></p>
     <form id="form-grisbi" class="grid-form">
         <label><?= _("Fichero .gsb") ?> <input name="grisbi" type="file" accept=".gsb,.xml,text/xml" required></label>
         <button type="submit"><?= _("Importar") ?></button>
     </form>
     <p class="ok" id="msg-import" hidden></p>
-    <p class="muted"><?= _("Mientras estemos de pruebas: vaciar asientos para volver a cargar un fichero. Quedan la associació y los usuarios.") ?></p>
+    <p class="muted"><?= $esFundacion
+        ? _("Mientras estemos de pruebas: vaciar asientos para volver a cargar un fichero. Quedan la fundación y los usuarios.")
+        : _("Mientras estemos de pruebas: vaciar asientos para volver a cargar un fichero. Quedan la associació y los usuarios.") ?></p>
     <?php else: ?>
     <h3><?= _("Excel de este centro") ?></h3>
     <p class="muted"><?= _("Carga el .xlsm en el libro de este centro, sin tocar el de los demás.") ?></p>
@@ -78,7 +84,9 @@ const I18N_CENTROS = {
   partidasGuardadas: <?= json_encode(_("Partidas guardadas."), JSON_UNESCAPED_UNICODE) ?>,
   excelImportado: <?= json_encode(_("Excel importado."), JSON_UNESCAPED_UNICODE) ?>,
   grisbiImportado: <?= json_encode(_("Grisbi importado."), JSON_UNESCAPED_UNICODE) ?>,
-  confirmVaciarClub: <?= json_encode(_("Esto borra los asientos de ESTA associació para poder volver a importar. Quedan la associació y los usuarios. ¿Seguro?"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmVaciarClub: <?= json_encode($esFundacion
+      ? _("Esto borra los asientos de ESTA fundación para poder volver a importar. Quedan la fundación y los usuarios. ¿Seguro?")
+      : _("Esto borra los asientos de ESTA associació para poder volver a importar. Quedan la associació y los usuarios. ¿Seguro?"), JSON_UNESCAPED_UNICODE) ?>,
   vaciadosClub: <?= json_encode(_("Vaciados %s asientos en %s ejercicio(s). Ya puedes importar el fichero."), JSON_UNESCAPED_UNICODE) ?>,
   esClub: <?= $esClub ? 'true' : 'false' ?>,
   faltaResponsable: <?= json_encode(_("Marque que el centro es responsable de los datos de las personas que da de alta."), JSON_UNESCAPED_UNICODE) ?>,

@@ -28,14 +28,14 @@ Gestiona la plataforma sin entrar en la contabilidad de ningún centro: planes c
    - **Exportar** descarga un JSON; **Importar** lo sustituye (mismo formato: objeto con `plan` y `conceptos`, o solo la lista `conceptos`).
    - Si un plan no tenía conceptos cargados, al abrir el editor se rellenan con el catálogo H16n. Los códigos 7x son plantilla del capítulo VII.
 
-### Centros (`/admin/centros`)
+### Entidades (`/admin/centros`)
 
-5. Rellenar el formulario «Nuevo centro» (código, nombre, plan, tipo de cierre, tipo n/sg, fechas del ejercicio, secretario y contraseña; Excel opcional) y pulsar **Crear centro**.
-6. En la tabla, **Borrar** elimina un centro y todos sus datos (pide confirmación).
+5. Rellenar el formulario «Nueva entidad» (sigla, nombre, plan, tipo de cierre, tipo de entidad, fechas del ejercicio, alias y nombre del secretario, y contraseña; Excel opcional) y pulsar **Crear entidad**. El tipo es **centro n**, **centro sg**, **asociación** o **fundación**. Al cambiar el tipo, el plan propuesto pasa a H16n, H16s o Club.
+6. La tabla muestra sigla, nombre, tipo de entidad, plan y tipo de cierre. **Borrar** elimina la entidad y todos sus datos (pide confirmación). El libro personal (tipo interno `p`) no sale en esta lista.
 
 ### Usuarios (`/admin/usuarios`)
 
-7. Listado de cuentas. **Borrar** en cuentas **personales** (borrado inmediato; correo al usuario) o de **secretario** (baja en standby 60 días: se desactiva el acceso, se desvincula del centro sin borrar contabilidad, se avisa por correo al secretario y a las cuentas personales vinculadas a ese centro). Si era el único secretario, el resumen lo advierte. **Reactivar** aparece mientras dure el standby. Tras el plazo, un job (`php bin/console.php cuentas:purga-bajas-centro`) elimina credenciales; si la identidad tenía también libro personal, queda solo como cuenta personal. No aparece **Borrar** en el admin de plataforma.
+7. Listado de cuentas: alias, correo y nombre. **Borrar** en cuentas **personales** (borrado inmediato; correo al usuario), en cuentas **sin libro ni entidad** (borrado inmediato; correo al usuario) o de **secretario** (baja en standby 60 días: se desactiva el acceso, se desvincula del centro sin borrar contabilidad, se avisa por correo al secretario y a las cuentas personales vinculadas a ese centro). Si era el único secretario, el resumen lo advierte. **Reactivar** aparece mientras dure el standby. Tras el plazo, un job (`php bin/console.php cuentas:purga-bajas-centro`) elimina credenciales; si la identidad tenía también libro personal, queda solo como cuenta personal. No aparece **Borrar** en el admin de plataforma.
 
 ### Legal (`/admin/legal`)
 
@@ -46,7 +46,7 @@ Gestiona la plataforma sin entrar en la contabilidad de ningún centro: planes c
 ## Reglas que conviene saber
 
 - El admin no ve menús de contabilidad ni puede operar en un centro concreto.
-- Los secretarios crean usuarios de su centro en Parámetros → Centros, pero no pueden crear centros nuevos ni borrar usuarios globales.
+- Los secretarios crean usuarios de su centro en Parámetros → Centros, pero no pueden crear entidades nuevas ni borrar usuarios globales. Una asociación o una fundación no tiene esa pantalla de Centros: los usuarios se gestionan en Configuración.
 - En el centro, solo el secretario puede cambiar las partidas **7x** (cap. VII); el resto de conceptos vienen del plan asignado al centro.
 - La contraseña del admin se sincroniza desde `.env` al ejecutar `db:migrate`.
 

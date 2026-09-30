@@ -70,7 +70,7 @@
   "Apuntes A sin cuadrar.": "Apunts A sense quadrar.",
   "Apuntes de cierre de mes": "Apunts de tancament de mes",
   "Apuntes de un concepto": "Apunts d'un concepte",
-  "Aquí defines en qué día termina cada mes en tu libro (p. ej. el 25 si entregas cuentas entonces). Esa fecha afecta al resumen, a la lista de movimientos y al envío mensual al centro: lo posterior cuenta ya en el mes siguiente.": "Aquí definiu en quin dia acaba cada mes al vostre llibre (per exemple, el 25 si lliureu els comptes aleshores). Aquesta data afecta el resum, el llistat de moviments i l'enviament mensual al centre: el darrer compta ja en el mes següent.",
+  "Aquí defines en qué día termina cada mes en tu libro (p. ej. el 25 si entregas cuentas entonces). El mes empieza el día siguiente al cierre del mes anterior, no siempre el día 1. Esa fecha afecta al resumen, a la lista de movimientos y al envío mensual al centro: lo posterior al cierre cuenta ya en el mes siguiente.": "Aquí definiu en quin dia acaba cada mes al vostre llibre (per exemple, el 25 si lliureu els comptes aleshores). El mes comença l'endemà del tancament del mes anterior, no sempre el dia 1. Aquesta data afecta el resum, el llistat de moviments i l'enviament mensual al centre: el que és posterior al tancament ja compta en el mes següent.",
   "Arqueo %s": "Arqueig %s",
   "Arqueo G": "Arqueig G",
   "Arqueo P": "Arqueig P",

@@ -289,16 +289,22 @@ final class AuthController
             'centro_tipo' => $tipoCentro,
         ];
         try {
-            if ($tipoCuenta === 'centro' || $tipoCuenta === 'club' || $tipoCuenta === 'centro-sg') {
+            if ($tipoCuenta === 'centro' || $tipoCuenta === 'club' || $tipoCuenta === 'centro-sg' || $tipoCuenta === 'fundacion') {
                 $plan = match ($tipoCuenta) {
-                    'club' => CatalogoPlanesContables::CLUB,
+                    'club', 'fundacion' => CatalogoPlanesContables::CLUB,
                     'centro-sg' => CatalogoPlanesContables::CENTRO_SG,
                     default => CatalogoPlanesContables::H16N,
+                };
+                $tipoEntidad = match ($tipoCuenta) {
+                    'centro' => $tipoCentro,
+                    'centro-sg' => 'sg',
+                    'fundacion' => 'fundacion',
+                    default => 'asociacion',
                 };
                 $alta = $this->registrarCentro->ejecutar(
                     $codigoCentro,
                     $nombreCentro,
-                    $tipoCuenta === 'centro' ? $tipoCentro : ($tipoCuenta === 'centro-sg' ? 'sg' : 'n'),
+                    $tipoEntidad,
                     $alias,
                     $email,
                     $pass,

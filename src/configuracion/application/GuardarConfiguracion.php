@@ -12,6 +12,7 @@ use src\ambito\domain\entity\Centro;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\configuracion\domain\entity\ConfiguracionCentro;
 use src\plan\domain\contracts\PlanContableRepository;
+use src\ambito\domain\services\TipoEntidad;
 use src\plan\domain\services\CatalogoPlanesContables;
 
 final class GuardarConfiguracion
@@ -55,8 +56,11 @@ final class GuardarConfiguracion
                 $tipo = 'n';
             }
         }
-        if (!in_array($tipo, ['n', 'sg'], true)) {
-            throw new InvalidArgumentException(_("Tipo de centro: n o sg"));
+        if (!in_array($tipo, TipoEntidad::deAlta(), true)) {
+            throw new InvalidArgumentException(_("Tipo de entidad no válido"));
+        }
+        if (!$planFijo && !in_array($tipo, [TipoEntidad::CENTRO_N, TipoEntidad::CENTRO_SG], true)) {
+            throw new InvalidArgumentException(_("Desde configuración solo se puede dejar el tipo en centro n o centro sg"));
         }
         $planContable = trim((string) ($datos['plan_contable'] ?? ''));
         if ($planFijo && $centroActivo !== null) {

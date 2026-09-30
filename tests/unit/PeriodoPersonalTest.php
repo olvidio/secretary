@@ -21,7 +21,36 @@ final class PeriodoPersonalTest extends TestCase
     public function testDia25(): void
     {
         $p = PeriodoPersonal::periodo(2026, 9, 25, false, null);
+        self::assertSame('2026-08-26', $p['desde']->format('Y-m-d'));
         self::assertSame('2026-09-25', $p['fecha_cierre']->format('Y-m-d'));
+    }
+
+    public function testEneroEmpiezaElDiaSiguienteAlCierreDeDiciembre(): void
+    {
+        $p = PeriodoPersonal::periodo(2026, 1, 25, false, null);
+        self::assertSame('2025-12-26', $p['desde']->format('Y-m-d'));
+        self::assertSame('2026-01-25', $p['hasta']->format('Y-m-d'));
+    }
+
+    public function testElCierreConcretoDelMesAnteriorAdelantaElInicio(): void
+    {
+        $p = PeriodoPersonal::periodo(2026, 9, 25, false, null, new DateTimeImmutable('2026-08-20'));
+        self::assertSame('2026-08-21', $p['desde']->format('Y-m-d'));
+        self::assertSame('2026-09-25', $p['hasta']->format('Y-m-d'));
+    }
+
+    public function testElDiaHabilDelMesAnteriorPuedeEmpujarElInicio(): void
+    {
+        // 28/02/2026 es sábado: el cierre pasa al lunes 2/03. Marzo empieza el 3.
+        $p = PeriodoPersonal::periodo(2026, 3, 28, true, null);
+        self::assertSame('2026-03-03', $p['desde']->format('Y-m-d'));
+        self::assertSame('2026-03-30', $p['hasta']->format('Y-m-d'));
+    }
+
+    public function testRechazaInicioPosteriorAlCierre(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        PeriodoPersonal::periodo(2026, 3, 28, true, new DateTimeImmutable('2026-03-01'));
     }
 
     public function testDia25SabadoPasaALunes(): void

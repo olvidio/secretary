@@ -30,7 +30,7 @@ Flujo mensual entre el libro personal y el centro.
 **Persona (Mis cuentas):**
 
 1. Anotar ingresos, gastos y traspasos del mes en Resumen, Lista o Banco.
-2. Si hay que dejar dinero en el banco, fijarlo antes en **Remanente**. Ir a **Remesa**, elegir el mes con ‹ ›, revisar las líneas, el saldo y el disponible (saldo menos remanente).
+2. Si hay que dejar dinero en el banco, fijarlo antes en **Remanente** (menú del nombre, junto a Mail y Contraseña). Ir a **Remesa**, elegir el mes con ‹ ›, revisar las líneas, el saldo y el disponible (saldo menos remanente).
 3. **Cerrar y enviar mes** (pide confirmación). Si el centro ya propuso destinos 7, el texto «Deberías ingresar…» aparece encima del botón.
 
 **Secretario (centro):**
@@ -58,7 +58,7 @@ Mismo criterio en el libro personal (`/yo/banco`) y en el centro (**Entrada G** 
 4. Seguir anotando a mano lo que no venga del banco (caja, apuntes sueltos).
 5. Al cerrar el mes, incluir esos movimientos en la **Remesa** (persona) o en los apuntes del centro (secretario).
 
-Reimportar el mismo fichero no duplica líneas ya importadas.
+Dos apuntes iguales del extracto (mismo día, concepto e importe) se importan los dos. Reimportar el mismo fichero no duplica líneas ya importadas.
 
 ### 4. Dar de alta a una persona nueva → vincular cuenta → primera remesa
 

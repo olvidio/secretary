@@ -30,10 +30,10 @@ final class AsegurarIdentidadCentro
         $password = trim($password);
         $nombre = trim($nombre);
         if ($alias === '' || $email === '') {
-            throw new InvalidArgumentException(_("Usuario (alias) y correo son obligatorios"));
+            throw new InvalidArgumentException(_("Alias y correo son obligatorios"));
         }
         if (preg_match('/^[a-z][a-z0-9._-]{1,31}$/', $alias) !== 1) {
-            throw new InvalidArgumentException(_("El usuario debe empezar por letra y tener 2-32 caracteres (letras, números, punto, guion)"));
+            throw new InvalidArgumentException(_("El alias debe empezar por letra y tener 2-32 caracteres (letras, números, punto, guion)"));
         }
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
             throw new InvalidArgumentException(_("El correo no es válido"));
@@ -43,7 +43,7 @@ final class AsegurarIdentidadCentro
 
         if ($identidad !== null && $identidad->id !== null) {
             if (strtolower($identidad->email) !== $email) {
-                throw new InvalidArgumentException(sprintf(_("El usuario «%s» ya existe con otro correo"), $alias));
+                throw new InvalidArgumentException(sprintf(_("El alias «%s» ya existe con otro correo"), $alias));
             }
             if ($password !== '') {
                 if (strlen($password) < 6) {

@@ -15,6 +15,8 @@ use src\acceso\infrastructure\persistence\PdoIdentidadRepository;
 use src\personal\application\AsegurarPlanPersonal;
 use src\personal\application\DesdoblarMovimientoPersonal;
 use src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository;
+use src\apuntes\infrastructure\persistence\PlantillaApunteSeeder;
+use src\personal\domain\services\ResolverCategoriaPlantillaPersonal;
 use src\personal\application\ListarMovimientosPersonales;
 use src\personal\application\RegistrarMovimientoPersonal;
 use src\personal\application\ResolverPersonaActual;
@@ -108,17 +110,27 @@ final class DesdoblarMovimientoTest extends TestCase
         self::assertCount(1, $guardado);
         self::assertNotNull($guardado[0]->id);
 
+        PlantillaApunteSeeder::sembrar($pdo);
+        $club = null;
+        foreach ((new PdoPlantillaApunteRepository($pdo))->listar($centroId, 'P') as $plantilla) {
+            if ($plantilla->nombre === 'Club' && $plantilla->id !== null) {
+                $club = $plantilla;
+            }
+        }
+        self::assertNotNull($club);
+
         $desdoblar = new DesdoblarMovimientoPersonal(
             $resolver,
             $cuentas,
             $asientos,
             new PdoBancoImportRepository($pdo),
             $pdo,
+            new ResolverCategoriaPlantillaPersonal(new PdoPlantillaApunteRepository($pdo), $cuentas),
         );
         $partidos = $desdoblar->ejecutar($guardado[0]->id, [
             'partes' => [
                 ['cantidad' => '300', 'cuenta_id' => $cat22->id, 'nota' => 'Vivienda'],
-                ['cantidad' => '400', 'cuenta_id' => $cat22->id, 'nota' => 'Club'],
+                ['cantidad' => '400', 'plantilla_id' => $club->id, 'nota' => 'Cuota'],
             ],
         ]);
         self::assertCount(2, $partidos);
@@ -131,6 +143,8 @@ final class DesdoblarMovimientoTest extends TestCase
         self::assertSame([300.0, 400.0], $importes);
         self::assertSame('BANCO', $movs[0]['tesoreria']);
         self::assertSame('Vivienda', $movs[0]['nota']);
-        self::assertSame('Club', $movs[1]['nota']);
+        self::assertSame('Cuota', $movs[1]['nota']);
+        self::assertSame($club->id, $movs[1]['plantilla_apunte_id']);
+        self::assertSame('Club', $movs[1]['plantilla_nombre']);
     }
 }

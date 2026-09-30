@@ -22,7 +22,7 @@ En N26 el fichero se descarga desde la web: cuenta → Descargas → actividad d
 
 ## Reglas que conviene saber
 
-- Volver a subir el mismo extracto no duplica nada: el programa reconoce las líneas que ya tenía.
+- Dos apuntes iguales (mismo día, concepto e importe) se importan los dos. Volver a subir el mismo extracto no duplica nada: el programa reconoce las líneas que ya tenía, incluida cada repetición.
 - Si antes se clasificó algo del mismo comercio, la categoría aparece preseleccionada.
 - La categoría elegida debe ser del mismo signo: un cobro no admite una categoría de gasto.
 - «Otra contabilidad» aparca un movimiento que no es propio: sigue moviendo el banco, para que el saldo cuadre con el extracto, pero no suma en ingresos ni gastos ni viaja al centro. Después se le puede poner una categoría normal.

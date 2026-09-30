@@ -1,4 +1,4 @@
-<?php $esClub = !empty($esClub); $esCentroSg = !empty($esCentroSg); ?>
+<?php $esClub = !empty($esClub); $esFundacion = !empty($esFundacion); $esCentroSg = !empty($esCentroSg); ?>
 <h1><?= _("Inicio") ?></h1>
 <?php if ($esCentroSg): ?>
 <p><?= _("Contabilidad de un centro sg: un solo libro, nombres, presupuesto y resumen 613, como el Excel Secretario sg.") ?></p>
@@ -12,7 +12,9 @@
     <li><a href="/arqueo-g"><?= _("Arqueo") ?></a></li>
 </ul>
 <?php elseif ($esClub): ?>
-<p><?= _("Contabilidad de la associació: un solo libro, caja y banco, importación Grisbi y listados.") ?></p>
+<p><?= $esFundacion
+    ? _("Contabilidad de la fundación: un solo libro, caja y banco, importación Grisbi y listados.")
+    : _("Contabilidad de la associació: un solo libro, caja y banco, importación Grisbi y listados.") ?></p>
 <ul class="cards">
     <li><a href="/entrada-g"><?= _("Entrada") ?></a></li>
     <li><a href="/apuntes"><?= _("Apuntes") ?></a></li>

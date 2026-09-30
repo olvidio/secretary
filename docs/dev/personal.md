@@ -45,6 +45,7 @@ Cada persona define en `/yo/cierre` cómo acota el mes en resumen, lista, remesa
 - **Regla por defecto:** día del mes (p. ej. 25). Vacío = último día del mes.
 - **Día hábil:** si el día cae en sábado o domingo, se usa el lunes siguiente.
 - **Mes concreto:** fecha explícita para un mes (anula la regla solo ese mes).
+- **Inicio:** el día siguiente al cierre del mes anterior (día 1 solo si ese cierre fue el último día).
 
 Migración `0026_personal_cierre.sql` (`personas.dia_cierre`, `personas.cierre_dia_habil`,
 `personal_cierre_mes`). Lógica en `PeriodoPersonal` / `ResolverPeriodoPersonal`.

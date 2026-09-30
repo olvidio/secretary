@@ -1,7 +1,7 @@
 # Remanente
 
 - Ruta: `/yo/remanente`
-- Menú: Mis cuentas → Remanente
+- Menú: nombre de la esquina → Remanente (junto a Mail y Contraseña)
 - Quién: cualquier persona
 
 ## Para qué sirve
@@ -10,7 +10,7 @@ Sirve para fijar el dinero que se queda en el banco o en la cuenta personal y no
 
 ## Cómo se usa
 
-1. Abrir **Remanente** en Mis cuentas.
+1. Abrir el nombre de la esquina y pulsar **Remanente** (junto a Mail y Contraseña).
 2. Escribir la cantidad que debe quedarse (por ejemplo 200). Vacío o cero significa que se envía todo el saldo.
 3. Pulsar **Guardar**.
 4. En **Remesa**, revisar el saldo, el remanente y el disponible que se envía antes de cerrar el mes.

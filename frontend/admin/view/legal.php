@@ -11,7 +11,7 @@
 <table id="tabla-legal-resultados" hidden>
     <thead>
         <tr>
-            <th><?= _("Usuario") ?></th>
+            <th><?= _("Alias") ?></th>
             <th><?= _("Correo") ?></th>
             <th><?= _("Verificado") ?></th>
             <th><?= _("Aceptaciones") ?></th>

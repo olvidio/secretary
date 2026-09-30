@@ -6,34 +6,35 @@
 
 ## Para qué sirve
 
-Sirve para crear una cuenta en el programa. Hay cuatro modalidades:
+Sirve para crear una cuenta en el programa. Hay cinco modalidades:
 
-- **Personal:** libro propio sin centro. Tras confirmar el correo puede solicitar acceso a un centro de tipo **n** desde Centros.
-- **Centro (secretario):** crea un centro nuevo (tipo **n** o **sg**, plan H16n) y la cuenta del secretario. Tras confirmar el correo debe activar el segundo factor para operar.
-- **Centro sg:** crea un centro con el plan **H16s** (un solo libro: aportaciones, gastos, destinos 41–54 y resumen 613). El tipo queda **sg**. Tras confirmar el correo debe activar el segundo factor.
-- **Associació (club):** crea un centro con plan Club (un solo libro) y la cuenta de quien lo lleva. Tras confirmar el correo debe activar el segundo factor.
+- **Personal:** libro propio sin centro. Tras confirmar el correo puede solicitar acceso a un **centro n** desde Centros.
+- **Centro n:** crea un centro n (plan H16n) y la cuenta del secretario. Las personas pueden solicitar vincularse. Tras confirmar el correo debe activar el segundo factor para operar.
+- **Centro sg:** crea un centro sg con el plan **H16s** (un solo libro: aportaciones, gastos, destinos 41–54 y resumen 613). Las personas no se vinculan. Tras confirmar el correo debe activar el segundo factor.
+- **Asociación:** crea una asociación con plan Club (un solo libro) y la cuenta de quien la lleva. Las personas no se vinculan. Tras confirmar el correo debe activar el segundo factor.
+- **Fundación:** igual que la asociación en la contabilidad (plan Club, un solo libro), con tipo fundación. Las personas no se vinculan. Tras confirmar el correo debe activar el segundo factor.
 
 Tras registrarse, el programa envía un correo con enlace de confirmación (48 horas). No se puede entrar hasta confirmarlo. Al marcar la casilla y abrir el enlace se aceptan las [Condiciones de uso](/condiciones) y se informa de la [Política de privacidad](/privacidad).
 
 ## Cómo se usa
 
 1. En la pantalla de entrada, pulsar «Registrarse».
-2. Elegir **Personal**, **Centro (secretario)**, **Centro sg** o **Associació (club)**.
-3. Si es centro H16n: escribir sigla, nombre y tipo (**n** o **sg**). Si es centro sg o associació: sigla y nombre.
-4. Escribir usuario, correo, nombre (opcional) y contraseña (dos veces).
+2. Elegir **Personal**, **Centro n**, **Centro sg**, **Asociación** o **Fundación**.
+3. Si no es personal: escribir sigla y nombre.
+4. Escribir alias, correo, nombre (opcional) y contraseña (dos veces).
 5. Marcar que se aceptan las condiciones (la casilla viene vacía) y pulsar «Crear cuenta».
 6. Confirmar el correo recibido. El mensaje recuerda la versión de las condiciones.
-7. Entrar con usuario y contraseña. Las cuentas personales sin centro irán a **Centros**; las de secretario activarán el segundo factor.
+7. Entrar con alias (o correo) y contraseña. Las cuentas personales sin centro irán a **Centros**; las de secretario activarán el segundo factor.
 
 ## Reglas que conviene saber
 
 - Cada correo puede tener una sola cuenta.
 - Hay que aceptar las condiciones: el servicio es gratuito y no se garantiza la ausencia de fallos ni la conservación de los datos; hay que hacer copias.
-- **n** y **sg** son tipos de centro; las cuentas personales solo pueden solicitar acceso a centros **n**.
-- Un secretario ya existente no se da de alta aquí como centro adicional: otro secretario lo añade desde la pantalla de centros del programa.
+- Los tipos de entidad son centro n, centro sg, asociación y fundación. Las cuentas personales solo pueden solicitar acceso a un **centro n**.
+- Un secretario ya existente no se da de alta aquí como entidad adicional: otro secretario lo añade desde la pantalla de centros del programa, o desde Configuración si es una asociación o una fundación.
 
 ## Problemas frecuentes
 
-- **«Ese usuario ya existe»** / **«Ese correo ya tiene una cuenta»**: usar otro identificador o entrar con el existente.
+- **«Ese alias ya existe»** / **«Ese correo ya tiene una cuenta»**: usar otro identificador o entrar con el existente.
 - **«Confirme su correo antes de entrar»**: abrir el enlace del correo o reenviarlo desde `/registro-enviado`.
 - **«Debe aceptar las Condiciones de uso»**: falta marcar la casilla del registro.

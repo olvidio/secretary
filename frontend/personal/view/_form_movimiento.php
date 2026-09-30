@@ -29,6 +29,7 @@
         <fieldset class="yo-tesoreria">
             <label><span><?= _("Caja") ?></span><input type="radio" name="tesoreria" value="CAJA" checked></label>
             <label><span><?= _("Banco") ?></span><input type="radio" name="tesoreria" value="BANCO"></label>
+            <button type="button" id="yo-btn-traspaso-caja" class="yo-traspaso-caja" hidden><?= _("Traspaso a caja") ?></button>
         </fieldset>
         <div id="yo-traspaso-campos" class="yo-traspaso-campos">
             <label><span><?= _("Origen") ?></span>

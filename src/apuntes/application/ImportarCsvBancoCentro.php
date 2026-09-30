@@ -13,6 +13,7 @@ use src\ambito\domain\entity\Cuenta;
 use src\apuntes\domain\contracts\BancoCentroImportRepository;
 use src\importacion\domain\contracts\LectorExtractoEnFilas;
 use src\importacion\domain\services\CatalogoBancosCsv;
+use src\importacion\domain\services\HuellasExtracto;
 use src\shared\domain\value_objects\Dinero;
 
 final class ImportarCsvBancoCentro
@@ -43,6 +44,7 @@ final class ImportarCsvBancoCentro
         } else {
             $lineas = $lector->leer($csv);
         }
+        $lineas = HuellasExtracto::distinguirIguales($lineas);
 
         $ctx = $this->ambito->ejecutar();
         $centroId = $ctx->centroId;

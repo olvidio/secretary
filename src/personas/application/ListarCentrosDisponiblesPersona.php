@@ -6,6 +6,7 @@ namespace src\personas\application;
 
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\ambito\domain\contracts\CentroRepository;
+use src\ambito\domain\services\TipoEntidad;
 
 final class ListarCentrosDisponiblesPersona
 {
@@ -21,7 +22,7 @@ final class ListarCentrosDisponiblesPersona
     {
         $out = [];
         foreach ($this->centros->listar() as $centro) {
-            if ($centro->id === null || !$centro->activo || $centro->tipo !== 'n') {
+            if ($centro->id === null || !$centro->activo || !TipoEntidad::esCentroParaPersona($centro->tipo)) {
                 continue;
             }
             if (str_starts_with(strtolower($centro->codigo), 'p-')) {

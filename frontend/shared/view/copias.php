@@ -1,11 +1,11 @@
 <h1><?= _("Copias de seguridad") ?></h1>
 <p class="muted">
-    <?= _("Copia solo de este centro o associació") ?> (<span id="db-name">…</span>). <?= _("No incluye los demás centros aunque los lleve el mismo usuario. La copia de toda la base está en la administración de la plataforma.") ?>
+    <?= _("Copia solo de esta entidad") ?> (<span id="db-name">…</span>). <?= _("No incluye las demás entidades aunque las lleve el mismo usuario. La copia de toda la base está en la administración de la plataforma.") ?>
 </p>
 
 <section>
     <h2><?= _("Nueva copia") ?></h2>
-    <p class="muted"><?= _("Genera un fichero de este centro (.json) en el servidor y lo añade al listado.") ?></p>
+    <p class="muted"><?= _("Genera un fichero de esta entidad (.json) en el servidor y lo añade al listado.") ?></p>
     <button type="button" id="btn-backup"><?= _("Crear copia ahora") ?></button>
     <p class="peligro" id="aviso-limite-copias" hidden><?= _("Solo se permite tener 5 copias en el servidor") ?></p>
     <button type="button" id="btn-backup-reemplazar" hidden><?= _("Borrar la más antigua y guardar") ?></button>

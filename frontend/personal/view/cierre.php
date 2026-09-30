@@ -9,7 +9,7 @@
         <details class="yo-ayuda">
             <summary aria-label="<?= htmlspecialchars(_("Ayuda"), ENT_QUOTES) ?>">i</summary>
             <div class="yo-ayuda-cuerpo">
-                <p class="muted"><?= _("Aquí defines en qué día termina cada mes en tu libro (p. ej. el 25 si entregas cuentas entonces). Esa fecha afecta al resumen, a la lista de movimientos y al envío mensual al centro: lo posterior cuenta ya en el mes siguiente.") ?></p>
+                <p class="muted"><?= _("Aquí defines en qué día termina cada mes en tu libro (p. ej. el 25 si entregas cuentas entonces). El mes empieza el día siguiente al cierre del mes anterior, no siempre el día 1. Esa fecha afecta al resumen, a la lista de movimientos y al envío mensual al centro: lo posterior al cierre cuenta ya en el mes siguiente.") ?></p>
             </div>
         </details>
     </div>

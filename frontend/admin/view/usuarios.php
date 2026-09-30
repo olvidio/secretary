@@ -1,7 +1,7 @@
 <h1><?= _("Usuarios") ?></h1>
 <p class="muted"><?= _("Cuentas de acceso. Personal: borrado inmediato con confirmación por correo (desde la propia cuenta) o desde aquí. Secretario: baja en standby (60 días) con aviso a cuentas personales vinculadas; reactivable por admin.") ?></p>
 <table id="tabla-usuarios">
-    <thead><tr><th><?= _("Alias") ?></th><th><?= _("Correo") ?></th><th><?= _("Nombre del usuario") ?></th><th><?= _("Centros") ?></th><th><?= _("Personas") ?></th><th></th></tr></thead>
+    <thead><tr><th><?= _("Alias") ?></th><th><?= _("Correo") ?></th><th><?= _("Nombre") ?></th><th><?= _("Centros") ?></th><th><?= _("Personas") ?></th><th></th></tr></thead>
     <tbody></tbody>
 </table>
 <script>
@@ -13,6 +13,7 @@ const I18N_ADMIN_USUARIOS = {
   confirmPersonalTitulo: <?= json_encode(_("¿Eliminar esta cuenta personal?"), JSON_UNESCAPED_UNICODE) ?>,
   confirmCentroTitulo: <?= json_encode(_("¿Programar la baja de esta cuenta de secretario?"), JSON_UNESCAPED_UNICODE) ?>,
   confirmSeguro: <?= json_encode(_("Esta acción no se puede deshacer."), JSON_UNESCAPED_UNICODE) ?>,
+  confirmVaciaTitulo: <?= json_encode(_("¿Eliminar esta cuenta?"), JSON_UNESCAPED_UNICODE) ?>,
   confirmFinalPersonal: <?= json_encode(_("¿Confirma el borrado definitivo? Se enviará un correo al usuario."), JSON_UNESCAPED_UNICODE) ?>,
   confirmFinalCentro: <?= json_encode(_("¿Confirma la baja programada? Se desactiva el acceso y se avisa por correo."), JSON_UNESCAPED_UNICODE) ?>,
   confirmReactivar: <?= json_encode(_("¿Reactivar esta cuenta de secretario y restaurar sus centros?"), JSON_UNESCAPED_UNICODE) ?>,
@@ -46,7 +47,7 @@ function filaUsuario(u) {
     btn.textContent = I18N_ADMIN_USUARIOS.reactivar;
     btn.onclick = () => reactivarCentro(u);
     td.appendChild(btn);
-  } else if (!u.es_admin && (u.es_personal || u.es_secretario)) {
+  } else if (!u.es_admin && (u.es_personal || u.es_secretario || ((u.centros ?? 0) === 0 && (u.personas ?? 0) === 0))) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'peligro';
@@ -61,7 +62,10 @@ async function borrarUsuario(u) {
   if (!prev.ok) return alert(prev.error);
   if (!prev.puede_borrar) return alert(prev.motivo_bloqueo || prev.error);
   const esCentro = prev.es_secretario === true;
-  let msg = (esCentro ? I18N_ADMIN_USUARIOS.confirmCentroTitulo : I18N_ADMIN_USUARIOS.confirmPersonalTitulo);
+  const esVacia = prev.es_vacia === true;
+  let msg = esCentro
+    ? I18N_ADMIN_USUARIOS.confirmCentroTitulo
+    : (esVacia ? I18N_ADMIN_USUARIOS.confirmVaciaTitulo : I18N_ADMIN_USUARIOS.confirmPersonalTitulo);
   if (!esCentro) msg += '\n\n' + I18N_ADMIN_USUARIOS.confirmSeguro;
   if (prev.texto_datos) msg += '\n\n' + prev.texto_datos;
   if (prev.texto_conservacion) msg += '\n\n' + prev.texto_conservacion;

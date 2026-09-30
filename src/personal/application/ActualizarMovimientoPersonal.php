@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use PDO;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\asientos\domain\entity\Asiento;
+use src\personal\domain\contracts\BancoImportRepository;
 use Throwable;
 
 final class ActualizarMovimientoPersonal
@@ -17,6 +18,7 @@ final class ActualizarMovimientoPersonal
         private readonly AsientoRepository $asientos,
         private readonly RegistrarMovimientoPersonal $registrar,
         private readonly PDO $pdo,
+        private readonly BancoImportRepository $bancoImport,
     ) {
     }
 
@@ -35,10 +37,23 @@ final class ActualizarMovimientoPersonal
             throw new InvalidArgumentException(_("Un movimiento de remesa no se edita a mano"));
         }
 
+        $bancoFila = $this->bancoImport->porAsiento($id);
+
         $this->pdo->beginTransaction();
         try {
             $this->asientos->borrar($id);
             $guardados = $this->registrar->ejecutar($datos);
+            if ($bancoFila !== null && isset($guardados[0]->id)) {
+                $this->bancoImport->guardar(
+                    $ctx->personaId,
+                    $bancoFila['banco'],
+                    $bancoFila['huella'],
+                    $guardados[0]->id,
+                    $bancoFila['fecha'],
+                    $bancoFila['importe'],
+                    $bancoFila['concepto'],
+                );
+            }
             $this->pdo->commit();
 
             return $guardados;

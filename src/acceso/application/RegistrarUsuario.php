@@ -40,10 +40,10 @@ final class RegistrarUsuario
         $passwordConfirm = trim($passwordConfirm);
         $nombre = trim($nombre);
         if ($alias === '' || $email === '') {
-            throw new InvalidArgumentException(_("Usuario y correo son obligatorios"));
+            throw new InvalidArgumentException(_("Alias y correo son obligatorios"));
         }
         if (preg_match('/^[a-z][a-z0-9._-]{1,31}$/', $alias) !== 1) {
-            throw new InvalidArgumentException(_("El usuario debe empezar por letra y tener 2-32 caracteres (letras, números, punto, guion)"));
+            throw new InvalidArgumentException(_("El alias debe empezar por letra y tener 2-32 caracteres (letras, números, punto, guion)"));
         }
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
             throw new InvalidArgumentException(_("El correo no es válido"));
@@ -55,7 +55,7 @@ final class RegistrarUsuario
             throw new InvalidArgumentException(_("Las contraseñas no coinciden"));
         }
         if ($this->identidades->porAlias($alias) !== null) {
-            throw new InvalidArgumentException(_("Ese usuario ya existe"));
+            throw new InvalidArgumentException(_("Ese alias ya existe"));
         }
         if ($this->identidades->cuentaPersonalPorEmail($email) !== null) {
             throw new InvalidArgumentException(_("Ese correo ya tiene una cuenta personal"));

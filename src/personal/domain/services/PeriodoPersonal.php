@@ -35,6 +35,21 @@ final class PeriodoPersonal
     }
 
     /**
+     * @return array{0: int, 1: int}
+     */
+    public static function mesAnterior(int $anio, int $mes): array
+    {
+        if ($mes === 1) {
+            return [$anio - 1, 12];
+        }
+
+        return [$anio, $mes - 1];
+    }
+
+    /**
+     * El periodo empieza el día siguiente al cierre del mes anterior.
+     * Si ese cierre es el último día, el inicio coincide con el día 1.
+     *
      * @return array{desde: DateTimeImmutable, hasta: DateTimeImmutable, fecha_cierre: DateTimeImmutable}
      */
     public static function periodo(
@@ -43,25 +58,43 @@ final class PeriodoPersonal
         ?int $diaCierreDefecto,
         bool $cierreDiaHabil,
         ?DateTimeImmutable $fechaMes,
+        ?DateTimeImmutable $fechaMesAnterior = null,
     ): array {
         self::validar($anio, $mes);
-        $desde = self::primerDia($anio, $mes);
+        $hasta = self::fechaCierre($anio, $mes, $diaCierreDefecto, $cierreDiaHabil, $fechaMes);
+        [$anioAnt, $mesAnt] = self::mesAnterior($anio, $mes);
+        $cierreAnt = self::fechaCierre($anioAnt, $mesAnt, $diaCierreDefecto, $cierreDiaHabil, $fechaMesAnterior);
+        $desde = $cierreAnt->modify('+1 day');
+        if ($desde > $hasta) {
+            throw new InvalidArgumentException('El inicio del periodo queda después del cierre');
+        }
+
+        return ['desde' => $desde, 'hasta' => $hasta, 'fecha_cierre' => $hasta];
+    }
+
+    public static function fechaCierre(
+        int $anio,
+        int $mes,
+        ?int $diaCierreDefecto,
+        bool $cierreDiaHabil,
+        ?DateTimeImmutable $fechaMes,
+    ): DateTimeImmutable {
         if ($fechaMes !== null) {
             self::assertEnMes($fechaMes, $anio, $mes);
 
-            return ['desde' => $desde, 'hasta' => $fechaMes, 'fecha_cierre' => $fechaMes];
+            return $fechaMes;
         }
-        $ultimo = self::ultimoDia($anio, $mes);
+        $ultimo = self::diaUno($anio, $mes)->modify('last day of this month');
         if ($diaCierreDefecto === null) {
-            return ['desde' => $desde, 'hasta' => $ultimo, 'fecha_cierre' => $ultimo];
+            return $ultimo;
         }
         $dia = min($diaCierreDefecto, (int) $ultimo->format('j'));
-        $cierre = self::primerDia($anio, $mes)->setDate($anio, $mes, $dia);
+        $cierre = self::diaUno($anio, $mes)->setDate($anio, $mes, $dia);
         if ($cierreDiaHabil) {
             $cierre = self::siguienteDiaHabil($cierre);
         }
 
-        return ['desde' => $desde, 'hasta' => $cierre, 'fecha_cierre' => $cierre];
+        return $cierre;
     }
 
     /** Fecha de imputación del asiento de remesa dentro del ejercicio. */
@@ -87,6 +120,19 @@ final class PeriodoPersonal
         }
 
         return $fecha;
+    }
+
+    private static function diaUno(int $anio, int $mes): DateTimeImmutable
+    {
+        if ($mes < 1 || $mes > 12) {
+            throw new InvalidArgumentException('Mes no válido');
+        }
+        $d = DateTimeImmutable::createFromFormat('!Y-n-j', $anio . '-' . $mes . '-1');
+        if ($d === false) {
+            throw new InvalidArgumentException('Mes no válido');
+        }
+
+        return $d;
     }
 
     private static function assertEnMes(DateTimeImmutable $fecha, int $anio, int $mes): void

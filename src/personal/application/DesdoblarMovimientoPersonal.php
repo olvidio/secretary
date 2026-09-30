@@ -12,6 +12,7 @@ use src\asientos\domain\contracts\AsientoRepository;
 use src\asientos\domain\entity\Asiento;
 use src\personal\domain\contracts\BancoImportRepository;
 use src\personal\domain\services\ConstructorAsientoPersonal;
+use src\personal\domain\services\ResolverCategoriaPlantillaPersonal;
 use src\shared\domain\value_objects\Dinero;
 use Throwable;
 
@@ -23,6 +24,7 @@ final class DesdoblarMovimientoPersonal
         private readonly AsientoRepository $asientos,
         private readonly BancoImportRepository $bancoImport,
         private readonly PDO $pdo,
+        private readonly ResolverCategoriaPlantillaPersonal $categoriaPlantilla,
     ) {
     }
 
@@ -75,12 +77,22 @@ final class DesdoblarMovimientoPersonal
             }
             $cents = $importe->toCents();
             $suma += $cents;
-            $categoria = $this->categoria($ctx->centroId, $ctx->personaId, (int) ($parte['cuenta_id'] ?? 0));
+            $plantillaId = (int) ($parte['plantilla_id'] ?? 0);
+            if ($plantillaId > 0) {
+                if ($meta['sentido'] !== 'gasto') {
+                    throw new InvalidArgumentException(_("Las plantillas del centro solo aplican a gastos"));
+                }
+                $categoria = $this->categoriaPlantilla->ejecutar($ctx->centroId, $ctx->personaId, $plantillaId);
+            } else {
+                $plantillaId = 0;
+                $categoria = $this->categoria($ctx->centroId, $ctx->personaId, (int) ($parte['cuenta_id'] ?? 0));
+            }
             $nota = trim((string) ($parte['nota'] ?? ''));
             $preparadas[] = [
                 'categoria' => $categoria,
                 'cents' => $cents,
                 'glosa' => $nota !== '' ? $nota : $asiento->glosa,
+                'plantilla_id' => $plantillaId > 0 ? $plantillaId : null,
             ];
         }
         if ($suma !== $meta['cents']) {
@@ -97,7 +109,7 @@ final class DesdoblarMovimientoPersonal
             $this->asientos->borrar($id);
             $guardados = [];
             foreach ($preparadas as $parte) {
-                $nuevo = ConstructorAsientoPersonal::movimiento(
+                $nuevo = $this->conPlantilla(ConstructorAsientoPersonal::movimiento(
                     $asiento->ejercicioId,
                     $ctx->personaId,
                     $asiento->fecha,
@@ -109,7 +121,7 @@ final class DesdoblarMovimientoPersonal
                     $parte['categoria']->codigo,
                     $asiento->fechaOperacion(),
                     $asiento->origen,
-                );
+                ), $parte['plantilla_id']);
                 $guardados[] = $this->asientos->guardar($nuevo);
             }
             if ($bancoFila !== null && isset($guardados[0]->id)) {
@@ -178,5 +190,32 @@ final class DesdoblarMovimientoPersonal
         }
 
         throw new InvalidArgumentException(_("Categoría no válida"));
+    }
+
+    private function conPlantilla(Asiento $asiento, ?int $plantillaId): Asiento
+    {
+        if ($plantillaId === null) {
+            return $asiento;
+        }
+
+        return new Asiento(
+            $asiento->id,
+            $asiento->ejercicioId,
+            $asiento->libro,
+            $asiento->numero,
+            $asiento->fecha,
+            $asiento->glosa,
+            $asiento->tipo,
+            $asiento->origen,
+            $asiento->personaId,
+            $asiento->movimientos,
+            $asiento->conceptoCodigo,
+            $asiento->asientoParId,
+            $asiento->fechaOperacion(),
+            $asiento->remesaId,
+            $asiento->gastoGenerales,
+            $asiento->conceptoGenerales,
+            $plantillaId,
+        );
     }
 }

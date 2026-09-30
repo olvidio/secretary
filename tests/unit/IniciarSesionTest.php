@@ -52,7 +52,7 @@ final class IniciarSesionTest extends TestCase
         $res = $this->caso($repo)->ejecutar('scl', 'no-es');
         self::assertSame('fallo', $res->estado);
         self::assertFalse($res->desconocido());
-        self::assertSame('Usuario o contraseña incorrectos', $res->mensaje);
+        self::assertSame('Alias o contraseña incorrectos', $res->mensaje);
     }
 
     public function testVariasCuentasMismoCorreoYClavePidenElegir(): void

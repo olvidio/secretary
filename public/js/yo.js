@@ -476,6 +476,34 @@
     });
     const first = grid.querySelector('button');
     if (first && !(sentido === 'gasto' && state.generalesActivo)) first.click();
+    actualizarOpcionTraspasoCaja();
+  }
+
+  function actualizarOpcionTraspasoCaja() {
+    const btn = qs('#yo-btn-traspaso-caja');
+    if (!btn) return;
+    const banco = qs('#yo-form [name="tesoreria"]:checked');
+    const esBanco = banco && banco.value === 'BANCO';
+    const aplica = (state.sentido === 'gasto' || state.sentido === 'ingreso') && esBanco;
+    btn.hidden = !aplica;
+    if (!aplica) return;
+    btn.textContent = state.sentido === 'ingreso' ? t('traspaso_desde_caja') : t('traspaso_a_caja');
+  }
+
+  function convertirATraspasoCaja() {
+    const form = qs('#yo-form');
+    if (!form) return;
+    const desdeCaja = state.sentido === 'ingreso';
+    state.sentido = 'traspaso';
+    form.sentido.value = 'traspaso';
+    resetPlantilla();
+    resetGenerales();
+    configurarFormulario('traspaso');
+    if (form.tesoreria_origen) form.tesoreria_origen.value = desdeCaja ? 'CAJA' : 'BANCO';
+    if (form.tesoreria_destino) form.tesoreria_destino.value = desdeCaja ? 'BANCO' : 'CAJA';
+    const titulo = qs('#yo-form-titulo');
+    if (titulo) titulo.textContent = desdeCaja ? t('traspaso_desde_caja') : t('traspaso_a_caja');
+    actualizarOpcionTraspasoCaja();
   }
 
   function prepararModalBase() {
@@ -580,6 +608,7 @@
       }
       actualizarPillGenerales();
     }
+    actualizarOpcionTraspasoCaja();
     modal.hidden = false;
   }
 
@@ -637,6 +666,17 @@
     if (modal) modal.hidden = true;
   }
 
+  function parteDesdoblar(cantidad, cuenta, nota) {
+    const v = String(cuenta || '');
+    const parte = { cantidad: cantidad, nota: nota };
+    if (v.indexOf('plantilla:') === 0) {
+      parte.plantilla_id = Number(v.slice(10));
+    } else {
+      parte.cuenta_id = Number(v);
+    }
+    return parte;
+  }
+
   function bindDesdoblar() {
     const modal = qs('#yo-modal-desdoblar');
     const form = qs('#yo-desdoblar-form');
@@ -678,8 +718,8 @@
         method: 'POST',
         body: {
           partes: [
-            { cantidad: form.cantidad1.value, cuenta_id: Number(form.cuenta_id1.value), nota: form.nota1.value },
-            { cantidad: form.cantidad2.value, cuenta_id: Number(form.cuenta_id2.value), nota: form.nota2.value },
+            parteDesdoblar(form.cantidad1.value, form.cuenta_id1.value, form.nota1.value),
+            parteDesdoblar(form.cantidad2.value, form.cuenta_id2.value, form.nota2.value),
           ],
         },
       });
@@ -712,6 +752,13 @@
         if (state.generalesActivo) resetPlantilla();
         actualizarPillGenerales();
       };
+    }
+    const traspasoCaja = qs('#yo-btn-traspaso-caja');
+    if (traspasoCaja) traspasoCaja.onclick = convertirATraspasoCaja;
+    if (form) {
+      form.querySelectorAll('[name="tesoreria"]').forEach((el) => {
+        el.addEventListener('change', actualizarOpcionTraspasoCaja);
+      });
     }
     if (!form) return;
     form.onsubmit = async (ev) => {

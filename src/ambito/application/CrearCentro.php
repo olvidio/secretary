@@ -14,6 +14,7 @@ use src\ambito\domain\entity\Centro;
 use src\ambito\domain\entity\Ejercicio;
 use src\plan\domain\contracts\PartidaLaboresRepository;
 use src\plan\domain\contracts\PlanContableRepository;
+use src\ambito\domain\services\TipoEntidad;
 use src\plan\domain\services\CatalogoPlanesContables;
 
 /**
@@ -46,16 +47,16 @@ final class CrearCentro
         $tipoCierre = (string) ($datos['tipo_cierre'] ?? 'vivienda');
         $verificarEmail = !array_key_exists('verificar_email', $datos) || (bool) $datos['verificar_email'];
         if ($codigo === '' || $nombre === '') {
-            throw new InvalidArgumentException(_("Código y nombre del centro son obligatorios"));
+            throw new InvalidArgumentException(_("Código y nombre de la entidad son obligatorios"));
         }
-        if (!in_array($tipo, ['n', 'sg'], true)) {
-            throw new InvalidArgumentException(_("Tipo de centro: n o sg"));
+        if (!in_array($tipo, TipoEntidad::deAlta(), true)) {
+            throw new InvalidArgumentException(_("Tipo de entidad: centro n, centro sg, asociación o fundación"));
         }
         if (!in_array($tipoCierre, ['vivienda', 'necesidades'], true)) {
             throw new InvalidArgumentException(_("Tipo de cierre: vivienda o necesidades"));
         }
         if ($this->centros->porCodigo($codigo) !== null) {
-            throw new InvalidArgumentException(_("Ya existe un centro con ese código"));
+            throw new InvalidArgumentException(_("Ya existe una entidad con ese código"));
         }
         $planCodigo = trim((string) ($datos['plan_contable'] ?? CatalogoPlanesContables::H16N));
         if ($this->planes->idPorCodigo($planCodigo) === null) {
@@ -67,7 +68,7 @@ final class CrearCentro
                 new Centro(null, $codigo, $nombre, $tipo, $tipoCierre, $planCodigo)
             );
             if ($centro->id === null) {
-                throw new InvalidArgumentException(_("No se pudo crear el centro"));
+                throw new InvalidArgumentException(_("No se pudo crear la entidad"));
             }
             if (!CatalogoPlanesContables::esClub($planCodigo) && !CatalogoPlanesContables::esCentroSg($planCodigo)) {
                 $this->partidasLabores->sembrarPorDefecto($centro->id);

@@ -5,10 +5,13 @@ $esLibroPersonal = (($_SESSION['nivel'] ?? '') === 'persona');
 $itemsCuenta = [
     ['cuenta-mail', '/cuenta/mail', _('Mail')],
     ['cuenta-password', '/cuenta/password', _('Contraseña')],
-    ['cuenta-totp', '/cuenta/totp', _('2FA')],
-    ['cuenta-layout', '/cuenta/layout', _('Layout')],
-    ['cuenta-idioma', '/cuenta/idioma', _('Idioma')],
 ];
+if ($esLibroPersonal) {
+    $itemsCuenta[] = ['yo-remanente', '/yo/remanente', _('Remanente')];
+}
+$itemsCuenta[] = ['cuenta-totp', '/cuenta/totp', _('2FA')];
+$itemsCuenta[] = ['cuenta-layout', '/cuenta/layout', _('Layout')];
+$itemsCuenta[] = ['cuenta-idioma', '/cuenta/idioma', _('Idioma')];
 if ($esLibroPersonal) {
     if (!empty($mostrarMenuPersonaActiva)) {
         $itemsCuenta[] = ['cuenta-persona', '/cuenta/persona', _('Persona activa')];

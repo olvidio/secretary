@@ -1,7 +1,7 @@
-<?php $esClub = !empty($esClub); $esCentroSg = !empty($esCentroSg); $esPlanPropio = $esClub || $esCentroSg; ?>
+<?php $esClub = !empty($esClub); $esFundacion = !empty($esFundacion); $esCentroSg = !empty($esCentroSg); $esPlanPropio = $esClub || $esCentroSg; ?>
 <h1><?= _("Configuración") ?></h1>
 <form id="form-config" class="grid-form">
-    <label><?= $esClub ? _("Sigla") : _("Centro") ?> <input name="centro" required></label>
+    <label><?= _("Sigla") ?> <input name="centro" required></label>
     <label><?= _("Año") ?> <input name="anio" type="number" required></label>
     <label><?= _("Ejercicio") ?>
         <select name="modo_ejercicio">
@@ -14,8 +14,8 @@
     <?php if (!$esPlanPropio): ?>
     <label><?= _("Tipo de centro") ?>
         <select name="tipo">
-            <option value="n"><?= _("n") ?></option>
-            <option value="sg"><?= _("sg") ?></option>
+            <option value="n"><?= _("centro n") ?></option>
+            <option value="sg"><?= _("centro sg") ?></option>
         </select>
     </label>
     <label><?= _("Tipo de cierre") ?>
@@ -51,31 +51,37 @@
 <?php endif; ?>
 <?php if ($esClub): ?>
 <section>
-    <h2><?= _("Usuarios de esta associació") ?></h2>
-    <p class="muted"><?= _("Quien lleve otra associació no ve los datos de ésta.") ?></p>
+    <h2><?= $esFundacion ? _("Usuarios de esta fundación") : _("Usuarios de esta associació") ?></h2>
+    <p class="muted"><?= $esFundacion
+        ? _("Quien lleve otra fundación no ve los datos de ésta.")
+        : _("Quien lleve otra associació no ve los datos de ésta.") ?></p>
     <p id="centro-actual" class="muted"><?= _("Cargando…") ?></p>
     <table id="tabla-usuarios">
         <thead>
-        <tr><th><?= _("Usuario") ?></th><th><?= _("Correo") ?></th><th><?= _("Nombre del usuario") ?></th><th><?= _("Rol") ?></th></tr>
+        <tr><th><?= _("Alias") ?></th><th><?= _("Correo") ?></th><th><?= _("Nombre") ?></th><th><?= _("Rol") ?></th></tr>
         </thead>
         <tbody></tbody>
     </table>
     <h3><?= _("Añadir usuario") ?></h3>
     <form id="form-usuario" class="grid-form">
-        <label><?= _("Usuario (alias)") ?> <input name="usuario" required placeholder="<?= htmlspecialchars(_("p. ej. scl"), ENT_QUOTES) ?>"></label>
+        <label><?= _("Alias") ?> <input name="usuario" required placeholder="<?= htmlspecialchars(_("p. ej. scl"), ENT_QUOTES) ?>"></label>
         <label><?= _("Correo") ?> <input name="email" type="email" required></label>
         <label><?= _("Contraseña") ?> <input name="password" type="password" required minlength="6"></label>
-        <label><?= _("Nombre del usuario") ?> <input name="nombre" autocomplete="name"></label>
+        <label><?= _("Nombre") ?> <input name="nombre" autocomplete="name"></label>
         <button type="submit"><?= _("Vincular") ?></button>
     </form>
     <h3><?= _("Importar Grisbi") ?></h3>
-    <p class="muted"><?= _("Carga un fichero .gsb en esta associació. Las categorías nuevas se crean como cuentas y los movimientos como asientos. Volver a importar el mismo fichero no duplica.") ?></p>
+    <p class="muted"><?= $esFundacion
+        ? _("Carga un fichero .gsb en esta fundación. Las categorías nuevas se crean como cuentas y los movimientos como asientos. Volver a importar el mismo fichero no duplica.")
+        : _("Carga un fichero .gsb en esta associació. Las categorías nuevas se crean como cuentas y los movimientos como asientos. Volver a importar el mismo fichero no duplica.") ?></p>
     <form id="form-grisbi" class="grid-form">
         <label><?= _("Fichero .gsb") ?> <input name="grisbi" type="file" accept=".gsb,.xml,text/xml" required></label>
         <button type="submit"><?= _("Importar") ?></button>
     </form>
     <p class="ok" id="msg-import" hidden></p>
-    <p class="muted"><?= _("Mientras estemos de pruebas: vaciar asientos para volver a cargar un fichero. Quedan la associació y los usuarios.") ?></p>
+    <p class="muted"><?= $esFundacion
+        ? _("Mientras estemos de pruebas: vaciar asientos para volver a cargar un fichero. Quedan la fundación y los usuarios.")
+        : _("Mientras estemos de pruebas: vaciar asientos para volver a cargar un fichero. Quedan la associació y los usuarios.") ?></p>
     <button type="button" id="btn-vaciar" class="peligro"><?= _("Vaciar datos (pruebas)") ?></button>
     <p class="ok" id="msg-vaciar" hidden></p>
 </section>
@@ -85,7 +91,9 @@ const I18N_CONFIG = {
   quitar: <?= json_encode(_("Quitar"), JSON_UNESCAPED_UNICODE) ?>,
   noCentro: <?= json_encode(_("No se pudo cargar el centro"), JSON_UNESCAPED_UNICODE) ?>,
   grisbiImportado: <?= json_encode(_("Grisbi importado."), JSON_UNESCAPED_UNICODE) ?>,
-  confirmVaciarClub: <?= json_encode(_("Esto borra los asientos de ESTA associació para poder volver a importar. Quedan la associació y los usuarios. ¿Seguro?"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmVaciarClub: <?= json_encode($esFundacion
+    ? _("Esto borra los asientos de ESTA fundación para poder volver a importar. Quedan la fundación y los usuarios. ¿Seguro?")
+    : _("Esto borra los asientos de ESTA associació para poder volver a importar. Quedan la associació y los usuarios. ¿Seguro?"), JSON_UNESCAPED_UNICODE) ?>,
   vaciadosClub: <?= json_encode(_("Vaciados %s asientos en %s ejercicio(s). Ya puedes importar el fichero."), JSON_UNESCAPED_UNICODE) ?>,
 };
 async function cargarAssociacio() {

@@ -14,6 +14,7 @@ use src\acceso\domain\value_objects\IdiomaUsuario;
 use src\acceso\domain\value_objects\LayoutPantalla;
 use src\acceso\infrastructure\http\ProteccionCsrf;
 use src\ambito\domain\contracts\CentroRepository;
+use src\ambito\domain\services\TipoEntidad;
 use src\legal\domain\services\CatalogoDocumentosLegales;
 use src\legal\domain\services\DatosOperador;
 use src\legal\infrastructure\http\HuellaAceptacionHttp;
@@ -372,6 +373,7 @@ final class PageController
             'cuentaPresupuesto' => $vars['presupuesto'] ?? null,
             'textoAsumoNombres' => $this->documentos->textoCasillaNombres($this->idiomaUsuario()),
             'esClub' => $club,
+            'esFundacion' => $this->esFundacion(),
             'esCentroSg' => $centroSg,
         ]));
     }
@@ -644,6 +646,17 @@ final class PageController
         $centro = $this->centros->porId($id);
 
         return $centro !== null && CatalogoPlanesContables::esClub($centro->planContableCodigo);
+    }
+
+    private function esFundacion(): bool
+    {
+        $id = isset($_SESSION['centro_id']) ? (int) $_SESSION['centro_id'] : 0;
+        if ($id <= 0) {
+            return false;
+        }
+        $centro = $this->centros->porId($id);
+
+        return $centro !== null && $centro->tipo === TipoEntidad::FUNDACION;
     }
 
     private function esPlanCentroSg(): bool

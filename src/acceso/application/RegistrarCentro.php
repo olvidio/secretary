@@ -10,6 +10,7 @@ use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\entity\Identidad;
 use src\ambito\application\CrearCentro;
 use src\ambito\domain\entity\Centro;
+use src\ambito\domain\services\TipoEntidad;
 use src\plan\domain\services\CatalogoPlanesContables;
 
 /**
@@ -50,17 +51,17 @@ final class RegistrarCentro
         if ($codigo === '' || $nombreCentro === '') {
             throw new InvalidArgumentException(_("La sigla y el nombre son obligatorios"));
         }
-        if (!in_array($tipo, ['n', 'sg'], true)) {
-            throw new InvalidArgumentException(_("Indique el tipo de centro: n o sg"));
+        if (!in_array($tipo, TipoEntidad::deAlta(), true)) {
+            throw new InvalidArgumentException(_("Indique el tipo de entidad: centro n, centro sg, asociación o fundación"));
         }
         if (!CatalogoPlanesContables::esValido($planContable)) {
             throw new InvalidArgumentException(_("Plan contable no válido"));
         }
         if ($alias === '' || $email === '') {
-            throw new InvalidArgumentException(_("Usuario y correo del secretario son obligatorios"));
+            throw new InvalidArgumentException(_("Alias y correo del secretario son obligatorios"));
         }
         if (preg_match('/^[a-z][a-z0-9._-]{1,31}$/', $alias) !== 1) {
-            throw new InvalidArgumentException(_("El usuario debe empezar por letra y tener 2-32 caracteres (letras, números, punto, guion)"));
+            throw new InvalidArgumentException(_("El alias debe empezar por letra y tener 2-32 caracteres (letras, números, punto, guion)"));
         }
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
             throw new InvalidArgumentException(_("El correo no es válido"));
@@ -72,7 +73,7 @@ final class RegistrarCentro
             throw new InvalidArgumentException(_("Las contraseñas no coinciden"));
         }
         if ($this->identidades->porAlias($alias) !== null) {
-            throw new InvalidArgumentException(_("Ese usuario ya existe"));
+            throw new InvalidArgumentException(_("Ese alias ya existe"));
         }
         if (!$aceptoCondiciones) {
             throw new InvalidArgumentException(_("Debe aceptar las Condiciones de uso"));

@@ -1,7 +1,9 @@
 <?php $cuenta = $cuentaEntrada ?? 'P'; $esClub = !empty($esClub); ?>
 <?php if ($esClub && $cuenta === 'G'): ?>
 <h1><?= _("Cuentas") ?></h1>
-<p><?= _("Las cuentas de esta associació. La plantilla de base se puede cambiar; las cuentas que ya existen se conservan.") ?></p>
+<p><?= !empty($esFundacion)
+    ? _("Las cuentas de esta fundación. La plantilla de base se puede cambiar; las cuentas que ya existen se conservan.")
+    : _("Las cuentas de esta associació. La plantilla de base se puede cambiar; las cuentas que ya existen se conservan.") ?></p>
 <section>
     <h2><?= _("Nueva cuenta") ?></h2>
     <form id="form-cuenta">

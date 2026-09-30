@@ -13,6 +13,7 @@ use src\asientos\domain\contracts\AsientoRepository;
 use src\personal\domain\contracts\BancoImportRepository;
 use src\importacion\domain\contracts\LectorExtractoEnFilas;
 use src\importacion\domain\services\CatalogoBancosCsv;
+use src\importacion\domain\services\HuellasExtracto;
 use src\personal\domain\services\ConstructorAsientoPersonal;
 use src\importacion\domain\value_objects\LineaExtractoBanco;
 use src\shared\domain\value_objects\Dinero;
@@ -46,6 +47,7 @@ final class ImportarCsvBanco
         } else {
             $lineas = $lector->leer($csv);
         }
+        $lineas = HuellasExtracto::distinguirIguales($lineas);
         $ctx = $this->ambito->ejecutar();
         $this->plan->ejecutar($ctx->centroId, $ctx->personaId);
         $tesoreria = $this->cuentas->tesoreriaDePersona($ctx->centroId, $ctx->personaId, 'X', 'BANCO');

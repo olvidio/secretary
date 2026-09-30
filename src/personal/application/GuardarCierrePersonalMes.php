@@ -33,7 +33,17 @@ final class GuardarCierrePersonalMes
         if ($fecha === false) {
             throw new InvalidArgumentException(_("Fecha de cierre no válida"));
         }
-        PeriodoPersonal::periodo($anio, $mes, null, false, $fecha);
+        $defecto = $this->cierres->defectoDe($ctx->personaId);
+        [$anioAnt, $mesAnt] = PeriodoPersonal::mesAnterior($anio, $mes);
+        $fechaAnt = $this->cierres->fechaMes($ctx->personaId, $anioAnt, $mesAnt);
+        PeriodoPersonal::periodo(
+            $anio,
+            $mes,
+            $defecto['dia_cierre'],
+            $defecto['dia_habil'],
+            $fecha,
+            $fechaAnt,
+        );
         $this->cierres->guardarMes($ctx->personaId, $anio, $mes, $fecha);
 
         return $this->periodo->ejecutar($ctx->personaId, $anio, $mes);

@@ -6,9 +6,9 @@
 
 ## Para qué sirve
 
-Sirve para decidir en qué día termina el mes en el libro propio. No todos los meses se cuentan de día 1 a día 31: si las cuentas se entregan cada día 25, conviene que el programa considere que el mes acaba el 25.
+Sirve para decidir en qué día termina el mes en el libro propio. No todos los meses se cuentan de día 1 a día 31: si las cuentas se entregan cada día 25, conviene que el programa considere que el mes acaba el 25 y que el siguiente empieza el 26.
 
-Esta fecha manda en el resumen, en la lista de movimientos y en el envío mensual al centro: todo lo posterior cuenta ya en el mes siguiente.
+Esta fecha manda en el resumen, en la lista de movimientos y en el envío mensual al centro: todo lo posterior al cierre cuenta ya en el mes siguiente.
 
 ## Cómo se usa
 
@@ -22,7 +22,7 @@ Esta fecha manda en el resumen, en la lista de movimientos y en el envío mensua
 
 - El día de la regla general debe estar entre 1 y 28, o quedar vacío. Así se evita que falte en febrero.
 - La fecha concreta de un mes tiene que caer dentro de ese mes.
-- El mes siempre empieza el día 1; lo único que se cambia es el día en que acaba.
+- El mes empieza el día siguiente al cierre del mes anterior. Si ese cierre fue el último día del mes, el inicio coincide con el día 1.
 - El texto bajo «Este mes» indica el periodo en uso y si viene de la regla general o de una fecha concreta.
 - Cambiar la fecha no borra ni mueve ningún movimiento: solo cambia el mes en el que se cuenta.
 
