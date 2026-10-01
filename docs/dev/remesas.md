@@ -10,7 +10,10 @@ subcuentas queda en el nivel 1 y el centro solo lo ve si la persona autoriza.
 ## Flujo
 
 1. La persona previsualiza el mes (`GET /api/yo/remesas`) y envía
-   (`POST /api/yo/remesas`). `saldo_tesoreria` es el saldo de caja+banco
+   (`POST /api/yo/remesas`). Los movimientos se leen del libro X. Si ese
+   libro es un centro tipo `p` y la identidad tiene un nombre en un centro,
+   la remesa se guarda con ese nombre y ese centro (la bandeja de `/remesas`).
+   `saldo_tesoreria` es el saldo de caja+banco
    (opcional; si falta, el del libro). Se guarda el disponible
    `max(0, saldo − remanente)`. Nace una remesa `enviada`, versión 1, 2, …
 2. El centro ve la bandeja en `/remesas`. Puede aceptar o rechazar.

@@ -20,17 +20,22 @@
     <?php endif; ?>
     <div id="campos-casa"<?= !empty($esCentroSg) ? ' hidden' : '' ?>>
     <label><?= _("Correo") ?> <input name="email" type="email" autocomplete="off"></label>
-    <label><?= _("No paga desde mes") ?> <input name="mes_exento_inicio" type="number" min="1" max="12"></label>
-    <label><?= _("No paga hasta mes") ?> <input name="mes_exento_fin" type="number" min="1" max="12"></label>
-    <label><?= _("Otro intervalo desde") ?> <input name="mes_exento2_inicio" type="number" min="1" max="12"></label>
-    <label><?= _("Otro intervalo hasta") ?> <input name="mes_exento2_fin" type="number" min="1" max="12"></label>
-    <label><?= _("Importe fijo vivienda") ?> <input name="importe_vivienda_fijo"></label>
+    <div class="meses-exentos">
+    <label><?= _("No paga desde mes") ?> <input name="mes_exento_inicio" type="number" min="1" max="12" inputmode="numeric"></label>
+    <label><?= _("No paga hasta mes") ?> <input name="mes_exento_fin" type="number" min="1" max="12" inputmode="numeric"></label>
+    <label><?= _("Otro intervalo desde") ?> <input name="mes_exento2_inicio" type="number" min="1" max="12" inputmode="numeric"></label>
+    <label><?= _("Otro intervalo hasta") ?> <input name="mes_exento2_fin" type="number" min="1" max="12" inputmode="numeric"></label>
+    </div>
+    <div class="vivienda-aporta">
     <label><?= _("Vivienda aporta a generales") ?>
         <select name="vivienda_aporta_generales">
             <option value="1"><?= _("Sí — entra en el cierre automático (P/211)") ?></option>
             <option value="0"><?= _("No — vivienda solo personal") ?></option>
         </select>
     </label>
+    <label><?= _("Importe fijo vivienda") ?> <input name="importe_vivienda_fijo" inputmode="decimal"></label>
+    </div>
+    <div class="desgrava-base">
     <label><?= _("Puede desgravar donativos") ?>
         <select name="puede_desgravar">
             <option value="1"><?= _("Sí") ?></option>
@@ -39,8 +44,9 @@
     </label>
     <label><?= _("Base liquidable IRPF") ?>
         <input name="base_liquidable" inputmode="decimal">
-        <span class="muted"><?= _("Si se deja vacío, se usa el 111 de la previsión personal; si aún no está guardada, el ingreso 111 proyectado a fin de año.") ?></span>
     </label>
+    <span class="muted"><?= _("Si se deja vacío, se usa el 111 de la previsión personal; si aún no está guardada, el ingreso 111 proyectado a fin de año.") ?></span>
+    </div>
     </div>
     <label class="inline casilla-legal">
         <input type="checkbox" name="asumo_responsable_nombres" value="1" id="asumo-responsable-nombres">

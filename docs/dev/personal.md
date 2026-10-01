@@ -70,7 +70,7 @@ Tope de 5 copias por persona en el servidor (igual que en `/copias` del centro).
 No toca el centro ni remesas ya aceptadas. En Docker, `var/backups/personal` debe ser
 escribible por PHP-FPM (`chmod 777 var/backups/personal` en desarrollo).
 
-Pantallas: `/yo`, `/yo/movimientos`, `/yo/banco`, `/yo/categorias`, `/yo/remesas`, `/yo/cierre` (layout propio,
+Pantallas: `/yo`, `/yo/movimientos`, `/yo/banco`, `/yo/categorias`, `/yo/remesas`, `/yo/gastos-ordinarios`, `/yo/cierre` (layout propio,
 sin cinta del centro). API bajo `/api/yo/...`. Ámbito `persona` en `CatalogoRutas`.
 Una sesión de centro que pisa `/yo` vuelve a `/`; una de persona que pisa el
 centro va a `/yo`.

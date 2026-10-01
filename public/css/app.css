@@ -177,6 +177,65 @@ hr.separa-apunte { border: 0; border-top: 1px solid var(--line, #ccc); margin: 0
 .solicitud-candidatos { margin-top: .75rem; padding-top: .75rem; border-top: 1px solid var(--line); }
 .lista-candidatos { margin: .35rem 0 0; padding-left: 1.25rem; }
 .lista-candidatos li { margin-bottom: .35rem; }
+.meses-exentos {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: end;
+  gap: .75rem 1rem;
+}
+.meses-exentos input[type="number"] {
+  width: 3.6rem;
+  max-width: 3.6rem;
+  box-sizing: border-box;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.vivienda-aporta {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: end;
+  gap: .75rem 1rem;
+}
+.vivienda-aporta select {
+  width: auto;
+  max-width: 22rem;
+}
+.vivienda-aporta input[name="importe_vivienda_fijo"] {
+  width: 4.5rem;
+  max-width: 4.5rem;
+  box-sizing: border-box;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.desgrava-base {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: .75rem 1rem;
+}
+.desgrava-base select {
+  width: auto;
+  max-width: 22rem;
+}
+.desgrava-base input[name="base_liquidable"] {
+  width: 5.5rem;
+  max-width: 5.5rem;
+  box-sizing: border-box;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.desgrava-base > .muted {
+  flex: 1 1 100%;
+}
+#campos-casa > * + * {
+  margin-top: .75rem;
+}
+#form-persona input[name="email"] {
+  width: 20rem;
+  max-width: 100%;
+  align-self: flex-start;
+  box-sizing: border-box;
+}
 .nombres-listado { margin-top: 1.5rem; }
 .nombres-listado-titulo { font-size: 1.1rem; margin: 0 0 .75rem; }
 .nombres-listado #tabla-personas { margin-top: 0; }
@@ -1464,6 +1523,21 @@ body.admin { margin: 0; background: #f8fafc; }
   white-space: nowrap;
 }
 .yo-tabbar a.on { color: #0f766e; font-weight: 700; background: #ccfbf1; }
+.go-cabecera h1 { margin: 0 0 .15rem; }
+.go-cabecera p { margin: 0 0 .85rem; }
+.go-tabla { width: 100%; border-collapse: collapse; }
+.go-tabla th, .go-tabla td { text-align: left; border-bottom: 1px solid #e2e8f0; }
+.go-tabla .num, .go-tabla th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.go-tabla tfoot td { font-weight: 700; border-top: 2px solid #1a202c; border-bottom: 0; }
+.go-tabla small { color: #64748b; }
+@media print {
+  body.yo .yo-top,
+  body.yo .yo-month,
+  body.yo .login-version { display: none !important; }
+  body.yo .yo-main { max-width: none; padding: 0; overflow: visible; }
+  .go-cabecera h1 { font-size: 16pt; }
+  .go-tabla { font-size: 11pt; }
+}
 .yo-modal {
   position: fixed;
   inset: 0;
@@ -1759,6 +1833,14 @@ body.admin { margin: 0; background: #f8fafc; }
   color: #0f172a;
 }
 .yo-remesa-resumen { margin: .75rem 0 1rem; }
+#yo-remesa-tesoreria {
+  width: 7.2rem;
+  max-width: 100%;
+  align-self: flex-start;
+  box-sizing: border-box;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
 #yo-remesa-enviar { width: 100%; padding: .85rem; font-size: 1.05rem; min-height: 3rem; }
 @media (max-width: 480px) {
   body.yo { font-size: 16px; }

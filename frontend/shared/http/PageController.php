@@ -319,6 +319,12 @@ final class PageController
         if ($personas === []) {
             return Response::redirect('/yo');
         }
+        $libro = $this->identidades->personaLibroPersonalDe($id);
+        if ($libro !== null) {
+            $_SESSION['persona_id'] = $libro;
+
+            return Response::redirect('/yo');
+        }
         if (count($personas) === 1) {
             $_SESSION['persona_id'] = (int) $personas[0]['persona_id'];
 
@@ -429,6 +435,11 @@ final class PageController
         }
 
         return $this->paginaYo('personal/view/remesas.php', 'yo-remesas');
+    }
+
+    public function yoGastosOrdinarios(Request $request, array $vars = []): Response
+    {
+        return $this->paginaYo('personal/view/gastos_ordinarios.php', 'yo-go');
     }
 
     public function yoCierre(Request $request, array $vars = []): Response

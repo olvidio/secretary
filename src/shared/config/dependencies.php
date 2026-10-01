@@ -218,6 +218,7 @@ use src\personal\application\CrearCopiaPersonal;
 use src\personal\application\ListarCopiasPersonal;
 use src\personal\application\ListarConceptosGenerales;
 use src\personal\application\RestaurarCopiaPersonal;
+use src\personal\application\ListarGastosOrdinarios;
 use src\personal\application\ListarMovimientosPersonales;
 use src\personal\application\ListarPendientesBanco;
 use src\personal\application\RegistrarMovimientoPersonal;
@@ -532,6 +533,7 @@ return [
     AsegurarPlanPersonal::class => autowire(),
     RegistrarMovimientoPersonal::class => autowire(),
     ListarMovimientosPersonales::class => autowire(),
+    ListarGastosOrdinarios::class => autowire(),
     BorrarMovimientoPersonal::class => autowire(),
     ResumenMensualPersonal::class => autowire(),
     ListarCategoriasPersonales::class => autowire(),
@@ -549,7 +551,32 @@ return [
     BorrarCopiaPersonal::class => autowire(),
     CopiaPersonalController::class => autowire(),
     BancoPersonalController::class => autowire(),
-    ResolverMesRemesa::class => autowire(),
+    ResolverMesRemesa::class => factory(static function (
+        ResolverPersonaActual $ambito,
+        EjercicioRepository $ejercicios,
+        AsientoRepository $asientos,
+        CuentaRepository $cuentas,
+        ResolverPeriodoPersonal $periodoPersonal,
+        RemanenteRepository $remanentes,
+        PersonaRepository $personas,
+        CentroRepository $centros,
+        IdentidadRepository $identidades,
+    ): ResolverMesRemesa {
+        $identidadId = !empty($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : null;
+
+        return new ResolverMesRemesa(
+            $ambito,
+            $ejercicios,
+            $asientos,
+            $cuentas,
+            $periodoPersonal,
+            $remanentes,
+            $personas,
+            $centros,
+            $identidades,
+            $identidadId,
+        );
+    }),
     PrevisualizarRemesa::class => autowire(),
     EnviarRemesa::class => autowire(),
     ObtenerRemesaPersonal::class => autowire(),

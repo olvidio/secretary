@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace src\remesas\application;
 
+use DateTimeImmutable;
 use InvalidArgumentException;
+use src\acceso\domain\contracts\IdentidadRepository;
+use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\contracts\CuentaRepository;
 use src\ambito\domain\contracts\EjercicioRepository;
 use src\ambito\domain\entity\Ejercicio;
@@ -14,6 +17,7 @@ use src\personal\application\ResolverPersonaActual;
 use src\personal\domain\contracts\RemanenteRepository;
 use src\personal\domain\services\PeriodoPersonal;
 use src\personal\domain\value_objects\ContextoPersonal;
+use src\personas\domain\contracts\PersonaRepository;
 use src\remesas\domain\entity\RemesaLinea;
 use src\remesas\domain\services\AgregadorRemesaPersonal;
 use src\remesas\domain\services\CalculoDisponibleRemesa;
@@ -27,6 +31,10 @@ final class ResolverMesRemesa
         private readonly CuentaRepository $cuentas,
         private readonly ResolverPeriodoPersonal $periodoPersonal,
         private readonly RemanenteRepository $remanentes,
+        private readonly PersonaRepository $personas,
+        private readonly CentroRepository $centros,
+        private readonly IdentidadRepository $identidades,
+        private readonly ?int $identidadId = null,
     ) {
     }
 
@@ -34,6 +42,8 @@ final class ResolverMesRemesa
      * @return array{
      *   ctx: ContextoPersonal,
      *   ejercicio: Ejercicio,
+     *   destino_persona_id: int,
+     *   destino_centro_id: int,
      *   anio: int,
      *   mes: int,
      *   lineas: list<RemesaLinea>,
@@ -60,7 +70,9 @@ final class ResolverMesRemesa
         if ($ejercicio === null || $ejercicio->id === null) {
             throw new InvalidArgumentException(_("No hay ejercicio que cubra ese mes"));
         }
-        PeriodoPersonal::fechaAsiento($desde, $hasta, $ejercicio);
+        $destino = $this->destino($ctx, $hasta, $ejercicio);
+        $ejercicioDestino = $destino['ejercicio'];
+        PeriodoPersonal::fechaAsiento($desde, $hasta, $ejercicioDestino);
 
         $cuentas = [];
         foreach ($this->cuentas->listarDePersona($ctx->centroId, $ctx->personaId, 'X') as $c) {
@@ -94,7 +106,9 @@ final class ResolverMesRemesa
 
         return [
             'ctx' => $ctx,
-            'ejercicio' => $ejercicio,
+            'ejercicio' => $ejercicioDestino,
+            'destino_persona_id' => $destino['persona_id'],
+            'destino_centro_id' => $destino['centro_id'],
             'anio' => $anio,
             'mes' => $mes,
             'lineas' => $lineas,
@@ -102,6 +116,42 @@ final class ResolverMesRemesa
             'remanente_cents' => $remanente,
             'disponible_cents' => CalculoDisponibleRemesa::cents($tesoreria, $remanente),
             'hasta' => $periodo['hasta'],
+        ];
+    }
+
+    /**
+     * El libro X sigue en la cuenta personal. Si esa cuenta es un libro propio
+     * (centro tipo p) y hay un nombre vinculado a un centro, la remesa se dirige
+     * a ese nombre para que el centro la vea en su bandeja.
+     *
+     * @return array{persona_id: int, centro_id: int, ejercicio: Ejercicio}
+     */
+    private function destino(ContextoPersonal $libro, DateTimeImmutable $hasta, Ejercicio $ejercicioLibro): array
+    {
+        $mismo = [
+            'persona_id' => $libro->personaId,
+            'centro_id' => $libro->centroId,
+            'ejercicio' => $ejercicioLibro,
+        ];
+        $persona = $this->personas->porId($libro->personaId);
+        $centro = $persona?->centroId !== null ? $this->centros->porId($persona->centroId) : null;
+        if ($centro === null || $centro->tipo !== 'p' || $this->identidadId === null) {
+            return $mismo;
+        }
+        $vinculos = $this->identidades->personasVinculoDe($this->identidadId);
+        if ($vinculos === []) {
+            return $mismo;
+        }
+        $vinculo = $vinculos[0];
+        $ejercicio = $this->ejercicios->deCentroEnFecha($vinculo['centro_id'], $hasta);
+        if ($ejercicio === null || $ejercicio->id === null) {
+            throw new InvalidArgumentException(_("No hay ejercicio que cubra ese mes"));
+        }
+
+        return [
+            'persona_id' => $vinculo['persona_id'],
+            'centro_id' => $vinculo['centro_id'],
+            'ejercicio' => $ejercicio,
         ];
     }
 }

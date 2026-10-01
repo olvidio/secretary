@@ -119,6 +119,9 @@ final class RemesaTest extends TestCase
         self::assertSame(3750, $prev['saldo_tesoreria_cents']);
         self::assertSame(1000, $prev['remanente_cents']);
         self::assertSame(2750, $prev['disponible_cents']);
+        self::assertSame(3750, $prev['neto_cents']);
+        self::assertArrayHasKey('desde', $prev);
+        self::assertArrayHasKey('hasta', $prev);
         $codigos = array_column($prev['lineas'], 'codigo_maestro');
         self::assertContains('22', $codigos);
         self::assertContains('111', $codigos);
@@ -289,6 +292,10 @@ final class RemesaTest extends TestCase
             $cuentas,
             $periodoPersonal,
             new PdoRemanenteRepository($this->pdo),
+            $personas,
+            $centros,
+            $identidades,
+            $yo->id,
         );
         $conceptosRepo = new PdoConceptoRepository($this->pdo);
         $conceptos = ConceptosCentro::resolver($this->pdo);

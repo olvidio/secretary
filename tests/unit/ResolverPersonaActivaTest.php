@@ -36,4 +36,14 @@ final class ResolverPersonaActivaTest extends TestCase
         self::assertSame(20, $res['persona_id']);
         self::assertFalse($res['requiere_elegir']);
     }
+
+    public function testElLibroPersonalSeMantieneAunqueHayaNombreDeCentro(): void
+    {
+        $repo = $this->createStub(IdentidadRepository::class);
+        $repo->method('personasDe')->willReturn([21, 95]);
+        $repo->method('personaLibroPersonalDe')->willReturn(95);
+        $res = (new ResolverPersonaActiva($repo))->ejecutar(4, null);
+        self::assertSame(95, $res['persona_id']);
+        self::assertFalse($res['requiere_elegir']);
+    }
 }

@@ -26,6 +26,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/yo/categorias', [PageController::class, 'yoCategorias']);
     $r->addRoute('GET', '/yo/banco', [PageController::class, 'yoBanco']);
     $r->addRoute('GET', '/yo/remesas', [PageController::class, 'yoRemesas']);
+    $r->addRoute('GET', '/yo/gastos-ordinarios', [PageController::class, 'yoGastosOrdinarios']);
     $r->addRoute('GET', '/yo/cierre', [PageController::class, 'yoCierre']);
     $r->addRoute('GET', '/yo/remanente', [PageController::class, 'yoRemanente']);
     $r->addRoute('GET', '/yo/centros', [PageController::class, 'yoCentros']);

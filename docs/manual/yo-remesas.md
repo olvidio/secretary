@@ -16,7 +16,7 @@ Si el centro ya confirmó destinos 7, el texto («Deberías ingresar…») apare
 
 1. Elegir el mes con las flechas ‹ y ›.
 2. Revisar las líneas y el texto de estado, que indica si el mes está sin enviar, enviado o ya aceptado.
-3. Si se quiere, escribir una nota para el centro. El saldo de caja y banco viene relleno y se puede corregir. Debajo se ve el remanente que se queda y el disponible que se enviará. El remanente se cambia en el menú del nombre.
+3. Si se quiere, escribir una nota para el centro. El saldo de caja y banco viene relleno y se puede corregir. Debajo se ve el remanente que se queda, el neto del mes (ingresos menos gastos entre el día siguiente al cierre anterior y el cierre de este mes) y el disponible que se enviará. El remanente se cambia en el menú del nombre.
 4. Pulsar «Cerrar y enviar mes» y confirmar.
 5. En «Solicitudes de detalle», si el centro ha pedido ver el desglose de una línea, pulsar «Autorizar» o «Denegar».
 
@@ -29,7 +29,7 @@ Si el centro ya confirmó destinos 7, el texto («Deberías ingresar…») apare
 - El mes empieza el día siguiente al cierre del mes anterior y llega hasta la fecha de cierre elegida en la pantalla de cierre, no necesariamente del día 1 al último día.
 - El importe que viaja para el disponible del centro es el saldo menos el remanente. Si el saldo no cubre el remanente, se envía cero. Con remanente a cero se envía todo el saldo.
 - Los gastos marcados como «Generales» viajan indicando su concepto, para que el centro los anote también en sus cuentas.
-- El «Historial de este mes» muestra las versiones enviadas y en qué estado quedó cada una.
+- El «Historial de este mes» muestra las versiones enviadas, en qué estado quedó cada una y el disponible que se mandó en esa versión.
 - Las 7 que ya se hayan anotado en el libro viajan en la remesa. Las de la propuesta del centro se apuntaron al confirmar; no hay que volver a cargarlas a mano para que cuenten.
 
 ## Problemas frecuentes

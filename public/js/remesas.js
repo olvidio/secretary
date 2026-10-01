@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         + '<td>' + esc((m.iniciales || '') + ' · ' + (m.persona || '')) + '</td>'
         + '<td>' + esc(String(m.version)) + '</td>'
         + '<td>' + esc(m.estado) + '</td>'
-        + '<td class="num">' + esc(m.sobrante_es || '') + '</td>'
+        + '<td class="num">' + esc(m.saldo_tesoreria_es || '') + '</td>'
         + '<td>' + esc(enviada) + '</td>'
         + '<td><button type="button" data-id="' + m.id + '">Ver</button></td>';
       tr.querySelector('button').onclick = () => abrir(m.id);

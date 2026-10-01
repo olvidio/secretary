@@ -90,7 +90,9 @@ final class AprobarSolicitudVinculoCentro
             $persona = $this->personas->porId($personaId);
             if ($persona !== null) {
                 $this->cuentaCorriente->ejecutar($persona);
-                if ($persona->centroId !== null && $persona->id !== null) {
+                $libro = $this->identidades->personaLibroPersonalDe($solicitud->identidadId);
+                $abrirPlanAqui = $libro === null || $libro === $persona->id;
+                if ($abrirPlanAqui && $persona->centroId !== null && $persona->id !== null) {
                     $this->planPersonal->ejecutar($persona->centroId, $persona->id);
                 }
             }

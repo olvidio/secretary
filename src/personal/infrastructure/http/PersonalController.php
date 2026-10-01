@@ -14,6 +14,7 @@ use src\personal\application\GuardarCierrePersonalDefecto;
 use src\personal\application\GuardarCierrePersonalMes;
 use src\personal\application\ListarCategoriasPersonales;
 use src\personal\application\ListarConceptosGenerales;
+use src\personal\application\ListarGastosOrdinarios;
 use src\personal\application\ListarMovimientosPersonales;
 use src\personal\application\RegistrarMovimientoPersonal;
 use src\personal\application\RemanentePersonal;
@@ -42,6 +43,7 @@ final class PersonalController
         private readonly GuardarCierrePersonalMes $guardarCierreMes,
         private readonly BorrarCierrePersonalMes $borrarCierreMes,
         private readonly RemanentePersonal $remanente,
+        private readonly ListarGastosOrdinarios $ordinarios,
     ) {
     }
 
@@ -64,6 +66,19 @@ final class PersonalController
             'movimientos' => $this->listar->ejecutar($periodo['desde'], $periodo['hasta']),
             'fecha_cierre' => $periodo['fecha_cierre'],
         ]);
+    }
+
+    public function gastosOrdinarios(Request $request, array $vars = []): Response
+    {
+        $periodo = $this->periodoDe($request);
+        $datos = $this->ordinarios->ejecutar($periodo['desde'], $periodo['hasta']);
+        $datos['anio'] = $periodo['anio'];
+        $datos['mes'] = $periodo['mes'];
+        $datos['desde'] = $periodo['desde'];
+        $datos['hasta'] = $periodo['hasta'];
+        $datos['fecha_cierre'] = $periodo['fecha_cierre'];
+
+        return ContestarJson::ok($datos);
     }
 
     public function cierre(Request $request, array $vars = []): Response

@@ -21,6 +21,8 @@
 </p>
 <p><?= _("Remanente que se queda") ?>: <strong id="yo-remesa-remanente">0,00</strong>
     <a href="/yo/remanente"><?= _("Cambiar") ?></a></p>
+<p><?= _("Neto del mes") ?>: <strong id="yo-remesa-neto">0,00</strong>
+    <span class="muted" id="yo-remesa-periodo"></span></p>
 <p><?= _("Disponible que se envía") ?>: <strong id="yo-remesa-disponible">0,00</strong></p>
 <p id="yo-asig" class="ok" hidden></p>
 <p>

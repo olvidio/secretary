@@ -30,29 +30,30 @@ final class EnviarRemesa
         if ($ejercicio->estado !== 'abierto' || $ejercicio->id === null) {
             throw new InvalidArgumentException(_("El ejercicio de ese mes está cerrado; no se puede enviar"));
         }
-        $ctx = $preview['ctx'];
+        $personaId = (int) $preview['destino_persona_id'];
+        $centroId = (int) $preview['destino_centro_id'];
         $lineas = $preview['lineas'];
         $saldo = array_key_exists('saldo_tesoreria', $datos) && $datos['saldo_tesoreria'] !== '' && $datos['saldo_tesoreria'] !== null
             ? Dinero::fromInput((string) $datos['saldo_tesoreria'])->toCents()
             : (int) $preview['tesoreria_cents'];
         $tesoreria = CalculoDisponibleRemesa::cents($saldo, (int) $preview['remanente_cents']);
         $hash = HashRemesa::deLineas($lineas, $tesoreria);
-        $enviada = $this->remesas->enviadaDe($ctx->personaId, $ejercicio->id, $anio, $mes);
+        $enviada = $this->remesas->enviadaDe($personaId, $ejercicio->id, $anio, $mes);
         if ($enviada !== null && $enviada->hashContenido === $hash) {
             return $enviada;
         }
         $notaFinal = $nota !== '' ? $nota : null;
 
-        return $this->remesas->enTransaccion(function () use ($ctx, $ejercicio, $anio, $mes, $lineas, $hash, $notaFinal, $enviada, $tesoreria): Remesa {
+        return $this->remesas->enTransaccion(function () use ($personaId, $centroId, $ejercicio, $anio, $mes, $lineas, $hash, $notaFinal, $enviada, $tesoreria): Remesa {
             if ($enviada !== null && $enviada->id !== null) {
                 $this->remesas->marcarEstado($enviada->id, 'sustituida', true);
             }
-            $version = $this->remesas->maxVersion($ctx->personaId, (int) $ejercicio->id, $anio, $mes) + 1;
+            $version = $this->remesas->maxVersion($personaId, (int) $ejercicio->id, $anio, $mes) + 1;
 
             return $this->remesas->guardarConLineas(new Remesa(
                 null,
-                $ctx->personaId,
-                $ctx->centroId,
+                $personaId,
+                $centroId,
                 (int) $ejercicio->id,
                 $anio,
                 $mes,

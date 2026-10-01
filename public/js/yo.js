@@ -912,9 +912,39 @@
     if (nav === 'yo-remesas') {
       await pintarRemesas();
     }
+    if (nav === 'yo-go') {
+      await pintarGastosOrdinarios();
+    }
     if (nav === 'yo-cierre') {
       await pintarCierre();
     }
+  }
+
+  async function pintarGastosOrdinarios() {
+    const r = await api('/api/yo/gastos-ordinarios?' + paramsMes());
+    if (!r.ok) return alert(r.error || t('error'));
+    actualizarTituloMes(r.fecha_cierre);
+    const nombre = qs('#go-nombre');
+    if (nombre) nombre.textContent = r.nombre || '';
+    const periodo = qs('#go-periodo');
+    if (periodo) periodo.textContent = fmtFecha(r.desde) + ' – ' + fmtFecha(r.hasta);
+    const lineas = r.lineas || [];
+    const vacia = qs('#go-vacia');
+    const tabla = qs('#go-tabla');
+    if (vacia) vacia.hidden = lineas.length > 0;
+    if (tabla) tabla.hidden = lineas.length === 0;
+    const tbody = qs('#go-lineas');
+    if (tbody) {
+      tbody.innerHTML = lineas.map((m) => {
+        const cuenta = esc(m.categoria || '');
+        const codigo = m.categoria_codigo && m.categoria_codigo !== '22'
+          ? ' <small>' + esc(m.categoria_codigo) + '</small>'
+          : '';
+        return '<tr><td>' + esc(fmtFecha(m.fecha)) + '</td><td>' + esc(m.nota || '') + '</td><td>' + cuenta + codigo + '</td><td class="num">' + esc(m.importe_es || '') + '</td></tr>';
+      }).join('');
+    }
+    const total = qs('#go-total');
+    if (total) total.textContent = r.total_es || '';
   }
 
   function centsDeImporte(raw) {
@@ -963,17 +993,29 @@
     const inpTes = qs('#yo-remesa-tesoreria');
     const remTxt = qs('#yo-remesa-remanente');
     if (remTxt) remTxt.textContent = r.remanente_es || '0,00';
+    const netoTxt = qs('#yo-remesa-neto');
+    if (netoTxt) netoTxt.textContent = r.neto_es || '0,00';
+    const periodoTxt = qs('#yo-remesa-periodo');
+    if (periodoTxt && r.desde && r.hasta) {
+      periodoTxt.textContent = '[' + fmtFecha(r.desde) + ' – ' + fmtFecha(r.hasta) + ']';
+    }
     if (inpTes) {
       inpTes.dataset.remanenteCents = String(r.remanente_cents || 0);
       inpTes.dataset.saldoCents = String(r.saldo_tesoreria_cents || 0);
       if (inpTes.value === '' || inpTes.dataset.auto === '1') {
-        inpTes.value = r.saldo_tesoreria || '';
+        inpTes.value = r.saldo_tesoreria_es || '';
         inpTes.dataset.auto = '1';
       }
       if (!inpTes.dataset.bound) {
         inpTes.dataset.bound = '1';
         inpTes.addEventListener('input', () => {
           inpTes.dataset.auto = '0';
+          pintarDisponibleRemesa();
+        });
+        inpTes.addEventListener('blur', () => {
+          const cents = centsDeImporte(inpTes.value);
+          if (cents === null) return;
+          inpTes.value = fmtCents(cents);
           pintarDisponibleRemesa();
         });
       }
@@ -1010,7 +1052,7 @@
     if (hist) {
       hist.innerHTML = (r.historial || []).map((h) =>
         '<li><span class="meta"><strong>v' + esc(String(h.version)) + ' · ' + esc(h.estado)
-        + '</strong><small>' + esc(h.sobrante_es || h.total_es) + '</small></span></li>'
+        + '</strong><small>' + esc(h.saldo_tesoreria_es || '') + '</small></span></li>'
       ).join('');
     }
     const btn = qs('#yo-remesa-enviar');
@@ -1251,6 +1293,9 @@
     }
     if (nav === 'yo-remesas') {
       await pintarRemesas();
+    }
+    if (nav === 'yo-go') {
+      await pintarGastosOrdinarios();
     }
     if (nav === 'yo-cierre') {
       bindCierreForms();

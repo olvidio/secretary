@@ -10,6 +10,21 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.14] — 2026-10-01
+
+### Añadido
+- En **Mis cuentas**, pestaña **g.o.** (en catalán, **d.o.**) entre Remesa y Cierre. Abre un listado para imprimir: cabecera con el nombre y el periodo, y debajo los movimientos de la cuenta 22 Ordinarios y sus subcuentas.
+- En **Remesa**, el **neto del mes** entre el remanente y el disponible. Las fechas de apertura y cierre van entre corchetes.
+
+### Cambiado
+- En **Nombres**, los cuatro meses exentos caben en una fila y son más cortos. Vivienda, desgravación, base liquidable y correo ocupan menos ancho.
+- El saldo de la cuenta en la remesa usa separador de miles, como el resto de importes, y el campo cabe en 8 cifras.
+- Lo que se envía y lo que muestra el historial y la bandeja del centro es el **disponible** (saldo de caja y banco menos el remanente). El neto del mes queda aparte.
+- La remesa del libro personal llega al **nombre vinculado del centro**, para que salga en la bandeja de Remesas.
+
+### Corregido
+- Vincular la cuenta personal con un nombre ya existente del centro ya no abre un segundo libro personal dentro de ese nombre. La sesión sigue en el libro propio.
+
 ## [0.1.13] — 2026-09-30
 
 ### Añadido

@@ -224,6 +224,26 @@ final class PdoIdentidadRepository implements IdentidadRepository
         return $ids;
     }
 
+    public function personaLibroPersonalDe(int $identidadId): ?int
+    {
+        $st = $this->pdo->prepare(
+            'SELECT p.id
+             FROM identidad_persona ip
+             INNER JOIN personas p ON p.id = ip.persona_id
+             INNER JOIN centros c ON c.id = p.centro_id
+             WHERE ip.identidad_id = :id AND p.activo = TRUE AND c.tipo = \'p\'
+             ORDER BY p.id
+             LIMIT 1'
+        );
+        $st->execute([':id' => $identidadId]);
+        $val = $st->fetchColumn();
+        if ($val === false || $val === null) {
+            return null;
+        }
+
+        return (int) $val;
+    }
+
     public function personasVinculoDe(int $identidadId): array
     {
         $st = $this->pdo->prepare(

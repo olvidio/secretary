@@ -8,6 +8,7 @@ use src\personal\application\ResolverPeriodoPersonal;
 use src\personas\domain\contracts\PersonaRepository;
 use src\remesas\domain\contracts\RemesaRepository;
 use src\remesas\domain\entity\Remesa;
+use src\disponible\domain\services\SobranteRemesa;
 use src\remesas\domain\services\AgregadorRemesaPersonal;
 use src\remesas\domain\services\DiffRemesa;
 use src\shared\domain\value_objects\Dinero;
@@ -29,16 +30,18 @@ final class PrevisualizarRemesa
         $datos = $this->mes->ejecutar($anio, $mes);
         $ctx = $datos['ctx'];
         $ejercicio = $datos['ejercicio'];
+        $destinoPersonaId = (int) $datos['destino_persona_id'];
         $lineas = $datos['lineas'];
-        $historial = $this->remesas->listarDePersona($ctx->personaId, (int) $ejercicio->id, $anio, $mes);
-        $enviada = $this->remesas->enviadaDe($ctx->personaId, (int) $ejercicio->id, $anio, $mes);
-        $aceptada = $this->remesas->aceptadaDe($ctx->personaId, (int) $ejercicio->id, $anio, $mes);
+        $historial = $this->remesas->listarDePersona($destinoPersonaId, (int) $ejercicio->id, $anio, $mes);
+        $enviada = $this->remesas->enviadaDe($destinoPersonaId, (int) $ejercicio->id, $anio, $mes);
+        $aceptada = $this->remesas->aceptadaDe($destinoPersonaId, (int) $ejercicio->id, $anio, $mes);
         $referencia = $aceptada ?? $enviada;
         $diff = $referencia !== null ? DiffRemesa::entre($lineas, $referencia->lineas) : [];
         $abierto = $ejercicio->estado === 'abierto';
         $motivo = $abierto ? null : 'El ejercicio de ese mes está cerrado';
         $persona = $this->personas->porId($ctx->personaId);
         $periodo = $this->periodoPersonal->ejecutar($ctx->personaId, $anio, $mes);
+        $neto = SobranteRemesa::cents($lineas);
 
         return [
             'anio' => $anio,
@@ -61,6 +64,9 @@ final class PrevisualizarRemesa
             'remanente_cents' => $datos['remanente_cents'],
             'remanente' => Dinero::fromCents($datos['remanente_cents'])->toString(),
             'remanente_es' => Dinero::fromCents($datos['remanente_cents'])->formatEs(),
+            'neto_cents' => $neto,
+            'neto' => Dinero::fromCents($neto)->toString(),
+            'neto_es' => Dinero::fromCents($neto)->formatEs(),
             'disponible_cents' => $datos['disponible_cents'],
             'disponible' => Dinero::fromCents($datos['disponible_cents'])->toString(),
             'disponible_es' => Dinero::fromCents($datos['disponible_cents'])->formatEs(),

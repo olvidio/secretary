@@ -39,6 +39,9 @@ interface IdentidadRepository
     /** @return list<int> */
     public function personasDe(int $identidadId): array;
 
+    /** Persona del libro propio (centro tipo p), si la cuenta ya lo tiene. */
+    public function personaLibroPersonalDe(int $identidadId): ?int;
+
     /**
      * Personas vinculadas con datos de centro para elegir sesión nivel 1.
      *

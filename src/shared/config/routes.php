@@ -186,6 +186,7 @@ return static function (RouteCollector $r): void {
 
     $r->addRoute('GET', '/api/yo/resumen', [PersonalController::class, 'resumen']);
     $r->addRoute('GET', '/api/yo/movimientos', [PersonalController::class, 'movimientos']);
+    $r->addRoute('GET', '/api/yo/gastos-ordinarios', [PersonalController::class, 'gastosOrdinarios']);
     $r->addRoute('POST', '/api/yo/movimientos', [PersonalController::class, 'crear']);
     $r->addRoute('PUT', '/api/yo/movimientos/{id:\d+}', [PersonalController::class, 'actualizarMovimiento']);
     $r->addRoute('POST', '/api/yo/movimientos/{id:\d+}/desdoblar', [PersonalController::class, 'desdoblarMovimiento']);
