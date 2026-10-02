@@ -1,5 +1,6 @@
 # Novedades (changelog)
 
+- Ámbito: todos
 - Ruta: `/changelog`
 - Menú: No sale en el menú: enlace en la versión del pie (login, registro y pantallas autenticadas)
 - Quién: cualquiera, también sin entrar

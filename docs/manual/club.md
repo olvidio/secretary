@@ -1,6 +1,7 @@
 # Club: importar Grisbi y listados
 
 - Ruta: `/listados`
+- Ámbito: asociacion, fundacion
 - Menú: Movimientos → Listados. La importación Grisbi está en Parámetros → Configuración.
 
 ## Para qué sirve
@@ -9,7 +10,7 @@ Llevar la contabilidad de un club en un centro con plan **Club**: un solo libro 
 
 ## Cómo se usa
 
-1. Al dar de alta el centro, elegir el plan contable **Club**. Los centros con plan H16n siguen igual y no usan estas pantallas.
+1. El centro ya está en el plan **Club**.
 2. En **Parámetros → Configuración**, bloque **Importar Grisbi**, subir el `.gsb`. Las categorías que no existan se crean como cuentas del libro G. Cada movimiento pasa a un asiento (entrada de dinero al debe de caja o banco; salida al haber). Un traspaso entre caja y banco es un solo asiento. El saldo inicial va contra la cuenta de apertura.
 3. Volver a importar el mismo fichero no duplica: cada movimiento de Grisbi queda ligado a su asiento.
 4. Los informes del fichero aparecen en **Listados**.

@@ -79,6 +79,7 @@ return static function (RouteCollector $r): void {
 
     $r->addRoute('GET', '/api/centros', [CentroController::class, 'get']);
     $r->addRoute('POST', '/api/centros/import', [CentroController::class, 'import']);
+    $r->addRoute('POST', '/api/centros/import-sg', [CentroController::class, 'importSg']);
 
     $r->addRoute('GET', '/api/admin/planes', [AdminPlanController::class, 'list']);
     $r->addRoute('POST', '/api/admin/planes', [AdminPlanController::class, 'save']);

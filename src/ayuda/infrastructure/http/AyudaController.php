@@ -7,8 +7,10 @@ namespace src\ayuda\infrastructure\http;
 use InvalidArgumentException;
 use RuntimeException;
 use src\ambito\domain\contracts\CentroRepository;
+use src\ambito\domain\services\TipoEntidad;
 use src\ayuda\application\ListarTemasAyuda;
 use src\ayuda\application\ResponderPreguntaAyuda;
+use src\ayuda\domain\value_objects\AmbitoManual;
 use src\plan\domain\services\CatalogoPlanesContables;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
@@ -25,7 +27,7 @@ final class AyudaController
 
     public function listarTemas(Request $request, array $vars = []): Response
     {
-        return ContestarJson::ok(['temas' => $this->temas->ejecutar($this->sinResumen613($request))]);
+        return ContestarJson::ok(['temas' => $this->temas->ejecutar($this->ambito($request))]);
     }
 
     public function preguntar(Request $request, array $vars = []): Response
@@ -34,20 +36,20 @@ final class AyudaController
             ? (int) $request->session['identidad_id']
             : null;
         $idioma = (string) ($request->session['idioma'] ?? 'es');
+        $ambito = $this->ambito($request);
         try {
-            $sinResumen613 = $this->sinResumen613($request);
             $respuesta = $this->responder->ejecutar(
                 (string) $request->input('pregunta', ''),
                 $identidadId,
                 $idioma,
-                $sinResumen613,
+                $ambito,
             );
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
         } catch (RuntimeException $e) {
             return ContestarJson::error($e->getMessage(), 503);
         }
-        $titulos = $this->temas->titulos($sinResumen613);
+        $titulos = $this->temas->titulos($ambito);
         $fuentes = [];
         foreach ($respuesta->fuentes as $clave) {
             $fuentes[] = ['clave' => $clave, 'titulo' => $titulos[$clave] ?? $clave];
@@ -61,14 +63,25 @@ final class AyudaController
         ]);
     }
 
-    private function sinResumen613(Request $request): bool
+    private function ambito(Request $request): AmbitoManual
     {
-        $id = isset($request->session['centro_id']) ? (int) $request->session['centro_id'] : 0;
-        if ($id <= 0) {
-            return false;
+        if (($request->session['nivel'] ?? '') === 'persona') {
+            return AmbitoManual::persona();
         }
-        $centro = $this->centros->porId($id);
+        $id = isset($request->session['centro_id']) ? (int) $request->session['centro_id'] : 0;
+        $centro = $id > 0 ? $this->centros->porId($id) : null;
+        if ($centro === null) {
+            return AmbitoManual::centroN();
+        }
+        if (CatalogoPlanesContables::esCentroSg($centro->planContableCodigo)) {
+            return AmbitoManual::centroSg();
+        }
+        if (CatalogoPlanesContables::esClub($centro->planContableCodigo)) {
+            return $centro->tipo === TipoEntidad::FUNDACION
+                ? AmbitoManual::fundacion()
+                : AmbitoManual::asociacion();
+        }
 
-        return $centro !== null && CatalogoPlanesContables::esClub($centro->planContableCodigo);
+        return AmbitoManual::centroN();
     }
 }

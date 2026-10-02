@@ -1,5 +1,6 @@
 # Enviar a DL
 
+- Ámbito: centro-n
 - Ruta: `/enviar-dl`
 - Menú: Movimientos → Enviar a DL (layout burger); Personales → Enviar a DL (layout excel)
 - Quién: secretario del centro

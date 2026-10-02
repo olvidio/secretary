@@ -1,5 +1,6 @@
 # Centros de la persona
 
+- Ámbito: persona
 - Ruta: `/yo/centros`
 - Menú: Mis cuentas → Centros
 - Quién: cualquier persona

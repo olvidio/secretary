@@ -1,5 +1,6 @@
 # Preferencias de la cuenta
 
+- Ámbito: todos
 - Ruta: `/cuenta/mail`, `/cuenta/password`, `/cuenta/layout`, `/cuenta/idioma`, `/cuenta/centro`, `/cuenta/persona`, `/cuenta/tipo`, `/cuenta/baja`
 - Menú: menú del nombre (esquina de arriba) → Mail, Contraseña, Remanente (libro personal), 2FA, Layout, Idioma, Centro (secretario) o Copia personal (persona), y solo si aplica Persona activa o Tipo
 - Quién: cualquier persona; el apartado del centro, solo el secretario del centro

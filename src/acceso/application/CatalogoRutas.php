@@ -105,6 +105,7 @@ final class CatalogoRutas
             ['src\\configuracion\\infrastructure\\http\\ConfiguracionController', 'save', 'centro'],
             ['src\\ambito\\infrastructure\\http\\CentroController', 'get', 'centro'],
             ['src\\ambito\\infrastructure\\http\\CentroController', 'import', 'centro'],
+            ['src\\ambito\\infrastructure\\http\\CentroController', 'importSg', 'centro'],
             ['src\\administracion\\infrastructure\\http\\AdminPlanController', 'list', 'admin'],
             ['src\\administracion\\infrastructure\\http\\AdminPlanController', 'save', 'admin'],
             ['src\\administracion\\infrastructure\\http\\AdminPlanController', 'delete', 'admin'],

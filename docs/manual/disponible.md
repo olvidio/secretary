@@ -1,5 +1,6 @@
 # Disponible
 
+- Ámbito: centro-n
 - Ruta: `/disponible`
 - Menú: Personales → Disponible
 - Quién: secretario del centro

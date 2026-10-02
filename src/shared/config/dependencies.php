@@ -599,6 +599,7 @@ return [
     frontend\shared\http\PageController::class => autowire(),
     src\shared\infrastructure\VersiónDespliegue::class => factory([VersiónDespliegue::class, 'porDefecto']),
     src\importacion\application\ImportarExcelSecretario::class => autowire(),
+    src\importacion\application\ImportarExcelCentroSg::class => autowire(),
     PostgresDumper::class => factory(static fn (PDO $pdo): PostgresDumper => PostgresDumper::fromEnv($pdo)),
     AlmacenCopiasSeguridad::class => factory(static fn (PDO $pdo): AlmacenCopiasSeguridad => new AlmacenCopiasSeguridad(
         RutasCopiasSeguridad::directorio(),

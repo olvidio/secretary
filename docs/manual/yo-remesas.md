@@ -1,5 +1,6 @@
 # Envío mensual al centro
 
+- Ámbito: persona
 - Ruta: `/yo/remesas`
 - Menú: Mis cuentas → Remesa
 - Quién: cualquier persona

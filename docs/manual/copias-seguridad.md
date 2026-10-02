@@ -1,7 +1,7 @@
 # Copias de seguridad
 
 - Ruta: `/copias`
-- Menú: Inicio → Copias
+- Ámbito: centro-n, centro-sg, asociacion, fundacion
 - Quién: secretario del centro
 
 ## Para qué sirve
@@ -35,3 +35,15 @@ Permite guardar una copia de **este** centro o associació y volver a ella si al
 - **«La copia supera el tamaño máximo (256 MB)»**: hay que dejarla en el servidor y restaurarla desde el listado.
 - **«No existe el fichero de copia indicado»**: se ha borrado o cambiado de nombre. Recargar la pantalla.
 - **Avisa de comprobar el estado del programa**: la copia puede ser anterior a una actualización; que lo revise quien administra la instalación antes de seguir.
+
+## Centro n
+
+- Menú: Inicio → Copias
+
+## Centro sg
+
+- Menú: Centro → Copias
+
+## Asociación y fundación
+
+- Menú: Parámetros → Copias

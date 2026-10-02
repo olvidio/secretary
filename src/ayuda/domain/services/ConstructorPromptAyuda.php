@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace src\ayuda\domain\services;
 
 use src\ayuda\domain\entity\DocumentoAyuda;
+use src\ayuda\domain\value_objects\AmbitoManual;
 
 /**
  * Monta la instrucción del sistema: las reglas y el manual entero.
@@ -18,14 +19,17 @@ final class ConstructorPromptAyuda
     public const MARCA_FUENTES = 'FUENTES';
 
     /** @param list<DocumentoAyuda> $documentos */
-    public function instruccion(array $documentos, string $idioma = 'es'): string
+    public function instruccion(array $documentos, string $idioma = 'es', ?AmbitoManual $ambito = null): string
     {
+        $ambito ??= AmbitoManual::centroN();
         $lineas = [
-            'Eres el asistente de ayuda del programa Secretario, que lleva la contabilidad',
-            'personal (P) y general (G) de un centro.',
+            'Eres el asistente de ayuda del programa Secretario.',
+            'Quien pregunta está en ' . $ambito->descripcion(),
             '',
-            'Responde ÚNICAMENTE con lo que digan los documentos de más abajo. No uses tu',
-            'conocimiento de contabilidad, de otros programas ni de internet.',
+            'Responde ÚNICAMENTE con lo que digan los documentos de más abajo, y solo para',
+            'ese tipo de cuenta. No uses tu conocimiento de contabilidad, de otros programas',
+            'ni de internet. Si un documento habla de otro tipo de centro o del libro personal',
+            'y no es el suyo, no lo uses.',
             '',
             'Reglas:',
             '- Si la respuesta no está en los documentos, responde exactamente '

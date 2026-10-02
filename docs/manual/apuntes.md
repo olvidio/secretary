@@ -1,8 +1,12 @@
 # Apuntes
 
 - Ruta: `/apuntes`
-- Menú: Personales y generales → Apuntes
+- Ámbito: centro-n, centro-sg, asociacion, fundacion
 - Quién: secretario del centro
+
+## Centro n
+
+- Menú: Personales y generales → Apuntes
 
 ## Para qué sirve
 
@@ -10,7 +14,7 @@ Es el listado de todo lo anotado en el centro, con filtros. Sirve para buscar un
 
 ## Cómo se usa
 
-1. Ajustar los filtros: libro (P, G o los dos), procedencia (A, B o C), iniciales, concepto y fechas. En un centro sg (plan H16s) los filtros son otros: nombre, concepto y fechas. La tabla es la del talonario: fecha, nombre, concepto, observaciones y cantidad. No hay libro P/G ni procedencia A/B/C.
+1. Ajustar los filtros: libro (P, G o los dos), procedencia (A, B o C), iniciales, concepto y fechas.
 2. Pulsar «Filtrar». El listado sale ordenado por fecha.
 3. Para corregir una fila, pulsar «Editar»: se abre una ventana con todos los campos y el cursor puesto en observaciones. Guardar aplica el cambio; Escape o «Cancelar» lo descarta.
 4. Para quitar una fila, «Borrar» y confirmar.
@@ -47,3 +51,15 @@ Si el aviso no encaja o no hay candidato en G, corregir a mano en Entrada P/G o 
 - **Una fila no tiene botones de editar ni borrar**: viene de una remesa.
 - **El saldo de un día no cuadra**: casi siempre falta el ingreso de contrapartida (el 111) o el gasto de vivienda que hace pareja. El aviso de esa fecha indica qué movimiento del libro general parece ser el que falta.
 - **Al guardar una edición sale un aviso de ejercicio cerrado**: el apunte cae en un ejercicio que ya se cerró; hay que reabrirlo antes de corregirlo.
+
+## Centro sg
+
+- Menú: Apuntes → Apuntes
+
+Es el talonario del único libro. Los filtros son nombre, concepto y fechas. La tabla muestra fecha, nombre, concepto, observaciones y cantidad. No hay libro P/G ni procedencia A/B/C. **Filtrar** ordena por fecha. **Editar** abre la fila; **Borrar** pide confirmación. No hay modo de cuadre entre libros ni apuntes llegados de una remesa.
+
+## Asociación y fundación
+
+- Menú: Movimientos → Apuntes
+
+Filtros: ejercicio, fechas, cuenta, tesorería y observaciones. La tabla es fecha, cuenta, nombre, observaciones y cantidad. Editar cambia fecha, cuenta, observaciones y cantidad.

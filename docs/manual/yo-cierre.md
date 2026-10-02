@@ -1,5 +1,6 @@
 # Fecha de cierre del mes
 
+- Ámbito: persona
 - Ruta: `/yo/cierre`
 - Menú: Mis cuentas → Cierre
 - Quién: cualquier persona

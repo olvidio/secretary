@@ -11,8 +11,10 @@ use src\acceso\domain\contracts\IdentidadRepository;
 use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\application\VaciarDatosCentro;
 use src\ambito\domain\contracts\CentroRepository;
+use src\importacion\application\ImportarExcelCentroSg;
 use src\importacion\application\ImportarExcelSecretario;
 use src\importacion\infrastructure\http\RecibirFicheroExcel;
+use src\plan\domain\services\CatalogoPlanesContables;
 use src\legal\application\ExigirDeclaracionResponsableNombres;
 use src\legal\application\LecturaAceptacion;
 use src\legal\infrastructure\http\HuellaAceptacionHttp;
@@ -28,6 +30,7 @@ final class CentroController
         private readonly IdentidadRepository $identidades,
         private readonly AsegurarIdentidadCentro $asegurarUsuario,
         private readonly ImportarExcelSecretario $importar,
+        private readonly ImportarExcelCentroSg $importarSg,
         private readonly VaciarDatosCentro $vaciarDatos,
         private readonly ExigirDeclaracionResponsableNombres $declaracionNombres,
     ) {
@@ -62,6 +65,47 @@ final class CentroController
             );
             $excel = RecibirFicheroExcel::obligatorio($request, 'excel');
             $importacion = $this->importar->ejecutar($excel, true, false, $centro->codigo);
+            $this->declaracionNombres->ejecutar(
+                true,
+                isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : null,
+                'nombres_import',
+                HuellaAceptacionHttp::desde(
+                    $request,
+                    (string) ($_SESSION['idioma'] ?? 'es'),
+                    null,
+                    null,
+                    $ctx->centroId,
+                ),
+            );
+
+            return ContestarJson::ok([
+                'importacion' => $importacion,
+                'centro' => $centro->toArray(),
+            ]);
+        } catch (InvalidArgumentException | RuntimeException $e) {
+            return ContestarJson::error($e->getMessage());
+        } finally {
+            RecibirFicheroExcel::limpiar($excel);
+        }
+    }
+
+    public function importSg(Request $request, array $vars = []): Response
+    {
+        $ctx = $this->ambito->ejecutar();
+        $centro = $this->centros->porId($ctx->centroId);
+        if ($centro === null) {
+            return ContestarJson::error(_("Centro no encontrado"), 404);
+        }
+        if (!CatalogoPlanesContables::esCentroSg($centro->planContableCodigo)) {
+            return ContestarJson::error(_("Esta importación es del libro Secretario sg"));
+        }
+        $excel = null;
+        try {
+            $this->declaracionNombres->comprobar(
+                LecturaAceptacion::marcada($request->input('asumo_responsable_nombres', false)),
+            );
+            $excel = RecibirFicheroExcel::obligatorio($request, 'excel');
+            $importacion = $this->importarSg->ejecutar($excel, $centro->codigo);
             $this->declaracionNombres->ejecutar(
                 true,
                 isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : null,

@@ -1,6 +1,8 @@
 # Procesos contables habituales — cierro el mes del centro, remesa, disponible, banco, alta en Nombres
 
-Guía paso a paso de los flujos que cruzan varias pantallas. Para el detalle de cada botón, ver la ficha de la pantalla correspondiente.
+- Ámbito: centro-n
+
+Guía paso a paso de los flujos que cruzan varias pantallas de un **centro n**. Para el detalle de cada botón, ver la ficha de la pantalla correspondiente. El libro personal tiene sus propias fichas (Resumen, Remesa, Banco, Centros).
 
 Palabras clave: **cierro el mes**, **cerrar el mes del centro**, **remesa**, **disponible**, **partidas 7**, **importar extracto del banco**, **dar de alta persona nueva**, **primera remesa**, **vincular cuenta**.
 

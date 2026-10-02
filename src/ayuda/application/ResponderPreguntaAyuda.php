@@ -11,8 +11,9 @@ use src\ayuda\domain\contracts\RegistroConsultasAyuda;
 use src\ayuda\domain\contracts\RepositorioDocumentacion;
 use src\ayuda\domain\entity\DocumentoAyuda;
 use src\ayuda\domain\services\BuscadorDocumentacion;
-use src\ayuda\domain\services\ManualSinResumen613;
 use src\ayuda\domain\services\ConstructorPromptAyuda;
+use src\ayuda\domain\services\ManualPorAmbito;
+use src\ayuda\domain\value_objects\AmbitoManual;
 use src\ayuda\domain\services\InterpreteRespuestaIA;
 use src\ayuda\domain\value_objects\OrigenRespuesta;
 use src\ayuda\domain\value_objects\PreguntaAyuda;
@@ -37,17 +38,19 @@ final class ResponderPreguntaAyuda
     ) {
     }
 
-    public function ejecutar(string $texto, ?int $identidadId = null, string $idioma = 'es', bool $sinResumen613 = false): RespuestaAyuda
-    {
+    public function ejecutar(
+        string $texto,
+        ?int $identidadId = null,
+        string $idioma = 'es',
+        ?AmbitoManual $ambito = null,
+    ): RespuestaAyuda {
         $pregunta = new PreguntaAyuda($texto);
-        $documentos = $this->documentacion->todos();
-        if ($sinResumen613) {
-            $documentos = (new ManualSinResumen613())->aplicar($documentos);
-        }
+        $ambito ??= AmbitoManual::centroN();
+        $documentos = (new ManualPorAmbito())->aplicar($this->documentacion->todos(), $ambito);
         if ($documentos === []) {
             throw new RuntimeException(_("Todavía no hay manual que consultar"));
         }
-        $version = $this->documentacion->version() . ($sinResumen613 ? '|sin613' : '');
+        $version = $this->documentacion->version() . '|' . $ambito->codigo;
         $guardada = $this->registro->buscar($pregunta->huella($version));
         if ($guardada !== null) {
             return $guardada->comoCache();
@@ -58,7 +61,7 @@ final class ResponderPreguntaAyuda
         $this->comprobarLimite($identidadId);
         try {
             $crudo = $this->proveedor->responder(
-                $this->constructor->instruccion($documentos, $idioma),
+                $this->constructor->instruccion($documentos, $idioma, $ambito),
                 $pregunta->texto,
             );
         } catch (RuntimeException $e) {

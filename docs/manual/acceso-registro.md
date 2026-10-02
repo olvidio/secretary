@@ -1,5 +1,6 @@
 # Darse de alta
 
+- Ámbito: todos
 - Ruta: `/registro`, `/registro-enviado`, `/confirmar-email`
 - Menú: No sale en el menú: se llega desde el enlace «Registrarse» de la pantalla de entrada
 - Quién: cualquier persona o quien vaya a crear un centro

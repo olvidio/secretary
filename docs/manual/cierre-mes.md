@@ -1,5 +1,6 @@
 # Cierre de mes
 
+- Ámbito: centro-n
 - Ruta: `/cierre`
 - Menú: Personales y generales → Cierre de mes
 - Quién: secretario del centro

@@ -1,5 +1,6 @@
 # Remanente
 
+- Ámbito: persona
 - Ruta: `/yo/remanente`
 - Menú: nombre de la esquina → Remanente (junto a Mail y Contraseña)
 - Quién: cualquier persona

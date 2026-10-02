@@ -1,12 +1,16 @@
-# Conceptos P y G
+# Conceptos
 
 - Ruta: `/conceptos-p` y `/conceptos-g`
-- Menú: Utilidades → Conceptos P / Conceptos G
+- Ámbito: centro-n, centro-sg, asociacion, fundacion
 - Quién: secretario del centro
+
+## Centro n
+
+- Menú: Utilidades → Conceptos P / Conceptos G
 
 ## Para qué sirve
 
-Es la lista de consulta de los códigos con los que se clasifica cada apunte. Hay una pantalla para el libro personal (P) y otra para el general (G). En una associació, Cuentas permite añadir cuentas propias, aplicar una plantilla de associació y guardar el plan actual como plantilla nueva.
+Es la lista de consulta de los códigos con los que se clasifica cada apunte. Hay una pantalla para el libro personal (P) y otra para el general (G).
 
 Sirve para recordar qué código toca antes de teclear un apunte, y para saber qué entra en cada uno: la descripción de cada concepto detalla los casos que recoge.
 
@@ -29,3 +33,17 @@ Sirve para recordar qué código toca antes de teclear un apunte, y para saber q
 
 - **No se puede añadir un concepto desde aquí**: es una lista de consulta. Las partidas del capítulo VII (las que empiezan por 7) se cambian en Centros.
 - **No aparece el concepto que se acaba de usar en una remesa**: el plan es fijo salvo las partidas del capítulo VII, que se cambian en Centros. Si la persona ha usado un código que aquí no existe, hay que pedirle que lo cambie, o añadir una partida VII si corresponde.
+
+## Centro sg
+
+- Ruta: `/conceptos-g`
+- Menú: Caja → Conceptos
+
+Lista de consulta del único libro. Los destinos con nombre (del 42 al 54) se dan de alta en el presupuesto, no aquí.
+
+## Asociación y fundación
+
+- Ruta: `/conceptos-g`
+- Menú: Plan contable → Cuentas
+
+Lista de las cuentas del libro único. Se pueden añadir cuentas propias, aplicar una plantilla de asociación y guardar el plan actual como plantilla nueva.

@@ -1,5 +1,6 @@
 # Resumen de cuentas personales
 
+- Ámbito: centro-n
 - Ruta: `/e37-resumen`
 - Menú: Personales → Resumen E37
 - Quién: secretario del centro

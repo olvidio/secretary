@@ -1,5 +1,6 @@
 # Apuntes de un concepto
 
+- Ámbito: centro-n
 - Ruta: `/por-concepto`
 - Menú: Utilidades → Por concepto
 - Quién: secretario del centro

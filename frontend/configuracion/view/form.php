@@ -31,6 +31,21 @@
     <button type="submit"><?= _("Guardar") ?></button>
     <p class="ok" id="msg" hidden><?= _("Guardado") ?></p>
 </form>
+<?php if ($esCentroSg): ?>
+<section>
+    <h2><?= _("Importar Excel") ?></h2>
+    <p class="muted"><?= _("Al empezar de cero, carga el libro Secretario sg (.xlsm o .xlsx). Entran los nombres, el talonario y los destinos de este centro. Si se vuelve a importar, se sustituyen los apuntes que vinieron de un Excel anterior.") ?></p>
+    <form id="form-import-sg" class="grid-form">
+        <label><?= _("Fichero Excel") ?> <input name="excel" type="file" accept=".xlsm,.xlsx" required></label>
+        <label class="inline casilla-legal">
+            <input type="checkbox" name="asumo_responsable_nombres" value="1" required>
+            <span><?= htmlspecialchars((string) ($textoAsumoNombres ?? _('Declaro que el centro, y yo como secretario, somos responsables del tratamiento de los datos de las personas que doy de alta, importo o vinculo. Secretario es un programa gratuito que solo aloja la información. Tengo base legal para ese tratamiento.')), ENT_QUOTES) ?></span>
+        </label>
+        <button type="submit"><?= _("Importar Excel") ?></button>
+    </form>
+    <p class="ok" id="msg-import-sg" hidden></p>
+</section>
+<?php endif; ?>
 <?php if (!$esPlanPropio): ?>
 <section>
     <h2><?= _("Tramos de desgravación") ?></h2>
@@ -95,6 +110,8 @@ const I18N_CONFIG = {
     ? _("Esto borra los asientos de ESTA fundación para poder volver a importar. Quedan la fundación y los usuarios. ¿Seguro?")
     : _("Esto borra los asientos de ESTA associació para poder volver a importar. Quedan la associació y los usuarios. ¿Seguro?"), JSON_UNESCAPED_UNICODE) ?>,
   vaciadosClub: <?= json_encode(_("Vaciados %s asientos en %s ejercicio(s). Ya puedes importar el fichero."), JSON_UNESCAPED_UNICODE) ?>,
+  excelSgImportado: <?= json_encode(_("Excel importado. Nombres: %s. Apuntes: %s. Fecha de cierre: %s."), JSON_UNESCAPED_UNICODE) ?>,
+  faltaResponsable: <?= json_encode(_("Marque que el centro es responsable de los datos de las personas que da de alta."), JSON_UNESCAPED_UNICODE) ?>,
 };
 async function cargarAssociacio() {
   const r = await api('/api/centros');
@@ -200,6 +217,29 @@ document.getElementById('form-grisbi')?.addEventListener('submit', async (ev) =>
     msg.textContent = I18N_CONFIG.grisbiImportado
       + ' Altas: ' + (s.altas || 0) + '. Omitidos: ' + (s.omitidos || 0) + '. Listados: ' + (s.listados || 0)
       + ((s.avisos && s.avisos.length) ? ' ' + s.avisos.join(' ') : '');
+    ev.target.reset();
+  } finally {
+    btn.disabled = false;
+  }
+});
+document.getElementById('form-import-sg')?.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  if (!ev.target.querySelector('[name=asumo_responsable_nombres]')?.checked) {
+    return alert(I18N_CONFIG.faltaResponsable);
+  }
+  const btn = ev.target.querySelector('button[type=submit]');
+  const msg = document.getElementById('msg-import-sg');
+  btn.disabled = true;
+  msg.hidden = true;
+  try {
+    const s = await api('/api/centros/import-sg', { method: 'POST', body: new FormData(ev.target) });
+    if (!s.ok) return alert(s.error || 'Error');
+    const imp = s.importacion || {};
+    msg.hidden = false;
+    msg.textContent = I18N_CONFIG.excelSgImportado
+      .replace('%s', imp.personas || 0)
+      .replace('%s', imp.apuntes || 0)
+      .replace('%s', fmtFecha(imp.fecha_cierre || ''));
     ev.target.reset();
   } finally {
     btn.disabled = false;

@@ -1,8 +1,12 @@
 # Traspasos de tesorería
 
 - Ruta: `/traspasos`
-- Menú: Utilidades → Traspasos
+- Ámbito: centro-n, asociacion, fundacion
 - Quién: secretario del centro
+
+## Centro n
+
+- Menú: Utilidades → Traspasos
 
 ## Para qué sirve
 
@@ -40,3 +44,9 @@ Para un préstamo entre libros:
 - **«La fecha no corresponde al ejercicio»**: la fecha cae fuera del ejercicio del centro.
 - **«La cantidad debe ser positiva»**: el importe no puede ser cero ni negativo; el sentido lo dan el origen y el destino.
 - **«Cuenta física no válida»**: esa caja o ese banco se ha desactivado mientras tanto; recargar la pantalla.
+
+## Asociación y fundación
+
+- Menú: Plan contable → Traspasos
+
+Pasar dinero entre caja y banco del libro único. No hay préstamo entre un libro personal y uno general.

@@ -1,7 +1,8 @@
 # Listado de aportaciones
 
 - Ruta: `/aportaciones`
-- Menú: Cuentas → Listado de aportaciones (solo plan H16s)
+- Ámbito: centro-sg
+- Menú: Cuentas → Listado de aportaciones
 - Quién: el secretario de un centro sg
 
 ## Para qué sirve

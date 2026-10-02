@@ -1,5 +1,6 @@
 # Equivalencias con el Excel
 
+- Ámbito: centro-n
 Para quien viene del `moviments.xlsm`: cada hoja de la cinta **Secretario** del
 Excel tiene su pantalla en el programa web. Lo que cambia de nombre está en esta
 tabla; lo que no existía en el Excel va marcado como nuevo.

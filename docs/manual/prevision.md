@@ -1,5 +1,6 @@
 # Previsión
 
+- Ámbito: centro-n
 - Ruta: `/prevision`
 - Menú: Presupuestos → Previsión
 - Quién: secretario del centro

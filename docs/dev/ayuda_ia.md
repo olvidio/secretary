@@ -27,6 +27,13 @@ Reglas del corpus, que son las que hacen que la ayuda funcione:
   migraciones, y el usuario no pregunta en esos términos.
 - Cada fichero autocontenido, con el mismo esqueleto: para qué sirve, cómo se
   usa, reglas que conviene saber, problemas frecuentes.
+- Cada ficha declara `- Ámbito:` con uno o varios de `centro-n`, `centro-sg`,
+  `asociacion`, `fundacion`, `persona` o `todos`. La ayuda de quien está en un
+  centro sg no recibe las fichas del centro n, y al revés. Si una ficha sirve
+  a varios tipos pero el texto cambia, los apartados `## Centro n`,
+  `## Centro sg`, `## Asociación y fundación`, `## Asociación`, `## Fundación`,
+  `## Libro personal` y `## Común` recortan el resto. Lo que va antes del
+  primer apartado de esos se queda para todos los ámbitos de la ficha.
 - Los mensajes de error que el usuario puede ver deberían estar en «problemas
   frecuentes» del fichero de su pantalla. Es la pregunta más habitual.
 

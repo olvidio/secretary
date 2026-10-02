@@ -10,6 +10,15 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.15] — 2026-10-02
+
+### Añadido
+- En un **centro sg**, **Configuración** tiene **Importar Excel** para cargar el libro Secretario sg al empezar de cero: nombres, talonario y destinos.
+
+### Cambiado
+- En un **centro sg**, **Ayuda** está en el menú lateral, junto a Apuntes, Cuentas y Caja. Ya no sale dentro de Caja.
+- La **Ayuda** responde solo con el manual del tipo de cuenta con el que se ha entrado (centro n, centro sg, asociación, fundación o libro personal). Los apartados de otro tipo no se ofrecen.
+
 ## [0.1.14] — 2026-10-01
 
 ### Añadido

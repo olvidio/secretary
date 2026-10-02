@@ -1,8 +1,12 @@
-# Plantillas de apuntes P y G
+# Plantillas de apuntes
 
 - Ruta: `/plantillas-p` y `/plantillas-g`
-- Menú: Utilidades → Plantillas P / Plantillas G
+- Ámbito: centro-n, asociacion, fundacion
 - Quién: secretario del centro
+
+## Centro n
+
+- Menú: Utilidades → Plantillas P / Plantillas G
 
 ## Para qué sirve
 
@@ -34,3 +38,10 @@ Una plantilla solo describe la forma del movimiento: qué libro, de dónde sale 
 - **«Ya existe una plantilla con ese nombre»**: usar otro nombre o borrar la anterior.
 - **«La plantilla necesita al menos una línea»**: hay que dejar al menos un movimiento.
 - **«Concepto no válido: …»**: el código escrito no existe en el libro de esa línea. Los códigos disponibles se consultan en las pantallas de Conceptos.
+
+## Asociación y fundación
+
+- Ruta: `/plantillas-g`
+- Menú: Plan contable → Plantillas
+
+Guarda apuntes que se repiten en el libro único. La persona, la fecha y la cantidad se ponen al usarla. No hay plantillas del libro personal.

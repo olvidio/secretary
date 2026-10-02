@@ -1,8 +1,12 @@
 # Saldos
 
 - Ruta: `/saldos`
-- Menú: Utilidades → Saldos
+- Ámbito: centro-n, asociacion, fundacion
 - Quién: secretario del centro
+
+## Centro n
+
+- Menú: Utilidades → Saldos
 
 ## Para qué sirve
 
@@ -34,3 +38,9 @@ Además tiene un botón que ejecuta unas revisiones automáticas y señala, pers
 - **Avisa de que hay apuntes descuadrados**: algún apunte se grabó con un lado distinto del otro. Hasta corregirlo, los saldos no son fiables.
 - **Una persona sale con saldo distinto de cero**: le falta la contrapartida. En las comprobaciones se propone el importe y el concepto del apunte que falta (111, 211 o 212) y hay un enlace para ver sus apuntes A. P/211 imputa a generales (cuadra con G/11); P/212 es vivienda personal. Si el desfase coincide con vivienda «automático», ver Cierre de mes y el aviso del E37: aportar de más el mes siguiente no lo cancela.
 - **Los saldos parecen antiguos**: revisar la fecha «Hasta» y volver a pulsar Calcular.
+
+## Asociación y fundación
+
+- Menú: Movimientos → Saldos
+
+Dinero en caja y en banco a una fecha. No hay cuentas personales ni columna c/c.

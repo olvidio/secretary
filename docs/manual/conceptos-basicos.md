@@ -1,5 +1,6 @@
 # Conceptos básicos
 
+- Ámbito: centro-n
 Lo que conviene entender antes de usar cualquier pantalla. Es el contenido de la
 antigua hoja «Ayuda (Schema)» del Excel.
 

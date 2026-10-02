@@ -1,5 +1,6 @@
 # Categorías del libro propio
 
+- Ámbito: persona
 - Ruta: `/yo/categorias`
 - Menú: Mis cuentas → Categorías
 - Quién: cualquier persona

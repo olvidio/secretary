@@ -1,5 +1,6 @@
 # Política de privacidad
 
+- Ámbito: todos
 - Ruta: `/privacidad`
 - Menú: No sale en el menú: enlace en el registro, en el pie y en el correo de alta
 - Quién: cualquiera, también sin entrar

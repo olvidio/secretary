@@ -1,5 +1,6 @@
 # Previsión personal
 
+- Ámbito: centro-n
 - Ruta: `/prevision-personal`
 - Menú: Presupuestos → Previsión personal
 - Quién: secretario del centro

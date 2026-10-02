@@ -1,13 +1,12 @@
 # Mapa del programa
 
-Dónde se hace cada cosa. Hay dos zonas distintas: la contabilidad **del centro**
-(la que lleva el secretario) y **Mis cuentas**, el libro personal de cada
-persona, que se abre en `/yo` y no mueve la caja del centro. Si no se recuerda
-la pantalla, se pregunta en **Ayuda**.
+- Ámbito: todos
 
-Los **procesos que cruzan varias pantallas** (cierre mensual, remesa y disponible, importación del banco, alta de persona nueva) están en el apartado **Procesos contables habituales** del manual.
+Dónde se hace cada cosa. El apartado que sigue es el de su tipo de cuenta. Si no se recuerda la pantalla, se pregunta en **Ayuda**.
 
-## Contabilidad del centro
+## Centro n
+
+La contabilidad del secretario: libro personal (P) y libro general (G).
 
 | Lo que quiere hacer | Pantalla |
 | --- | --- |
@@ -36,7 +35,50 @@ Los **procesos que cruzan varias pantallas** (cierre mensual, remesa y disponibl
 | Guardar o recuperar una copia de todo | Copias |
 | Preguntar cómo se usa el programa | Ayuda |
 
-## Mis cuentas (libro personal)
+Los procesos que cruzan varias pantallas (cierre mensual, remesa y disponible, importación del banco, alta de persona nueva) están en **Procesos contables habituales**.
+
+## Centro sg
+
+Un solo libro, como el Excel Secretario sg. No hay libro personal, ni remesas, ni cierre de vivienda.
+
+| Lo que quiere hacer | Pantalla |
+| --- | --- |
+| Poner la sigla, el año y las fechas | Configuración |
+| Cargar el Excel al empezar de cero | Configuración → Importar Excel |
+| Dar de alta nombres, grupo y s / cp | Nombres |
+| Anotar un apunte | Apuntes → Entrada |
+| Ver, corregir o borrar lo anotado | Apuntes |
+| Poner el presupuesto y los destinos 42–54 | Cuentas → Presupuesto |
+| Sacar el resumen 613 G-D | Cuentas → 613 |
+| Ver las aportaciones | Cuentas → Listado de aportaciones |
+| Contar el dinero de la caja | Caja → Arqueo |
+| Consultar los conceptos | Caja → Conceptos |
+| Cambiar la fecha de cierre o el ejercicio | Caja → Fecha cierre / Ejercicios |
+| Guardar o recuperar una copia | Centro → Copias |
+| Preguntar cómo se usa el programa | Ayuda (menú lateral) |
+
+## Asociación y fundación
+
+Un solo libro (plan Club): caja, banco, importación Grisbi y listados. Una fundación usa las mismas pantallas que una asociación.
+
+| Lo que quiere hacer | Pantalla |
+| --- | --- |
+| Poner la sigla, el año y las fechas | Configuración |
+| Importar un fichero Grisbi | Configuración → Importar Grisbi |
+| Añadir quien lleva esta entidad | Configuración → Usuarios |
+| Anotar un movimiento a mano | Movimientos → Entrada |
+| Ver o corregir lo anotado | Movimientos → Apuntes |
+| Ver listados e informes | Movimientos → Listados |
+| Declarar cajas y bancos | Parámetros → Tesorería |
+| Ver el saldo de caja y banco | Movimientos → Saldos |
+| Pasar dinero entre caja y banco | Plan contable → Traspasos |
+| Contar caja y banco | Arqueo |
+| Guardar o recuperar una copia | Parámetros → Copias |
+| Preguntar cómo se usa el programa | Ayuda |
+
+## Libro personal
+
+Mis cuentas (`/yo`). No mueve la caja del centro: el mes llega al centro cuando se envía la remesa, y solo si el vínculo es con un **centro n**.
 
 | Lo que quiere hacer | Pantalla |
 | --- | --- |
@@ -47,12 +89,10 @@ Los **procesos que cruzan varias pantallas** (cierre mensual, remesa y disponibl
 | Cerrar el mes y enviarlo al centro | Remesa |
 | Dejar una cantidad en el banco y no enviarla | Remanente (menú del nombre) |
 | Fijar lo que se repite cada mes | Cierre |
-| Pedir unirse a un centro | Centros |
+| Pedir unirse a un centro n | Centros |
 | Guardar una copia de su libro | Copia personal |
 | Preguntar cómo se usa el programa | Ayuda (menú del nombre) |
 
-## Su cuenta
+## Común
 
-El nombre de la esquina abre las preferencias: correo, contraseña y, en el libro
-personal, el remanente; también el doble factor, el aspecto de las pantallas,
-el idioma, el centro y el tipo de cuenta.
+El nombre de la esquina abre las preferencias: correo, contraseña y, en el libro personal, el remanente; también el doble factor, el aspecto de las pantallas, el idioma, el centro y, si la misma cuenta sirve para los dos modos, el tipo de cuenta.

@@ -1,5 +1,6 @@
 # Copia del libro personal
 
+- Ámbito: persona
 - Ruta: `/cuenta/copias`
 - Menú: menú del nombre (esquina de arriba) → Copia personal
 - Quién: cualquier persona

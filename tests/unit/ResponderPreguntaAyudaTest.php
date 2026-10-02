@@ -15,6 +15,7 @@ use src\ayuda\domain\entity\DocumentoAyuda;
 use src\ayuda\domain\services\BuscadorDocumentacion;
 use src\ayuda\domain\services\ConstructorPromptAyuda;
 use src\ayuda\domain\services\InterpreteRespuestaIA;
+use src\ayuda\domain\value_objects\AmbitoManual;
 use src\ayuda\domain\value_objects\OrigenRespuesta;
 use src\ayuda\domain\value_objects\PreguntaAyuda;
 use src\ayuda\domain\value_objects\RespuestaAyuda;
@@ -58,6 +59,27 @@ final class ResponderPreguntaAyudaTest extends TestCase
 
         self::assertStringContainsString('[clave: apuntes]', $proveedor->ultimaInstruccion);
         self::assertStringContainsString('[clave: traspasos]', $proveedor->ultimaInstruccion);
+        self::assertStringContainsString('centro n', $proveedor->ultimaInstruccion);
+    }
+
+    public function testUnCentroSgNoRecibeDocumentosDelCentroN(): void
+    {
+        $proveedor = new ProveedorDeAyudaFalso("En el talonario.\nFUENTES: aportaciones");
+        $caso = new ResponderPreguntaAyuda(
+            new ManualDeAyudaConAmbitos(),
+            new RegistroDeAyudaEnMemoria(),
+            new ConstructorPromptAyuda(),
+            new InterpreteRespuestaIA(),
+            new BuscadorDocumentacion(),
+            $proveedor,
+        );
+
+        $caso->ejecutar('¿Cómo veo las aportaciones?', null, 'es', AmbitoManual::centroSg());
+
+        self::assertStringContainsString('[clave: aportaciones]', $proveedor->ultimaInstruccion);
+        self::assertStringContainsString('centro sg', $proveedor->ultimaInstruccion);
+        self::assertStringContainsString('No se usa el cierre de vivienda.', $proveedor->ultimaInstruccion);
+        self::assertStringNotContainsString('Filtros de libro P', $proveedor->ultimaInstruccion);
     }
 
     public function testReutilizaLaRespuestaGuardadaSinLlamarAlProveedor(): void
@@ -119,6 +141,27 @@ final class ResponderPreguntaAyudaTest extends TestCase
 
         self::assertFalse($respuesta->resuelta);
         self::assertSame(RespuestaAyuda::NO_ESTA_EN_EL_MANUAL, $respuesta->texto);
+    }
+}
+
+final class ManualDeAyudaConAmbitos implements RepositorioDocumentacion
+{
+    /** @return list<DocumentoAyuda> */
+    public function todos(): array
+    {
+        return [
+            new DocumentoAyuda(
+                'cierre-mes',
+                'Cierre',
+                "# Cierre\n- Ámbito: centro-n, centro-sg\n\n## Centro n\n\nFiltros de libro P y G.\n\n## Centro sg\n\nNo se usa el cierre de vivienda.\n",
+            ),
+            new DocumentoAyuda('aportaciones', 'Aportaciones', "# Aportaciones\n- Ámbito: centro-sg\n\nListado de aportaciones."),
+        ];
+    }
+
+    public function version(): string
+    {
+        return 'v-ambitos';
     }
 }
 

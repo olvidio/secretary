@@ -1,8 +1,12 @@
-# Arqueo P y Arqueo G
+# Arqueo
 
 - Ruta: `/arqueo-p` y `/arqueo-g`
-- Menú: no sale en el menú; se entra por el enlace **Arqueo** del resumen mensual 613 P o 613 G
+- Ámbito: centro-n, centro-sg, asociacion, fundacion
 - Quién: secretario del centro
+
+## Centro n
+
+- Menú: no sale en el menú; se entra por el enlace **Arqueo** del resumen mensual 613 P o 613 G
 
 ## Para qué sirve
 
@@ -31,3 +35,17 @@ Sirve para contar el dinero que hay de verdad en la caja y compararlo con lo que
 - **La diferencia no es cero**: volver a contar y revisar los apuntes de caja del mes.
 - **No aparece Buscar capuchinos**: solo sale si la diferencia no es cero y es múltiplo de nueve.
 - **«Ningún apunte de caja encaja»**: no hay ninguno cuyas cifras invertidas cuadren. Puede haber dos errores a la vez, o ser un apunte posterior a la fecha indicada.
+
+## Centro sg
+
+- Ruta: `/arqueo-g`
+- Menú: Caja → Arqueo
+
+Recuento de la caja del único libro. Se entra también desde el enlace **Arqueo** del 613. No hay reparto entre libro personal y general.
+
+## Asociación y fundación
+
+- Ruta: `/arqueo`
+- Menú: Arqueo
+
+Recuento de caja y banco hasta una fecha. La tabla muestra tesorería, saldo contable, contado y diferencia. Si cuadra, **Dar por cuadrado**: un cambio posterior de apuntes que mueva ese saldo avisa del descuadre. Debajo queda la lista de periodos cuadrados.

@@ -1,5 +1,6 @@
 # Licencia del programa
 
+- Ámbito: todos
 - Ruta: `/licencia`
 - Menú: No sale en el menú: enlace en el pie junto a Condiciones y Privacidad
 - Quién: cualquiera, también sin entrar

@@ -191,6 +191,8 @@ final class CatalogoMenus
                 ['conceptos-g', _("Conceptos")],
                 ['fecha-cierre', null],
                 ['ejercicios', null],
+            ]],
+            ['id' => 'ayuda', 'label' => _("Ayuda"), 'items' => [
                 ['ayuda', null],
             ]],
         ];

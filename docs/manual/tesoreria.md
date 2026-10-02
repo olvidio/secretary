@@ -1,14 +1,13 @@
 # Tesorería física
 
 - Ruta: `/tesoreria`
-- Menú: Utilidades → Tesorería
+- Ámbito: centro-n, asociacion, fundacion
+- Menú: Utilidades → Tesorería. En una asociación o fundación, Parámetros → Tesorería.
 - Quién: secretario del centro
 
 ## Para qué sirve
 
 Mantiene la lista de sitios reales donde el centro tiene el dinero: las cajas y las cuentas de banco. Es lo que luego se elige al anotar un apunte que mueve efectivo o banco, y lo que aparece en los traspasos.
-
-Una misma caja o un mismo banco sirve para los dos libros, el personal y el general: el dinero es el mismo, solo cambia a qué libro se apunta cada movimiento.
 
 ## Cómo se usa
 
@@ -33,3 +32,7 @@ Una misma caja o un mismo banco sirve para los dos libros, el personal y el gene
 - **«El nombre es obligatorio»**: falta el nombre de la cuenta.
 - **«La cuenta física ya está desactivada»**: alguien la había desactivado antes; recargar la pantalla.
 - **«No se puede desactivar la única caja activa del centro»** (o el único banco): dar de alta la nueva antes de desactivar la vieja.
+
+## Centro n
+
+Una misma caja o un mismo banco sirve para los dos libros, el personal y el general: el dinero es el mismo, solo cambia a qué libro se apunta cada movimiento.

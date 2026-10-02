@@ -1,12 +1,13 @@
 # Ayuda
 
 - Ruta: `/ayuda` y `/yo/ayuda`
-- Menú: en el centro, Utilidades → Ayuda (cinta) o el grupo Ayuda (menú burger). En Mis cuentas, menú del nombre → Ayuda
+- Ámbito: todos
+- Menú: en el centro, Utilidades → Ayuda (cinta) o el grupo Ayuda (menú burger). En un centro sg, el grupo Ayuda del menú lateral, junto a Apuntes, Cuentas y Caja. En Mis cuentas, menú del nombre → Ayuda
 - Quién: cualquier persona que haya entrado
 
 ## Para qué sirve
 
-Es una ventana para preguntar con sus palabras cómo se usa el programa. La respuesta sale **solo** del manual: no ve las cuentas ni inventa pantallas que no existan. Si algo no está explicado, lo dice en lugar de improvisar.
+Es una ventana para preguntar con sus palabras cómo se usa el programa. La respuesta sale **solo** del manual, y **solo del tipo de cuenta** con el que se ha entrado: centro n, centro sg, asociación, fundación o libro personal. No ve las cuentas ni inventa pantallas que no existan. Si algo no está explicado para ese tipo, lo dice en lugar de improvisar con las pantallas de otro.
 
 ## Cómo se usa
 

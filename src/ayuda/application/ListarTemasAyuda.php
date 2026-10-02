@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace src\ayuda\application;
 
 use src\ayuda\domain\contracts\RepositorioDocumentacion;
-use src\ayuda\domain\services\ManualSinResumen613;
+use src\ayuda\domain\services\ManualPorAmbito;
+use src\ayuda\domain\value_objects\AmbitoManual;
 
 /** Índice del manual: alimenta la lista de apartados de la pantalla de ayuda. */
 final class ListarTemasAyuda
@@ -17,13 +18,10 @@ final class ListarTemasAyuda
     /**
      * @return list<array{clave: string, titulo: string}>
      */
-    public function ejecutar(bool $sinResumen613 = false): array
+    public function ejecutar(?AmbitoManual $ambito = null): array
     {
         $out = [];
-        $documentos = $this->documentacion->todos();
-        if ($sinResumen613) {
-            $documentos = (new ManualSinResumen613())->aplicar($documentos);
-        }
+        $documentos = $this->documentos($ambito);
         foreach ($documentos as $documento) {
             $out[] = ['clave' => $documento->clave, 'titulo' => $documento->titulo];
         }
@@ -36,17 +34,22 @@ final class ListarTemasAyuda
      *
      * @return array<string, string>
      */
-    public function titulos(bool $sinResumen613 = false): array
+    public function titulos(?AmbitoManual $ambito = null): array
     {
         $out = [];
-        $documentos = $this->documentacion->todos();
-        if ($sinResumen613) {
-            $documentos = (new ManualSinResumen613())->aplicar($documentos);
-        }
+        $documentos = $this->documentos($ambito);
         foreach ($documentos as $documento) {
             $out[$documento->clave] = $documento->titulo;
         }
 
         return $out;
+    }
+
+    /** @return list<\src\ayuda\domain\entity\DocumentoAyuda> */
+    private function documentos(?AmbitoManual $ambito): array
+    {
+        $ambito ??= AmbitoManual::centroN();
+
+        return (new ManualPorAmbito())->aplicar($this->documentacion->todos(), $ambito);
     }
 }

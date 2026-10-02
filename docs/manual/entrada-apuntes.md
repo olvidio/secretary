@@ -1,8 +1,12 @@
-# Entrada de apuntes P y G
+# Entrada de apuntes
 
 - Ruta: `/entrada-p` y `/entrada-g`
-- Menú: Personales → Entrada P; Generales → Entrada G
+- Ámbito: centro-n, centro-sg, asociacion, fundacion
 - Quién: secretario del centro
+
+## Centro n
+
+- Menú: Personales → Entrada P; Generales → Entrada G
 
 ## Para qué sirve
 
@@ -44,3 +48,17 @@ En **Entrada G** hay un bloque **Importar extracto del banco** (mismo criterio q
 - **«La cantidad debe ser positiva»**: no se teclea el signo menos.
 - **«No hay ejercicio que cubra la fecha …»**: cae fuera de los ejercicios dados de alta.
 - **«… en un ejercicio cerrado»**: reabrirlo, o cambiar la fecha.
+
+## Centro sg
+
+- Ruta: `/entrada-g`
+- Menú: Apuntes → Entrada
+
+Un solo libro. Se anota el apunte del talonario: nombre, concepto, observaciones, cantidad y fecha. No hay libro P, ni procedencia A/B/C, ni el gasto de vivienda que genera P/111 y G/11. Los conceptos 41 y 42 de un centro n (traspaso caja/banco) no se usan aquí: el 41 es Necesidades generales.
+
+## Asociación y fundación
+
+- Ruta: `/entrada-g`
+- Menú: Movimientos → Entrada
+
+Sirve para anotar a mano un movimiento del libro único. Lo que ya viene en el fichero Grisbi entra por Configuración → Importar Grisbi, no por esta pantalla.

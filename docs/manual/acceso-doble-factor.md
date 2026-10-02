@@ -1,5 +1,6 @@
 # Código de seguridad de seis dígitos
 
+- Ámbito: todos
 - Ruta: `/cuenta/totp`, `/totp-activar`, `/totp-verificar`, `/totp-codigos`
 - Menú: menú del nombre (esquina de arriba) → 2FA. Las pantallas de activación y de verificación salen solas al entrar cuando hacen falta
 - Quién: cualquier persona; obligatorio para el secretario del centro

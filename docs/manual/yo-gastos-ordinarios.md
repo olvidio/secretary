@@ -1,5 +1,6 @@
 # Gastos ordinarios
 
+- Ámbito: persona
 - Ruta: `/yo/gastos-ordinarios`
 - Menú: Mis cuentas → g.o.
 - Quién: cualquier persona con libro propio

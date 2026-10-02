@@ -1,8 +1,12 @@
 # Nombres
 
 - Ruta: `/nombres`
-- Menú: Inicio → Nombres
+- Ámbito: centro-n, centro-sg
 - Quién: secretario del centro
+
+## Centro n
+
+- Menú: Inicio → Nombres
 
 ## Para qué sirve
 
@@ -46,3 +50,13 @@ Desde aquí se abre también el libro personal de cada una, con solo poner su co
 - **«La identidad ya está vinculada a este centro»**: esa cuenta ya está unida a otro nombre de este centro. Hay que vincular ese nombre, o desvincular antes si el enlace es el que no corresponde.
 - **«Ese correo es de un usuario de centro; no puede usarse como cuenta personal»**: el correo de un secretario no sirve aquí.
 - **«Debe aceptar que el centro es responsable…»**: falta marcar la casilla de responsable de los datos.
+
+## Centro sg
+
+- Menú: Centro → Nombres
+
+Apellidos y nombre, como en el Excel. El **grupo** y la clase (**s** o **cp**) ordenan el listado de aportaciones. El correo no abre un libro personal: un centro sg no admite cuentas personales ni solicitudes de acceso. No hay vivienda, exención, base liquidable ni «puede desgravar».
+
+1. Rellenar nombre, apellidos, iniciales, grupo y s / cp, y pulsar «Guardar».
+2. En el alta hay que marcar que el centro es responsable de esos datos.
+3. «Editar» recupera la fila; «Borrar» la quita del listado si no tiene apuntes.

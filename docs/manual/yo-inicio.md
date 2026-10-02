@@ -1,5 +1,6 @@
 # Mis cuentas (resumen del mes)
 
+- Ámbito: persona
 - Ruta: `/yo`
 - Menú: Mis cuentas → Resumen
 - Quién: cualquier persona

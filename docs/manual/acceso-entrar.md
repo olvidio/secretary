@@ -1,5 +1,6 @@
 # Entrar en el programa
 
+- Ámbito: todos
 - Ruta: `/login`, `/elegir-cuenta`, `/elegir-centro`, `/elegir-persona`
 - Menú: No sale en el menú: es la primera pantalla, y también la que aparece al pulsar «Salir»
 - Quién: cualquier persona

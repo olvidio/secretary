@@ -1,5 +1,6 @@
 # Banco: importar el extracto
 
+- Ámbito: persona
 - Ruta: `/yo/banco`
 - Menú: Mis cuentas → Banco
 - Quién: cualquier persona

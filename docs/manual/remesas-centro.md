@@ -1,5 +1,6 @@
 # Remesas (bandeja del centro)
 
+- Ámbito: centro-n
 - Ruta: `/remesas`
 - Menú: Personales → Remesas
 - Quién: secretario del centro

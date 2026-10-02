@@ -1,5 +1,6 @@
 # Comprobaciones personales / generales
 
+- Ámbito: centro-n
 - Ruta: `/comprobaciones`
 - Menú: Utilidades → Comprobaciones
 - Quién: secretario del centro

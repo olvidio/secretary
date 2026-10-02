@@ -82,7 +82,10 @@ final class CatalogoMenusTest extends TestCase
                 $navs[] = $item['nav'];
             }
         }
-        self::assertSame(['centro', 'apuntes', 'cuentas', 'caja'], $ids);
+        self::assertSame(['centro', 'apuntes', 'cuentas', 'caja', 'ayuda'], $ids);
+        $caja = CatalogoMenus::gruposCentroSg()[3];
+        self::assertSame('caja', $caja['id']);
+        self::assertNotContains('ayuda', array_column($caja['items'], 'nav'));
         foreach (['613-p', 'entrada-p', 'remesas', 'e37', 'centros', 'cierre', 'tesoreria', 'saldos'] as $fuera) {
             self::assertNotContains($fuera, $navs);
         }

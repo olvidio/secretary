@@ -1,5 +1,6 @@
 # Movimientos del mes
 
+- Ámbito: persona
 - Ruta: `/yo/movimientos`
 - Menú: Mis cuentas → Lista
 - Quién: cualquier persona

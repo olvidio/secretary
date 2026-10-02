@@ -1,7 +1,7 @@
 # Ejercicios
 
 - Ruta: `/ejercicios`
-- Menú: Utilidades → Ejercicios
+- Ámbito: centro-n, centro-sg, asociacion, fundacion
 - Quién: secretario del centro
 
 ## Para qué sirve
@@ -36,3 +36,15 @@ La tabla muestra sus fechas, cuántos meses abarca, cuántos han transcurrido y 
 - **«El ejercicio anterior tiene … descuadrados; corríjalos antes de generar la apertura»**: hay apuntes del ejercicio anterior a los que les falta su pareja; revisarlos en Apuntes.
 - **«No hay ningún centro dado de alta todavía»**: primero hay que crear el centro.
 - **«Elimine antes el ejercicio posterior …»**: ese ejercicio es el anterior de otro. Borre primero el más reciente.
+
+## Centro n
+
+- Menú: Utilidades → Ejercicios
+
+## Centro sg
+
+- Menú: Caja → Ejercicios
+
+## Asociación y fundación
+
+- Menú: Parámetros → Ejercicios
