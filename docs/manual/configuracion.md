@@ -2,7 +2,7 @@
 
 - Ruta: `/configuracion`
 - Ámbito: centro-n, centro-sg, asociacion, fundacion
-- Quién: secretario del centro
+- Quién: secretario del centro. Quien solo consulta ve la pantalla y no puede guardar.
 
 ## Común
 
@@ -24,7 +24,7 @@ En «Tramos de desgravación» se editan los tramos (p. ej. 250 € al 80 % y el
 
 ## Centro sg
 
-No hay tipo de centro, tipo de cierre, plan ni tramos de desgravación. El menú es Centro → Configuración.
+No hay tipo de centro, tipo de cierre, plan ni tramos de desgravación. El menú es Centro → Configuración. Ahí también se ven los usuarios del centro y se puede añadir otro: **Puede modificar** o **Solo consulta**. El de solo consulta ve los datos y no los guarda ni los borra. Tiene que quedar al menos un usuario que pueda modificar.
 
 **Importar Excel** carga el libro Secretario sg (`.xlsm` o `.xlsx`) cuando el centro empieza de cero. Hay que marcar que el centro es responsable de los nombres y pulsar **Importar Excel**. Entran los nombres, el talonario y los destinos. El aviso indica cuántos nombres y apuntes han entrado y la fecha de cierre. Volver a importar sustituye los apuntes que vinieron de un Excel anterior; lo anotado a mano se queda.
 
@@ -33,6 +33,6 @@ No hay tipo de centro, tipo de cierre, plan ni tramos de desgravación. El menú
 
 ## Asociación y fundación
 
-No hay menú Centros, ni tipo de centro, ni tipo de vivienda, ni tramos de desgravación. En esta pantalla se editan la sigla, el año, el modo y las fechas, y también los usuarios de esta asociación o fundación.
+No hay menú Centros, ni tipo de centro, ni tipo de vivienda, ni tramos de desgravación. En esta pantalla se editan la sigla, el año, el modo y las fechas, y también los usuarios de esta asociación o fundación. Al vincular un usuario se elige **Puede modificar** o **Solo consulta**. El de solo consulta ve los datos y no los guarda ni los borra. En la tabla se puede cambiar el rol; tiene que quedar al menos un usuario que pueda modificar.
 
 **Importar Grisbi** carga un `.gsb`. Las categorías nuevas se crean como cuentas y los movimientos como asientos. Volver a importar el mismo fichero no duplica. **Vaciar datos (pruebas)** borra los asientos para volver a cargar un fichero; quedan la entidad y los usuarios.

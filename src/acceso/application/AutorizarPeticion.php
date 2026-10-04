@@ -6,6 +6,7 @@ namespace src\acceso\application;
 
 use src\acceso\domain\contracts\AccesoRutaRepository;
 use src\acceso\domain\contracts\IdentidadRepository;
+use src\acceso\domain\value_objects\RolCentro;
 
 final class DecisionAcceso
 {
@@ -94,6 +95,12 @@ final class AutorizarPeticion
             }
             if ($centroId === null) {
                 return $this->denegar($esApi, _("Seleccione un centro"), 401, '/elegir-centro');
+            }
+            if (
+                $mutacion
+                && RolCentro::esConsulta($this->identidades->rolEnCentro((int) $identidadId, $centroId))
+            ) {
+                return $this->denegar($esApi, _("Esta cuenta es de solo consulta"), 403, null);
             }
 
             return new DecisionAcceso(true);

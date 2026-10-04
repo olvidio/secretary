@@ -59,6 +59,8 @@ interface IdentidadRepository
 
     public function vincularCentro(int $identidadId, int $centroId, string $rol): void;
 
+    public function rolEnCentro(int $identidadId, int $centroId): ?string;
+
     public function vincularPersona(int $identidadId, int $personaId, ?int $anio = null): void;
 
     public function tienePersonaEnCentro(int $identidadId, int $centroId): bool;
@@ -174,4 +176,12 @@ interface IdentidadRepository
     public function cuentasPersonalesVinculadasACentros(array $centroIds, int $excluirIdentidadId): array;
 
     public function eliminar(int $id): void;
+
+    public function guardarTokenRestablecerPassword(int $identidadId, string $tokenHash, DateTimeImmutable $expira): void;
+
+    /** @return array{identidad_id: int, expira: DateTimeImmutable}|null */
+    public function porTokenRestablecerPassword(string $tokenHash): ?array;
+
+    /** Cambia la contraseña, quita el bloqueo de intentos y consume el token. */
+    public function aplicarPasswordRestablecida(int $identidadId, string $passwordHash, string $tokenHash): bool;
 }

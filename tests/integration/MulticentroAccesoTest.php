@@ -213,7 +213,10 @@ final class MulticentroAccesoTest extends TestCase
             new PdoCentroRepository($this->pdo),
             $crearEjercicio,
             new PdoPobladorCentro($this->pdo),
-            new AsegurarIdentidadCentro(new PdoIdentidadRepository($this->pdo)),
+            new AsegurarIdentidadCentro(
+                new PdoIdentidadRepository($this->pdo),
+                new \src\acceso\application\QuedaEscritorCentro(new PdoIdentidadRepository($this->pdo)),
+            ),
             new \src\plan\infrastructure\persistence\PdoPartidaLaboresRepository(
                 $this->pdo,
                 new \src\plan\infrastructure\persistence\PdoPlanConceptoRepository($this->pdo),

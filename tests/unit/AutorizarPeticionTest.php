@@ -299,6 +299,70 @@ final class AutorizarPeticionTest extends TestCase
         self::assertTrue($dApi->permitido);
     }
 
+    public function testConsultaLeeElCentroYNoLoModifica(): void
+    {
+        $auth = $this->autorizar([1 => true], [1 => 'consulta']);
+        $lectura = $auth->ejecutar(
+            self::APUNTES,
+            'list',
+            'GET',
+            true,
+            1,
+            null,
+            10,
+            'centro',
+            true,
+        );
+        self::assertTrue($lectura->permitido);
+
+        $escritura = $auth->ejecutar(
+            self::APUNTES,
+            'create',
+            'POST',
+            true,
+            1,
+            null,
+            10,
+            'centro',
+            true,
+        );
+        self::assertFalse($escritura->permitido);
+        self::assertSame(403, $escritura->status);
+        self::assertSame('Esta cuenta es de solo consulta', $escritura->error);
+    }
+
+    public function testQuienModificaSiguePudiendoAnotar(): void
+    {
+        $d = $this->autorizar([1 => true], [1 => 'admin'])->ejecutar(
+            self::APUNTES,
+            'create',
+            'POST',
+            true,
+            1,
+            null,
+            10,
+            'centro',
+            true,
+        );
+        self::assertTrue($d->permitido);
+    }
+
+    public function testConsultaPuedeCambiarSuContrasena(): void
+    {
+        $d = $this->autorizar([1 => true], [1 => 'consulta'])->ejecutar(
+            'src\\acceso\\infrastructure\\http\\PreferenciaController',
+            'guardarPassword',
+            'POST',
+            true,
+            1,
+            null,
+            10,
+            'centro',
+            true,
+        );
+        self::assertTrue($d->permitido);
+    }
+
     public function testCuentaEsAutenticadoParaCentroYPersona(): void
     {
         $dCentro = $this->autorizar([1 => true])->ejecutar(
@@ -329,8 +393,11 @@ final class AutorizarPeticionTest extends TestCase
         self::assertTrue($dPersona->permitido);
     }
 
-    /** @param array<int, bool> $totpPorId */
-    private function autorizar(array $totpPorId = []): AutorizarPeticion
+    /**
+     * @param array<int, bool> $totpPorId
+     * @param array<int, string> $rolPorId
+     */
+    private function autorizar(array $totpPorId = [], array $rolPorId = []): AutorizarPeticion
     {
         $rutas = $this->createStub(AccesoRutaRepository::class);
         $rutas->method('ambitoDe')->willReturnCallback(
@@ -347,6 +414,9 @@ final class AutorizarPeticionTest extends TestCase
         $identidades = $this->createStub(IdentidadRepository::class);
         $identidades->method('totpConfirmado')->willReturnCallback(
             static fn (int $id): bool => $totpPorId[$id] ?? false
+        );
+        $identidades->method('rolEnCentro')->willReturnCallback(
+            static fn (int $id, int $centroId): ?string => $rolPorId[$id] ?? 'admin'
         );
 
         return new AutorizarPeticion($rutas, $identidades);

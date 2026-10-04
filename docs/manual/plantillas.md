@@ -1,7 +1,7 @@
 # Plantillas de apuntes
 
 - Ruta: `/plantillas-p` y `/plantillas-g`
-- Ámbito: centro-n, asociacion, fundacion
+- Ámbito: centro-n, centro-sg, asociacion, fundacion
 - Quién: secretario del centro
 
 ## Centro n
@@ -17,10 +17,10 @@ Una plantilla solo describe la forma del movimiento: qué libro, de dónde sale 
 ## Cómo se usa
 
 1. Abrir «Plantillas P» o «Plantillas G» según el libro desde el que se vaya a usar.
-2. Escribir un nombre reconocible, por ejemplo «Club».
-3. Rellenar cada movimiento: libro (P o G), procedencia (A si no toca caja ni banco, B si es banco, C si es caja), concepto y observaciones.
+2. En la primera línea del formulario, escribir un nombre reconocible, por ejemplo «aportación a F. Montagut».
+3. En **Movimientos**, rellenar cada línea: libro (P o G), procedencia (A si no toca caja ni banco, B si es banco, C si es caja), concepto y observaciones.
 4. **Añadir movimiento** agrega otra línea; **Quitar** en una línea la elimina. El orden en que aparecen es el orden en que se anotarán.
-5. Pulsar **Guardar plantilla**. Aparece en la tabla, con el resumen de sus movimientos.
+5. Al final del formulario, pulsar **Guardar plantilla**. Aparece en la tabla, con el resumen de sus movimientos.
 6. En la tabla: **Editar** carga la plantilla en el formulario de arriba; el botón de envío pasa a **Guardar cambios** y aparece **Nueva plantilla** para volver al formulario vacío sin salir de la pantalla.
 7. **Borrar** en una fila elimina esa plantilla (pide confirmación).
 
@@ -38,6 +38,13 @@ Una plantilla solo describe la forma del movimiento: qué libro, de dónde sale 
 - **«Ya existe una plantilla con ese nombre»**: usar otro nombre o borrar la anterior.
 - **«La plantilla necesita al menos una línea»**: hay que dejar al menos un movimiento.
 - **«Concepto no válido: …»**: el código escrito no existe en el libro de esa línea. Los códigos disponibles se consultan en las pantallas de Conceptos.
+
+## Centro sg
+
+- Ruta: `/plantillas-g`
+- Menú: Cuentas → Plantillas
+
+Guarda apuntes que se repiten en el libro único, por ejemplo una plantilla «aportación a F. Montagut». Cada movimiento lleva concepto y observaciones; la contrapartida es la caja. El nombre, la fecha y la cantidad se ponen al usarla en Entrada. No hay libro P ni procedencia A, B o C.
 
 ## Asociación y fundación
 

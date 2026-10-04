@@ -56,7 +56,13 @@ use src\asientos\infrastructure\persistence\PdoAsientoRepository;
 use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
 use src\apuntes\application\ActualizarApunte;
 use src\apuntes\application\BorrarApunte;
+use src\apuntes\application\BorrarEntradaPeriodica;
 use src\apuntes\application\BorrarPlantillaApunte;
+use src\apuntes\application\ComprobarAccesoCentroSg;
+use src\apuntes\application\EjecutarEntradasPeriodicas;
+use src\apuntes\application\GuardarEntradaPeriodica;
+use src\apuntes\application\ListarEntradasPeriodicas;
+use src\apuntes\application\ListarPendientesEntradaPeriodica;
 use src\apuntes\application\BuscarSugerenciasObservacion;
 use src\apuntes\application\CrearApunte;
 use src\apuntes\application\CrearApuntesDeEntrada;
@@ -71,14 +77,18 @@ use src\apuntes\application\PreferenciaBancoCentro;
 use src\apuntes\domain\contracts\ApunteRepository;
 use src\apuntes\domain\contracts\BancoCentroImportRepository;
 use src\apuntes\domain\contracts\CentroBancoRepository;
+use src\apuntes\domain\contracts\EntradaPeriodicaRepository;
 use src\apuntes\domain\contracts\PlantillaApunteRepository;
+use src\apuntes\domain\services\CalculadorVencimientosEntradaPeriodica;
 use src\apuntes\domain\services\ContrapartidasGastoGeneral;
 use src\apuntes\infrastructure\http\ApunteController;
 use src\apuntes\infrastructure\http\BancoCentroController;
+use src\apuntes\infrastructure\http\EntradaPeriodicaController;
 use src\apuntes\infrastructure\http\PlantillaApunteController;
 use src\apuntes\infrastructure\persistence\PdoApunteRepository;
 use src\apuntes\infrastructure\persistence\PdoBancoCentroImportRepository;
 use src\apuntes\infrastructure\persistence\PdoCentroBancoRepository;
+use src\apuntes\infrastructure\persistence\PdoEntradaPeriodicaRepository;
 use src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository;
 use src\arqueo\application\BuscarCapuchinos;
 use src\ayuda\application\ListarTemasAyuda;
@@ -163,6 +173,8 @@ use src\plan\infrastructure\persistence\PdoDestinoSgRepository;
 use src\plan\infrastructure\persistence\PdoPlanContableRepository;
 use src\plan\infrastructure\persistence\PdoPlanConceptoRepository;
 use src\acceso\application\AsegurarIdentidadCentro;
+use src\acceso\application\CambiarRolUsuarioCentro;
+use src\acceso\application\QuedaEscritorCentro;
 use src\acceso\application\AsegurarLibroPersonalIdentidad;
 use src\acceso\application\AutorizarPeticion;
 use src\acceso\application\CambiarCentroUsuario;
@@ -177,7 +189,10 @@ use src\acceso\application\NotificarBajaSecretarioAVinculados;
 use src\acceso\application\NotificarConfirmacionBajaCuenta;
 use src\acceso\application\NotificarInicioBajaCentro;
 use src\acceso\application\NotificarRegistroUsuario;
+use src\acceso\application\NotificarRestablecerPassword;
+use src\acceso\application\RestablecerPassword;
 use src\acceso\application\SolicitarBajaCuentaPersonal;
+use src\acceso\application\SolicitarRestablecerPassword;
 use src\acceso\application\ReenviarCorreoVerificacion;
 use src\acceso\application\GuardarEmailUsuario;
 use src\acceso\application\GuardarIdiomaUsuario;
@@ -281,6 +296,9 @@ return [
     ConceptoRepository::class => autowire(PdoConceptoRepository::class),
     ApunteRepository::class => autowire(PdoApunteRepository::class),
     PlantillaApunteRepository::class => autowire(PdoPlantillaApunteRepository::class),
+    EntradaPeriodicaRepository::class => autowire(PdoEntradaPeriodicaRepository::class),
+    CalculadorVencimientosEntradaPeriodica::class => autowire(),
+    ComprobarAccesoCentroSg::class => autowire(),
     PresupuestoRepository::class => autowire(PdoPresupuestoRepository::class),
     PresupuestoSgRepository::class => autowire(PdoPresupuestoSg::class),
     PrevisionPersonalRepository::class => autowire(PdoPrevisionPersonalRepository::class),
@@ -374,6 +392,9 @@ return [
     RegistrarUsuario::class => autowire(),
     RegistrarCentro::class => autowire(),
     NotificarRegistroUsuario::class => autowire(),
+    NotificarRestablecerPassword::class => autowire(),
+    SolicitarRestablecerPassword::class => autowire(),
+    RestablecerPassword::class => autowire(),
     NotificarConfirmacionBajaCuenta::class => autowire(),
     SolicitarBajaCuentaPersonal::class => autowire(),
     ConfirmarBajaCuentaPersonal::class => autowire(),
@@ -435,6 +456,8 @@ return [
     BorrarPersona::class => autowire(),
     VincularEmailPersona::class => autowire(),
     AsegurarIdentidadCentro::class => autowire(),
+    QuedaEscritorCentro::class => autowire(),
+    CambiarRolUsuarioCentro::class => autowire(),
     AsegurarCuentaCorrientePersona::class => autowire(),
     CrearCentro::class => autowire(),
     VaciarDatosCentro::class => autowire(),
@@ -518,6 +541,12 @@ return [
     PreferenciaBancoCentro::class => autowire(),
     BancoCentroController::class => autowire(),
     PlantillaApunteController::class => autowire(),
+    ListarEntradasPeriodicas::class => autowire(),
+    GuardarEntradaPeriodica::class => autowire(),
+    BorrarEntradaPeriodica::class => autowire(),
+    ListarPendientesEntradaPeriodica::class => autowire(),
+    EjecutarEntradasPeriodicas::class => autowire(),
+    EntradaPeriodicaController::class => autowire(),
     CierreController::class => autowire(),
     InformeController::class => autowire(),
     ComprobarPersonalesGenerales::class => autowire(),

@@ -7,6 +7,8 @@ namespace src\ambito\infrastructure\http;
 use InvalidArgumentException;
 use RuntimeException;
 use src\acceso\application\AsegurarIdentidadCentro;
+use src\acceso\application\CambiarRolUsuarioCentro;
+use src\acceso\domain\value_objects\RolCentro;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\application\VaciarDatosCentro;
@@ -29,6 +31,7 @@ final class CentroController
         private readonly CentroRepository $centros,
         private readonly IdentidadRepository $identidades,
         private readonly AsegurarIdentidadCentro $asegurarUsuario,
+        private readonly CambiarRolUsuarioCentro $cambiarRolUsuario,
         private readonly ImportarExcelSecretario $importar,
         private readonly ImportarExcelCentroSg $importarSg,
         private readonly VaciarDatosCentro $vaciarDatos,
@@ -157,7 +160,7 @@ final class CentroController
                 (string) ($datos['email'] ?? ''),
                 (string) ($datos['password'] ?? ''),
                 (string) ($datos['nombre'] ?? ''),
-                'admin',
+                (string) ($datos['rol'] ?? RolCentro::ADMIN),
             );
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
@@ -170,6 +173,25 @@ final class CentroController
                 'email' => $identidad->email,
                 'nombre' => $identidad->nombre,
             ],
+            'usuarios' => $this->identidades->usuariosDeCentro($ctx->centroId),
+        ]);
+    }
+
+    public function cambiarRol(Request $request, array $vars = []): Response
+    {
+        $ctx = $this->ambito->ejecutar();
+        $datos = $request->json();
+        try {
+            $this->cambiarRolUsuario->ejecutar(
+                $ctx->centroId,
+                (int) ($datos['identidad_id'] ?? 0),
+                (string) ($datos['rol'] ?? ''),
+            );
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+
+        return ContestarJson::ok([
             'usuarios' => $this->identidades->usuariosDeCentro($ctx->centroId),
         ]);
     }

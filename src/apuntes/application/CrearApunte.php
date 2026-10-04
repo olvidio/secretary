@@ -7,6 +7,7 @@ namespace src\apuntes\application;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\contracts\CuentaFisicaRepository;
 use src\ambito\domain\contracts\CuentaRepository;
 use src\ambito\domain\contracts\EjercicioRepository;
@@ -22,6 +23,7 @@ use src\cierre\application\GenerarApertura;
 use src\conceptos\application\ResolverConceptosCentro;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\personas\domain\contracts\PersonaRepository;
+use src\plan\domain\services\CatalogoPlanesContables;
 use src\shared\domain\value_objects\Dinero;
 
 final class CrearApunte
@@ -38,6 +40,7 @@ final class CrearApunte
         private readonly ResolverAmbitoActual $ambito,
         private readonly EjercicioRepository $ejercicios,
         private readonly ?GenerarApertura $generarApertura = null,
+        private readonly ?CentroRepository $centros = null,
     ) {
     }
 
@@ -85,18 +88,21 @@ final class CrearApunte
         }
         $esCierre = !empty($datos['es_cierre']);
         $fechasDistintas = $fechaImputacion->format('Y-m-d') !== $fechaOperacion->format('Y-m-d');
+
+        $this->config->get();
+        $contexto = $this->ambito->ejecutar();
+        $centroId = $contexto->centroId;
+        if ($origen === 'A' && $this->libroSinDeudoresVivienda($centroId)) {
+            $origen = 'C';
+        }
         if ($fechasDistintas) {
-            if (in_array($conceptoCodigo, ['41', '42'], true)) {
+            if (in_array($conceptoCodigo, ['41', '42'], true) && !$this->libroSinDeudoresVivienda($centroId)) {
                 throw new InvalidArgumentException(_("Un traspaso caja/banco no admite fecha de imputación distinta"));
             }
             if ($esCierre) {
                 throw new InvalidArgumentException(_("El asiento de cierre de mes no admite fecha de imputación distinta"));
             }
         }
-
-        $this->config->get();
-        $contexto = $this->ambito->ejecutar();
-        $centroId = $contexto->centroId;
         [$ejercicioImputacion, $ejercicioOperacion, $permiteCerradoImputacion] = $this->resolverEjercicios(
             $centroId,
             $fechaImputacion,
@@ -362,12 +368,30 @@ final class CrearApunte
 
     private function resolverDeudores(int $centroId): \src\ambito\domain\entity\Cuenta
     {
+        if ($this->libroSinDeudoresVivienda($centroId)) {
+            return $this->resolverTesoreria($centroId, 'G', 'CAJA');
+        }
         $cuenta = $this->cuentas->deudoresVivienda($centroId);
         if ($cuenta === null) {
             throw new InvalidArgumentException(_("Cuenta DEUDORES.VIV no encontrada"));
         }
 
         return $cuenta;
+    }
+
+    /** Centro sg y club: un solo libro, sin DEUDORES.VIV. La contrapartida del apunte es la caja. */
+    private function libroSinDeudoresVivienda(int $centroId): bool
+    {
+        if ($this->centros === null) {
+            return false;
+        }
+        $centro = $this->centros->porId($centroId);
+        if ($centro === null) {
+            return false;
+        }
+
+        return CatalogoPlanesContables::esCentroSg($centro->planContableCodigo)
+            || CatalogoPlanesContables::esClub($centro->planContableCodigo);
     }
 
     /** @return array<int, \src\ambito\domain\entity\Cuenta> */

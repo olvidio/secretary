@@ -13,6 +13,7 @@ use src\ambito\infrastructure\http\EjercicioController;
 use src\ambito\infrastructure\http\TesoreriaController;
 use src\apuntes\infrastructure\http\ApunteController;
 use src\apuntes\infrastructure\http\BancoCentroController;
+use src\apuntes\infrastructure\http\EntradaPeriodicaController;
 use src\apuntes\infrastructure\http\PlantillaApunteController;
 use src\arqueo\infrastructure\http\ArqueoController;
 use src\arqueo\infrastructure\http\ClubArqueoController;
@@ -45,6 +46,8 @@ use src\shared\infrastructure\http\CopiaSeguridadController;
 return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/login', [AuthController::class, 'login']);
     $r->addRoute('POST', '/login', [AuthController::class, 'login']);
+    $r->addRoute('POST', '/olvide-contrasena', [AuthController::class, 'solicitarRestablecer']);
+    $r->addRoute('POST', '/restablecer-contrasena', [AuthController::class, 'aplicarRestablecer']);
     $r->addRoute('POST', '/api/registro', [AuthController::class, 'registro']);
     $r->addRoute('POST', '/registro', [AuthController::class, 'registro']);
     $r->addRoute('POST', '/api/registro/reenviar', [AuthController::class, 'reenviarVerificacion']);
@@ -100,6 +103,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/admin/legal/expediente/{id:\d+}/export', [AdminLegalController::class, 'exportar']);
     $r->addRoute('POST', '/api/centros/vaciar', [CentroController::class, 'vaciar']);
     $r->addRoute('POST', '/api/centros/usuarios', [CentroController::class, 'addUsuario']);
+    $r->addRoute('POST', '/api/centros/usuarios/rol', [CentroController::class, 'cambiarRol']);
     $r->addRoute('GET', '/api/centros/partidas-labores', [PartidaLaboresController::class, 'list']);
     $r->addRoute('POST', '/api/centros/partidas-labores', [PartidaLaboresController::class, 'save']);
 
@@ -137,6 +141,12 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/plantillas-apunte', [PlantillaApunteController::class, 'list']);
     $r->addRoute('POST', '/api/plantillas-apunte', [PlantillaApunteController::class, 'save']);
     $r->addRoute('DELETE', '/api/plantillas-apunte/{id:\d+}', [PlantillaApunteController::class, 'delete']);
+
+    $r->addRoute('GET', '/api/entradas-periodicas', [EntradaPeriodicaController::class, 'list']);
+    $r->addRoute('POST', '/api/entradas-periodicas', [EntradaPeriodicaController::class, 'save']);
+    $r->addRoute('DELETE', '/api/entradas-periodicas/{id:\d+}', [EntradaPeriodicaController::class, 'delete']);
+    $r->addRoute('GET', '/api/entradas-periodicas/pendientes', [EntradaPeriodicaController::class, 'pendientes']);
+    $r->addRoute('POST', '/api/entradas-periodicas/ejecutar', [EntradaPeriodicaController::class, 'ejecutar']);
 
     $r->addRoute('GET', '/api/cierre', [CierreController::class, 'preview']);
     $r->addRoute('POST', '/api/cierre', [CierreController::class, 'run']);

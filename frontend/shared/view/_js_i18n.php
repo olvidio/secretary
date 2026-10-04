@@ -52,6 +52,9 @@ $i18nJs = [
     'propuesta_saldos_hasta' => _(". Saldos hasta "),
     'propuesta_revisar_p71' => _(". Revisar y confirmar para anotar P/71 desde caja."),
     'nadie_reparto_mes' => _("Nadie entra en el reparto de este mes."),
+    'solo_consulta' => _("Esta cuenta es de solo consulta"),
+    'rol_modificar' => _("Puede modificar"),
+    'rol_consulta' => _("Solo consulta"),
 ];
 ?>
 <script>

@@ -9,9 +9,11 @@ use frontend\shared\view\View;
 use src\acceso\application\ConfirmarBajaCuentaPersonal;
 use src\acceso\application\ConfirmarEmailRegistro;
 use src\acceso\application\PrepararTotp;
+use src\acceso\application\RestablecerPassword;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\value_objects\IdiomaUsuario;
 use src\acceso\domain\value_objects\LayoutPantalla;
+use src\acceso\domain\value_objects\RolCentro;
 use src\acceso\infrastructure\http\ProteccionCsrf;
 use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\services\TipoEntidad;
@@ -37,6 +39,7 @@ final class PageController
         private readonly CatalogoDocumentosLegales $documentos,
         private readonly DatosOperador $operador,
         private readonly VersiónDespliegue $versión,
+        private readonly RestablecerPassword $restablecerPassword,
     ) {
     }
 
@@ -111,6 +114,54 @@ final class PageController
             'ok' => $ok,
             'error' => $error,
             'csrf' => ProteccionCsrf::renovarToken(),
+        ]));
+    }
+
+    public function olvideContrasena(Request $request, array $vars = []): Response
+    {
+        $error = $_SESSION['login_error'] ?? null;
+        unset($_SESSION['login_error']);
+        $usuario = (string) ($_SESSION['login_usuario'] ?? $request->query('usuario', '') ?? '');
+        unset($_SESSION['login_usuario']);
+
+        return Response::html($this->view->standalone('login/view/olvide_contrasena.php', [
+            'error' => $error,
+            'csrf' => ProteccionCsrf::renovarToken(),
+            'usuario' => $usuario,
+        ]));
+    }
+
+    public function olvideContrasenaEnviado(Request $request, array $vars = []): Response
+    {
+        return Response::html($this->view->standalone('login/view/olvide_contrasena_enviado.php', []));
+    }
+
+    public function restablecerContrasena(Request $request, array $vars = []): Response
+    {
+        $error = $_SESSION['login_error'] ?? null;
+        unset($_SESSION['login_error']);
+        $token = trim((string) ($request->query('token', '') ?? ''));
+        $etiqueta = '';
+        $valido = false;
+        if ($token === '') {
+            $error = $error ?: _('El enlace no es válido o ha caducado. Solicite otro.');
+        } else {
+            try {
+                $cuenta = $this->restablecerPassword->cuenta($token);
+                $etiqueta = $cuenta['etiqueta'];
+                $valido = true;
+            } catch (\InvalidArgumentException $e) {
+                $error = $e->getMessage();
+                $token = '';
+            }
+        }
+
+        return Response::html($this->view->standalone('login/view/restablecer_contrasena.php', [
+            'error' => $error,
+            'csrf' => ProteccionCsrf::renovarToken(),
+            'token' => $token,
+            'etiqueta' => $etiqueta,
+            'valido' => $valido,
         ]));
     }
 
@@ -381,6 +432,7 @@ final class PageController
             'esClub' => $club,
             'esFundacion' => $this->esFundacion(),
             'esCentroSg' => $centroSg,
+            'soloConsulta' => $this->soloConsultaSesion(),
         ]));
     }
 
@@ -518,6 +570,20 @@ final class PageController
             'idioma' => $this->idiomaUsuario(),
             'menuItems' => CatalogoMenus::itemsAdmin(),
         ]));
+    }
+
+    private function soloConsultaSesion(): bool
+    {
+        if (($_SESSION['nivel'] ?? '') !== 'centro') {
+            return false;
+        }
+        $identidadId = isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : 0;
+        $centroId = isset($_SESSION['centro_id']) ? (int) $_SESSION['centro_id'] : 0;
+        if ($identidadId <= 0 || $centroId <= 0) {
+            return false;
+        }
+
+        return RolCentro::esConsulta($this->identidades->rolEnCentro($identidadId, $centroId));
     }
 
     private function puedeCambiarTipoSesion(): bool

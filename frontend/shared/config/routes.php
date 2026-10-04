@@ -11,6 +11,9 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/registro-enviado', [PageController::class, 'registroEnviado']);
     $r->addRoute('GET', '/confirmar-email', [PageController::class, 'confirmarEmail']);
     $r->addRoute('GET', '/confirmar-baja', [PageController::class, 'confirmarBaja']);
+    $r->addRoute('GET', '/olvide-contrasena', [PageController::class, 'olvideContrasena']);
+    $r->addRoute('GET', '/olvide-contrasena-enviado', [PageController::class, 'olvideContrasenaEnviado']);
+    $r->addRoute('GET', '/restablecer-contrasena', [PageController::class, 'restablecerContrasena']);
     $r->addRoute('GET', '/condiciones', [PageController::class, 'documentoLegal', ['tipo' => 'condiciones']]);
     $r->addRoute('GET', '/privacidad', [PageController::class, 'documentoLegal', ['tipo' => 'privacidad']]);
     $r->addRoute('GET', '/licencia', [PageController::class, 'licencia']);
@@ -63,6 +66,8 @@ return static function (RouteCollector $r): void {
         ['/presupuesto-p', 'presupuestos/view/form.php', 'presupuesto-p'],
         ['/presupuesto-g', 'presupuestos/view/form.php', 'presupuesto-g'],
         ['/apuntes', 'apuntes/view/listado.php', 'apuntes'],
+        ['/entradas-periodicas', 'apuntes/view/entradas_periodicas.php', 'entradas-periodicas'],
+        ['/ejecutar-entradas-periodicas', 'apuntes/view/ejecutar_entradas_periodicas.php', 'ejecutar-entradas-periodicas'],
         ['/cierre', 'cierre/view/cierre.php', 'cierre'],
         ['/entrada-p', 'apuntes/view/entrada.php', 'entrada-p'],
         ['/entrada-g', 'apuntes/view/entrada.php', 'entrada-g'],

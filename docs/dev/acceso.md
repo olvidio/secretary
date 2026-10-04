@@ -16,6 +16,13 @@ códigos de recuperación, CSRF y autorización por tabla.
    El alta pública exige aceptar las Condiciones de uso (casilla + correo de
    confirmación). Ver `docs/dev/legal.md`. En desarrollo local sin SMTP puede
    poner `REGISTRO_AUTO_CONFIRMA_EMAIL=1` en el `.env` del stack (producción: `0`).
+1b. `GET /olvide-contrasena` — alias o correo. Si hay cuentas activas con ese dato y el
+    correo confirmado, un solo mensaje lleva un enlace por cuenta
+    (`/restablecer-contrasena?token=`). El token se guarda como `sha256` (sin
+    `APP_KEY`), caduca a las 2 horas, es de un solo uso y una petición nueva
+    sustituye a la anterior. Al guardar la contraseña se borran los intentos
+    fallidos y el bloqueo temporal. No inicia sesión. El mensaje de éxito es
+    el mismo si el dato no existe, para no revelar cuentas.
 2. Identidad de **centro** sin TOTP confirmado → `GET /totp-activar` (clave e URI
    `otpauth://`). Confirmar con 6 dígitos. Se muestran **una vez** 8 códigos
    `XXXX-XXXX`.
@@ -66,6 +73,15 @@ deniega (default deny). Ámbitos: `publico`, `pendiente` (contraseña ok, 2FA no
 
 El centro de la sesión (`$_SESSION['centro_id']`) tiene preferencia en
 `ResolverAmbitoActual`; si falta, se usa `configuracion.centro` como hasta ahora.
+
+El vínculo `identidad_centro.rol` es `admin` (puede modificar) o `consulta`
+(solo lectura). `operador` es el valor antiguo y sigue pudiendo modificar.
+Quien es `consulta` abre las pantallas y las peticiones GET del centro; un
+POST, PUT, PATCH o DELETE de ese ámbito responde 403. La cuenta propia
+(contraseña, correo, idioma, layout, segundo factor, cambio de centro) sigue
+en el ámbito `autenticado`. El alta y el cambio de rol están en Centros, o en
+Configuración si la entidad es asociación o fundación. No se puede dejar el
+centro sin ningún usuario que pueda modificar.
 
 Cada identidad elige disposición de menús (`identidades.layout`: `excel` o `burger`)
 e idioma (`identidades.idioma`: `es` o `ca`) en el menú del nombre (esquina).

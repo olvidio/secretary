@@ -19,7 +19,7 @@ foreach ($gruposBurger as $g) {
     <title><?= _("Secretario") ?></title>
     <link rel="stylesheet" href="/css/app.css?v=<?= (int) (@filemtime(dirname(__DIR__, 3) . '/public/css/app.css') ?: 0) ?>">
 </head>
-<body class="layout-burger">
+<body class="layout-burger<?= !empty($soloConsulta) ? ' solo-consulta' : '' ?>">
 <button type="button" class="burger-toggle" id="burgerToggle" aria-label="<?= htmlspecialchars(_("Menú"), ENT_QUOTES) ?>">☰</button>
 <div class="burger-overlay" id="burgerOverlay" hidden></div>
 <aside class="burger-sidebar" id="burgerSidebar">
@@ -60,6 +60,7 @@ foreach ($gruposBurger as $g) {
         </div>
     </header>
     <main>
+<?php include __DIR__ . '/_aviso_consulta.php'; ?>
 <?php
 if (!empty($contentView) && is_file($contentView)) {
     include $contentView;

@@ -277,11 +277,26 @@ hr.separa-apunte { border: 0; border-top: 1px solid var(--line, #ccc); margin: 0
 .cuadre-alerta.cuadre-ok #cuadre-msg { color: var(--ok); }
 .cuadre-alerta.cuadre-mal #cuadre-msg { color: var(--err); }
 .entrada-hint { margin: .35rem 0 1rem; font-size: .85rem; }
-.plantilla-lineas { border: 1px solid var(--line); padding: .75rem; margin: 0; border-radius: 4px; }
+.form-plantilla {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.form-plantilla-nombre label { max-width: 28rem; }
+.form-plantilla-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  align-items: center;
+}
+.plantilla-lineas { border: 1px solid var(--line); padding: .75rem; margin: 0; border-radius: 4px; width: 100%; box-sizing: border-box; }
 .plantilla-lineas legend { padding: 0 .35rem; }
 .plantilla-linea { margin-bottom: .5rem; align-items: end; }
 .plantilla-preview { width: 100%; margin: 0; font-size: .85rem; }
 label { display: flex; flex-direction: column; gap: .2rem; font-size: .85rem; }
+label[hidden] { display: none; }
 input, select, textarea, button { font: inherit; padding: .35rem .45rem; }
 button { background: var(--navy); color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
 button[type="button"] { background: #4a5568; }
@@ -485,6 +500,15 @@ button[type="button"].arqueo-capuchinos-btn {
 }
 .comprobacion-item.ok { border-left: 4px solid #38a169; }
 .comprobacion-item.fail { border-left: 4px solid var(--err); }
+.aviso-consulta {
+  background: #fffbeb;
+  border: 1px solid #f6e05e;
+  border-left: 4px solid #d69e2e;
+  border-radius: 6px;
+  padding: .65rem 1rem;
+  margin: 0 0 1rem;
+  max-width: 70ch;
+}
 .aviso-cierre {
   background: #fffbeb;
   border: 1px solid #f6e05e;

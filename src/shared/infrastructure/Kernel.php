@@ -145,6 +145,8 @@ final class Kernel
             '/totp-verificar', '/api/totp/verificar' => '/totp-verificar',
             '/elegir-centro', '/api/centros/elegir' => '/elegir-centro',
             '/elegir-persona', '/api/personas/elegir' => '/elegir-persona',
+            '/olvide-contrasena' => '/olvide-contrasena',
+            '/restablecer-contrasena' => '/olvide-contrasena',
             default => '/login',
         };
     }

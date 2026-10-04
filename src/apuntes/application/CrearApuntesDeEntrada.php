@@ -7,8 +7,10 @@ namespace src\apuntes\application;
 use src\apuntes\domain\services\ContrapartidasGastoGeneral;
 use src\asientos\domain\value_objects\FilaApunteExcel;
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\domain\contracts\CentroRepository;
 use src\conceptos\application\ResolverConceptosCentro;
 use src\personas\domain\contracts\PersonaRepository;
+use src\plan\domain\services\CatalogoPlanesContables;
 
 final class CrearApuntesDeEntrada
 {
@@ -18,6 +20,7 @@ final class CrearApuntesDeEntrada
         private readonly ResolverAmbitoActual $ambito,
         private readonly PersonaRepository $personas,
         private readonly ContrapartidasGastoGeneral $contrapartidas,
+        private readonly ?CentroRepository $centros = null,
     ) {
     }
 
@@ -70,7 +73,7 @@ final class CrearApuntesDeEntrada
      */
     private function lineasContrapartida(array $datos): ?array
     {
-        if (empty($datos['contrapartidas'])) {
+        if (empty($datos['contrapartidas']) || $this->libroSinDeudoresVivienda()) {
             return null;
         }
         $cuenta = strtoupper(trim((string) ($datos['cuenta'] ?? '')));
@@ -88,5 +91,20 @@ final class CrearApuntesDeEntrada
             $iniciales,
             $obsRaw === '' ? null : $obsRaw,
         );
+    }
+
+    /** Centro sg y club no generan la cadena P/111 → P/211 → G/11. */
+    private function libroSinDeudoresVivienda(): bool
+    {
+        if ($this->centros === null) {
+            return false;
+        }
+        $centro = $this->centros->porId($this->ambito->ejecutar()->centroId);
+        if ($centro === null) {
+            return false;
+        }
+
+        return CatalogoPlanesContables::esCentroSg($centro->planContableCodigo)
+            || CatalogoPlanesContables::esClub($centro->planContableCodigo);
     }
 }

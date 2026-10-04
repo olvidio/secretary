@@ -7,7 +7,7 @@
     <title><?= _("Secretario") ?></title>
     <link rel="stylesheet" href="/css/app.css?v=<?= (int) (@filemtime(dirname(__DIR__, 3) . '/public/css/app.css') ?: 0) ?>">
 </head>
-<body class="layout-excel">
+<body class="layout-excel<?= !empty($soloConsulta) ? ' solo-consulta' : '' ?>">
 <header class="ribbon">
     <div class="ribbon-top">
         <strong><a href="/"><?= _("Secretario") ?></a></strong>
@@ -29,6 +29,7 @@
     </nav>
 </header>
 <main>
+<?php include __DIR__ . '/_aviso_consulta.php'; ?>
 <?php
 if (!empty($contentView) && is_file($contentView)) {
     include $contentView;
@@ -37,7 +38,7 @@ if (!empty($contentView) && is_file($contentView)) {
 </main>
 <?php include __DIR__ . '/_pie_legal.php'; ?>
 <?php include __DIR__ . '/_js_i18n.php'; ?>
-<script src="/js/app.js"></script>
+<script src="/js/app.js?v=<?= (int) (@filemtime(dirname(__DIR__, 3) . '/public/js/app.js') ?: 0) ?>"></script>
 <script src="/js/editar-apunte.js"></script>
 </body>
 </html>

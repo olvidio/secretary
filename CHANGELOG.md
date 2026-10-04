@@ -10,6 +10,14 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.16] — 2026-10-04
+
+### Añadido
+- En **Entrar**, **Olvidé la contraseña**. El enlace llega al correo confirmado, caduca a las dos horas y solo sirve una vez. Al usarlo se quita el bloqueo por intentos fallidos. Después hay que entrar otra vez; si la cuenta es de secretario, pide el código de seis dígitos.
+- Usuarios de **solo consulta** en un centro n (Centros) y en un centro sg, una asociación o una fundación (Configuración). Ven las pantallas y los informes y no pueden guardar ni borrar. Tiene que quedar al menos un usuario que pueda modificar.
+- En un **centro sg**, **Apuntes → Entradas periódicas** y **Ejecutar periódicas**: apuntes mensuales, trimestrales o anuales que se contabilizan cuando tocan.
+- En un **centro sg**, **Cuentas → Plantillas** para repetir un apunte del talonario. El concepto y las observaciones quedan guardados; la contrapartida es la caja.
+
 ## [0.1.15] — 2026-10-02
 
 ### Añadido

@@ -8,12 +8,15 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\acceso\domain\entity\Identidad;
+use src\acceso\domain\value_objects\RolCentro;
 
 /** Crea o reutiliza una identidad de centro y la vincula a un centro concreto. */
 final class AsegurarIdentidadCentro
 {
-    public function __construct(private readonly IdentidadRepository $identidades)
-    {
+    public function __construct(
+        private readonly IdentidadRepository $identidades,
+        private readonly QuedaEscritorCentro $quedaEscritor,
+    ) {
     }
 
     public function ejecutar(
@@ -22,9 +25,10 @@ final class AsegurarIdentidadCentro
         string $email,
         string $password,
         string $nombre = '',
-        string $rol = 'admin',
+        string $rol = RolCentro::ADMIN,
         bool $verificarEmail = true,
     ): Identidad {
+        $rol = RolCentro::exigirAsignable($rol);
         $alias = strtolower(trim($alias));
         $email = strtolower(trim($email));
         $password = trim($password);
@@ -65,6 +69,7 @@ final class AsegurarIdentidadCentro
             if ($identidad->id === null) {
                 throw new InvalidArgumentException(_("No se pudo actualizar el usuario"));
             }
+            $this->exigirSiDejaDeEscribir($centroId, $identidad->id, $rol);
             $this->identidades->vincularCentro($identidad->id, $centroId, $rol);
 
             return $identidad;
@@ -90,8 +95,20 @@ final class AsegurarIdentidadCentro
         if ($verificarEmail) {
             $this->identidades->marcarEmailVerificado($creada->id, new DateTimeImmutable());
         }
+        $this->exigirSiDejaDeEscribir($centroId, $creada->id, $rol);
         $this->identidades->vincularCentro($creada->id, $centroId, $rol);
 
         return $this->identidades->porId($creada->id) ?? $creada;
+    }
+
+    private function exigirSiDejaDeEscribir(int $centroId, int $identidadId, string $rol): void
+    {
+        if (RolCentro::puedeEscribir($rol)) {
+            return;
+        }
+        $actual = $this->identidades->rolEnCentro($identidadId, $centroId);
+        if ($actual !== null && RolCentro::puedeEscribir($actual)) {
+            $this->quedaEscritor->comprobar($centroId, $identidadId);
+        }
     }
 }

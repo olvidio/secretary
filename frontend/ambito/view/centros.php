@@ -19,15 +19,23 @@
         </thead>
         <tbody></tbody>
     </table>
+    <?php if (empty($soloConsulta)): ?>
     <h3><?= _("Añadir usuario de este centro") ?></h3>
     <form id="form-usuario" class="grid-form">
         <label><?= _("Alias") ?> <input name="usuario" required placeholder="<?= htmlspecialchars(_("p. ej. scl"), ENT_QUOTES) ?>"></label>
         <label><?= _("Correo") ?> <input name="email" type="email" required></label>
         <label><?= _("Contraseña") ?> <input name="password" type="password" required minlength="6"></label>
         <label><?= _("Nombre") ?> <input name="nombre" autocomplete="name"></label>
+        <label><?= _("Rol") ?>
+            <select name="rol">
+                <option value="admin"><?= _("Puede modificar") ?></option>
+                <option value="consulta"><?= _("Solo consulta") ?></option>
+            </select>
+        </label>
         <button type="submit"><?= _("Vincular") ?></button>
     </form>
-    <?php if ($esClub): ?>
+    <?php endif; ?>
+    <?php if (empty($soloConsulta) && $esClub): ?>
     <h3><?= _("Importar Grisbi") ?></h3>
     <p class="muted"><?= $esFundacion
         ? _("Carga un fichero .gsb en esta fundación. Las categorías nuevas se crean como cuentas y los movimientos como asientos. Volver a importar el mismo fichero no duplica.")
@@ -40,7 +48,7 @@
     <p class="muted"><?= $esFundacion
         ? _("Mientras estemos de pruebas: vaciar asientos para volver a cargar un fichero. Quedan la fundación y los usuarios.")
         : _("Mientras estemos de pruebas: vaciar asientos para volver a cargar un fichero. Quedan la associació y los usuarios.") ?></p>
-    <?php else: ?>
+    <?php elseif (empty($soloConsulta)): ?>
     <h3><?= _("Excel de este centro") ?></h3>
     <p class="muted"><?= _("Carga el .xlsm en el libro de este centro, sin tocar el de los demás.") ?></p>
     <form id="form-import" class="grid-form">
@@ -54,7 +62,9 @@
     <p class="ok" id="msg-import" hidden></p>
     <p class="muted"><?= _("Mientras estemos de pruebas: vaciar asientos, remesas y arqueos para volver a cargar el Excel. Quedan el centro, los usuarios y los nombres.") ?></p>
     <?php endif; ?>
+    <?php if (empty($soloConsulta)): ?>
     <button type="button" id="btn-vaciar" class="peligro"><?= _("Vaciar datos (pruebas)") ?></button>
+    <?php endif; ?>
     <p class="ok" id="msg-vaciar" hidden></p>
 
     <?php if (!$esClub): ?>
@@ -67,10 +77,12 @@
             </thead>
             <tbody></tbody>
         </table>
+        <?php if (empty($soloConsulta)): ?>
         <p class="grid-form" style="margin-top:.5rem">
             <button type="button" id="btn-add-labor"><?= _("Añadir partida") ?></button>
             <button type="button" id="btn-save-labores"><?= _("Guardar partidas") ?></button>
         </p>
+        <?php endif; ?>
         <p class="ok" id="msg-labores" hidden></p>
     </section>
     <?php endif; ?>
@@ -101,12 +113,14 @@ function textoImportacion(imp) {
 }
 function filaLabor(p = {}) {
   const tr = document.createElement('tr');
+  const solo = document.body.classList.contains('solo-consulta');
+  const bloqueo = solo ? ' readonly' : '';
   tr.innerHTML =
     '<td><input name="codigo" required pattern="7\\d{1,2}" maxlength="3" ' +
-    'placeholder="71" value="' + esc(p.codigo || '') + '"></td>' +
-    '<td><input name="etiqueta" required value="' + esc(p.etiqueta || '') + '"></td>' +
-    '<td><label><input type="checkbox" name="desgrava"' + (p.desgrava ? ' checked' : '') + '> ' + esc(I18N_CENTROS.si) + '</label></td>' +
-    '<td><button type="button" class="btn-quitar">' + esc(I18N_CENTROS.quitar) + '</button></td>';
+    'placeholder="71" value="' + esc(p.codigo || '') + '"' + bloqueo + '></td>' +
+    '<td><input name="etiqueta" required value="' + esc(p.etiqueta || '') + '"' + bloqueo + '></td>' +
+    '<td><label><input type="checkbox" name="desgrava"' + (p.desgrava ? ' checked' : '') + (solo ? ' disabled' : '') + '> ' + esc(I18N_CENTROS.si) + '</label></td>' +
+    (solo ? '<td></td>' : '<td><button type="button" class="btn-quitar">' + esc(I18N_CENTROS.quitar) + '</button></td>');
   tr.querySelector('.btn-quitar')?.addEventListener('click', () => tr.remove());
   return tr;
 }
@@ -160,7 +174,8 @@ async function loadCentro() {
     + (c.tipo_cierre ? ' · cierre ' + c.tipo_cierre : '');
   (r.usuarios || []).forEach((u) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${esc(u.alias)}</td><td>${esc(u.email)}</td><td>${esc(u.nombre)}</td><td>${esc(u.rol)}</td>`;
+    const solo = document.body.classList.contains('solo-consulta');
+    tr.innerHTML = `<td>${esc(u.alias)}</td><td>${esc(u.email)}</td><td>${esc(u.nombre)}</td><td>${htmlRolCentro(u, solo)}</td>`;
     tb.appendChild(tr);
   });
 }
@@ -182,13 +197,13 @@ document.addEventListener('DOMContentLoaded', () => {
     msg.textContent = I18N_CENTROS.partidasGuardadas;
     await loadLabores();
   });
-  document.getElementById('form-usuario').onsubmit = async (ev) => {
+  document.getElementById('form-usuario')?.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const s = await api('/api/centros/usuarios', {method:'POST', body: formObj(ev.target)});
     if (!s.ok) return alert(s.error);
     ev.target.reset();
     loadCentro();
-  };
+  });
   document.getElementById('form-grisbi')?.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const btn = ev.target.querySelector('button[type=submit]');
@@ -226,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.disabled = false;
     }
   });
-  document.getElementById('btn-vaciar').onclick = async () => {
+  document.getElementById('btn-vaciar')?.addEventListener('click', async () => {
     const pregunta = I18N_CENTROS.esClub ? I18N_CENTROS.confirmVaciarClub : I18N_CENTROS.confirmVaciar;
     if (!confirm(pregunta)) {
       return;
@@ -239,6 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
     msg.textContent = plantilla
       .replace('%s', s.asientos || 0)
       .replace('%s', s.ejercicios || 0);
-  };
+  });
 });
 </script>

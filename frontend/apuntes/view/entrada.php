@@ -1,6 +1,6 @@
-<?php $cuenta = $cuentaEntrada ?? 'P'; ?>
+<?php $cuenta = $cuentaEntrada ?? 'P'; $esCentroSg = !empty($esCentroSg); ?>
 <h1><?= sprintf(_("Entrada apuntes %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
-<p class="muted"><?php if ($cuenta === 'G'): ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber. Un gasto de G con iniciales anota también P/111, P/211 y G/11.") ?><?php else: ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.") ?><?php endif; ?></p>
+<p class="muted"><?php if ($esCentroSg): ?><?= _("Se anota el apunte del talonario: nombre, concepto, observaciones, cantidad y fecha. La contrapartida es la caja.") ?><?php elseif ($cuenta === 'G'): ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber. Un gasto de G con iniciales anota también P/111, P/211 y G/11.") ?><?php else: ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.") ?><?php endif; ?></p>
 
 <?php if ($cuenta === 'G'): ?>
 <details class="yo-ayuda-bloque" id="entrada-banco-bloque">
@@ -43,11 +43,11 @@
         <label><?= _("Iniciales") ?>
             <select id="hdr-iniciales"><option value=""></option></select>
         </label>
-        <label>A/B/C
+        <label<?= $esCentroSg ? ' hidden' : '' ?>>A/B/C
             <select id="hdr-origen" required>
-                <option value="A"><?= _("Apunte") ?></option>
+                <option value="A"<?= $esCentroSg ? '' : ' selected' ?>><?= _("Apunte") ?></option>
                 <option value="B"><?= _("Banco") ?></option>
-                <option value="C"><?= _("Caja") ?></option>
+                <option value="C"<?= $esCentroSg ? ' selected' : '' ?>><?= _("Caja") ?></option>
             </select>
         </label>
         <label><?= _("Fecha") ?> <input id="hdr-fecha" type="date" required></label>
@@ -98,7 +98,7 @@
     </div>
     <p id="plantilla-preview" class="muted plantilla-preview" hidden></p>
     <p class="muted entrada-hint"><?= _("F. imputación vacía = la misma fecha de cabecera. Si difiere, el gasto/ingreso se imputa en ese día y la contrapartida (caja, banco o personal) en la fecha de cabecera; el tabulador la salta (de concepto a cantidad).") ?>
-        <?= _("Las") ?> <a href="/plantillas-<?= strtolower($cuenta) ?>"><?= _("plantillas") ?></a> <?= _("recurrentes aparecen en el desplegable de concepto.") ?><?php if ($cuenta === 'G'): ?> <?= _("Gasto con iniciales: P/111 → P/211 → G/11 → el gasto.") ?><?php endif; ?></p>
+        <?= _("Las") ?> <a href="/plantillas-<?= strtolower($cuenta) ?>"><?= _("plantillas") ?></a> <?= _("recurrentes aparecen en el desplegable de concepto.") ?><?php if ($cuenta === 'G' && !$esCentroSg): ?> <?= _("Gasto con iniciales: P/111 → P/211 → G/11 → el gasto.") ?><?php endif; ?></p>
 </div>
 
 <p id="msg" class="ok" hidden><?= _("Apunte guardado") ?></p>
@@ -106,6 +106,7 @@
 
 <script>
 const CUENTA = <?= json_encode($cuenta) ?>;
+const ES_CENTRO_SG = <?= $esCentroSg ? 'true' : 'false' ?>;
 const I18N_ENTRADA = {
   plantillas: <?= json_encode(_("Plantillas"), JSON_UNESCAPED_UNICODE) ?>,
   conceptos: <?= json_encode(_("Conceptos"), JSON_UNESCAPED_UNICODE) ?>,
@@ -327,7 +328,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const body = {
       cuenta: CUENTA,
       iniciales: selI.value,
-      origen: selOrigen.value,
+      origen: ES_CENTRO_SG ? 'C' : selOrigen.value,
       fecha: document.getElementById('hdr-fecha').value,
       observaciones: inpObs.value,
       concepto_codigo: selC.value,
@@ -369,7 +370,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function lineasContrapartidas() {
-    if (CUENTA !== 'G' || plantillaActiva) return null;
+    if (ES_CENTRO_SG || CUENTA !== 'G' || plantillaActiva) return null;
     const ini = selI.value;
     const codigo = selC.value;
     if (!ini || !codigo || codigo.startsWith('@plantilla:')) return null;

@@ -1,18 +1,22 @@
-<?php $cuenta = $cuentaEntrada ?? 'P'; ?>
-<h1><?= sprintf(_("Plantillas de apuntes %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
-<p class="muted"><?= sprintf(_("Solo define los movimientos (origen, concepto, observaciones). Las plantillas de este listado aparecen al final del desplegable de concepto en Entrada %s (no en el otro libro). Al usarlas, las iniciales, la fecha y la cantidad salen de la cabecera del formulario."), htmlspecialchars($cuenta, ENT_QUOTES)) ?></p>
+<?php $cuenta = $cuentaEntrada ?? 'P'; $esCentroSg = !empty($esCentroSg); ?>
+<h1><?= $esCentroSg ? _("Plantillas") : sprintf(_("Plantillas de apuntes %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
+<p class="muted"><?php if ($esCentroSg): ?><?= _("Define el concepto y las observaciones. La contrapartida es la caja. En Entrada se eligen el nombre, la fecha y la cantidad; por ejemplo una plantilla «aportación a F. Montagut».") ?><?php else: ?><?= sprintf(_("Solo define los movimientos (origen, concepto, observaciones). Las plantillas de este listado aparecen al final del desplegable de concepto en Entrada %s (no en el otro libro). Al usarlas, las iniciales, la fecha y la cantidad salen de la cabecera del formulario."), htmlspecialchars($cuenta, ENT_QUOTES)) ?><?php endif; ?></p>
 
-<form id="form-plantilla" class="grid-form">
+<form id="form-plantilla" class="form-plantilla">
     <input type="hidden" name="id">
     <input type="hidden" name="cuenta" value="<?= htmlspecialchars($cuenta, ENT_QUOTES) ?>">
-    <label><?= _("Nombre") ?> <input name="nombre" required placeholder="<?= htmlspecialchars(_("p. ej. Club"), ENT_QUOTES) ?>"></label>
+    <div class="form-plantilla-nombre">
+        <label><?= _("Nombre") ?> <input name="nombre" required placeholder="<?= htmlspecialchars(_("p. ej. aportación a F. Montagut"), ENT_QUOTES) ?>"></label>
+    </div>
     <fieldset class="plantilla-lineas">
         <legend><?= _("Movimientos") ?></legend>
         <div id="lineas-form"></div>
         <button type="button" id="btn-add-linea"><?= _("Añadir movimiento") ?></button>
     </fieldset>
-    <button type="submit" id="btn-guardar"><?= _("Guardar plantilla") ?></button>
-    <button type="button" id="btn-nuevo" hidden><?= _("Nueva plantilla") ?></button>
+    <div class="form-plantilla-acciones">
+        <button type="submit" id="btn-guardar"><?= _("Guardar plantilla") ?></button>
+        <button type="button" id="btn-nuevo" hidden><?= _("Nueva plantilla") ?></button>
+    </div>
 </form>
 
 <table id="tabla-plantillas">
@@ -24,6 +28,7 @@
 
 <script>
 const CUENTA = <?= json_encode($cuenta) ?>;
+const ES_CENTRO_SG = <?= $esCentroSg ? 'true' : 'false' ?>;
 const I18N_PLANTILLAS = {
   apunte: <?= json_encode(_("Apunte"), JSON_UNESCAPED_UNICODE) ?>,
   banco: <?= json_encode(_("Banco"), JSON_UNESCAPED_UNICODE) ?>,
@@ -66,36 +71,50 @@ function pintarSelectConcepto(sel, cuenta, codigoSeleccionado) {
 function filaLinea(d = {}) {
   const div = document.createElement('div');
   div.className = 'plantilla-linea grid-form';
-  div.innerHTML =
-    '<label>P/G <select name="linea_cuenta"><option>P</option><option>G</option></select></label>' +
-    '<label>A/B/C <select name="origen" required>' + origenOpts() + '</select></label>' +
-    '<label><?= _("Concepto") ?> <select name="concepto_codigo" required></select></label>' +
-    '<label><?= _("Observaciones") ?> <input name="observaciones" value="' + esc(d.observaciones || '') + '"></label>' +
-    '<button type="button" class="btn-quitar">' + esc(I18N_PLANTILLAS.quitar) + '</button>';
+  if (ES_CENTRO_SG) {
+    div.innerHTML =
+      '<input type="hidden" name="linea_cuenta" value="G">' +
+      '<input type="hidden" name="origen" value="C">' +
+      '<label><?= _("Concepto") ?> <select name="concepto_codigo" required></select></label>' +
+      '<label><?= _("Observaciones") ?> <input name="observaciones" value="' + esc(d.observaciones || '') + '"></label>' +
+      '<button type="button" class="btn-quitar">' + esc(I18N_PLANTILLAS.quitar) + '</button>';
+  } else {
+    div.innerHTML =
+      '<label>P/G <select name="linea_cuenta"><option>P</option><option>G</option></select></label>' +
+      '<label>A/B/C <select name="origen" required>' + origenOpts() + '</select></label>' +
+      '<label><?= _("Concepto") ?> <select name="concepto_codigo" required></select></label>' +
+      '<label><?= _("Observaciones") ?> <input name="observaciones" value="' + esc(d.observaciones || '') + '"></label>' +
+      '<button type="button" class="btn-quitar">' + esc(I18N_PLANTILLAS.quitar) + '</button>';
+  }
   const selCuenta = div.querySelector('[name=linea_cuenta]');
   const selConcepto = div.querySelector('[name=concepto_codigo]');
-  selCuenta.value = d.cuenta || CUENTA;
-  div.querySelector('[name=origen]').value = d.origen || 'A';
-  pintarSelectConcepto(selConcepto, selCuenta.value, d.concepto_codigo || '');
-  selCuenta.onchange = () => pintarSelectConcepto(selConcepto, selCuenta.value, '');
+  const cuentaLinea = ES_CENTRO_SG ? 'G' : (d.cuenta || CUENTA);
+  selCuenta.value = cuentaLinea;
+  div.querySelector('[name=origen]').value = ES_CENTRO_SG ? 'C' : (d.origen || 'A');
+  pintarSelectConcepto(selConcepto, cuentaLinea, d.concepto_codigo || '');
+  if (!ES_CENTRO_SG) {
+    selCuenta.onchange = () => pintarSelectConcepto(selConcepto, selCuenta.value, '');
+  }
   div.querySelector('.btn-quitar').onclick = () => div.remove();
   return div;
 }
 
 function lineasDelForm() {
   return [...document.querySelectorAll('#lineas-form .plantilla-linea')].map(row => ({
-    cuenta: row.querySelector('[name=linea_cuenta]').value,
-    origen: row.querySelector('[name=origen]').value,
+    cuenta: ES_CENTRO_SG ? 'G' : row.querySelector('[name=linea_cuenta]').value,
+    origen: ES_CENTRO_SG ? 'C' : row.querySelector('[name=origen]').value,
     concepto_codigo: row.querySelector('[name=concepto_codigo]').value,
     observaciones: row.querySelector('[name=observaciones]').value,
   }));
 }
 
 function resumenLineas(lineas) {
-  return (lineas || []).map(l =>
-    (l.cuenta || 'P') + ' ' + l.origen + ' ' + l.concepto_codigo
-    + (l.observaciones ? ' · ' + l.observaciones : '')
-  ).join(' → ');
+  return (lineas || []).map(l => {
+    const base = ES_CENTRO_SG
+      ? (l.concepto_codigo || '')
+      : (l.cuenta || 'P') + ' ' + l.origen + ' ' + l.concepto_codigo;
+    return base + (l.observaciones ? ' · ' + l.observaciones : '');
+  }).join(' → ');
 }
 
 function pintarLineas(lineas) {
@@ -150,16 +169,25 @@ async function loadPlantillas() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const [rP, rG] = await Promise.all([
-    api('/api/conceptos?cuenta=P'),
-    api('/api/conceptos?cuenta=G'),
-  ]);
-  if (!rP.ok || !rG.ok) {
-    alert((rP.error || rG.error) || I18N_PLANTILLAS.error);
-    return;
+  if (ES_CENTRO_SG) {
+    const rG = await api('/api/conceptos?cuenta=G');
+    if (!rG.ok) {
+      alert(rG.error || I18N_PLANTILLAS.error);
+      return;
+    }
+    conceptosPorCuenta.G = rG.conceptos || [];
+  } else {
+    const [rP, rG] = await Promise.all([
+      api('/api/conceptos?cuenta=P'),
+      api('/api/conceptos?cuenta=G'),
+    ]);
+    if (!rP.ok || !rG.ok) {
+      alert((rP.error || rG.error) || I18N_PLANTILLAS.error);
+      return;
+    }
+    conceptosPorCuenta.P = rP.conceptos || [];
+    conceptosPorCuenta.G = rG.conceptos || [];
   }
-  conceptosPorCuenta.P = rP.conceptos || [];
-  conceptosPorCuenta.G = rG.conceptos || [];
 
   resetFormulario();
 

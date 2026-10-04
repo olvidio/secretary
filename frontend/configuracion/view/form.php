@@ -28,10 +28,12 @@
         <select name="plan_contable" required></select>
     </label>
     <?php endif; ?>
+    <?php if (empty($soloConsulta)): ?>
     <button type="submit"><?= _("Guardar") ?></button>
+    <?php endif; ?>
     <p class="ok" id="msg" hidden><?= _("Guardado") ?></p>
 </form>
-<?php if ($esCentroSg): ?>
+<?php if ($esCentroSg && empty($soloConsulta)): ?>
 <section>
     <h2><?= _("Importar Excel") ?></h2>
     <p class="muted"><?= _("Al empezar de cero, carga el libro Secretario sg (.xlsm o .xlsx). Entran los nombres, el talonario y los destinos de este centro. Si se vuelve a importar, se sustituyen los apuntes que vinieron de un Excel anterior.") ?></p>
@@ -57,19 +59,25 @@
         <thead><tr><th><?= _("Hasta (€, vacío = resto hasta el máximo)") ?></th><th>%</th><th></th></tr></thead>
         <tbody></tbody>
     </table>
+    <?php if (empty($soloConsulta)): ?>
     <p>
         <button type="button" id="btn-add-tramo"><?= _("Añadir tramo") ?></button>
         <button type="button" id="btn-save-tramos"><?= _("Guardar tramos") ?></button>
     </p>
+    <?php endif; ?>
     <p class="ok" id="msg-tramos" hidden><?= _("Tramos guardados") ?></p>
 </section>
 <?php endif; ?>
-<?php if ($esClub): ?>
+<?php if ($esClub || $esCentroSg): ?>
 <section>
-    <h2><?= $esFundacion ? _("Usuarios de esta fundación") : _("Usuarios de esta associació") ?></h2>
-    <p class="muted"><?= $esFundacion
-        ? _("Quien lleve otra fundación no ve los datos de ésta.")
-        : _("Quien lleve otra associació no ve los datos de ésta.") ?></p>
+    <h2><?= $esCentroSg
+        ? _("Usuarios de este centro")
+        : ($esFundacion ? _("Usuarios de esta fundación") : _("Usuarios de esta associació")) ?></h2>
+    <p class="muted"><?= $esCentroSg
+        ? _("Quien lleve otro centro no ve los datos de éste.")
+        : ($esFundacion
+            ? _("Quien lleve otra fundación no ve los datos de ésta.")
+            : _("Quien lleve otra associació no ve los datos de ésta.")) ?></p>
     <p id="centro-actual" class="muted"><?= _("Cargando…") ?></p>
     <table id="tabla-usuarios">
         <thead>
@@ -77,14 +85,23 @@
         </thead>
         <tbody></tbody>
     </table>
+    <?php if (empty($soloConsulta)): ?>
     <h3><?= _("Añadir usuario") ?></h3>
     <form id="form-usuario" class="grid-form">
         <label><?= _("Alias") ?> <input name="usuario" required placeholder="<?= htmlspecialchars(_("p. ej. scl"), ENT_QUOTES) ?>"></label>
         <label><?= _("Correo") ?> <input name="email" type="email" required></label>
         <label><?= _("Contraseña") ?> <input name="password" type="password" required minlength="6"></label>
         <label><?= _("Nombre") ?> <input name="nombre" autocomplete="name"></label>
+        <label><?= _("Rol") ?>
+            <select name="rol">
+                <option value="admin"><?= _("Puede modificar") ?></option>
+                <option value="consulta"><?= _("Solo consulta") ?></option>
+            </select>
+        </label>
         <button type="submit"><?= _("Vincular") ?></button>
     </form>
+    <?php endif; ?>
+    <?php if ($esClub && empty($soloConsulta)): ?>
     <h3><?= _("Importar Grisbi") ?></h3>
     <p class="muted"><?= $esFundacion
         ? _("Carga un fichero .gsb en esta fundación. Las categorías nuevas se crean como cuentas y los movimientos como asientos. Volver a importar el mismo fichero no duplica.")
@@ -99,6 +116,7 @@
         : _("Mientras estemos de pruebas: vaciar asientos para volver a cargar un fichero. Quedan la associació y los usuarios.") ?></p>
     <button type="button" id="btn-vaciar" class="peligro"><?= _("Vaciar datos (pruebas)") ?></button>
     <p class="ok" id="msg-vaciar" hidden></p>
+    <?php endif; ?>
 </section>
 <?php endif; ?>
 <script>
@@ -126,17 +144,20 @@ async function cargarAssociacio() {
   p.textContent = (c.nombre || c.codigo || '') + (c.plan_contable ? ' · plan ' + c.plan_contable : '');
   (r.usuarios || []).forEach((u) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td>' + esc(u.alias) + '</td><td>' + esc(u.email) + '</td><td>' + esc(u.nombre) + '</td><td>' + esc(u.rol) + '</td>';
+    const solo = document.body.classList.contains('solo-consulta');
+    tr.innerHTML = '<td>' + esc(u.alias) + '</td><td>' + esc(u.email) + '</td><td>' + esc(u.nombre) + '</td><td>' + htmlRolCentro(u, solo) + '</td>';
     tb.appendChild(tr);
   });
 }
 function filaTramo(t = {}) {
   const tr = document.createElement('tr');
   const hasta = t.hasta_cents == null ? '' : (Number(t.hasta_cents) / 100).toFixed(2);
-  tr.innerHTML = '<td><input name="hasta" inputmode="decimal" value="' + esc(hasta) + '"></td>'
-    + '<td><input name="pct" type="number" min="0" max="100" required value="' + esc(String(t.porcentaje ?? '')) + '"></td>'
-    + '<td><button type="button" class="btn-quitar">' + esc(I18N_CONFIG.quitar) + '</button></td>';
-  tr.querySelector('.btn-quitar').onclick = () => tr.remove();
+  const solo = document.body.classList.contains('solo-consulta');
+  const bloqueo = solo ? ' readonly' : '';
+  tr.innerHTML = '<td><input name="hasta" inputmode="decimal" value="' + esc(hasta) + '"' + bloqueo + '></td>'
+    + '<td><input name="pct" type="number" min="0" max="100" required value="' + esc(String(t.porcentaje ?? '')) + '"' + bloqueo + '></td>'
+    + '<td>' + (solo ? '' : '<button type="button" class="btn-quitar">' + esc(I18N_CONFIG.quitar) + '</button>') + '</td>';
+  tr.querySelector('.btn-quitar')?.addEventListener('click', () => tr.remove());
   return tr;
 }
 async function loadTramos() {
@@ -169,10 +190,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('msg').hidden = !s.ok;
     if (!s.ok) alert(s.error);
   });
-  if (document.getElementById('form-usuario')) cargarAssociacio();
+  if (document.getElementById('tabla-usuarios')) cargarAssociacio();
   if (!document.getElementById('tabla-tramos')) return;
   loadTramos();
-  document.getElementById('btn-add-tramo').onclick = () => {
+  const btnAddTramo = document.getElementById('btn-add-tramo');
+  if (!btnAddTramo) return;
+  btnAddTramo.onclick = () => {
     document.querySelector('#tabla-tramos tbody').appendChild(filaTramo({ porcentaje: 40 }));
   };
   document.getElementById('btn-save-tramos').onclick = async () => {

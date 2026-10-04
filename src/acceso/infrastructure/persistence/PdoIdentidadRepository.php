@@ -283,6 +283,17 @@ final class PdoIdentidadRepository implements IdentidadRepository
         $st->execute([':i' => $identidadId, ':c' => $centroId, ':r' => $rol]);
     }
 
+    public function rolEnCentro(int $identidadId, int $centroId): ?string
+    {
+        $st = $this->pdo->prepare(
+            'SELECT rol FROM identidad_centro WHERE identidad_id = :i AND centro_id = :c'
+        );
+        $st->execute([':i' => $identidadId, ':c' => $centroId]);
+        $rol = $st->fetchColumn();
+
+        return is_string($rol) && $rol !== '' ? $rol : null;
+    }
+
     public function vincularPersona(int $identidadId, int $personaId, ?int $anio = null): void
     {
         $st = $this->pdo->prepare(
@@ -922,6 +933,67 @@ final class PdoIdentidadRepository implements IdentidadRepository
             'identidad_id' => (int) $row['id'],
             'expira' => new DateTimeImmutable((string) $row['baja_cuenta_expira']),
         ];
+    }
+
+    public function guardarTokenRestablecerPassword(int $identidadId, string $tokenHash, DateTimeImmutable $expira): void
+    {
+        $st = $this->pdo->prepare(
+            'UPDATE identidades
+             SET password_reset_token_hash = :t, password_reset_expira = :e
+             WHERE id = :id'
+        );
+        $st->execute([
+            ':t' => $tokenHash,
+            ':e' => $expira->format('c'),
+            ':id' => $identidadId,
+        ]);
+    }
+
+    public function porTokenRestablecerPassword(string $tokenHash): ?array
+    {
+        $tokenHash = trim($tokenHash);
+        if ($tokenHash === '') {
+            return null;
+        }
+        $st = $this->pdo->prepare(
+            'SELECT id, password_reset_expira
+             FROM identidades
+             WHERE password_reset_token_hash = :t
+             LIMIT 1'
+        );
+        $st->execute([':t' => $tokenHash]);
+        $row = $st->fetch();
+        if (!is_array($row) || empty($row['password_reset_expira'])) {
+            return null;
+        }
+
+        return [
+            'identidad_id' => (int) $row['id'],
+            'expira' => new DateTimeImmutable((string) $row['password_reset_expira']),
+        ];
+    }
+
+    public function aplicarPasswordRestablecida(int $identidadId, string $passwordHash, string $tokenHash): bool
+    {
+        $st = $this->pdo->prepare(
+            'UPDATE identidades
+             SET password_hash = :h,
+                 intentos_fallidos = 0,
+                 bloqueado_hasta = NULL,
+                 password_reset_token_hash = NULL,
+                 password_reset_expira = NULL
+             WHERE id = :id
+               AND activo = TRUE
+               AND password_reset_token_hash = :t
+               AND password_reset_expira > NOW()'
+        );
+        $st->execute([
+            ':h' => $passwordHash,
+            ':id' => $identidadId,
+            ':t' => $tokenHash,
+        ]);
+
+        return $st->rowCount() === 1;
     }
 
     public function limpiarTokenBajaCuenta(int $identidadId): void

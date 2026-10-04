@@ -26,12 +26,13 @@ Es la puerta de entrada. Se escribe el alias (o el correo) y la contraseña. Seg
 - Si el alias no existe, el programa lleva al registro con ese dato ya puesto.
 - El secretario del centro necesita siempre el código de seis dígitos; en una cuenta personal es opcional.
 - La elección de centro o de nombre vale para esa sesión y se puede cambiar después desde el menú del nombre.
-- No hay opción de recordar ni de recuperar la contraseña por correo; si se olvida, hay que pedir ayuda a quien administra el programa.
+- Si no se recuerda la contraseña, en la misma pantalla está «Olvidé la contraseña». El programa envía un enlace al correo confirmado de esa cuenta. El enlace caduca en dos horas y solo sirve una vez. Después de elegir la contraseña nueva hay que entrar otra vez; si la cuenta es de secretario, seguirá pidiendo el código de seis dígitos.
 
 ## Problemas frecuentes
 
 - **«Alias o contraseña incorrectos»**: revisar la contraseña y comprobar que no hay espacios sobrantes.
 - **«No hay cuenta con ese alias. Puede registrarse.»**: el alias o el correo no están dados de alta.
-- **«Cuenta temporalmente bloqueada. Pruebe más tarde.»**: se han agotado los intentos; hay que esperar quince minutos.
+- **«Cuenta temporalmente bloqueada. Pruebe más tarde.»**: se han agotado los intentos; hay que esperar quince minutos, o usar «Olvidé la contraseña»: el enlace nuevo también quita el bloqueo.
+- **No llega el correo para cambiar la contraseña**: el mensaje solo se envía si el correo de esa cuenta está confirmado. Si nunca se confirmó, hay que usar el enlace del alta. Un aviso de éxito no significa que el dato exista.
 - **«Centro no permitido» o «Persona no permitida»**: se ha elegido algo a lo que la cuenta no tiene acceso. Recargar y elegir de la lista.
 - **«Sesión caducada»**: ha pasado demasiado tiempo. Volver a entrar desde el principio.

@@ -19,16 +19,22 @@
     <label><?= _("Alias o correo") ?> <input name="usuario" required autofocus autocomplete="username" value="<?= htmlspecialchars((string) ($usuario ?? ''), ENT_QUOTES) ?>"></label>
     <label><?= _("Contraseña") ?> <input type="password" name="password" required autocomplete="current-password"></label>
     <button type="submit"><?= _("Entrar") ?></button>
-    <p class="login-alt"><a href="/registro" id="ir-registro"><?= _("Registrarse") ?></a></p>
+    <p class="login-alt">
+        <a href="/olvide-contrasena" id="ir-olvide"><?= _("Olvidé la contraseña") ?></a>
+        ·
+        <a href="/registro" id="ir-registro"><?= _("Registrarse") ?></a>
+    </p>
     <?php include dirname(__DIR__, 2) . '/shared/view/_pie_legal.php'; ?>
 </form>
 <script>
-document.getElementById('ir-registro').addEventListener('click', (ev) => {
+function irConUsuario(base, ev) {
   const u = document.querySelector('input[name="usuario"]')?.value?.trim();
   if (!u) return;
   ev.preventDefault();
-  location.href = '/registro?usuario=' + encodeURIComponent(u);
-});
+  location.href = base + '?usuario=' + encodeURIComponent(u);
+}
+document.getElementById('ir-registro').addEventListener('click', (ev) => irConUsuario('/registro', ev));
+document.getElementById('ir-olvide').addEventListener('click', (ev) => irConUsuario('/olvide-contrasena', ev));
 </script>
 </body>
 </html>

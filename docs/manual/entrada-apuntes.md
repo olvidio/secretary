@@ -54,7 +54,9 @@ En **Entrada G** hay un bloque **Importar extracto del banco** (mismo criterio q
 - Ruta: `/entrada-g`
 - Menú: Apuntes → Entrada
 
-Un solo libro. Se anota el apunte del talonario: nombre, concepto, observaciones, cantidad y fecha. No hay libro P, ni procedencia A/B/C, ni el gasto de vivienda que genera P/111 y G/11. Los conceptos 41 y 42 de un centro n (traspaso caja/banco) no se usan aquí: el 41 es Necesidades generales.
+Un solo libro. Se anota el apunte del talonario: nombre, concepto, observaciones, cantidad y fecha. La contrapartida es la caja; la pantalla no pide procedencia A, B o C. No hay libro P, ni el gasto de vivienda que genera P/111 y G/11. Los conceptos 41 y 42 de un centro n (traspaso caja/banco) no se usan aquí: el 41 es Necesidades generales. Las plantillas de Cuentas → Plantillas salen en el desplegable de concepto.
+
+Para movimientos que se repiten cada mes, trimestre o año: menú Apuntes → **Entradas periódicas** (definición) y **Ejecutar periódicas** (contabilizar los que tocan). Ver `docs/manual/entradas-periodicas.md`.
 
 ## Asociación y fundación
 

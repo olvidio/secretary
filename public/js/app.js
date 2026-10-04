@@ -6,7 +6,27 @@ function secretaryLocale() {
   return window.SECRETARY_LOCALE || 'es-ES';
 }
 
+function htmlRolCentro(usuario, soloConsulta) {
+  const rol = usuario.rol === 'consulta' ? 'consulta' : 'admin';
+  if (soloConsulta) {
+    return esc(rol === 'consulta' ? t('rol_consulta') : t('rol_modificar'));
+  }
+  return '<select data-rol-id="' + Number(usuario.id) + '" data-rol-previo="' + rol + '">'
+    + '<option value="admin"' + (rol === 'admin' ? ' selected' : '') + '>' + esc(t('rol_modificar')) + '</option>'
+    + '<option value="consulta"' + (rol === 'consulta' ? ' selected' : '') + '>' + esc(t('rol_consulta')) + '</option>'
+    + '</select>';
+}
+
 async function api(url, opts = {}) {
+  const method = String(opts.method || 'GET').toUpperCase();
+  if (
+    document.body.classList.contains('solo-consulta')
+    && (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE')
+    && !String(url).startsWith('/api/preferencias')
+    && !String(url).startsWith('/api/ayuda/')
+  ) {
+    return { ok: false, error: t('solo_consulta') };
+  }
   const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   const headers = {
     'Accept': 'application/json',
@@ -67,6 +87,22 @@ function fmtImporteEs(valor) {
     maximumFractionDigits: 2,
   });
 }
+
+document.addEventListener('change', async (ev) => {
+  const sel = ev.target.closest('select[data-rol-id]');
+  if (!sel) return;
+  const previo = sel.dataset.rolPrevio || 'admin';
+  const s = await api('/api/centros/usuarios/rol', {
+    method: 'POST',
+    body: { identidad_id: Number(sel.dataset.rolId), rol: sel.value },
+  });
+  if (!s.ok) {
+    sel.value = previo;
+    alert(s.error || t('error'));
+    return;
+  }
+  sel.dataset.rolPrevio = sel.value;
+});
 
 document.addEventListener('click', (ev) => {
   document.querySelectorAll('details.user-menu[open]').forEach((d) => {

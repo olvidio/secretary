@@ -13,7 +13,9 @@ use src\acceso\application\RegistrarCentro;
 use src\plan\domain\services\CatalogoPlanesContables;
 use src\acceso\application\RegistrarUsuario;
 use src\acceso\application\ResolverPersonaActiva;
+use src\acceso\application\RestablecerPassword;
 use src\acceso\application\ResultadoLogin;
+use src\acceso\application\SolicitarRestablecerPassword;
 use src\acceso\application\VerificarSegundoFactor;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\legal\application\LecturaAceptacion;
@@ -39,6 +41,8 @@ final class AuthController
         private readonly ResolverPersonaActiva $resolverPersona,
         private readonly RegistrarAceptacion $registrarAceptacion,
         private readonly CatalogoDocumentosLegales $documentos,
+        private readonly SolicitarRestablecerPassword $solicitarRestablecerPassword,
+        private readonly RestablecerPassword $restablecerPassword,
     ) {
     }
 
@@ -389,6 +393,44 @@ final class AuthController
         return Response::redirect('/registro-enviado');
     }
 
+    public function solicitarRestablecer(Request $request, array $vars = []): Response
+    {
+        $usuario = trim((string) $request->input('usuario', ''));
+        try {
+            $this->solicitarRestablecerPassword->ejecutar($usuario);
+        } catch (\InvalidArgumentException $e) {
+            return $this->falloOlvido($usuario, $e->getMessage());
+        } catch (\RuntimeException $e) {
+            if ($e instanceof \PDOException) {
+                throw $e;
+            }
+
+            return $this->falloOlvido($usuario, $e->getMessage());
+        }
+
+        return Response::redirect('/olvide-contrasena-enviado');
+    }
+
+    public function aplicarRestablecer(Request $request, array $vars = []): Response
+    {
+        $token = trim((string) $request->input('token', ''));
+        try {
+            $this->restablecerPassword->ejecutar(
+                $token,
+                (string) $request->input('password', ''),
+                (string) $request->input('password_confirm', ''),
+            );
+        } catch (\InvalidArgumentException $e) {
+            $_SESSION['login_error'] = $e->getMessage();
+            $qs = $token !== '' ? '?token=' . rawurlencode($token) : '';
+
+            return Response::redirect('/restablecer-contrasena' . $qs);
+        }
+        $_SESSION['login_ok'] = _('Contraseña actualizada. Ya puede entrar. Si la cuenta es de secretario, le pedirá el código de seis dígitos.');
+
+        return Response::redirect('/login');
+    }
+
     public function logout(Request $request, array $vars = []): Response
     {
         $_SESSION = [];
@@ -502,6 +544,14 @@ final class AuthController
             $_SESSION['idioma'],
             $_SESSION['recovery_codes'],
         );
+    }
+
+    private function falloOlvido(string $usuario, string $mensaje): Response
+    {
+        $_SESSION['login_error'] = $mensaje;
+        $_SESSION['login_usuario'] = $usuario;
+
+        return Response::redirect('/olvide-contrasena');
     }
 
     private function falloLogin(Request $request, string $mensaje, string $usuario = ''): Response
