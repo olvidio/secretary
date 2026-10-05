@@ -2,13 +2,6 @@
 <h1><?= sprintf(_("Presupuesto %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
 <p class="muted"><?= _("Celdas de previsto anual. El 613 prorratea × meses / 12.") ?></p>
 <?php if ($esCentroSg && $cuenta === 'G'): ?>
-<p class="presu-num-s">
-    <label><?= _("Nº de s del centro") ?>
-        <input id="num-s" inputmode="numeric" class="num" value="0" maxlength="4" size="4">
-    </label>
-</p>
-<?php endif; ?>
-<?php if ($esCentroSg && $cuenta === 'G'): ?>
 <section id="sec-destinos">
     <h2><?= _("Destinos del centro") ?></h2>
     <p class="muted"><?= _("Como las partidas del capítulo VII: cada centro añade las suyas, del 42 al 54, con su nombre. El 41, Necesidades generales, es fijo y sale en la lista de abajo.") ?></p>
@@ -115,8 +108,6 @@ async function cargarPresupuesto() {
   const r = await api('/api/presupuestos/' + CUENTA);
   if (!r.ok) return alert(r.error || <?= json_encode(_("No se pudo cargar el presupuesto"), JSON_UNESCAPED_UNICODE) ?>);
   pintarLineasPresu(r.lineas);
-  const numS = document.getElementById('num-s');
-  if (numS && r.num_s != null) numS.value = r.num_s;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -148,10 +139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     ev.target.querySelectorAll('input[name]').forEach((i) => {
       lineas[i.name] = i.value.trim() ? fmtImporteEs(i.value) : '';
     });
-    const body = { lineas };
-    const numS = document.getElementById('num-s');
-    if (numS) body.num_s = numS.value.trim();
-    const s = await api('/api/presupuestos/' + CUENTA, { method: 'POST', body });
+    const s = await api('/api/presupuestos/' + CUENTA, { method: 'POST', body: { lineas } });
     document.getElementById('msg').hidden = !s.ok;
     if (!s.ok) return alert(s.error);
     pintarLineasPresu(s.lineas);

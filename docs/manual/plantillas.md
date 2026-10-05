@@ -42,7 +42,7 @@ Una plantilla solo describe la forma del movimiento: qué libro, de dónde sale 
 ## Centro sg
 
 - Ruta: `/plantillas-g`
-- Menú: Cuentas → Plantillas
+- Menú: Talonario → Plantillas
 
 Guarda apuntes que se repiten en el libro único, por ejemplo una plantilla «aportación a F. Montagut». Cada movimiento lleva concepto y observaciones; la contrapartida es la caja. El nombre, la fecha y la cantidad se ponen al usarla en Entrada. No hay libro P ni procedencia A, B o C.
 

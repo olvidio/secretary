@@ -37,7 +37,7 @@ Sirve para recordar qué código toca antes de teclear un apunte, y para saber q
 ## Centro sg
 
 - Ruta: `/conceptos-g`
-- Menú: Caja → Conceptos
+- Menú: Plan y ejercicio → Conceptos
 
 Lista de consulta del único libro. Los destinos con nombre (del 42 al 54) se dan de alta en el presupuesto, no aquí.
 

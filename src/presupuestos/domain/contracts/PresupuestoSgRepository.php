@@ -13,7 +13,4 @@ interface PresupuestoSgRepository
 
     public function guardar(int $centroId, LineaPresupuesto $linea): void;
 
-    public function numS(int $centroId): int;
-
-    public function guardarNumS(int $centroId, int $numS): void;
 }

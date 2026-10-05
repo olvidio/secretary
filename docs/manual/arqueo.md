@@ -39,7 +39,7 @@ Sirve para contar el dinero que hay de verdad en la caja y compararlo con lo que
 ## Centro sg
 
 - Ruta: `/arqueo-g`
-- Menú: Caja → Arqueo
+- Menú: Cierre y arqueo → Arqueo
 
 Recuento de la caja del único libro. Se entra también desde el enlace **Arqueo** del 613. No hay reparto entre libro personal y general.
 

@@ -182,22 +182,24 @@ final class CatalogoMenus
                 ['nombres', null],
                 ['copias', null],
             ]],
-            ['id' => 'apuntes', 'label' => _("Apuntes"), 'items' => [
+            ['id' => 'talonario', 'label' => _("Talonario"), 'items' => [
                 ['entrada-g', _("Entrada")],
                 ['entradas-periodicas', null],
                 ['ejecutar-entradas-periodicas', null],
-                ['apuntes', null],
+                ['apuntes', _("Listado de apuntes")],
+                ['plantillas-g', _("Plantillas")],
             ]],
-            ['id' => 'cuentas', 'label' => _("Cuentas"), 'items' => [
+            ['id' => 'presupuesto-informes', 'label' => _("Presupuesto e informes"), 'items' => [
                 ['presupuesto-g', _("Presupuesto")],
                 ['613-g', _("613")],
                 ['aportaciones', null],
-                ['plantillas-g', _("Plantillas")],
             ]],
-            ['id' => 'caja', 'label' => _("Caja"), 'items' => [
+            ['id' => 'cierre-arqueo', 'label' => _("Cierre y arqueo"), 'items' => [
                 ['arqueo-g', _("Arqueo")],
-                ['conceptos-g', _("Conceptos")],
                 ['fecha-cierre', null],
+            ]],
+            ['id' => 'plan-periodo', 'label' => _("Plan y ejercicio"), 'items' => [
+                ['conceptos-g', _("Conceptos")],
                 ['ejercicios', null],
             ]],
             ['id' => 'ayuda', 'label' => _("Ayuda"), 'items' => [

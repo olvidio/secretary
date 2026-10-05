@@ -258,6 +258,9 @@ final class ProyectorAsientoAFilaExcel
         $concepto = $conceptoForzado ?? $this->movimientoConcepto($cuentasMov);
         $conceptoCodigo = $asiento->conceptoCodigo
             ?? ($concepto !== null ? $concepto['cuenta']->codigo : '');
+        if ($conceptoCodigo === '' && $asiento->tipo === 'traspaso') {
+            $conceptoCodigo = $this->codigoTraspasoCajaBanco($cuentasMov);
+        }
 
         $cantidad = $this->calcularCantidad($asiento->tipo, $concepto, $cuentasMov);
 
@@ -387,6 +390,29 @@ final class ProyectorAsientoAFilaExcel
         }
 
         return null;
+    }
+
+    /**
+     * @param list<array{mov: Movimiento, cuenta: Cuenta}> $cuentasMov
+     */
+    /**
+     * @param list<array{mov: Movimiento, cuenta: Cuenta}> $cuentasMov
+     */
+    private function codigoTraspasoCajaBanco(array $cuentasMov): string
+    {
+        foreach ($cuentasMov as $item) {
+            if ($item['cuenta']->tipo !== 'tesoreria') {
+                continue;
+            }
+            if ($item['cuenta']->codigoMaestro === 'CAJA' && $item['mov']->debeCents > $item['mov']->haberCents) {
+                return '41';
+            }
+            if ($item['cuenta']->codigoMaestro === 'BANCO' && $item['mov']->debeCents > $item['mov']->haberCents) {
+                return '42';
+            }
+        }
+
+        return '41';
     }
 
     /**

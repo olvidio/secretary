@@ -82,18 +82,25 @@ final class CatalogoMenusTest extends TestCase
                 $navs[] = $item['nav'];
             }
         }
-        self::assertSame(['centro', 'apuntes', 'cuentas', 'caja', 'ayuda'], $ids);
-        $caja = CatalogoMenus::gruposCentroSg()[3];
-        self::assertSame('caja', $caja['id']);
-        self::assertNotContains('ayuda', array_column($caja['items'], 'nav'));
+        self::assertSame(
+            ['centro', 'talonario', 'presupuesto-informes', 'cierre-arqueo', 'plan-periodo', 'ayuda'],
+            $ids,
+        );
+        $talonario = CatalogoMenus::gruposCentroSg()[1];
+        self::assertSame('talonario', $talonario['id']);
+        self::assertContains('plantillas-g', array_column($talonario['items'], 'nav'));
+        $cierre = CatalogoMenus::gruposCentroSg()[3];
+        self::assertSame('cierre-arqueo', $cierre['id']);
+        self::assertNotContains('ayuda', array_column($cierre['items'], 'nav'));
+        self::assertNotContains('conceptos-g', array_column($cierre['items'], 'nav'));
         foreach (['613-p', 'entrada-p', 'remesas', 'e37', 'centros', 'cierre', 'tesoreria', 'saldos'] as $fuera) {
             self::assertNotContains($fuera, $navs);
         }
-        foreach (['nombres', 'entrada-g', 'entradas-periodicas', 'ejecutar-entradas-periodicas', 'presupuesto-g', '613-g', 'aportaciones', 'plantillas-g', 'arqueo-g'] as $dentro) {
+        foreach (['nombres', 'entrada-g', 'entradas-periodicas', 'ejecutar-entradas-periodicas', 'presupuesto-g', '613-g', 'aportaciones', 'plantillas-g', 'arqueo-g', 'conceptos-g', 'ejercicios'] as $dentro) {
             self::assertContains($dentro, $navs);
         }
-        $cuentas = CatalogoMenus::gruposCentroSg()[2];
-        self::assertSame('cuentas', $cuentas['id']);
-        self::assertContains('plantillas-g', array_column($cuentas['items'], 'nav'));
+        $presupuesto = CatalogoMenus::gruposCentroSg()[2];
+        self::assertSame('presupuesto-informes', $presupuesto['id']);
+        self::assertNotContains('plantillas-g', array_column($presupuesto['items'], 'nav'));
     }
 }

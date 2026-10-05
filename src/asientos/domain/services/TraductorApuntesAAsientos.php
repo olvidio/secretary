@@ -47,7 +47,7 @@ final class TraductorApuntesAAsientos
                 ++$omitidos9;
                 continue;
             }
-            if (in_array($apunte->conceptoCodigo, ['41', '42'], true)) {
+            if ($this->esTraspasoCajaBanco($apunte, $cuentaConcepto)) {
                 $traspasos[] = $apunte;
                 continue;
             }
@@ -110,6 +110,21 @@ final class TraductorApuntesAAsientos
      * @param list<Apunte> $traspasos
      * @return list<list<Apunte>>
      */
+    /**
+     * En H16n, G/41 y G/42 son puentes caja↔banco; en H16s el 41 (y 42–54) son gastos del plan sg.
+     *
+     * @param callable(string, string): Cuenta $cuentaConcepto
+     */
+    private function esTraspasoCajaBanco(Apunte $apunte, callable $cuentaConcepto): bool
+    {
+        if (!in_array($apunte->conceptoCodigo, ['41', '42'], true)) {
+            return false;
+        }
+        $cuenta = $cuentaConcepto($apunte->cuenta, $apunte->conceptoCodigo);
+
+        return $cuenta->tipo === 'puente';
+    }
+
     private function agruparTraspasos(array $traspasos): array
     {
         $grupos = [];

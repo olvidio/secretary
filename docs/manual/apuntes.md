@@ -54,7 +54,7 @@ Si el aviso no encaja o no hay candidato en G, corregir a mano en Entrada P/G o 
 
 ## Centro sg
 
-- Menú: Apuntes → Apuntes
+- Menú: Talonario → Listado de apuntes
 
 Es el talonario del único libro. Los filtros son nombre, concepto y fechas. La tabla muestra fecha, nombre, concepto, observaciones y cantidad. No hay libro P/G ni procedencia A/B/C. **Filtrar** ordena por fecha. **Editar** abre la fila; **Borrar** pide confirmación. No hay modo de cuadre entre libros ni apuntes llegados de una remesa.
 

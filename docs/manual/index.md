@@ -46,15 +46,15 @@ Un solo libro, como el Excel Secretario sg. No hay libro personal, ni remesas, n
 | Poner la sigla, el año y las fechas | Configuración |
 | Cargar el Excel al empezar de cero | Configuración → Importar Excel |
 | Dar de alta nombres, grupo y s / cp | Nombres |
-| Anotar un apunte | Apuntes → Entrada |
-| Ver, corregir o borrar lo anotado | Apuntes |
-| Poner el presupuesto y los destinos 42–54 | Cuentas → Presupuesto |
-| Sacar el resumen 613 G-D | Cuentas → 613 |
-| Ver las aportaciones | Cuentas → Listado de aportaciones |
-| Repetir un apunte que se hace siempre igual | Cuentas → Plantillas |
-| Contar el dinero de la caja | Caja → Arqueo |
-| Consultar los conceptos | Caja → Conceptos |
-| Cambiar la fecha de cierre o el ejercicio | Caja → Fecha cierre / Ejercicios |
+| Anotar un apunte | Talonario → Entrada |
+| Ver, corregir o borrar lo anotado | Talonario → Listado de apuntes |
+| Repetir un apunte que se hace siempre igual | Talonario → Plantillas |
+| Poner el presupuesto y los destinos 42–54 | Presupuesto e informes → Presupuesto |
+| Sacar el resumen 613 G-D | Presupuesto e informes → 613 |
+| Ver las aportaciones | Presupuesto e informes → Listado de aportaciones |
+| Contar el dinero de la caja | Cierre y arqueo → Arqueo |
+| Consultar los conceptos | Plan y ejercicio → Conceptos |
+| Cambiar la fecha de cierre o el ejercicio | Cierre y arqueo → Fecha cierre; Plan y ejercicio → Ejercicios |
 | Guardar o recuperar una copia | Centro → Copias |
 | Preguntar cómo se usa el programa | Ayuda (menú lateral) |
 

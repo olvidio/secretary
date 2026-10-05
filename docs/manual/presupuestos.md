@@ -39,7 +39,7 @@ En el libro P, las cifras se pueden generar primero en **Previsión personal** (
 ## Centro sg
 
 - Ruta: `/presupuesto-g`
-- Menú: Cuentas → Presupuesto
+- Menú: Presupuesto e informes → Presupuesto
 
 Un solo presupuesto, el del libro único. Lo que se teclea es el importe anual; el 613 lo prorratea. Una casilla vacía cuenta como cero.
 

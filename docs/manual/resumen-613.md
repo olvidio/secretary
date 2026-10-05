@@ -39,6 +39,6 @@ Es el resumen mensual que se envía. Compara, capítulo por capítulo, lo presup
 ## Centro sg
 
 - Ruta: `/613-g`
-- Menú: Cuentas → 613
+- Menú: Presupuesto e informes → 613
 
 La hoja es la «613 G-D», no la del centro de casa. El encabezado lleva la sigla de ese centro. Los bloques son ingresos (11–14), gastos (21–28), disponible, destinos y saldo final. Debajo: nº de s del centro, nº acumulado de aportaciones ordinarias, media de esas aportaciones y nº de s sin aportación en el año. El arqueo es un solo saldo contable y el dinero y vales. No salen personas de vivienda, gasto por persona, medias de cocina ni el IX de cuentas corrientes. El previsto es el presupuesto de este centro, prorrateado. **Imprimir** o **Descargar PDF**. El enlace **Arqueo** lleva al recuento de caja.

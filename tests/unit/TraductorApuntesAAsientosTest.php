@@ -104,6 +104,43 @@ final class TraductorApuntesAAsientosTest extends TestCase
         self::assertSame(100000, $movs[1]->haberCents);
     }
 
+    public function testG41GastoPlanSgNoEsTraspaso(): void
+    {
+        $cuentas = $this->sembrarCuentas();
+        $cuentas['41.G'] = new Cuenta(
+            200,
+            self::CENTRO_ID,
+            null,
+            null,
+            null,
+            'G',
+            '41',
+            'Necesidades generales',
+            '',
+            'gasto',
+            'deudora',
+            '41',
+            true,
+        );
+        $asientos = $this->traductor->traducir(
+            self::EJERCICIO_ID,
+            [$this->apunte('G', 'C', null, '41', '100.00')],
+            fn () => null,
+            fn (string $libro, string $codigo) => $cuentas["$codigo.$libro"] ?? $cuentas[$codigo],
+            fn (string $libro, string $maestro) => $cuentas["$maestro.$libro"],
+            fn () => $cuentas['CC.XX'],
+            fn () => $cuentas['DEUDORES.VIV'],
+        )['asientos'];
+
+        self::assertCount(1, $asientos);
+        self::assertSame('normal', $asientos[0]->tipo);
+        $movs = $asientos[0]->movimientos;
+        self::assertSame($cuentas['41.G']->id, $movs[0]->cuentaId);
+        self::assertSame(10000, $movs[0]->debeCents);
+        self::assertSame($this->id('CAJA.G'), $movs[1]->cuentaId);
+        self::assertSame(10000, $movs[1]->haberCents);
+    }
+
     public function testG41DosApuntesBCUnAsiento(): void
     {
         $resultado = $this->traductor->traducir(

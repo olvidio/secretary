@@ -62,6 +62,8 @@ final class AmbitoSeeder
         $unLibro = $plan === CatalogoPlanesContables::CLUB || $plan === CatalogoPlanesContables::CENTRO_SG;
         self::sembrarCuentasTesoreria($pdo, $centroId, $cajaId, $bancoId, $unLibro ? ['G'] : ['P', 'G']);
         if ($unLibro) {
+            self::sembrarPuentePeriodificacion($pdo, $centroId, ['G']);
+
             return;
         }
         self::sembrarPuenteEntreLibros($pdo, $centroId);
@@ -452,9 +454,10 @@ final class AmbitoSeeder
      * Contrapartida de gasto/ingreso imputado a un período y tesorería en otro (D13).
      * Distinta de PUENTE.LIBROS (préstamo P↔G) y de G/41-42 (traspaso caja↔banco).
      */
-    private static function sembrarPuentePeriodificacion(PDO $pdo, int $centroId): void
+    /** @param list<string> $libros */
+    private static function sembrarPuentePeriodificacion(PDO $pdo, int $centroId, array $libros = ['P', 'G']): void
     {
-        foreach (['P', 'G'] as $libro) {
+        foreach ($libros as $libro) {
             self::upsertCuenta($pdo, [
                 'centro_id' => $centroId,
                 'persona_id' => null,

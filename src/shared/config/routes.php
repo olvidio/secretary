@@ -108,6 +108,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/centros/partidas-labores', [PartidaLaboresController::class, 'save']);
 
     $r->addRoute('GET', '/api/personas', [PersonaController::class, 'list']);
+    $r->addRoute('POST', '/api/personas/num-s', [PersonaController::class, 'saveNumS']);
     $r->addRoute('POST', '/api/personas', [PersonaController::class, 'save']);
     $r->addRoute('DELETE', '/api/personas/{id:\d+}', [PersonaController::class, 'delete']);
 

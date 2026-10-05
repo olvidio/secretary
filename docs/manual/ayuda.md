@@ -2,7 +2,7 @@
 
 - Ruta: `/ayuda` y `/yo/ayuda`
 - Ámbito: todos
-- Menú: en el centro, Utilidades → Ayuda (cinta) o el grupo Ayuda (menú burger). En un centro sg, el grupo Ayuda del menú lateral, junto a Apuntes, Cuentas y Caja. En Mis cuentas, menú del nombre → Ayuda
+- Menú: en el centro, Utilidades → Ayuda (cinta) o el grupo Ayuda (menú burger). En un centro sg, el grupo Ayuda del menú lateral. En Mis cuentas, menú del nombre → Ayuda
 - Quién: cualquier persona que haya entrado
 
 ## Para qué sirve

@@ -18,6 +18,7 @@ use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
 use src\ambito\infrastructure\persistence\PdoPobladorCentro;
 use src\apuntes\application\CrearApunte;
 use src\apuntes\application\CrearApuntesDeEntrada;
+use src\apuntes\application\ListarApuntes;
 use src\apuntes\domain\services\ContrapartidasGastoGeneral;
 use src\asientos\domain\services\ProyectorAsientoAFilaExcel;
 use src\asientos\domain\services\TraductorApuntesAAsientos;
@@ -132,5 +133,140 @@ final class EntradaCentroSgTest extends TestCase
         self::assertSame('G/21', $conNombre[0]->cuenta . '/' . $conNombre[0]->conceptoCodigo);
         self::assertSame('C', $conNombre[0]->origen);
         self::assertSame('aa', $conNombre[0]->iniciales);
+    }
+
+    public function testConcepto41ApareceEnListado(): void
+    {
+        $config = new PdoConfiguracionRepository($this->pdo);
+        $asientos = new PdoAsientoRepository($this->pdo);
+        $cuentas = new PdoCuentaRepository($this->pdo);
+        $ejercicios = new PdoEjercicioRepository($this->pdo);
+        $personas = new PdoPersonaRepository($this->pdo);
+        $centros = new PdoCentroRepository($this->pdo);
+        $centro = $centros->guardar(new Centro(
+            null,
+            'SG-41',
+            'Centro sg concepto 41',
+            'sg',
+            'vivienda',
+            CatalogoPlanesContables::CENTRO_SG,
+        ));
+        self::assertNotNull($centro->id);
+        $ejercicios->guardar(new Ejercicio(
+            null,
+            $centro->id,
+            '2026',
+            new DateTimeImmutable('2026-01-01'),
+            new DateTimeImmutable('2026-12-31'),
+            new DateTimeImmutable('2026-01-01'),
+        ));
+        (new PdoPobladorCentro($this->pdo))->ejecutar($centro->id);
+
+        $ambito = new ResolverAmbitoActual($config, $centros, $ejercicios, $centro->id);
+        $conceptos = ConceptosCentro::resolver($this->pdo);
+        $proyector = new ProyectorAsientoAFilaExcel();
+        $crearApunte = new CrearApunte(
+            $asientos,
+            $conceptos,
+            $personas,
+            $config,
+            $cuentas,
+            new PdoCuentaFisicaRepository($this->pdo),
+            new TraductorApuntesAAsientos(),
+            $proyector,
+            $ambito,
+            $ejercicios,
+            new GenerarApertura($ejercicios, $asientos, $cuentas),
+            $centros,
+        );
+        $crear = new CrearApuntesDeEntrada(
+            $crearApunte,
+            $conceptos,
+            $ambito,
+            $personas,
+            new ContrapartidasGastoGeneral(),
+            $centros,
+        );
+        $listar = new ListarApuntes($asientos, $cuentas, $personas, $proyector, $ambito);
+
+        $crear->ejecutar([
+            'fecha' => '2026-04-01',
+            'cuenta' => 'G',
+            'origen' => 'C',
+            'concepto_codigo' => '41',
+            'observaciones' => 'destino fijo',
+            'cantidad' => '25.00',
+        ]);
+
+        $filas = $listar->ejecutar(['cuenta' => 'G']);
+        self::assertCount(1, $filas);
+        self::assertSame('41', $filas[0]['concepto_codigo']);
+    }
+
+    public function testFechaImputacionDistintaConConcepto41(): void
+    {
+        $config = new PdoConfiguracionRepository($this->pdo);
+        $asientos = new PdoAsientoRepository($this->pdo);
+        $cuentas = new PdoCuentaRepository($this->pdo);
+        $ejercicios = new PdoEjercicioRepository($this->pdo);
+        $personas = new PdoPersonaRepository($this->pdo);
+        $centros = new PdoCentroRepository($this->pdo);
+        $centro = $centros->guardar(new Centro(
+            null,
+            'SG-FIMP',
+            'Centro sg imputación',
+            'sg',
+            'vivienda',
+            CatalogoPlanesContables::CENTRO_SG,
+        ));
+        self::assertNotNull($centro->id);
+        $ejercicios->guardar(new Ejercicio(
+            null,
+            $centro->id,
+            '2026',
+            new DateTimeImmutable('2026-01-01'),
+            new DateTimeImmutable('2026-12-31'),
+            new DateTimeImmutable('2026-01-01'),
+        ));
+        (new PdoPobladorCentro($this->pdo))->ejecutar($centro->id);
+        self::assertNotNull($cuentas->puentePeriodificacion($centro->id, 'G'));
+
+        $ambito = new ResolverAmbitoActual($config, $centros, $ejercicios, $centro->id);
+        $conceptos = ConceptosCentro::resolver($this->pdo);
+        $proyector = new ProyectorAsientoAFilaExcel();
+        $crear = new CrearApuntesDeEntrada(
+            new CrearApunte(
+                $asientos,
+                $conceptos,
+                $personas,
+                $config,
+                $cuentas,
+                new PdoCuentaFisicaRepository($this->pdo),
+                new TraductorApuntesAAsientos(),
+                $proyector,
+                $ambito,
+                $ejercicios,
+                new GenerarApertura($ejercicios, $asientos, $cuentas),
+                $centros,
+            ),
+            $conceptos,
+            $ambito,
+            $personas,
+            new ContrapartidasGastoGeneral(),
+            $centros,
+        );
+
+        $filas = $crear->ejecutar([
+            'fecha' => '2026-03-20',
+            'fecha_imputacion' => '2026-03-15',
+            'cuenta' => 'G',
+            'origen' => 'C',
+            'concepto_codigo' => '41',
+            'observaciones' => 'imputado antes',
+            'cantidad' => '10.00',
+        ]);
+        self::assertCount(1, $filas);
+        self::assertSame('41', $filas[0]->conceptoCodigo);
+        self::assertSame('2026-03-15', $filas[0]->fechaImputacion?->format('Y-m-d'));
     }
 }

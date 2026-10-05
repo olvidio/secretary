@@ -141,6 +141,7 @@ final class CatalogoRutas
             ['src\\plan\\infrastructure\\http\\PartidaLaboresController', 'save', 'centro'],
             ['src\\personas\\infrastructure\\http\\PersonaController', 'list', 'centro'],
             ['src\\personas\\infrastructure\\http\\PersonaController', 'save', 'centro'],
+            ['src\\personas\\infrastructure\\http\\PersonaController', 'saveNumS', 'centro'],
             ['src\\personas\\infrastructure\\http\\PersonaController', 'delete', 'centro'],
             ['src\\personas\\infrastructure\\http\\VinculoCentroController', 'listarCentro', 'centro'],
             ['src\\personas\\infrastructure\\http\\VinculoCentroController', 'candidatos', 'centro'],

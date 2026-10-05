@@ -57,7 +57,20 @@
 </form>
 <p class="ok" id="msg-password" hidden></p>
 <p class="ok" id="msg-personas" hidden></p>
+<?php if (empty($esCentroSg)): ?>
 <?php include __DIR__ . '/_solicitudes_vinculo.php'; ?>
+<?php endif; ?>
+<?php if (!empty($esCentroSg)): ?>
+<section class="nombres-num-s">
+    <h2><?= _("Nº de s del centro") ?></h2>
+    <p class="muted"><?= _("Cifra prevista para las estadísticas del 613 G-D (aportaciones ordinarias). No cuenta las personas del listado: el realizado sale de quién tiene clase s.") ?></p>
+    <form id="form-num-s" class="grid-form">
+        <label><?= _("Nº de s") ?> <input name="num_s" id="inp-num-s" inputmode="numeric" min="0" required></label>
+        <button type="submit"><?= _("Guardar") ?></button>
+    </form>
+    <p class="ok" id="msg-num-s" hidden><?= _("Guardado") ?></p>
+</section>
+<?php endif; ?>
 <section class="nombres-listado">
 <h2 class="nombres-listado-titulo"><?= _("Personas del centro") ?></h2>
 <table id="tabla-personas">
@@ -103,6 +116,10 @@ function etiquetaBaseLiquidable(p) {
 }
 async function loadPersonas() {
   const r = await api('/api/personas');
+  if (ES_CENTRO_SG && r.num_s != null) {
+    const inp = document.getElementById('inp-num-s');
+    if (inp) inp.value = r.num_s;
+  }
   const tb = document.querySelector('#tabla-personas tbody');
   tb.innerHTML = '';
   (r.personas || []).forEach((p, i) => {
@@ -153,6 +170,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     aportaDefault = '0';
   }
   loadPersonas();
+  const formNumS = document.getElementById('form-num-s');
+  if (formNumS) {
+    formNumS.onsubmit = async (ev) => {
+      ev.preventDefault();
+      const msg = document.getElementById('msg-num-s');
+      msg.hidden = true;
+      const num_s = formNumS.querySelector('[name=num_s]').value.trim();
+      const s = await api('/api/personas/num-s', { method: 'POST', body: { num_s } });
+      if (!s.ok) return alert(s.error || I18N_PERSONAS.error);
+      if (s.num_s != null) formNumS.querySelector('[name=num_s]').value = s.num_s;
+      msg.hidden = false;
+    };
+  }
   document.getElementById('btn-nuevo').onclick = () => {
     document.getElementById('form-persona').reset();
     document.querySelector('[name=vivienda_aporta_generales]').value = aportaDefault;

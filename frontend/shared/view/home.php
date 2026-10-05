@@ -5,7 +5,8 @@
 <ul class="cards">
     <li><a href="/nombres"><?= _("Nombres") ?></a></li>
     <li><a href="/entrada-g"><?= _("Entrada") ?></a></li>
-    <li><a href="/apuntes"><?= _("Apuntes") ?></a></li>
+    <li><a href="/plantillas-g"><?= _("Plantillas") ?></a></li>
+    <li><a href="/apuntes"><?= _("Listado de apuntes") ?></a></li>
     <li><a href="/presupuesto-g"><?= _("Presupuesto") ?></a></li>
     <li><a href="/613-g"><?= _("613") ?></a></li>
     <li><a href="/aportaciones"><?= _("Listado de aportaciones") ?></a></li>

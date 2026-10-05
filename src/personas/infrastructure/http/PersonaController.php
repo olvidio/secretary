@@ -13,6 +13,7 @@ use src\legal\application\ExigirDeclaracionResponsableNombres;
 use src\legal\application\LecturaAceptacion;
 use src\legal\infrastructure\http\HuellaAceptacionHttp;
 use src\personas\application\BorrarPersona;
+use src\personas\application\GuardarNumSCentroSg;
 use src\personas\application\GuardarPersona;
 use src\personas\application\ListarPersonas;
 use src\shared\infrastructure\http\ContestarJson;
@@ -29,6 +30,7 @@ final class PersonaController
         private readonly ExigirDeclaracionResponsableNombres $declaracionNombres,
         private readonly PdoPersonaSg $fichasSg,
         private readonly CentroRepository $centros,
+        private readonly GuardarNumSCentroSg $guardarNumS,
     ) {
     }
 
@@ -44,7 +46,24 @@ final class PersonaController
         }
         unset($fila);
 
-        return ContestarJson::ok(['personas' => $personas]);
+        $out = ['personas' => $personas];
+        if ($this->esCentroSg()) {
+            $out['num_s'] = $this->centros->numS($centroId);
+        }
+
+        return ContestarJson::ok($out);
+    }
+
+    public function saveNumS(Request $request, array $vars = []): Response
+    {
+        try {
+            $datos = $request->json();
+            $numS = (int) ($datos['num_s'] ?? 0);
+
+            return ContestarJson::ok(['num_s' => $this->guardarNumS->ejecutar($numS)]);
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
     }
 
     public function save(Request $request, array $vars = []): Response

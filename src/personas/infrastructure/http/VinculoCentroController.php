@@ -7,6 +7,8 @@ namespace src\personas\infrastructure\http;
 use InvalidArgumentException;
 use src\ambito\application\ResolverAmbitoActual;
 use src\acceso\domain\contracts\IdentidadRepository;
+use src\ambito\domain\contracts\CentroRepository;
+use src\plan\domain\services\CatalogoPlanesContables;
 use src\legal\application\ExigirDeclaracionResponsableNombres;
 use src\legal\application\LecturaAceptacion;
 use src\legal\infrastructure\http\HuellaAceptacionHttp;
@@ -36,6 +38,7 @@ final class VinculoCentroController
         private readonly IdentidadRepository $identidades,
         private readonly ResolverAmbitoActual $ambito,
         private readonly ExigirDeclaracionResponsableNombres $declaracionNombres,
+        private readonly CentroRepository $centros,
     ) {
     }
 
@@ -99,6 +102,9 @@ final class VinculoCentroController
 
     public function listarCentro(Request $request, array $vars = []): Response
     {
+        if ($this->esCentroSgActivo()) {
+            return ContestarJson::ok(['solicitudes' => []]);
+        }
         $centroId = $this->ambito->ejecutar()->centroId;
 
         return ContestarJson::ok([
@@ -109,6 +115,7 @@ final class VinculoCentroController
     public function candidatos(Request $request, array $vars): Response
     {
         try {
+            $this->rechazarSiCentroSg();
             $centroId = $this->ambito->ejecutar()->centroId;
 
             return ContestarJson::ok([
@@ -122,6 +129,7 @@ final class VinculoCentroController
     public function aprobar(Request $request, array $vars): Response
     {
         try {
+            $this->rechazarSiCentroSg();
             $centroId = $this->ambito->ejecutar()->centroId;
             $resolvedBy = (int) ($_SESSION['identidad_id'] ?? 0);
             $datos = $request->json();
@@ -159,6 +167,7 @@ final class VinculoCentroController
     public function rechazar(Request $request, array $vars): Response
     {
         try {
+            $this->rechazarSiCentroSg();
             $centroId = $this->ambito->ejecutar()->centroId;
             $resolvedBy = (int) ($_SESSION['identidad_id'] ?? 0);
             $this->rechazar->ejecutar($centroId, (int) $vars['id'], $resolvedBy);
@@ -166,6 +175,24 @@ final class VinculoCentroController
             return ContestarJson::ok();
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage(), 404);
+        }
+    }
+
+    private function esCentroSgActivo(): bool
+    {
+        try {
+            $centro = $this->centros->porId($this->ambito->ejecutar()->centroId);
+        } catch (\Throwable) {
+            return false;
+        }
+
+        return $centro !== null && CatalogoPlanesContables::esCentroSg($centro->planContableCodigo);
+    }
+
+    private function rechazarSiCentroSg(): void
+    {
+        if ($this->esCentroSgActivo()) {
+            throw new InvalidArgumentException(_('Un centro sg no admite solicitudes de acceso personal'));
         }
     }
 }

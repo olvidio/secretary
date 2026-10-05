@@ -27,7 +27,7 @@ final class GuardarPresupuesto
     /**
      * @param array<string, mixed> $lineas codigo => previsto
      */
-    public function ejecutar(string $cuenta, array $lineas, ?int $numS = null): void
+    public function ejecutar(string $cuenta, array $lineas): void
     {
         $centroId = $this->ambito->ejecutar()->centroId;
         $propio = $this->esCentroSg($centroId) && strtoupper($cuenta) === 'G';
@@ -44,19 +44,6 @@ final class GuardarPresupuesto
                 $this->repo->guardar($linea);
             }
         }
-        if ($propio && $numS !== null) {
-            $this->presupuestoSg->guardarNumS($centroId, $numS);
-        }
-    }
-
-    public function numS(string $cuenta): ?int
-    {
-        $centroId = $this->ambito->ejecutar()->centroId;
-        if (!$this->esCentroSg($centroId) || strtoupper($cuenta) !== 'G') {
-            return null;
-        }
-
-        return $this->presupuestoSg->numS($centroId);
     }
 
     /** @return list<array<string, mixed>> */

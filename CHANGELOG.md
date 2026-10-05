@@ -10,6 +10,19 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.17] — 2026-10-05
+
+### Añadido
+- En un **centro sg**, el **nº de s** del centro se edita en **Centro → Nombres** (antes estaba en Presupuesto). El resumen **613** usa ese valor como previsto de aportaciones.
+
+### Cambiado
+- En un **centro sg**, el menú lateral se agrupa en **Centro**, **Talonario** (entrada, periódicas, listado de apuntes y plantillas), **Presupuesto e informes**, **Cierre y arqueo**, **Plan y ejercicio** y **Ayuda**.
+- En **Nombres** de un centro sg ya no aparece la bandeja de solicitudes de acceso personal (solo aplica a centros n).
+
+### Corregido
+- En un **centro sg**, los conceptos de **gasto** con código 41 o 42 (p. ej. necesidades generales) ya no se tratan como traspaso caja/banco: el listado de apuntes muestra el código y la fecha de imputación distinta a la de operación funciona cuando corresponde.
+- Al contabilizar en un centro sg ya no falla por falta de la cuenta puente **PUENTE.PERIODIFICACION** en el libro G (centros ya creados se actualizan al migrar la base de datos).
+
 ## [0.1.16] — 2026-10-04
 
 ### Añadido

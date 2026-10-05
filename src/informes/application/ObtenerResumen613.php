@@ -360,7 +360,7 @@ final class ObtenerResumen613
             : Dinero::zero();
 
         return Estadistica613Sg::armar(
-            $this->presupuestoSg?->numS($centroId) ?? 0,
+            $this->centros?->numS($centroId) ?? 0,
             $stats['num_s'],
             $stats['aportaciones'],
             $stats['sin_aportacion'],

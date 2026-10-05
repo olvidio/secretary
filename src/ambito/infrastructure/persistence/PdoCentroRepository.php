@@ -109,6 +109,24 @@ final class PdoCentroRepository implements CentroRepository
         }
     }
 
+    public function numS(int $centroId): int
+    {
+        $st = $this->pdo->prepare('SELECT num_s FROM centros WHERE id = :id');
+        $st->execute([':id' => $centroId]);
+        $v = $st->fetchColumn();
+
+        return $v === false ? 0 : max(0, (int) $v);
+    }
+
+    public function guardarNumS(int $centroId, int $numS): void
+    {
+        $st = $this->pdo->prepare('UPDATE centros SET num_s = :n WHERE id = :id');
+        $st->execute([':n' => max(0, $numS), ':id' => $centroId]);
+        if ($st->rowCount() === 0) {
+            throw new \RuntimeException('Centro no encontrado');
+        }
+    }
+
     /** @param array<string, mixed> $row */
     private function hydrate(array $row): Centro
     {

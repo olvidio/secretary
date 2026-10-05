@@ -18,4 +18,8 @@ interface CentroRepository
     public function guardar(Centro $centro): Centro;
 
     public function borrar(int $id): void;
+
+    public function numS(int $centroId): int;
+
+    public function guardarNumS(int $centroId, int $numS): void;
 }

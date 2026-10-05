@@ -10,7 +10,7 @@ Permite definir apuntes que se repiten (mensual, trimestral o anual) y contabili
 
 ## Definición (`/entradas-periodicas`)
 
-1. Rellenar concepto (al inicio del desplegable aparecen las **plantillas** de Cuentas → Plantillas), observaciones, cantidad y periodicidad. **Iniciales** puede quedar en blanco si el apunte no va asociado a una persona.
+1. Rellenar concepto (al inicio del desplegable aparecen las **plantillas** de Talonario → Plantillas), observaciones, cantidad y periodicidad. **Iniciales** puede quedar en blanco si el apunte no va asociado a una persona.
 2. Indicar la **fecha de referencia**: el día del mes en que debe caer cada ocurrencia; en trimestral y anual también marca el mes de partida.
 3. **Guardar**. El listado inferior permite **Editar** o **Borrar** cada definición.
 

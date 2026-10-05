@@ -96,7 +96,7 @@ final class CrearApunte
             $origen = 'C';
         }
         if ($fechasDistintas) {
-            if (in_array($conceptoCodigo, ['41', '42'], true) && !$this->libroSinDeudoresVivienda($centroId)) {
+            if ($concepto->naturaleza === 'transferencia') {
                 throw new InvalidArgumentException(_("Un traspaso caja/banco no admite fecha de imputación distinta"));
             }
             if ($esCierre) {
@@ -308,7 +308,8 @@ final class CrearApunte
         string $conceptoApunte,
         ?int $cuentaFisicaId,
     ): \src\ambito\domain\entity\Cuenta {
-        if (in_array($conceptoApunte, ['41', '42'], true)) {
+        $cuentaConcepto = $this->cuentas->buscar($centroId, null, $libro, $conceptoApunte);
+        if ($cuentaConcepto !== null && $cuentaConcepto->tipo === 'puente') {
             return $this->resolverTesoreria($centroId, $libro, $codigoMaestro);
         }
         if ($origenApunte === 'A') {

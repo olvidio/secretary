@@ -33,4 +33,4 @@ El cierre de mes reparte los gastos generales del mes al que pertenece esta fech
 
 ## Centro sg
 
-- Menú: Caja → Fecha cierre
+- Menú: Cierre y arqueo → Fecha cierre

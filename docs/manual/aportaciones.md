@@ -2,7 +2,7 @@
 
 - Ruta: `/aportaciones`
 - Ámbito: centro-sg
-- Menú: Cuentas → Listado de aportaciones
+- Menú: Presupuesto e informes → Listado de aportaciones
 - Quién: el secretario de un centro sg
 
 ## Para qué sirve

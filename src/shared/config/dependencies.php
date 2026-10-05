@@ -139,6 +139,7 @@ use src\informes\infrastructure\persistence\PdoEstadisticasSg;
 use src\informes\infrastructure\persistence\PdoInforme613MesRepository;
 use src\personas\application\BorrarPersona;
 use src\personas\application\EstimarBasesLiquidables;
+use src\personas\application\GuardarNumSCentroSg;
 use src\personas\application\GuardarPersona;
 use src\personas\application\ListarPersonas;
 use src\personas\domain\contracts\PersonaRepository;
@@ -453,6 +454,7 @@ return [
     ListarPersonas::class => autowire(),
     EstimarBasesLiquidables::class => autowire(),
     GuardarPersona::class => autowire(),
+    GuardarNumSCentroSg::class => autowire(),
     BorrarPersona::class => autowire(),
     VincularEmailPersona::class => autowire(),
     AsegurarIdentidadCentro::class => autowire(),

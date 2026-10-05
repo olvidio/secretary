@@ -57,6 +57,9 @@ Desde aquí se abre también el libro personal de cada una, con solo poner su co
 
 Apellidos y nombre, como en el Excel. El **grupo** y la clase (**s** o **cp**) ordenan el listado de aportaciones. El correo no abre un libro personal: un centro sg no admite cuentas personales ni solicitudes de acceso. No hay vivienda, exención, base liquidable ni «puede desgravar».
 
-1. Rellenar nombre, apellidos, iniciales, grupo y s / cp, y pulsar «Guardar».
-2. En el alta hay que marcar que el centro es responsable de esos datos.
-3. «Editar» recupera la fila; «Borrar» la quita del listado si no tiene apuntes.
+Antes del listado, **Nº de s del centro** es la cifra prevista que usa el 613 G-D en la columna «previsto» de las estadísticas de aportaciones (no es el recuento automático de personas con clase s).
+
+1. Si procede, escribir el **nº de s** previsto y pulsar «Guardar» en ese bloque.
+2. Rellenar nombre, apellidos, iniciales, grupo y s / cp, y pulsar «Guardar» en el formulario de persona.
+3. En el alta hay que marcar que el centro es responsable de esos datos.
+4. «Editar» recupera la fila; «Borrar» la quita del listado si no tiene apuntes.

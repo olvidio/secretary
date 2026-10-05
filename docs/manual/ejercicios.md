@@ -43,7 +43,7 @@ La tabla muestra sus fechas, cuántos meses abarca, cuántos han transcurrido y 
 
 ## Centro sg
 
-- Menú: Caja → Ejercicios
+- Menú: Plan y ejercicio → Ejercicios
 
 ## Asociación y fundación
 
