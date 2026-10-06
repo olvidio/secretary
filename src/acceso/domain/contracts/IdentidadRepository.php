@@ -57,7 +57,26 @@ interface IdentidadRepository
      */
     public function personasVinculoDe(int $identidadId): array;
 
+    /**
+     * Todas las personas de la cuenta (incluye libro personal tipo p) para administración.
+     *
+     * @return list<array{
+     *     persona_id: int,
+     *     iniciales: string,
+     *     nombre_completo: string,
+     *     centro_id: int,
+     *     centro_codigo: string,
+     *     centro_nombre: string,
+     *     centro_tipo: string,
+     *     es_libro_personal: bool,
+     *     anio: ?int
+     * }>
+     */
+    public function personasVinculoAdminDe(int $identidadId): array;
+
     public function vincularCentro(int $identidadId, int $centroId, string $rol): void;
+
+    public function desvincularCentro(int $identidadId, int $centroId): void;
 
     public function rolEnCentro(int $identidadId, int $centroId): ?string;
 
@@ -85,6 +104,9 @@ interface IdentidadRepository
     public function guardarTotp(int $identidadId, string $secretCifrado, ?DateTimeImmutable $confirmadoAt): void;
 
     public function confirmarTotp(int $identidadId, DateTimeImmutable $cuando): void;
+
+    /** Quita TOTP y códigos de recuperación; el usuario deberá escanear un QR nuevo. */
+    public function reiniciarTotp(int $identidadId): void;
 
     /** @param list<string> $hashes */
     public function reemplazarRecovery(int $identidadId, array $hashes): void;
@@ -129,6 +151,27 @@ interface IdentidadRepository
 
     /** @return list<array{id:int, email:string, alias:?string, nombre:string, es_admin:bool, centros:int, personas:int, es_personal:bool}> */
     public function listarTodas(): array;
+
+    /**
+     * Cuentas activas no admin que comparten correo (legacy D15).
+     *
+     * @return list<array{
+     *     email: string,
+     *     identidades: list<array{
+     *         id: int,
+     *         alias: ?string,
+     *         nombre: string,
+     *         centros: int,
+     *         personas: int,
+     *         es_secretario: bool,
+     *         es_personal: bool
+     *     }>
+     * }>
+     */
+    public function listarGruposEmailDuplicado(): array;
+
+    /** @return list<int> */
+    public function idsActivasPorEmail(string $email): array;
 
     public function guardarTokenBajaCuenta(int $identidadId, string $token, DateTimeImmutable $expira): void;
 

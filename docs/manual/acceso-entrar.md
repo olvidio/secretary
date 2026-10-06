@@ -13,7 +13,7 @@ Es la puerta de entrada. Se escribe el alias (o el correo) y la contraseña. Seg
 
 1. Escribir el alias o, si se prefiere, el correo de la cuenta.
 2. Escribir la contraseña y pulsar «Entrar».
-3. Si el mismo correo tiene varias cuentas (por ejemplo libro personal y uno o más centros), y la contraseña vale para más de una, aparece una pantalla para elegir con qué cuenta entrar.
+3. Si el mismo correo tiene **varias identidades** (convención antigua, varios alias distintos) y la contraseña vale para más de una, aparece **Elegir cuenta**. Lo habitual (D15) es **una identidad por persona** y varios centros en **Elegir centro** tras entrar con alias o correo.
 4. En las cuentas de secretario, el programa pide un código de seis dígitos de la aplicación de autenticación; la primera vez lleva a activarla.
 5. Si la cuenta es secretaria de más de un centro, aparece una pantalla para elegir el centro.
 6. Si la cuenta tiene nombre en más de un centro, aparece una pantalla para elegir con cuál se trabaja en esta sesión.

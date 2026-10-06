@@ -7,6 +7,8 @@ namespace src\asientos\application;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\domain\contracts\CentroRepository;
+use src\plan\domain\services\ContabilidadCentroSg;
 use src\ambito\domain\contracts\CuentaFisicaRepository;
 use src\ambito\domain\contracts\CuentaRepository;
 use src\asientos\domain\contracts\AsientoRepository;
@@ -23,6 +25,7 @@ final class RegistrarPrestamoEntreLibros
         private readonly CuentaFisicaRepository $fisicas,
         private readonly ConfiguracionRepository $config,
         private readonly ResolverAmbitoActual $ambito,
+        private readonly CentroRepository $centros,
     ) {
     }
 
@@ -46,6 +49,10 @@ final class RegistrarPrestamoEntreLibros
         }
 
         $contexto = $this->ambito->ejecutar();
+        $centro = $this->centros->porId($contexto->centroId);
+        if ($centro !== null && !ContabilidadCentroSg::admiteTraspasoCajaBanco($centro->planContableCodigo)) {
+            throw new InvalidArgumentException(_('En un centro sg solo hay un libro contable; no hay préstamos entre P y G'));
+        }
         $fisica = $this->fisicas->porId($fisicaId);
         if ($fisica === null || $fisica->centroId !== $contexto->centroId || !$fisica->activo) {
             throw new InvalidArgumentException(_("Cuenta física no válida"));

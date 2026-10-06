@@ -15,6 +15,7 @@ use src\cierre\domain\services\RepartoCierre;
 use src\informes\domain\contracts\EstadisticasSg;
 use src\informes\domain\services\Calculadora613;
 use src\informes\domain\services\Estadistica613Sg;
+use src\informes\domain\services\RealizadoPorConceptoCentroSg;
 use src\plan\domain\contracts\DestinoSgRepository;
 use src\plan\domain\contracts\PartidaLaboresRepository;
 use src\plan\domain\services\CatalogoPlanesContables;
@@ -40,6 +41,7 @@ final class ObtenerResumen613
         private readonly ?DestinoSgRepository $destinosSg = null,
         private readonly ?PresupuestoSgRepository $presupuestoSg = null,
         private readonly ?EstadisticasSg $estadisticasSg = null,
+        private readonly ?RealizadoPorConceptoCentroSg $realizadoCentroSg = null,
     ) {
     }
 
@@ -54,13 +56,15 @@ final class ObtenerResumen613
         $desde = $periodo->fechaInicio->format('Y-m-d');
         $hasta = $periodo->fechaCorte->format('Y-m-d');
 
-        $realizado = $this->asientos->realizadoPorConcepto(
-            $contexto->centroId,
-            $contexto->ejercicioId,
-            $cuenta,
-            $desde,
-            $hasta,
-        );
+        $realizado = ($cuenta === 'G' && $this->esCentroSg($contexto->centroId) && $this->realizadoCentroSg !== null)
+            ? $this->realizadoCentroSg->ejecutar($contexto->centroId, $contexto->ejercicioId, $desde, $hasta)
+            : $this->asientos->realizadoPorConcepto(
+                $contexto->centroId,
+                $contexto->ejercicioId,
+                $cuenta,
+                $desde,
+                $hasta,
+            );
 
         $saldoCodigo9 = 0;
         if ($cuenta === 'P') {

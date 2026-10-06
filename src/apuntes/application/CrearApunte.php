@@ -24,6 +24,7 @@ use src\conceptos\application\ResolverConceptosCentro;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\personas\domain\contracts\PersonaRepository;
 use src\plan\domain\services\CatalogoPlanesContables;
+use src\plan\domain\services\ContabilidadCentroSg;
 use src\shared\domain\value_objects\Dinero;
 
 final class CrearApunte
@@ -155,6 +156,7 @@ final class CrearApunte
             fn (int $personaId): \src\ambito\domain\entity\Cuenta => $this->resolverPersonal($centroId, $personaId),
             fn (): \src\ambito\domain\entity\Cuenta => $this->resolverDeudores($centroId),
             $origenAsiento,
+            ContabilidadCentroSg::admiteTraspasoCajaBanco($this->codigoPlanContable($centroId)),
         );
 
         if ($resultado['asientos'] === []) {
@@ -378,6 +380,16 @@ final class CrearApunte
         }
 
         return $cuenta;
+    }
+
+    private function codigoPlanContable(int $centroId): string
+    {
+        if ($this->centros === null) {
+            return CatalogoPlanesContables::H16N;
+        }
+        $centro = $this->centros->porId($centroId);
+
+        return $centro?->planContableCodigo ?? CatalogoPlanesContables::H16N;
     }
 
     /** Centro sg y club: un solo libro, sin DEUDORES.VIV. La contrapartida del apunte es la caja. */

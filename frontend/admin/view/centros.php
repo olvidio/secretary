@@ -25,7 +25,7 @@
     </label>
     <label><?= _("Ejercicio desde") ?> <input name="fecha_inicio" type="date" required></label>
     <label><?= _("Ejercicio hasta") ?> <input name="fecha_fin" type="date" required></label>
-    <label><?= _("Alias del secretario") ?> <input name="usuario" required></label>
+    <label><?= _("Alias del secretario") ?> <input name="usuario" required placeholder="<?= htmlspecialchars(_("Persona, no sigla del centro"), ENT_QUOTES) ?>"></label>
     <label><?= _("Nombre del secretario") ?> <input name="nombre_usuario" autocomplete="name"></label>
     <label><?= _("Correo secretario") ?> <input name="email" type="email" required></label>
     <label><?= _("Contraseña") ?> <input name="password" type="password" required minlength="6"></label>

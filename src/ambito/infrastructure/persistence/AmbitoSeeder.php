@@ -198,10 +198,8 @@ final class AmbitoSeeder
      *                           patrimonio del asiento de apertura que pide el
      *                           punto 2 del encargo (D12 la calculará; hoy sigue
      *                           siendo el importe tecleado a mano).
-     * - transferencia (G/41,42) -> tipo puente (D10): las cuentas para los
-     *                           traspasos Banco<->Caja. Hoy ningún apunte real usa
-     *                           41/42, así que esta parte queda lista para cuando
-     *                           se necesite, no ejercitada por datos reales.
+     * - transferencia (G/41,42 en H16n) -> tipo puente (D10): traspaso Banco<->Caja.
+     *   En plan H16s el 41–54 son gastos (CatalogoConceptosCentroSg), no puentes.
      */
     private static function sembrarPlanMaestro(PDO $pdo, int $centroId): void
     {

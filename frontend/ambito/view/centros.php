@@ -20,20 +20,8 @@
         <tbody></tbody>
     </table>
     <?php if (empty($soloConsulta)): ?>
-    <h3><?= _("Añadir usuario de este centro") ?></h3>
-    <form id="form-usuario" class="grid-form">
-        <label><?= _("Alias") ?> <input name="usuario" required placeholder="<?= htmlspecialchars(_("p. ej. scl"), ENT_QUOTES) ?>"></label>
-        <label><?= _("Correo") ?> <input name="email" type="email" required></label>
-        <label><?= _("Contraseña") ?> <input name="password" type="password" required minlength="6"></label>
-        <label><?= _("Nombre") ?> <input name="nombre" autocomplete="name"></label>
-        <label><?= _("Rol") ?>
-            <select name="rol">
-                <option value="admin"><?= _("Puede modificar") ?></option>
-                <option value="consulta"><?= _("Solo consulta") ?></option>
-            </select>
-        </label>
-        <button type="submit"><?= _("Vincular") ?></button>
-    </form>
+    <h3><?= _("Invitar secretario") ?></h3>
+    <?php require __DIR__ . '/../../shared/view/_form_invitar_secretario.php'; ?>
     <?php endif; ?>
     <?php if (empty($soloConsulta) && $esClub): ?>
     <h3><?= _("Importar Grisbi") ?></h3>

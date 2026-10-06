@@ -92,8 +92,8 @@ final class CrearEjercicio
         if ($ejercicioAnteriorId !== null && $guardado->id !== null) {
             $this->generarApertura->ejecutar($guardado->id);
             $guardado = $this->repo->porId($guardado->id) ?? $guardado;
-            $this->sincronizarConfig->ejecutar($guardado);
         }
+        $this->sincronizarConfig->ejecutar($guardado);
 
         return $guardado;
     }

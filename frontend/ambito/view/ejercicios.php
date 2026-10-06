@@ -1,19 +1,8 @@
 <?php $esClub = !empty($esClub); ?>
 <h1><?= _("Ejercicios") ?></h1>
-<p>
-    <?php if ($esClub): ?>
-        <?= _("La fecha de inicio y la de fin delimitan el ejercicio. La fecha de corte es hasta dónde hay datos introducidos; cuando el ejercicio está cerrado del todo, coincide con la fecha de fin.") ?>
-    <?php else: ?>
-        <?= _("Alta de ejercicios de período libre (D11). fecha_inicio/fecha_fin delimitan el ejercicio contable completo; fecha_corte es sólo la fecha hasta la que hay datos introducidos (p. ej. para informes 613 a mitad de ejercicio) y puede coincidir con fecha_fin cuando el ejercicio ya está cerrado del todo.") ?>
-    <?php endif; ?>
-</p>
-<p class="muted">
-    <?php if ($esClub): ?>
-        <?= _("Al abrir el ejercicio siguiente, el saldo de partida se arrastra del anterior. En el primero, ese saldo se anota a mano.") ?>
-    <?php else: ?>
-        <?= _("El concepto 32 del 613 G lo calcula la apertura automática al abrir el ejercicio siguiente. En el primer ejercicio importado (sin anterior) el disponible a 1 de enero se sigue tecleando a mano.") ?>
-    <?php endif; ?>
-</p>
+<?php if ($esClub): ?>
+<p><?= _("La fecha de inicio y la de fin delimitan el ejercicio. La fecha de corte es hasta dónde hay datos introducidos; cuando el ejercicio está cerrado del todo, coincide con la fecha de fin.") ?></p>
+<p class="muted"><?= _("Al abrir el ejercicio siguiente, el saldo de partida se arrastra del anterior. En el primero, ese saldo se anota a mano.") ?></p>
 <form id="form-ejercicio" class="grid-form">
     <label><?= _("Etiqueta") ?> <input name="etiqueta" placeholder="<?= htmlspecialchars(_("p. ej. 2026 o 2026-27"), ENT_QUOTES) ?>"></label>
     <label><?= _("Fecha inicio") ?> <input name="fecha_inicio" type="date" required></label>
@@ -21,6 +10,23 @@
     <label><?= _("Fecha de corte") ?> <input name="fecha_corte" type="date"></label>
     <button type="submit"><?= _("Crear ejercicio") ?></button>
 </form>
+<?php else: ?>
+<p><?= _("Cada fila es un periodo contable del centro. Solo puede haber uno abierto. La fecha de corte indica hasta dónde hay datos; al crear un ejercicio empieza igual que la fecha de inicio y se va moviendo con Fecha cierre.") ?></p>
+<p class="muted"><?= _("Al abrir el ejercicio siguiente al anterior cerrado, el saldo de partida (disponible, concepto 32 en G) se genera solo. En el primer ejercicio importado, ese disponible se teclea a mano.") ?></p>
+<p class="muted"><?= _("Puede ajustar las fechas si el periodo no es el habitual. La etiqueta (2026, 2026-27…) se calcula al crear.") ?></p>
+<form id="form-ejercicio" class="grid-form form-ejercicio-alta">
+    <label><?= _("Año") ?> <input name="anio" id="inp-anio" type="number" min="2000" max="2100" required></label>
+    <label><?= _("Ejercicio") ?>
+        <select name="modo_ejercicio" id="sel-modo">
+            <option value="Año"><?= _("Año") ?> (<?= _("ene–dic") ?>)</option>
+            <option value="Curso"><?= _("Curso") ?> (<?= _("sep–ago") ?>)</option>
+        </select>
+    </label>
+    <label><?= _("Fecha inicio") ?> <input name="fecha_inicio" id="inp-inicio" type="date" required></label>
+    <label><?= _("Fecha fin") ?> <input name="fecha_fin" id="inp-fin" type="date" required></label>
+    <button type="submit"><?= _("Crear ejercicio") ?></button>
+</form>
+<?php endif; ?>
 <table id="tabla-ejercicios">
     <thead>
     <tr>
@@ -31,6 +37,7 @@
     <tbody></tbody>
 </table>
 <script>
+const ES_CLUB = <?= $esClub ? 'true' : 'false' ?>;
 const I18N_EJERCICIOS = {
   sinCentro: <?= json_encode(_("No hay ningún centro dado de alta todavía."), JSON_UNESCAPED_UNICODE) ?>,
   cerrar: <?= json_encode(_("Cerrar"), JSON_UNESCAPED_UNICODE) ?>,
@@ -43,6 +50,30 @@ const I18N_EJERCICIOS = {
   confirmEliminar: <?= json_encode(_("¿Eliminar el ejercicio %s? Se borran sus %s asientos y no se puede deshacer."), JSON_UNESCAPED_UNICODE) ?>,
   continuar: <?= json_encode(_("¿Continuar?"), JSON_UNESCAPED_UNICODE) ?>,
 };
+function fechasTipicas(anio, modo) {
+  const a = Number(anio);
+  if (modo === 'Curso') {
+    return { inicio: `${a}-09-01`, fin: `${a + 1}-08-31` };
+  }
+  return { inicio: `${a}-01-01`, fin: `${a}-12-31` };
+}
+function aplicarFechasTipicas() {
+  if (ES_CLUB) return;
+  const anio = document.getElementById('inp-anio').value;
+  const modo = document.getElementById('sel-modo').value;
+  if (!anio) return;
+  const f = fechasTipicas(anio, modo);
+  document.getElementById('inp-inicio').value = f.inicio;
+  document.getElementById('inp-fin').value = f.fin;
+}
+function rellenarAlta(r) {
+  if (ES_CLUB || !r.sugerencia_nuevo) return;
+  const s = r.sugerencia_nuevo;
+  document.getElementById('inp-anio').value = s.anio;
+  document.getElementById('sel-modo').value = s.modo_ejercicio;
+  document.getElementById('inp-inicio').value = s.fecha_inicio;
+  document.getElementById('inp-fin').value = s.fecha_fin;
+}
 async function loadEjercicios() {
   const r = await api('/api/ejercicios');
   const tb = document.querySelector('#tabla-ejercicios tbody');
@@ -51,6 +82,7 @@ async function loadEjercicios() {
     tb.innerHTML = '<tr><td colspan="9">' + esc(I18N_EJERCICIOS.sinCentro) + '</td></tr>';
     return;
   }
+  rellenarAlta(r);
   (r.ejercicios || []).forEach((e, i) => {
     const tr = document.createElement('tr');
     const acciones = [];
@@ -74,10 +106,20 @@ async function loadEjercicios() {
   });
 }
 document.addEventListener('DOMContentLoaded', () => {
+  if (!ES_CLUB) {
+    document.getElementById('inp-anio').addEventListener('change', aplicarFechasTipicas);
+    document.getElementById('inp-anio').addEventListener('input', aplicarFechasTipicas);
+    document.getElementById('sel-modo').addEventListener('change', aplicarFechasTipicas);
+  }
   loadEjercicios();
   document.getElementById('form-ejercicio').onsubmit = async (ev) => {
     ev.preventDefault();
-    const s = await api('/api/ejercicios', {method:'POST', body: formObj(ev.target)});
+    const body = formObj(ev.target);
+    if (!ES_CLUB) {
+      delete body.anio;
+      delete body.modo_ejercicio;
+    }
+    const s = await api('/api/ejercicios', {method:'POST', body});
     if (!s.ok) return alert(s.error);
     ev.target.reset();
     loadEjercicios();

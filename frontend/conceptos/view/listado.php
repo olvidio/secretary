@@ -1,4 +1,8 @@
-<?php $cuenta = $cuentaEntrada ?? 'P'; $esClub = !empty($esClub); ?>
+<?php
+$cuenta = $cuentaEntrada ?? 'P';
+$esClub = !empty($esClub);
+$esCentroSg = !empty($esCentroSg);
+?>
 <?php if ($esClub && $cuenta === 'G'): ?>
 <h1><?= _("Cuentas") ?></h1>
 <p><?= !empty($esFundacion)
@@ -94,13 +98,20 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <?php else: ?>
 <h1><?= sprintf(_("Conceptos %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
+<?php if ($esCentroSg && $cuenta === 'G'): ?>
+<p class="muted"><?= _("Lista de consulta del plan. Los destinos 42–54 se nombran abajo; el 41 es fijo.") ?></p>
+<?php endif; ?>
 <table id="tabla-conceptos">
     <thead><tr><th><?= _("Código") ?></th><th><?= _("Nombre") ?></th><th><?= _("Descripción") ?></th><th><?= _("Naturaleza") ?></th></tr></thead>
     <tbody></tbody>
 </table>
+<?php if ($esCentroSg && $cuenta === 'G'): ?>
+<?php include __DIR__ . '/_destinos_centro_sg.php'; ?>
+<?php endif; ?>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
   const r = await api('/api/conceptos?cuenta=' + <?= json_encode($cuenta) ?>);
+  if (!r.ok) { alert(r.error || 'Error'); return; }
   const tb = document.querySelector('#tabla-conceptos tbody');
   (r.conceptos || []).forEach(c => {
     const tr = document.createElement('tr');

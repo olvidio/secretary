@@ -98,6 +98,12 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/admin/usuarios/{id:\d+}/borrar', [AdminUsuarioController::class, 'previewDelete']);
     $r->addRoute('POST', '/api/admin/usuarios/{id:\d+}/borrar', [AdminUsuarioController::class, 'delete']);
     $r->addRoute('POST', '/api/admin/usuarios/{id:\d+}/reactivar', [AdminUsuarioController::class, 'reactivate']);
+    $r->addRoute('POST', '/api/admin/usuarios/{id:\d+}/centros/{centroId:\d+}/desvincular', [AdminUsuarioController::class, 'desvincularCentroVinculo']);
+    $r->addRoute('POST', '/api/admin/usuarios/{id:\d+}/personas/{personaId:\d+}/desvincular', [AdminUsuarioController::class, 'desvincularPersonaVinculo']);
+    $r->addRoute('GET', '/api/admin/usuarios/duplicados-correo', [AdminUsuarioController::class, 'listDuplicadosCorreo']);
+    $r->addRoute('GET', '/api/admin/usuarios/fusionar-legacy', [AdminUsuarioController::class, 'previewFusionLegacy']);
+    $r->addRoute('POST', '/api/admin/usuarios/fusionar-legacy', [AdminUsuarioController::class, 'fusionarLegacy']);
+    $r->addRoute('POST', '/api/admin/usuarios/{id:\d+}/reiniciar-totp', [AdminUsuarioController::class, 'reiniciarTotp']);
     $r->addRoute('GET', '/api/admin/legal/buscar', [AdminLegalController::class, 'buscar']);
     $r->addRoute('GET', '/api/admin/legal/expediente/{id:\d+}', [AdminLegalController::class, 'ver']);
     $r->addRoute('GET', '/api/admin/legal/expediente/{id:\d+}/export', [AdminLegalController::class, 'exportar']);

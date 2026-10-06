@@ -10,6 +10,20 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.18] — 2026-10-06
+
+### Añadido
+- En **administración → Usuarios**, listas con nombre de cada **centro** (secretario) y **persona** (vínculo en la entidad), con **Quitar** por enlace sin borrar la contabilidad. **Reiniciar 2FA** cuando alguien pierde el móvil y los códigos de recuperación. Bloque para **fusionar cuentas legacy** que comparten el mismo correo (una identidad por persona).
+- **Invitar secretario** por correo en **Configuración** (centro sg, asociación o fundación) y en **Centros** (centro n): si ya tiene cuenta, solo se le da acceso al centro; si no, se crea con alias y contraseña.
+- En un **centro sg**, los **destinos 42–54** se nombran en **Conceptos G** (Plan y ejercicio); el enlace desde Presupuesto apunta allí.
+
+### Cambiado
+- Al **crear un ejercicio**, las fechas de la configuración del centro se alinean con las del ejercicio aunque sea el primero (no hace falta un ejercicio anterior).
+- Textos del manual de acceso (entrar, registro, doble factor) alineados con invitaciones y recuperación por admin.
+
+### Corregido
+- En **centro sg** (plan H16s), los códigos **41–54** quedan como **gasto** en plan y cuentas; el **613** y el realizado por concepto cuadran con apuntes al 41 y destinos. Asientos antiguos mal guardados como traspaso caja/banco se pueden reparar con `php bin/console.php sg:reparar-traspasos [--centro=SIGLA] [--execute]` (convive con las migraciones de base de datos).
+
 ## [0.1.17] — 2026-10-05
 
 ### Añadido

@@ -12,17 +12,19 @@ La tabla muestra sus fechas, cuántos meses abarca, cuántos han transcurrido y 
 
 ## Cómo se usa
 
-1. Poner la fecha de inicio y la fecha de fin del ejercicio.
-2. Si se quiere, indicar la fecha de corte y una etiqueta.
-3. Pulsar «Crear ejercicio».
+1. Elegir **Año** (enero–diciembre) o **Curso** (septiembre–agosto) y el **año** de referencia; las fechas de inicio y fin se rellenan solas y se pueden ajustar si el periodo es distinto.
+2. Pulsar «Crear ejercicio». La **etiqueta** (2026, 2026-27…) se calcula sola; al crear, la fecha de corte empieza igual que la de inicio.
+3. Mes a mes, avanzar la corte con **Fecha cierre** (no hace falta tocarla aquí al crear).
 4. Cuando el ejercicio termina y no hay que anotar nada más, pulsar «Cerrar» en su fila.
 5. Para corregir algo de un ejercicio cerrado, «Reabrir»; para recalcular su saldo de partida, «Regenerar apertura».
 6. «Eliminar» borra el ejercicio y sus asientos. Si otro ejercicio parte de él, hay que eliminar primero ese posterior. Pide confirmación y no se puede deshacer.
 
+En asociación y fundación el formulario sigue pidiendo etiqueta y fechas a mano (periodos libres).
+
 ## Reglas que conviene saber
 
-- La fecha de inicio y la de fin delimitan el ejercicio completo. La **fecha de corte** solo dice hasta dónde hay datos introducidos, para que los resúmenes a mitad de ejercicio salgan bien; al cerrar, el corte pasa a ser la fecha de fin.
-- Si se deja la etiqueta vacía, se pone el año, o algo como «2026-27» cuando abarca dos.
+- La fecha de inicio y la de fin delimitan el ejercicio completo. La **fecha de corte** solo dice hasta dónde hay datos introducidos, para que los resúmenes a mitad de ejercicio salgan bien; al cerrar, el corte pasa a ser la fecha de fin. En el día a día se cambia con **Fecha cierre**.
+- La etiqueta se genera al crear si no se indica (año, o «2026-27» cuando abarca dos).
 - Dos ejercicios del mismo centro no pueden solaparse, y solo puede haber uno abierto: hay que cerrar el anterior antes de crear el siguiente.
 - Al crear un ejercicio que continúa a uno ya cerrado, los saldos finales del anterior se arrastran solos como saldo de partida («disponible a 1 de enero», el concepto 32 del libro general). En el primer ejercicio cargado, que no tiene anterior, ese disponible se teclea a mano.
 - Un ejercicio cerrado no admite apuntes nuevos.

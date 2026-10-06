@@ -43,4 +43,4 @@ En el libro P, las cifras se pueden generar primero en **Previsión personal** (
 
 Un solo presupuesto, el del libro único. Lo que se teclea es el importe anual; el 613 lo prorratea. Una casilla vacía cuenta como cero.
 
-Los destinos del 42 al 54 no salen hasta que el centro les pone nombre. Arriba hay «Destinos del centro»: se añade una fila (el programa propone el siguiente código libre), se escribe el nombre y se pulsa «Guardar destinos». Entonces esa partida aparece en el presupuesto, en el 613 y al anotar un apunte. El 41, Necesidades generales, es fijo. No se puede quitar un destino que ya tiene apuntes. Como máximo hay trece (del 42 al 54). No hay presupuesto P ni «Aplicar al presupuesto P».
+Los destinos del 42 al 54 no salen en esta lista hasta que el centro les pone nombre en **Plan y ejercicio → Conceptos** («Destinos del centro»). El 41, Necesidades generales, es fijo. No hay presupuesto P ni «Aplicar al presupuesto P».

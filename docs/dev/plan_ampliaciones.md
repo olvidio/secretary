@@ -411,6 +411,34 @@ persona, fecha)` usado por remesas, cierre y comprobaciones.
 
 Detalle operativo: `docs/dev/personal.md` (remesas) y `docs/dev/acceso.md` (vínculos).
 
+### D15 — Identidad humana y mandato sobre el centro
+
+*Decisión del usuario (2026-10-06).* El **centro** es entidad contable persistente; quien
+**entra** siempre es una **identidad** (persona física con login). No existe “cuenta
+anónima del centro”.
+
+**Separación (complementa D7 y D14):**
+
+| Concepto | Qué es | Regla |
+| --- | --- | --- |
+| **Centro** | Sigla, plan, ejercicios, apuntes, nombres | Sobrevive al cambio de secretario; sin contraseña |
+| **Persona** (`personas`) | Ficha en Nombres; libro X en ese centro | No es login; histórico no se borra al cambiar año (D14) |
+| **Identidad** | Login (alias, correo, 2FA, legal) | Una por humano en el modelo objetivo |
+| **Mandato** (`identidad_centro`) | Autorización identidad → centro + rol | Varios secretarios = varios mandatos; revocar ≠ borrar centro |
+
+**Sesión:** autenticar identidad → elegir contexto (libro personal, un centro, varios
+centros, modo personal/secretario). **No** usar varias identidades con el mismo correo
+para el mismo humano; `/elegir-cuenta` queda para legacy o secretarios distintos que
+comparten buzón hasta migración.
+
+**Cambio de secretario:** otorgar mandato al nuevo, revocar al saliente; auditoría por
+`identidad_id`.
+
+**Implementación:** hoy `AsegurarIdentidadCentro` crea identidades con alias propio
+(`sgmontagut`, …). El acercamiento a D15 es invitar identidades existentes, fusionar
+duplicados y documentar mandatos; ver criterios en `docs/dev/d15_identidad_mandato_centro.md`.
+Fase dedicada: pendiente (no bloquea D14).
+
 ---
 
 ## 3. Modelo de datos objetivo
@@ -809,7 +837,7 @@ Ninguna bloquea las Fases 0-6. Conviene resolverlas antes de la Fase 7.
 Encargo literal para el siguiente agente:
 
 > Lee `docs/dev/plan_ampliaciones.md`. Implementa la **Fase N** completa, respetando las
-> decisiones D1-D14 sin reabrirlas (si crees que una está mal, párate y dilo antes de
+> decisiones D1-D15 sin reabrirlas (si crees que una está mal, párate y dilo antes de
 > escribir código). Cumple `AGENTS.md`: dominio sin I/O, application sin SQL ni HTML,
 > infraestructura con PDO/HTTP/Excel. Al terminar, `composer test` y `composer phpstan` en
 > verde, el golden master de la Fase 0 intacto (o las diferencias documentadas y
@@ -834,3 +862,4 @@ Encargo literal para el siguiente agente:
 | 8 Remesas | hecha | cursor-grok | 2026-09-09 | D6. Tablas `remesas`/`remesa_lineas`/`remesa_solicitudes_detalle`, FK `asientos.remesa_id` (`0010_remesas.sql`). Envío mensual X→P, versionado, aceptar sustituye asientos en transacción, detalle bajo petición. UNIQUE incluye `anio` (ejercicio D11 largo). Tests `RemesaTest`, `HashRemesaTest`, `AgregadorRemesaPersonalTest`, `ConstructorAsientoRemesaTest`. Pantallas `/yo/remesas` y `/remesas`. Detalle en `docs/dev/remesas.md`. |
 | 9 Multicentro | parcial | cursor-grok | 2026-09-09 | Vínculo usuario↔centro. Migración `0011_vinculo_usuario_centro.sql`. Alta de centro en `/centros` con secretario propio (`scl2` no ve el libro de `scl`). Correo en Nombres → identidad personal de esa persona/centro. `listarDeCentro` en nombres, apuntes, 613, E37, cierre, remesas e importación. Importación Excel aislada (`--centro` / UI `/centros`) sin pisar `configuracion`; vaciado temporal de asientos del centro para recargar. Test `MulticentroAccesoTest`. Pendiente: presupuesto/config por centro, informe consolidado. Solicitudes de vínculo centro (`0028`), selector persona activa en `/yo`. |
 | 9b Adscripción por ejercicio | pendiente | — | — | D14. Tabla `persona_ejercicio`, herencia en `CrearEjercicio`, remesa por adscripción del mes, Nombres por ejercicio. Ver § Fase 9b. |
+| 9c Mandatos e identidad única | parcial | — | 2026-10-06 | D15. `InvitarUsuarioCentro`, fusión legacy admin/consola. Ver `docs/dev/d15_identidad_mandato_centro.md`. |

@@ -7,8 +7,11 @@ namespace src\configuracion\application;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\application\SincronizarConfiguracionConEjercicio;
 use src\ambito\domain\contracts\CentroRepository;
+use src\ambito\domain\contracts\EjercicioRepository;
 use src\ambito\domain\entity\Centro;
+use src\ambito\domain\entity\Ejercicio;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\configuracion\domain\entity\ConfiguracionCentro;
 use src\plan\domain\contracts\PlanContableRepository;
@@ -22,6 +25,7 @@ final class GuardarConfiguracion
         private readonly ResolverAmbitoActual $ambito,
         private readonly CentroRepository $centros,
         private readonly PlanContableRepository $planes,
+        private readonly EjercicioRepository $ejercicios,
     ) {
     }
 
@@ -29,8 +33,23 @@ final class GuardarConfiguracion
     public function ejecutar(array $datos): ConfiguracionCentro
     {
         $actual = $this->repo->get();
-        $anio = (int) ($datos['anio'] ?? $actual->anio);
-        $modo = (string) ($datos['modo_ejercicio'] ?? $actual->modoEjercicio);
+        $anio = $actual->anio;
+        $modo = $actual->modoEjercicio;
+        $ini = $actual->fechaInicio;
+        $cie = $actual->fechaCierre;
+        $ejercicioAbierto = $this->ejercicioAbierto();
+        if ($ejercicioAbierto !== null) {
+            $legado = SincronizarConfiguracionConEjercicio::legadoDesdeEjercicio($ejercicioAbierto);
+            $anio = $legado['anio'];
+            $modo = $legado['modo'];
+            $ini = $legado['fecha_inicio'];
+            if (!array_key_exists('fecha_cierre', $datos)) {
+                $cie = $legado['fecha_corte'];
+            }
+        }
+        if (array_key_exists('fecha_cierre', $datos)) {
+            $cie = $this->fecha((string) $datos['fecha_cierre']);
+        }
         if (!in_array($modo, ['Año', 'Curso'], true)) {
             throw new InvalidArgumentException(_("Modo: Año o Curso"));
         }
@@ -76,8 +95,6 @@ final class GuardarConfiguracion
         if ($this->planes->idPorCodigo($planContable) === null) {
             throw new InvalidArgumentException(_("Plan contable no válido"));
         }
-        $ini = $this->fecha((string) ($datos['fecha_inicio'] ?? $actual->fechaInicio->format('Y-m-d')));
-        $cie = $this->fecha((string) ($datos['fecha_cierre'] ?? $actual->fechaCierre->format('Y-m-d')));
         $sigla = trim((string) ($datos['centro'] ?? ''));
         if ($planFijo) {
             if ($sigla === '') {
@@ -100,8 +117,43 @@ final class GuardarConfiguracion
         );
         $this->repo->guardar($cfg);
         $this->sincronizarCentroActivo($tipo, $tipoCierre, $planContable);
+        if ($ejercicioAbierto !== null && array_key_exists('fecha_cierre', $datos)) {
+            $this->actualizarCorteEjercicio($ejercicioAbierto, $cie);
+        }
 
         return $cfg;
+    }
+
+    private function ejercicioAbierto(): ?Ejercicio
+    {
+        try {
+            $contexto = $this->ambito->ejecutar();
+        } catch (\Throwable) {
+            return null;
+        }
+        $ej = $this->ejercicios->porId($contexto->ejercicioId);
+
+        return $ej !== null && $ej->estado === 'abierto' ? $ej : null;
+    }
+
+    private function actualizarCorteEjercicio(Ejercicio $ejercicio, DateTimeImmutable $corte): void
+    {
+        if ($ejercicio->id === null) {
+            return;
+        }
+        if ($corte->format('Y-m-d') === $ejercicio->fechaCorte->format('Y-m-d')) {
+            return;
+        }
+        $this->ejercicios->guardar(new Ejercicio(
+            $ejercicio->id,
+            $ejercicio->centroId,
+            $ejercicio->etiqueta,
+            $ejercicio->fechaInicio,
+            $ejercicio->fechaFin,
+            $corte,
+            $ejercicio->estado,
+            $ejercicio->ejercicioAnteriorId,
+        ));
     }
 
     private function centroActivo(): ?Centro

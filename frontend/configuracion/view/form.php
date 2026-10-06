@@ -2,15 +2,7 @@
 <h1><?= _("Configuración") ?></h1>
 <form id="form-config" class="grid-form">
     <label><?= _("Sigla") ?> <input name="centro" required></label>
-    <label><?= _("Año") ?> <input name="anio" type="number" required></label>
-    <label><?= _("Ejercicio") ?>
-        <select name="modo_ejercicio">
-            <option><?= _("Año") ?></option>
-            <option><?= _("Curso") ?></option>
-        </select>
-    </label>
-    <label><?= _("Fecha inicio") ?> <input name="fecha_inicio" type="date" required></label>
-    <label><?= _("Fecha cierre") ?> <input name="fecha_cierre" type="date" required></label>
+    <p class="muted"><?= _("El ejercicio contable (año, fechas, alta y cierre) se gestiona en Plan y ejercicio → Ejercicios. La fecha de corte del mes se cambia en Fecha cierre.") ?></p>
     <?php if (!$esPlanPropio): ?>
     <label><?= _("Tipo de centro") ?>
         <select name="tipo">
@@ -86,20 +78,8 @@
         <tbody></tbody>
     </table>
     <?php if (empty($soloConsulta)): ?>
-    <h3><?= _("Añadir usuario") ?></h3>
-    <form id="form-usuario" class="grid-form">
-        <label><?= _("Alias") ?> <input name="usuario" required placeholder="<?= htmlspecialchars(_("p. ej. scl"), ENT_QUOTES) ?>"></label>
-        <label><?= _("Correo") ?> <input name="email" type="email" required></label>
-        <label><?= _("Contraseña") ?> <input name="password" type="password" required minlength="6"></label>
-        <label><?= _("Nombre") ?> <input name="nombre" autocomplete="name"></label>
-        <label><?= _("Rol") ?>
-            <select name="rol">
-                <option value="admin"><?= _("Puede modificar") ?></option>
-                <option value="consulta"><?= _("Solo consulta") ?></option>
-            </select>
-        </label>
-        <button type="submit"><?= _("Vincular") ?></button>
-    </form>
+    <h3><?= _("Invitar secretario") ?></h3>
+    <?php require __DIR__ . '/../../shared/view/_form_invitar_secretario.php'; ?>
     <?php endif; ?>
     <?php if ($esClub && empty($soloConsulta)): ?>
     <h3><?= _("Importar Grisbi") ?></h3>

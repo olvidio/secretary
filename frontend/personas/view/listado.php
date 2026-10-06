@@ -4,7 +4,7 @@
 <?php else: ?>
 <p class="muted"><?= _("El correo convierte a esa persona en usuario del libro personal de este centro. Si el correo es nuevo, se muestra una contraseña inicial para comunicársela una vez. «Vivienda aporta a generales» indica si entra en el cierre automático (P/211, típico de n); quien no aporta puede igualmente imputar a generales puntualmente (P/211 y G/11). P/212 (vivienda personal) es un gasto propio, sin G/11. La exención de meses es para quien llega o se va a mitad de año (no se le pide movimiento ni entra en el cierre esos meses).") ?></p>
 <?php endif; ?>
-<form id="form-persona" class="grid-form">
+<form id="form-persona" class="grid-form<?= !empty($esCentroSg) ? ' centro-nombres' : '' ?>">
     <input type="hidden" name="id">
     <label><?= _("Nombre") ?> <input name="nombre" required></label>
     <label><?= _("Apellidos") ?> <input name="apellidos"></label>

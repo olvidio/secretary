@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace src\importacion\application;
 
 use InvalidArgumentException;
+use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\contracts\CuentaRepository;
+use src\plan\domain\services\CatalogoPlanesContables;
+use src\plan\domain\services\ContabilidadCentroSg;
 use src\ambito\domain\entity\Cuenta;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\asientos\domain\entity\Asiento;
@@ -29,6 +32,7 @@ final class SincronizarAsientosImportados
         private readonly TraductorApuntesAAsientos $traductor,
         private readonly ImportFilaRepository $filas,
         private readonly ImportEjecucionRepository $ejecuciones,
+        private readonly ?CentroRepository $centros = null,
     ) {
     }
 
@@ -304,6 +308,7 @@ final class SincronizarAsientosImportados
             fn (int $personaId): Cuenta => $this->resolverPersonal($centroId, $personaId),
             fn (): Cuenta => $this->resolverDeudores($centroId),
             'import',
+            $this->admiteTraspasoCajaBanco($centroId),
         );
         $asientos = $resultado['asientos'];
 
@@ -368,5 +373,16 @@ final class SincronizarAsientosImportados
         }
 
         return $cuenta;
+    }
+
+    private function admiteTraspasoCajaBanco(int $centroId): bool
+    {
+        if ($this->centros === null) {
+            return true;
+        }
+        $centro = $this->centros->porId($centroId);
+        $plan = $centro?->planContableCodigo ?? CatalogoPlanesContables::H16N;
+
+        return ContabilidadCentroSg::admiteTraspasoCajaBanco($plan);
     }
 }

@@ -14,7 +14,7 @@ Cada centro tiene sus propias cuentas, sus propios nombres y su propio secretari
 ## Cómo se usa
 
 1. En «Este centro» se ven el nombre del centro y los usuarios que pueden llevarlo.
-2. Para dar acceso a otra persona, rellenar «Añadir usuario de este centro» (alias, correo y contraseña de al menos seis caracteres), elegir el rol y pulsar «Vincular». **Puede modificar** anota y cambia datos. **Solo consulta** entra, ve las pantallas y los informes, y no puede guardar ni borrar. En la tabla de usuarios se puede cambiar el rol después. Tiene que quedar al menos un usuario que pueda modificar.
+2. Para dar acceso a otra persona, usar **Invitar secretario**: escribir su **correo**. Si ya tiene cuenta, basta el correo (y el rol); se añade un **mandato** sobre este centro sin crear otro usuario. Si es cuenta nueva, indicar alias y contraseña (mínimo seis caracteres). **Puede modificar** anota y cambia datos. **Solo consulta** entra, ve las pantallas y los informes, y no puede guardar ni borrar. En la tabla de usuarios se puede cambiar el rol después. Tiene que quedar al menos un usuario que pueda modificar.
 3. Para cargar el libro de Excel, elegir el fichero en «Excel de este centro», marcar que el centro es responsable de los nombres que se importan y pulsar «Importar Excel». Al acabar se indica cuántos nombres y apuntes se han cargado.
 4. En «VII. Otras labores apostólicas»: **Añadir partida** crea una fila; **Quitar** en una fila la elimina. En cada partida se escribe código, etiqueta y si **desgrava**. **Guardar partidas** persiste los cambios.
 5. **Vaciar datos (pruebas)** borra apuntes, remesas y arqueos del centro para volver a cargar el Excel (pide confirmación); no toca usuarios ni nombres.

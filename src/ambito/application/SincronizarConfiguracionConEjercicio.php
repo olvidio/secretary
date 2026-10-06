@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace src\ambito\application;
 
 use src\ambito\domain\entity\Ejercicio;
+use src\ambito\domain\services\PeriodoEjercicioTipico;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\configuracion\domain\entity\ConfiguracionCentro;
 
@@ -44,15 +45,17 @@ final class SincronizarConfiguracionConEjercicio
 
     private static function modoDesdeEjercicio(Ejercicio $ejercicio): string
     {
-        $inicioAnio = (int) $ejercicio->fechaInicio->format('Y');
-        $fin = $ejercicio->fechaFin;
-        if ($fin->format('m-d') === '12-31' && (int) $fin->format('Y') === $inicioAnio) {
-            return 'Año';
-        }
-        if ($fin->format('m-d') === '08-31' && (int) $fin->format('Y') === $inicioAnio + 1) {
-            return 'Curso';
-        }
+        return PeriodoEjercicioTipico::modoDesdeFechas($ejercicio->fechaInicio, $ejercicio->fechaFin);
+    }
 
-        return 'Año';
+    /** @return array{anio:int,modo:string,fecha_inicio:DateTimeImmutable,fecha_corte:DateTimeImmutable} */
+    public static function legadoDesdeEjercicio(Ejercicio $ejercicio): array
+    {
+        return [
+            'anio' => self::anioDesdeEjercicio($ejercicio),
+            'modo' => self::modoDesdeEjercicio($ejercicio),
+            'fecha_inicio' => $ejercicio->fechaInicio,
+            'fecha_corte' => $ejercicio->fechaCorte,
+        ];
     }
 }

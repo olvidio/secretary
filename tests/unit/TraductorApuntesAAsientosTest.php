@@ -104,6 +104,25 @@ final class TraductorApuntesAAsientosTest extends TestCase
         self::assertSame(100000, $movs[1]->haberCents);
     }
 
+    public function testG41PuenteH16nConPlanSgNoTraspasa(): void
+    {
+        $cuentas = $this->sembrarCuentas();
+        $asientos = $this->traductor->traducir(
+            self::EJERCICIO_ID,
+            [$this->apunte('G', 'C', null, '41', '50.00')],
+            fn () => null,
+            fn (string $libro, string $codigo) => $cuentas["$codigo.$libro"] ?? $cuentas[$codigo],
+            fn (string $libro, string $maestro) => $cuentas["$maestro.$libro"],
+            fn () => $cuentas['CC.XX'],
+            fn () => $cuentas['DEUDORES.VIV'],
+            'manual',
+            false,
+        )['asientos'];
+
+        self::assertSame('normal', $asientos[0]->tipo);
+        self::assertNotSame('traspaso', $asientos[0]->tipo);
+    }
+
     public function testG41GastoPlanSgNoEsTraspaso(): void
     {
         $cuentas = $this->sembrarCuentas();

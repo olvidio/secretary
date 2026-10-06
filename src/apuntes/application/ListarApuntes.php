@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace src\apuntes\application;
 
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\contracts\CuentaRepository;
+use src\plan\domain\services\CatalogoPlanesContables;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\asientos\domain\entity\Asiento;
 use src\asientos\domain\services\ProyectorAsientoAFilaExcel;
@@ -19,6 +21,7 @@ final class ListarApuntes
         private readonly PersonaRepository $personas,
         private readonly ProyectorAsientoAFilaExcel $proyector,
         private readonly ResolverAmbitoActual $ambito,
+        private readonly ?CentroRepository $centros = null,
     ) {
     }
 
@@ -29,6 +32,7 @@ final class ListarApuntes
     public function ejecutar(array $filtros = []): array
     {
         $contexto = $this->ambito->ejecutar();
+        $centroSg = $this->esCentroSg($contexto->centroId);
         $mapaCuentas = [];
         foreach ($this->cuentas->listarDeCentro($contexto->centroId) as $cuenta) {
             if ($cuenta->id !== null) {
@@ -60,9 +64,10 @@ final class ListarApuntes
                     $par['tesoreria'],
                     $mapaCuentas,
                     $mapaPersonas,
+                    $centroSg,
                 )];
             } else {
-                $filas = $this->proyector->proyectarFilas($asiento, $mapaCuentas, $mapaPersonas);
+                $filas = $this->proyector->proyectarFilas($asiento, $mapaCuentas, $mapaPersonas, $centroSg);
             }
             foreach ($filas as $fila) {
                 if (!empty($filtros['origen']) && $fila->origen !== strtoupper((string) $filtros['origen'])) {
@@ -106,5 +111,15 @@ final class ListarApuntes
     private function clavePar(Asiento $imputacion, Asiento $tesoreria): string
     {
         return (string) ($imputacion->id ?? 0) . ':' . (string) ($tesoreria->id ?? 0);
+    }
+
+    private function esCentroSg(int $centroId): bool
+    {
+        if ($this->centros === null) {
+            return false;
+        }
+        $centro = $this->centros->porId($centroId);
+
+        return $centro !== null && CatalogoPlanesContables::esCentroSg($centro->planContableCodigo);
     }
 }

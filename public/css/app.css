@@ -130,6 +130,18 @@ body.prevision-personal-todos .prevision-hoja-mini .prevision-print-cab {
 }
 tr.cierre { background: #fffbeb; }
 .grid-form, .filters { display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: end; margin-bottom: 1rem; }
+.form-ejercicio-alta input[name="anio"] {
+  width: calc(5ch + 1.75rem);
+  max-width: calc(5ch + 1.75rem);
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.form-ejercicio-alta button[type="submit"] {
+  flex: 0 0 auto;
+  align-self: end;
+}
 .presu-num-s { margin: 0 0 1rem; }
 .presu-num-s label {
   display: inline-flex;
@@ -236,6 +248,34 @@ hr.separa-apunte { border: 0; border-top: 1px solid var(--line, #ccc); margin: 0
   align-self: flex-start;
   box-sizing: border-box;
 }
+.centro-nombres input[name="iniciales"] {
+  width: calc(8ch + 0.9rem);
+  max-width: calc(8ch + 0.9rem);
+  flex: 0 0 auto;
+  box-sizing: border-box;
+}
+.centro-nombres input[name="grupo"] {
+  width: calc(3ch + 1.75rem);
+  max-width: calc(3ch + 1.75rem);
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.nombres-num-s label {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: .45rem;
+}
+.nombres-num-s input[name="num_s"] {
+  width: calc(6ch + 1.75rem);
+  max-width: calc(6ch + 1.75rem);
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
 .nombres-listado { margin-top: 1.5rem; }
 .nombres-listado-titulo { font-size: 1.1rem; margin: 0 0 .75rem; }
 .nombres-listado #tabla-personas { margin-top: 0; }
@@ -303,6 +343,12 @@ button[type="button"] { background: #4a5568; }
 button.peligro, button[type="button"].peligro { background: var(--err); }
 .ok { color: var(--ok); }
 .muted { color: #4a5568; }
+td.admin-usuario-acciones { white-space: nowrap; }
+td.admin-usuario-acciones button + button { margin-left: .35rem; }
+ul.admin-vinculos { list-style: none; margin: 0; padding: 0; font-size: .9rem; }
+ul.admin-vinculos li { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .5rem; padding: .15rem 0; }
+ul.admin-vinculos li + li { border-top: 1px solid #edf2f7; }
+button.btn-quitar-vinculo { font-size: .75rem; padding: .15rem .4rem; }
 p.peligro { color: var(--err); }
 .error { color: var(--err); }
 .sugerencias-wrap { position: relative; min-width: 16rem; }

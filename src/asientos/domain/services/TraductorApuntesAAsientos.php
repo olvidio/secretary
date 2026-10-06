@@ -35,6 +35,7 @@ final class TraductorApuntesAAsientos
         callable $cuentaPersonalDe,
         callable $cuentaDeudoresVivienda,
         string $origenAsiento = 'import',
+        bool $admiteTraspasoCajaBanco = true,
     ): array {
         $omitidos9 = 0;
         $fusionados = 0;
@@ -47,7 +48,7 @@ final class TraductorApuntesAAsientos
                 ++$omitidos9;
                 continue;
             }
-            if ($this->esTraspasoCajaBanco($apunte, $cuentaConcepto)) {
+            if ($admiteTraspasoCajaBanco && $this->esTraspasoCajaBanco($apunte, $cuentaConcepto)) {
                 $traspasos[] = $apunte;
                 continue;
             }
@@ -111,7 +112,7 @@ final class TraductorApuntesAAsientos
      * @return list<list<Apunte>>
      */
     /**
-     * En H16n, G/41 y G/42 son puentes caja↔banco; en H16s el 41 (y 42–54) son gastos del plan sg.
+     * Solo H16n: G/41 y G/42 puente caja↔banco. En H16s 41–54 son gastos (ver ContabilidadCentroSg).
      *
      * @param callable(string, string): Cuenta $cuentaConcepto
      */

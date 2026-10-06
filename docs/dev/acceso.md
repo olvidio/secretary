@@ -3,6 +3,10 @@
 Identidades con email (y alias opcional), TOTP RFC 6238 obligatorio para el centro,
 códigos de recuperación, CSRF y autorización por tabla.
 
+Modelo **objetivo** (centro persistente, login siempre humano, `identidad_centro` =
+mandato): decisión **D15** en `docs/dev/d15_identidad_mandato_centro.md`. Invitar otro
+secretario: `InvitarUsuarioCentro` (correo primero; ver formulario en Configuración/Centros).
+
 ## Flujo
 
 1. `GET /login` — usuario o email + contraseña. El alias `scl` sigue valiendo.

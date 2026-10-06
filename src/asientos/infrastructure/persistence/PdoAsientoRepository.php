@@ -121,14 +121,14 @@ final class PdoAsientoRepository implements AsientoRepository
         }
     }
 
-    public function actualizar(Asiento $asiento): Asiento
+    public function actualizar(Asiento $asiento, bool $permitirEjercicioCerrado = false): Asiento
     {
         if ($asiento->id === null) {
             throw new InvalidArgumentException('actualizar requiere un asiento persistido');
         }
         $asiento->assertCuadre();
         $this->validarCuentasImputables($asiento);
-        $this->validarEjercicioAbierto($asiento->ejercicioId);
+        $this->validarEjercicioAbierto($asiento->ejercicioId, $permitirEjercicioCerrado);
 
         $transaccionPropia = !$this->pdo->inTransaction();
         if ($transaccionPropia) {

@@ -40,6 +40,94 @@ set_exception_handler(static function (Throwable $e): void {
 $kernel = Kernel::boot();
 $pdo = $kernel->pdo();
 
+if ($cmd === 'sg:reparar-traspasos') {
+    $dryRun = true;
+    $centro = null;
+    foreach (array_slice($argv, 2) as $arg) {
+        if (!is_string($arg)) {
+            continue;
+        }
+        if ($arg === '--execute') {
+            $dryRun = false;
+            continue;
+        }
+        if (str_starts_with($arg, '--centro=')) {
+            $centro = substr($arg, strlen('--centro='));
+        }
+    }
+    $caso = $kernel->container()->get(\src\asientos\application\RepararAsientosTraspasoCentroSg::class);
+    $r = $caso->ejecutar($dryRun, $centro !== '' ? $centro : null);
+    fwrite(STDOUT, sprintf(
+        "%s: %d reparados, %d omitidos\n",
+        $dryRun ? 'Simulación' : 'Hecho',
+        $r['reparados'],
+        $r['omitidos'],
+    ));
+    foreach ($r['detalles'] as $linea) {
+        fwrite(STDOUT, '  ' . $linea . "\n");
+    }
+    exit(0);
+}
+
+if ($cmd === 'cuentas:duplicados-correo') {
+    $listar = $kernel->container()->get(\src\administracion\application\ListarIdentidadesDuplicadasPorEmail::class);
+    $grupos = $listar->ejecutar();
+    if ($grupos === []) {
+        fwrite(STDOUT, "No hay correos con varias cuentas activas.\n");
+        exit(0);
+    }
+    foreach ($grupos as $g) {
+        fwrite(STDOUT, $g['email'] . "\n");
+        foreach ($g['identidades'] as $i) {
+            fwrite(STDOUT, sprintf(
+                "  id=%d alias=%s centros=%d personas=%d\n",
+                $i['id'],
+                $i['alias'] ?? '-',
+                $i['centros'],
+                $i['personas'],
+            ));
+        }
+    }
+    exit(0);
+}
+
+if ($cmd === 'cuentas:fusionar-correo') {
+    $email = '';
+    $primaryId = 0;
+    $confirmar = false;
+    foreach (array_slice($argv, 2) as $arg) {
+        if (!is_string($arg)) {
+            continue;
+        }
+        if ($arg === '--confirmar') {
+            $confirmar = true;
+            continue;
+        }
+        if (str_starts_with($arg, '--email=')) {
+            $email = substr($arg, strlen('--email='));
+            continue;
+        }
+        if (str_starts_with($arg, '--principal=')) {
+            $primaryId = (int) substr($arg, strlen('--principal='));
+        }
+    }
+    if ($email === '' || $primaryId <= 0) {
+        fwrite(STDERR, "Uso: cuentas:fusionar-correo --email=... --principal=ID [--confirmar]\n");
+        exit(1);
+    }
+    $resumen = $kernel->container()->get(\src\administracion\application\ResumenFusionIdentidadesLegacy::class);
+    $prev = $resumen->ejecutar($email, $primaryId);
+    fwrite(STDOUT, ($prev['texto'] ?? '') . "\n");
+    if (!$confirmar) {
+        fwrite(STDOUT, "Simulación. Añada --confirmar para ejecutar.\n");
+        exit(0);
+    }
+    $fusion = $kernel->container()->get(\src\administracion\application\FusionarIdentidadesLegacy::class);
+    $r = $fusion->ejecutar($email, $primaryId, 0, true);
+    fwrite(STDOUT, sprintf("Fusionadas %d cuenta(s); principal id=%d\n", $r['cuentas_fusionadas'], $r['identidad_principal_id']));
+    exit(0);
+}
+
 if ($cmd === 'cuentas:purga-bajas-centro') {
     $purga = $kernel->container()->get(\src\administracion\application\PurgarBajasCentroProgramadas::class);
     $resultado = $purga->ejecutar();
@@ -284,5 +372,8 @@ fwrite(STDOUT, "Uso:\n"
     . "  php bin/console.php import:excel [fichero.xlsm] [--dry-run] [--centro=CODIGO] [--ejercicio=ETIQUETA]\n"
     . "  php bin/console.php import:excel-sg fichero.xlsm --centro=CODIGO\n"
     . "  php bin/console.php asientos:convertir\n"
-    . "  php bin/console.php cuentas:purga-bajas-centro\n");
+    . "  php bin/console.php cuentas:duplicados-correo\n"
+    . "  php bin/console.php cuentas:fusionar-correo --email=... --principal=ID [--confirmar]\n"
+    . "  php bin/console.php cuentas:purga-bajas-centro\n"
+    . "  php bin/console.php sg:reparar-traspasos [--centro=CODIGO] [--execute]\n");
 exit(1);

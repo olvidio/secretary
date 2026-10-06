@@ -23,7 +23,7 @@ Añade una comprobación más al entrar, además de la contraseña: un código d
 - El código de seis dígitos vale mientras está en pantalla; se admiten también los treinta segundos anteriores y posteriores, por si el reloj del móvil va desajustado.
 - Cinco códigos erróneos seguidos bloquean la cuenta durante quince minutos.
 - Una vez activado, la pantalla solo informa de que está activo: no hay opción de desactivarlo por cuenta propia.
-- Si se pierden el móvil y los códigos de recuperación, no hay forma de entrar por cuenta propia: hay que pedir ayuda a quien administra el programa.
+- Si se pierden el móvil y los códigos de recuperación, no hay forma de entrar por cuenta propia: hay que pedir ayuda al administrador de plataforma, que puede usar **Reiniciar 2FA** en `/admin/usuarios` para que vuelva a escanear un QR.
 
 ## Problemas frecuentes
 

@@ -22,8 +22,9 @@ final class ProyectorAsientoAFilaExcel
         Asiento $asiento,
         array $cuentasPorId,
         array $personasPorId,
+        bool $centroSg = false,
     ): FilaApunteExcel {
-        $filas = $this->proyectarFilas($asiento, $cuentasPorId, $personasPorId);
+        $filas = $this->proyectarFilas($asiento, $cuentasPorId, $personasPorId, $centroSg);
         if ($filas === []) {
             throw new \InvalidArgumentException('El asiento no tiene líneas proyectables a apunte');
         }
@@ -40,6 +41,7 @@ final class ProyectorAsientoAFilaExcel
         Asiento $asiento,
         array $cuentasPorId,
         array $personasPorId,
+        bool $centroSg = false,
     ): array {
         if ($asiento->id === null) {
             throw new \InvalidArgumentException('El asiento debe estar persistido para proyectar');
@@ -56,7 +58,7 @@ final class ProyectorAsientoAFilaExcel
             return $this->proyectarFilasAsignacion($asiento, $cuentasMov, $personasPorId);
         }
 
-        return [$this->proyectarFila($asiento, $cuentasMov, $personasPorId, null)];
+        return [$this->proyectarFila($asiento, $cuentasMov, $personasPorId, null, $centroSg)];
     }
 
     /**
@@ -253,13 +255,16 @@ final class ProyectorAsientoAFilaExcel
         array $cuentasMov,
         array $personasPorId,
         ?array $conceptoForzado,
+        bool $centroSg = false,
     ): FilaApunteExcel {
-        $origen = $this->deducirOrigen($asiento, $cuentasMov);
+        $origen = $this->deducirOrigen($asiento, $cuentasMov, $centroSg);
         $concepto = $conceptoForzado ?? $this->movimientoConcepto($cuentasMov);
         $conceptoCodigo = $asiento->conceptoCodigo
             ?? ($concepto !== null ? $concepto['cuenta']->codigo : '');
         if ($conceptoCodigo === '' && $asiento->tipo === 'traspaso') {
-            $conceptoCodigo = $this->codigoTraspasoCajaBanco($cuentasMov);
+            $conceptoCodigo = $centroSg
+                ? $this->inferirCodigoGastoLegacy($cuentasMov)
+                : $this->codigoTraspasoCajaBanco($cuentasMov);
         }
 
         $cantidad = $this->calcularCantidad($asiento->tipo, $concepto, $cuentasMov);
@@ -296,9 +301,10 @@ final class ProyectorAsientoAFilaExcel
         Asiento $tesoreria,
         array $cuentasPorId,
         array $personasPorId,
+        bool $centroSg = false,
     ): FilaApunteExcel {
-        $filaConcepto = $this->proyectar($imputacion, $cuentasPorId, $personasPorId);
-        $origen = $this->deducirOrigen($tesoreria, $this->cuentasDe($tesoreria, $cuentasPorId));
+        $filaConcepto = $this->proyectar($imputacion, $cuentasPorId, $personasPorId, $centroSg);
+        $origen = $this->deducirOrigen($tesoreria, $this->cuentasDe($tesoreria, $cuentasPorId), $centroSg);
         $id = $imputacion->id ?? $tesoreria->id;
         if ($id === null) {
             throw new \InvalidArgumentException('El asiento debe estar persistido para proyectar');
@@ -338,9 +344,9 @@ final class ProyectorAsientoAFilaExcel
     /**
      * @param list<array{mov: Movimiento, cuenta: Cuenta}> $cuentasMov
      */
-    private function deducirOrigen(Asiento $asiento, array $cuentasMov): string
+    private function deducirOrigen(Asiento $asiento, array $cuentasMov, bool $centroSg = false): string
     {
-        if ($asiento->tipo === 'traspaso') {
+        if ($asiento->tipo === 'traspaso' && !$centroSg) {
             return $asiento->conceptoCodigo === '42' ? 'B' : 'C';
         }
 
@@ -399,6 +405,17 @@ final class ProyectorAsientoAFilaExcel
      * @param list<array{mov: Movimiento, cuenta: Cuenta}> $cuentasMov
      */
     private function codigoTraspasoCajaBanco(array $cuentasMov): string
+    {
+        return $this->inferirCodigoGastoLegacy($cuentasMov);
+    }
+
+    /**
+     * Asientos legacy mal clasificados (solo tesorería): atribuye 41 o 42 como en H16n.
+     * En H16s esos códigos son gastos, no traspaso.
+     *
+     * @param list<array{mov: Movimiento, cuenta: Cuenta}> $cuentasMov
+     */
+    private function inferirCodigoGastoLegacy(array $cuentasMov): string
     {
         foreach ($cuentasMov as $item) {
             if ($item['cuenta']->tipo !== 'tesoreria') {

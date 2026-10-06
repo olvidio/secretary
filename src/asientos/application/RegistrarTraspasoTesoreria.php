@@ -7,6 +7,8 @@ namespace src\asientos\application;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\domain\contracts\CentroRepository;
+use src\plan\domain\services\ContabilidadCentroSg;
 use src\ambito\domain\contracts\CuentaFisicaRepository;
 use src\ambito\domain\contracts\CuentaRepository;
 use src\asientos\domain\contracts\AsientoRepository;
@@ -23,6 +25,7 @@ final class RegistrarTraspasoTesoreria
         private readonly CuentaFisicaRepository $fisicas,
         private readonly ConfiguracionRepository $config,
         private readonly ResolverAmbitoActual $ambito,
+        private readonly CentroRepository $centros,
     ) {
     }
 
@@ -43,6 +46,10 @@ final class RegistrarTraspasoTesoreria
         }
 
         $contexto = $this->ambito->ejecutar();
+        $centro = $this->centros->porId($contexto->centroId);
+        if ($centro !== null && !ContabilidadCentroSg::admiteTraspasoCajaBanco($centro->planContableCodigo)) {
+            throw new InvalidArgumentException(_('En un centro sg no hay traspasos entre caja y banco; anote el gasto o ingreso con su concepto'));
+        }
         $this->validarFisicaDelCentro($contexto->centroId, $origenId);
         $this->validarFisicaDelCentro($contexto->centroId, $destinoId);
 

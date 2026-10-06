@@ -17,7 +17,7 @@ Es un atajo al mismo dato que aparece en la pantalla de Configuración, para no 
 
 ## Reglas que conviene saber
 
-- La fecha de cierre **no** es el final del ejercicio: es la fecha hasta la que se ha contabilizado. El final del ejercicio se fija en Configuración y en Ejercicios.
+- La fecha de cierre **no** es el final del ejercicio: es la fecha hasta la que se ha contabilizado. El periodo completo se define en **Ejercicios**; aquí solo se mueve la **corte** del ejercicio abierto.
 - La entrada de apuntes propone el día de hoy si estamos dentro del mes de la fecha de cierre; si no, propone la propia fecha de cierre.
 - Cambiarla no borra ni mueve ningún apunte: solo cambia el mes sobre el que se trabaja.
 

@@ -273,6 +273,38 @@ final class PdoIdentidadRepository implements IdentidadRepository
         return $out;
     }
 
+    public function personasVinculoAdminDe(int $identidadId): array
+    {
+        $st = $this->pdo->prepare(
+            'SELECT p.id AS persona_id, p.iniciales, p.nombre, p.apellidos, p.centro_id,
+                    c.nombre AS centro_nombre, c.codigo AS centro_codigo, c.tipo AS centro_tipo, ip.anio
+             FROM identidad_persona ip
+             INNER JOIN personas p ON p.id = ip.persona_id
+             INNER JOIN centros c ON c.id = p.centro_id
+             WHERE ip.identidad_id = :id
+             ORDER BY (c.tipo = \'p\') DESC, c.nombre, p.iniciales'
+        );
+        $st->execute([':id' => $identidadId]);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $tipo = (string) $row['centro_tipo'];
+            $nombre = trim((string) $row['nombre'] . ' ' . (string) $row['apellidos']);
+            $out[] = [
+                'persona_id' => (int) $row['persona_id'],
+                'iniciales' => (string) $row['iniciales'],
+                'nombre_completo' => $nombre,
+                'centro_id' => (int) $row['centro_id'],
+                'centro_nombre' => (string) $row['centro_nombre'],
+                'centro_codigo' => (string) $row['centro_codigo'],
+                'centro_tipo' => $tipo,
+                'es_libro_personal' => $tipo === 'p',
+                'anio' => isset($row['anio']) && $row['anio'] !== null ? (int) $row['anio'] : null,
+            ];
+        }
+
+        return $out;
+    }
+
     public function vincularCentro(int $identidadId, int $centroId, string $rol): void
     {
         $st = $this->pdo->prepare(
@@ -281,6 +313,14 @@ final class PdoIdentidadRepository implements IdentidadRepository
              ON CONFLICT (identidad_id, centro_id) DO UPDATE SET rol = excluded.rol'
         );
         $st->execute([':i' => $identidadId, ':c' => $centroId, ':r' => $rol]);
+    }
+
+    public function desvincularCentro(int $identidadId, int $centroId): void
+    {
+        $st = $this->pdo->prepare(
+            'DELETE FROM identidad_centro WHERE identidad_id = :i AND centro_id = :c'
+        );
+        $st->execute([':i' => $identidadId, ':c' => $centroId]);
     }
 
     public function rolEnCentro(int $identidadId, int $centroId): ?string
@@ -434,6 +474,14 @@ final class PdoIdentidadRepository implements IdentidadRepository
             'UPDATE identidad_totp SET confirmado_at = :c WHERE identidad_id = :id'
         );
         $st->execute([':c' => $cuando->format('c'), ':id' => $identidadId]);
+    }
+
+    public function reiniciarTotp(int $identidadId): void
+    {
+        $this->pdo->prepare('DELETE FROM identidad_recovery WHERE identidad_id = :id')
+            ->execute([':id' => $identidadId]);
+        $this->pdo->prepare('DELETE FROM identidad_totp WHERE identidad_id = :id')
+            ->execute([':id' => $identidadId]);
     }
 
     public function reemplazarRecovery(int $identidadId, array $hashes): void
@@ -730,6 +778,55 @@ final class PdoIdentidadRepository implements IdentidadRepository
         }
 
         return $out;
+    }
+
+    public function listarGruposEmailDuplicado(): array
+    {
+        $emails = $this->pdo->query(
+            'SELECT lower(email) AS em
+             FROM identidades
+             WHERE es_admin = FALSE AND activo = TRUE
+             GROUP BY lower(email)
+             HAVING COUNT(*) > 1
+             ORDER BY lower(email)'
+        )->fetchAll();
+        $grupos = [];
+        foreach ($emails as $row) {
+            $email = (string) $row['em'];
+            $identidades = [];
+            foreach ($this->listarPorEmail($email) as $identidad) {
+                if ($identidad->id === null || !$identidad->activo || $identidad->esAdmin) {
+                    continue;
+                }
+                $id = $identidad->id;
+                $identidades[] = [
+                    'id' => $id,
+                    'alias' => $identidad->alias,
+                    'nombre' => $identidad->nombre,
+                    'centros' => count($this->centrosDe($id)),
+                    'personas' => count($this->personasDe($id)),
+                    'es_secretario' => $this->esCuentaSecretarioCentro($id),
+                    'es_personal' => $this->esCuentaPersonal($id),
+                ];
+            }
+            if (count($identidades) > 1) {
+                $grupos[] = ['email' => $email, 'identidades' => $identidades];
+            }
+        }
+
+        return $grupos;
+    }
+
+    public function idsActivasPorEmail(string $email): array
+    {
+        $ids = [];
+        foreach ($this->listarPorEmail($email) as $identidad) {
+            if ($identidad->id !== null && $identidad->activo && !$identidad->esAdmin) {
+                $ids[] = $identidad->id;
+            }
+        }
+
+        return $ids;
     }
 
     public function contarSecretariosDeCentro(int $centroId): int

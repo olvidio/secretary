@@ -12,7 +12,7 @@ interface AsientoRepository
     public function guardar(Asiento $asiento, bool $permitirEjercicioCerrado = false): Asiento;
 
     /** Reescribe cabecera y movimientos conservando id y número (D8). */
-    public function actualizar(Asiento $asiento): Asiento;
+    public function actualizar(Asiento $asiento, bool $permitirEjercicioCerrado = false): Asiento;
 
     /** Marca `anulado_at`; no borra. Solo asientos `origen = import` (D8). */
     public function anular(int $id): void;

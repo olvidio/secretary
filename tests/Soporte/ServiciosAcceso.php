@@ -87,7 +87,10 @@ final class ServiciosAcceso
             new PdoCentroRepository($pdo),
             $crearEjercicio,
             new PdoPobladorCentro($pdo),
-            new AsegurarIdentidadCentro($identidades, new \src\acceso\application\QuedaEscritorCentro($identidades)),
+            new AsegurarIdentidadCentro(new \src\acceso\application\InvitarUsuarioCentro(
+                $identidades,
+                new \src\acceso\application\QuedaEscritorCentro($identidades),
+            )),
             new PdoPartidaLaboresRepository($pdo, new PdoPlanConceptoRepository($pdo)),
             new PdoPlanContableRepository($pdo),
         );

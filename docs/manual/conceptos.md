@@ -39,7 +39,9 @@ Sirve para recordar qué código toca antes de teclear un apunte, y para saber q
 - Ruta: `/conceptos-g`
 - Menú: Plan y ejercicio → Conceptos
 
-Lista de consulta del único libro. Los destinos con nombre (del 42 al 54) se dan de alta en el presupuesto, no aquí.
+Lista de consulta del único libro. Los códigos **41** (Necesidades generales) y **42–54** (destinos con nombre) son **gastos**, igual que el 21 o el 43: no hay naturaleza «transferencia» ni traspaso caja↔banco como en un centro n.
+
+Debajo de la tabla está **Destinos del centro**: se añade una fila (el programa propone el siguiente código libre del 42 al 54), se escribe el nombre y se pulsa «Guardar destinos». Entonces esa partida aparece en el presupuesto, en el 613 y al anotar un apunte. El 41 es fijo. No se puede quitar un destino que ya tiene apuntes. Como máximo hay trece (del 42 al 54).
 
 ## Asociación y fundación
 

@@ -46,6 +46,7 @@ use src\ambito\infrastructure\persistence\PdoCentroRepository;
 use src\ambito\infrastructure\persistence\PdoCuentaFisicaRepository;
 use src\ambito\infrastructure\persistence\PdoCuentaRepository;
 use src\asientos\application\ConvertirApuntesAAsientos;
+use src\asientos\application\RepararAsientosTraspasoCentroSg;
 use src\asientos\application\RegistrarPrestamoEntreLibros;
 use src\asientos\application\RegistrarTraspasoTesoreria;
 use src\asientos\domain\contracts\AsientoRepository;
@@ -133,6 +134,7 @@ use src\informes\application\ObtenerSaldosTesoreria;
 use src\informes\domain\contracts\Informe613MesRepository;
 use src\informes\domain\services\CuadreViviendaGenerales;
 use src\informes\domain\services\MesesSinMovimiento;
+use src\informes\domain\services\RealizadoPorConceptoCentroSg;
 use src\informes\infrastructure\http\InformeController;
 use src\informes\domain\contracts\EstadisticasSg;
 use src\informes\infrastructure\persistence\PdoEstadisticasSg;
@@ -343,10 +345,15 @@ return [
     Informe613MesRepository::class => autowire(PdoInforme613MesRepository::class),
     TraductorApuntesAAsientos::class => autowire(),
     ProyectorAsientoAFilaExcel::class => autowire(),
-    ConvertirApuntesAAsientos::class => autowire(),
+    RepararAsientosTraspasoCentroSg::class => autowire(),
+    ConvertirApuntesAAsientos::class => autowire()
+        ->constructorParameter('centros', get(CentroRepository::class)),
+    ListarApuntes::class => autowire()
+        ->constructorParameter('centros', get(CentroRepository::class)),
     src\importacion\domain\contracts\ImportFilaRepository::class => autowire(src\importacion\infrastructure\persistence\PdoImportFilaRepository::class),
     src\importacion\domain\contracts\ImportEjecucionRepository::class => autowire(src\importacion\infrastructure\persistence\PdoImportEjecucionRepository::class),
-    src\importacion\application\SincronizarAsientosImportados::class => autowire(),
+    src\importacion\application\SincronizarAsientosImportados::class => autowire()
+        ->constructorParameter('centros', get(CentroRepository::class)),
     ResolverAmbitoActual::class => factory(static function (
         ConfiguracionRepository $config,
         CentroRepository $centros,
@@ -457,6 +464,7 @@ return [
     GuardarNumSCentroSg::class => autowire(),
     BorrarPersona::class => autowire(),
     VincularEmailPersona::class => autowire(),
+    src\acceso\application\InvitarUsuarioCentro::class => autowire(),
     AsegurarIdentidadCentro::class => autowire(),
     QuedaEscritorCentro::class => autowire(),
     CambiarRolUsuarioCentro::class => autowire(),
@@ -464,7 +472,6 @@ return [
     CrearCentro::class => autowire(),
     VaciarDatosCentro::class => autowire(),
     ListarConceptos::class => autowire(),
-    ListarApuntes::class => autowire(),
     BuscarSugerenciasObservacion::class => autowire(),
     CrearApunte::class => autowire(),
     ActualizarApunte::class => autowire(),
@@ -499,14 +506,23 @@ return [
     BorrarLibroPersonalDePersona::class => autowire(),
     AdminPlanController::class => autowire(),
     AdminCentroController::class => autowire(),
+    src\administracion\application\ListarUsuariosAdmin::class => autowire(),
+    src\administracion\application\AdminDesvincularCentroUsuario::class => autowire(),
+    src\administracion\application\AdminDesvincularPersonaUsuario::class => autowire(),
+    src\administracion\application\ListarIdentidadesDuplicadasPorEmail::class => autowire(),
+    src\administracion\application\ResumenFusionIdentidadesLegacy::class => autowire(),
+    src\administracion\application\FusionarIdentidadesLegacy::class => autowire(),
+    src\administracion\application\AdminReiniciarTotpUsuario::class => autowire(),
     AdminUsuarioController::class => autowire(),
     AdminLegalController::class => autowire(),
     EstadisticasSg::class => autowire(PdoEstadisticasSg::class),
+    RealizadoPorConceptoCentroSg::class => autowire(),
     ObtenerResumen613::class => autowire()
         ->constructorParameter('centros', get(CentroRepository::class))
         ->constructorParameter('destinosSg', get(DestinoSgRepository::class))
         ->constructorParameter('presupuestoSg', get(PresupuestoSgRepository::class))
-        ->constructorParameter('estadisticasSg', get(EstadisticasSg::class)),
+        ->constructorParameter('estadisticasSg', get(EstadisticasSg::class))
+        ->constructorParameter('realizadoCentroSg', get(RealizadoPorConceptoCentroSg::class)),
     GuardarInforme613Mes::class => autowire(),
     ObtenerE37::class => autowire(),
     CalcularSaldos::class => autowire(),

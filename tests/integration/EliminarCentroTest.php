@@ -111,10 +111,10 @@ final class EliminarCentroTest extends TestCase
                 new SincronizarConfiguracionConEjercicio($config),
             ),
             new PdoPobladorCentro($this->pdo),
-            new AsegurarIdentidadCentro(
+            new AsegurarIdentidadCentro(new \src\acceso\application\InvitarUsuarioCentro(
                 new PdoIdentidadRepository($this->pdo),
                 new \src\acceso\application\QuedaEscritorCentro(new PdoIdentidadRepository($this->pdo)),
-            ),
+            )),
             new \src\plan\infrastructure\persistence\PdoPartidaLaboresRepository(
                 $this->pdo,
                 new \src\plan\infrastructure\persistence\PdoPlanConceptoRepository($this->pdo),
