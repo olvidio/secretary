@@ -1,8 +1,8 @@
 # Preferencias de la cuenta
 
 - Ámbito: todos
-- Ruta: `/cuenta/mail`, `/cuenta/password`, `/cuenta/layout`, `/cuenta/idioma`, `/cuenta/centro`, `/cuenta/persona`, `/cuenta/tipo`, `/cuenta/baja`, `/confirmar-baja`
-- Menú: menú del nombre (esquina de arriba) → Mail, Contraseña, Remanente (libro personal), 2FA, Layout, Idioma, Centro (secretario) o Copia personal (persona), y solo si aplica Persona activa o Tipo
+- Ruta: `/cuenta/mail`, `/cuenta/password`, `/cuenta/layout`, `/cuenta/idioma`, `/cuenta/centro`, `/cuenta/ambito`, `/cuenta/persona`, `/cuenta/tipo`, `/cuenta/baja`, `/confirmar-baja`
+- Menú: menú del nombre (esquina de arriba) → Mail, Contraseña, Remanente (libro personal), 2FA, Layout, Idioma, **Ámbito** (si es secretario y tiene libro personal), Centro (solo secretario sin libro personal) o Copia personal (persona), y solo si aplica Persona activa
 - Quién: cualquier persona; el apartado del centro, solo el secretario del centro
 
 ## Para qué sirve
@@ -29,7 +29,11 @@ Guarda la preferencia entre español y catalán. Al guardar, la pantalla se reca
 
 ### Centro
 
-Elige el centro con el que se trabaja en esta sesión. Solo aparecen aquellos de los que la cuenta es secretaria.
+Elige el centro con el que se trabaja en esta sesión. Solo aparecen aquellos de los que la cuenta es secretaria. Si la misma identidad también tiene libro personal, en el menú verá **Ámbito** en lugar de Centro y Tipo por separado.
+
+### Ámbito
+
+Solo si **la misma identidad** es secretaria de algún centro **y** tiene libro personal o vínculo de persona. En un solo desplegable puede elegir **Mis cuentas (individual)** o cualquiera de sus centros. Al entrar, si aplica este caso, la pantalla de elección también lista el libro personal junto a los centros (no solo los centros).
 
 ### Persona activa
 
@@ -37,7 +41,7 @@ Solo sale en el menú si hay **más de un** vínculo aprobado a centros tipo n (
 
 ### Tipo
 
-Solo sale en el menú si **la misma identidad** es secretaria de algún centro **y** tiene libro personal o vínculo de persona. Cambia el modo de la sesión (centro o Mis cuentas), sin borrar datos. Las cuentas separadas (registro personal frente a registro de centro) deben usarse entrando con cada una; no hace falta «Tipo».
+Pantalla heredada: si tiene **Ámbito** en el menú, el enlace antiguo redirige allí. Las cuentas separadas (registro personal frente a registro de centro) deben usarse entrando con cada una desde «Elegir cuenta».
 
 ### Dar de baja la cuenta
 
@@ -47,7 +51,7 @@ Solo en **cuentas personales** (registro desde el login, sin rol de secretario).
 
 - Solo se puede pasar a secretario del centro si la cuenta está dada de alta como tal y tiene activado el código de seguridad de seis dígitos.
 - Solo se puede pasar al libro personal si la identidad tiene al menos un vínculo de persona (incluido el ámbito del libro propio creado al registrarse).
-- Si solo hay un modo posible, **Tipo** no aparece en el menú.
+- Si solo hay un modo posible, **Ámbito** no aparece en el menú (solo **Centro** o el libro personal, según el caso).
 - Al cambiar el layout o el idioma, la pantalla se recarga para aplicar el cambio.
 
 ## Problemas frecuentes

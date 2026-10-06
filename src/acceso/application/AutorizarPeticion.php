@@ -24,6 +24,7 @@ final class AutorizarPeticion
     public function __construct(
         private readonly AccesoRutaRepository $rutas,
         private readonly IdentidadRepository $identidades,
+        private readonly ListarAmbitosIdentidad $ambitos,
     ) {
     }
 
@@ -94,7 +95,9 @@ final class AutorizarPeticion
                 return $this->denegar($esApi, _("Debe confirmar el segundo factor"), 401, '/totp-activar');
             }
             if ($centroId === null) {
-                return $this->denegar($esApi, _("Seleccione un centro"), 401, '/elegir-centro');
+                $destino = $this->ambitos->rutaSiFaltaCentro($identidadId);
+
+                return $this->denegar($esApi, _("Seleccione un centro"), 401, $destino);
             }
             if (
                 $mutacion

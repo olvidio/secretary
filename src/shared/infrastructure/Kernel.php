@@ -144,6 +144,7 @@ final class Kernel
             '/totp-activar', '/api/totp/confirmar' => '/totp-activar',
             '/totp-verificar', '/api/totp/verificar' => '/totp-verificar',
             '/elegir-centro', '/api/centros/elegir' => '/elegir-centro',
+            '/elegir-ambito', '/api/ambitos/elegir' => '/elegir-ambito',
             '/elegir-persona', '/api/personas/elegir' => '/elegir-persona',
             '/olvide-contrasena' => '/olvide-contrasena',
             '/restablecer-contrasena' => '/olvide-contrasena',

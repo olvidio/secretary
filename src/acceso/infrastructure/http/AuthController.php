@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace src\acceso\infrastructure\http;
 
+use src\acceso\application\CambiarAmbitoUsuario;
 use src\acceso\application\ConfirmarTotp;
 use src\acceso\application\IniciarSesion;
+use src\acceso\application\ListarAmbitosIdentidad;
 use src\acceso\application\NotificarRegistroUsuario;
 use src\acceso\application\PrepararTotp;
 use src\acceso\application\ReenviarCorreoVerificacion;
@@ -43,6 +45,8 @@ final class AuthController
         private readonly CatalogoDocumentosLegales $documentos,
         private readonly SolicitarRestablecerPassword $solicitarRestablecerPassword,
         private readonly RestablecerPassword $restablecerPassword,
+        private readonly ListarAmbitosIdentidad $listarAmbitos,
+        private readonly CambiarAmbitoUsuario $cambiarAmbito,
     ) {
     }
 
@@ -217,11 +221,36 @@ final class AuthController
         return $this->exitoLogin($request, '/totp-verificar');
     }
 
+    public function elegirAmbito(Request $request, array $vars = []): Response
+    {
+        $id = isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : null;
+        if ($id === null) {
+            return Response::redirect('/login');
+        }
+        $ambito = trim((string) $request->input('ambito', ''));
+        try {
+            $cambio = $this->cambiarAmbito->ejecutar($id, $ambito);
+        } catch (\InvalidArgumentException $e) {
+            if ($this->esJson($request)) {
+                return ContestarJson::error($e->getMessage(), 403);
+            }
+            $_SESSION['login_error'] = $e->getMessage();
+
+            return Response::redirect('/elegir-ambito');
+        }
+        $this->aplicarAmbitoEnSesion($id, $cambio);
+
+        return $this->exitoLogin($request, $cambio['siguiente']);
+    }
+
     public function elegirCentro(Request $request, array $vars = []): Response
     {
         $id = isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : null;
         if ($id === null) {
             return Response::redirect('/login');
+        }
+        if ($this->listarAmbitos->ejecutar($id)['puede_elegir_ambito']) {
+            return Response::redirect('/elegir-ambito');
         }
         $centroId = (int) $request->input('centro_id', 0);
         $ok = false;
@@ -465,8 +494,17 @@ final class AuthController
             $_SESSION['layout'] = $this->identidades->layoutDe($res->identidadId);
             $_SESSION['idioma'] = $this->identidades->idiomaDe($res->identidadId);
         }
-        if ($res->nivel === 'centro' && count($res->centros) === 1) {
-            $_SESSION['centro_id'] = $res->centros[0]['centro_id'];
+        if ($res->nivel === 'centro') {
+            $identidadId = $res->identidadId ?? 0;
+            $centroSesion = isset($_SESSION['centro_id']) ? (int) $_SESSION['centro_id'] : null;
+            $ruta = $this->listarAmbitos->rutaTrasLogin($identidadId, 'centro', $res->centros, $centroSesion);
+            if ($ruta !== null) {
+                unset($_SESSION['centro_id']);
+            } elseif (count($res->centros) === 1) {
+                $_SESSION['centro_id'] = $res->centros[0]['centro_id'];
+            } else {
+                unset($_SESSION['centro_id']);
+            }
         } else {
             unset($_SESSION['centro_id']);
         }
@@ -496,11 +534,42 @@ final class AuthController
 
             return '/yo';
         }
-        if ($res->nivel === 'centro' && count($res->centros) > 1 && empty($_SESSION['centro_id'])) {
-            return '/elegir-centro';
+        if ($res->nivel === 'centro') {
+            $ruta = $this->listarAmbitos->rutaTrasLogin(
+                $res->identidadId ?? 0,
+                'centro',
+                $res->centros,
+                isset($_SESSION['centro_id']) ? (int) $_SESSION['centro_id'] : null,
+            );
+            if ($ruta !== null) {
+                return $ruta;
+            }
         }
 
         return '/';
+    }
+
+    /** @param array{nivel: string, centros: list<array<string, mixed>>, persona_id: ?int, centro_id: ?int, siguiente: string} $cambio */
+    private function aplicarAmbitoEnSesion(int $identidadId, array $cambio): void
+    {
+        $_SESSION['nivel'] = $cambio['nivel'];
+        $_SESSION['centros'] = $cambio['centros'];
+        if ($cambio['nivel'] === 'centro') {
+            if ($cambio['centro_id'] !== null) {
+                $_SESSION['centro_id'] = $cambio['centro_id'];
+            } else {
+                unset($_SESSION['centro_id']);
+            }
+            unset($_SESSION['persona_id'], $_SESSION['personas_vinculo']);
+        } else {
+            $_SESSION['personas_vinculo'] = $this->personasVinculoDeIdentidad($identidadId);
+            if ($cambio['persona_id'] !== null) {
+                $_SESSION['persona_id'] = $cambio['persona_id'];
+            } else {
+                unset($_SESSION['persona_id']);
+            }
+            unset($_SESSION['centro_id']);
+        }
     }
 
     /** @return list<array<string, mixed>> */

@@ -19,14 +19,14 @@ if ($esLibroPersonal) {
     $itemsCuenta[] = ['cuenta-copias', '/cuenta/copias', _('Copia personal')];
     // En el centro la ayuda ya está en el menú principal.
     $itemsCuenta[] = ['yo-ayuda', '/yo/ayuda', _('Ayuda')];
-} else {
+}
+if (!empty($mostrarMenuAmbito)) {
+    $itemsCuenta[] = ['cuenta-ambito', '/cuenta/ambito', _('Ámbito')];
+} elseif (!$esLibroPersonal) {
     $itemsCuenta[] = ['cuenta-centro', '/cuenta/centro', _('Centro')];
 }
 if (!empty($mostrarMenuBaja)) {
     $itemsCuenta[] = ['cuenta-baja', '/cuenta/baja', _('Dar de baja la cuenta')];
-}
-if (!empty($mostrarMenuTipo)) {
-    $itemsCuenta[] = ['cuenta-tipo', '/cuenta/tipo', _('Tipo')];
 }
 ?>
 <details class="user-menu">

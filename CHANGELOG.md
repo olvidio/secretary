@@ -10,6 +10,14 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.20] — 2026-10-06
+
+### Añadido
+- **Ámbito** unificado: si la misma identidad es secretaria de centro(s) y tiene libro personal, al entrar puede elegir **Mis cuentas** o cualquier centro en una sola pantalla (`/elegir-ambito`). En el menú del nombre, **Ámbito** sustituye a **Tipo** y **Centro** por separado (`/cuenta/ambito`).
+
+### Cambiado
+- Manual de entrar y de preferencias de cuenta, alineado con la elección de ámbito.
+
 ## [0.1.19] — 2026-10-06
 
 ### Cambiado

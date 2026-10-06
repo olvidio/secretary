@@ -8,6 +8,7 @@ use PDO;
 use PDOException;
 use PHPUnit\Framework\TestCase;
 use src\acceso\application\AutorizarPeticion;
+use src\acceso\application\ListarAmbitosIdentidad;
 use src\acceso\application\IniciarSesion;
 use src\acceso\domain\entity\Identidad;
 use src\acceso\infrastructure\persistence\AccesoSeeder;
@@ -131,7 +132,11 @@ final class Nivel1Test extends TestCase
         self::assertSame('persona', $login->nivel);
         self::assertSame($deps['personaA'], $login->personaId);
 
-        $auth = new AutorizarPeticion(new PdoAccesoRutaRepository($this->pdo), $deps['identidades']);
+        $auth = new AutorizarPeticion(
+            new PdoAccesoRutaRepository($this->pdo),
+            $deps['identidades'],
+            new ListarAmbitosIdentidad($deps['identidades']),
+        );
         $centroApi = $auth->ejecutar(
             'src\\apuntes\\infrastructure\\http\\ApunteController',
             'list',

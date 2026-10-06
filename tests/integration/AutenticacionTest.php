@@ -7,6 +7,7 @@ namespace Tests\integration;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use src\acceso\application\AutorizarPeticion;
+use src\acceso\application\ListarAmbitosIdentidad;
 use src\acceso\application\ConfirmarTotp;
 use src\acceso\application\IniciarSesion;
 use src\acceso\application\ResolverPersonaActiva;
@@ -65,7 +66,11 @@ final class AutenticacionTest extends TestCase
         $ok = $verificar->ejecutar((int) $porAlias->identidadId, TotpRfc6238::codigo($datos['secreto']));
         self::assertSame('autenticado', $ok->estado);
 
-        $auth = new AutorizarPeticion(new PdoAccesoRutaRepository($pdo), $repo);
+        $auth = new AutorizarPeticion(
+            new PdoAccesoRutaRepository($pdo),
+            $repo,
+            new ListarAmbitosIdentidad($repo),
+        );
         $id = (int) $porAlias->identidadId;
         $centroId = $porAlias->centros[0]['centro_id'];
         $sinTotp = $auth->ejecutar(
@@ -128,7 +133,11 @@ final class AutenticacionTest extends TestCase
         self::assertSame('persona', $login->nivel);
         self::assertSame($personaId, $login->personaId);
 
-        $auth = new AutorizarPeticion(new PdoAccesoRutaRepository($pdo), $repo);
+        $auth = new AutorizarPeticion(
+            new PdoAccesoRutaRepository($pdo),
+            $repo,
+            new ListarAmbitosIdentidad($repo),
+        );
         $centro = $auth->ejecutar(
             'frontend\\shared\\http\\PageController',
             'page',

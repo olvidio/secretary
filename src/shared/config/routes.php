@@ -60,6 +60,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/totp-verificar', [AuthController::class, 'totpVerificar']);
     $r->addRoute('POST', '/api/totp/verificar', [AuthController::class, 'totpVerificar']);
     $r->addRoute('POST', '/elegir-centro', [AuthController::class, 'elegirCentro']);
+    $r->addRoute('POST', '/elegir-ambito', [AuthController::class, 'elegirAmbito']);
+    $r->addRoute('POST', '/api/ambitos/elegir', [AuthController::class, 'elegirAmbito']);
     $r->addRoute('POST', '/elegir-cuenta', [AuthController::class, 'elegirCuenta']);
     $r->addRoute('POST', '/api/centros/elegir', [AuthController::class, 'elegirCentro']);
     $r->addRoute('POST', '/elegir-persona', [AuthController::class, 'elegirPersona']);
@@ -74,6 +76,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/preferencias/centro', [PreferenciaController::class, 'guardarCentro']);
     $r->addRoute('POST', '/api/preferencias/persona', [PreferenciaController::class, 'guardarPersona']);
     $r->addRoute('POST', '/api/preferencias/tipo', [PreferenciaController::class, 'guardarTipo']);
+    $r->addRoute('POST', '/api/preferencias/ambito', [PreferenciaController::class, 'guardarAmbito']);
     $r->addRoute('GET', '/api/preferencias/baja', [PreferenciaController::class, 'resumenBaja']);
     $r->addRoute('POST', '/api/preferencias/baja/solicitar', [PreferenciaController::class, 'solicitarBaja']);
 

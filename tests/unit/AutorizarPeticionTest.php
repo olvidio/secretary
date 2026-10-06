@@ -6,6 +6,7 @@ namespace Tests\unit;
 
 use PHPUnit\Framework\TestCase;
 use src\acceso\application\AutorizarPeticion;
+use src\acceso\application\ListarAmbitosIdentidad;
 use src\acceso\application\CatalogoRutas;
 use src\acceso\domain\contracts\AccesoRutaRepository;
 use src\acceso\domain\contracts\IdentidadRepository;
@@ -20,7 +21,7 @@ final class AutorizarPeticionTest extends TestCase
         $rutas = $this->createStub(AccesoRutaRepository::class);
         $rutas->method('ambitoDe')->willReturn(null);
         $identidades = $this->createStub(IdentidadRepository::class);
-        $auth = new AutorizarPeticion($rutas, $identidades);
+        $auth = new AutorizarPeticion($rutas, $identidades, new ListarAmbitosIdentidad($identidades));
         $d = $auth->ejecutar(
             self::PAGINA,
             'yoCierre',
@@ -419,6 +420,6 @@ final class AutorizarPeticionTest extends TestCase
             static fn (int $id, int $centroId): ?string => $rolPorId[$id] ?? 'admin'
         );
 
-        return new AutorizarPeticion($rutas, $identidades);
+        return new AutorizarPeticion($rutas, $identidades, new ListarAmbitosIdentidad($identidades));
     }
 }

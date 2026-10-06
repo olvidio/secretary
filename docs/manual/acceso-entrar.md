@@ -1,7 +1,7 @@
 # Entrar en el programa
 
 - Ámbito: todos
-- Ruta: `/login`, `/elegir-cuenta`, `/elegir-centro`, `/elegir-persona`
+- Ruta: `/login`, `/elegir-cuenta`, `/elegir-centro`, `/elegir-ambito`, `/elegir-persona`
 - Menú: No sale en el menú: es la primera pantalla, y también la que aparece al pulsar «Salir»
 - Quién: cualquier persona
 
@@ -15,7 +15,7 @@ Es la puerta de entrada. Se escribe el alias (o el correo) y la contraseña. Seg
 2. Escribir la contraseña y pulsar «Entrar».
 3. Si el mismo correo tiene **varias identidades** (convención antigua, varios alias distintos) y la contraseña vale para más de una, aparece **Elegir cuenta**. Lo habitual (D15) es **una identidad por persona** y varios centros en **Elegir centro** tras entrar con alias o correo.
 4. En las cuentas de secretario, el programa pide un código de seis dígitos de la aplicación de autenticación; la primera vez lleva a activarla.
-5. Si la cuenta es secretaria de más de un centro, aparece una pantalla para elegir el centro.
+5. Si la cuenta es secretaria de más de un centro, aparece una pantalla para elegir el centro. Si **además** tiene libro personal con la misma identidad, la pantalla **Ámbito** lista también «Mis cuentas (individual)» junto a cada centro.
 6. Si la cuenta tiene nombre en más de un centro, aparece una pantalla para elegir con cuál se trabaja en esta sesión.
 7. Las cuentas personales entran en «Mis cuentas» y las de secretario, en el inicio del centro.
 8. Para salir, usar «Salir» en el menú del nombre, arriba a la derecha.

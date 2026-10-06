@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace src\acceso\infrastructure\http;
 
 use InvalidArgumentException;
+use src\acceso\application\CambiarAmbitoUsuario;
 use src\acceso\application\CambiarCentroUsuario;
 use src\acceso\application\CambiarPersonaUsuario;
+use src\acceso\application\ListarAmbitosIdentidad;
 use src\acceso\application\CambiarPasswordUsuario;
 use src\acceso\application\CambiarTipoUsuario;
 use src\acceso\application\ConfirmarTotp;
@@ -36,6 +38,8 @@ final class PreferenciaController
         private readonly ConfirmarTotp $confirmarTotp,
         private readonly ResumenEliminacionCuentaPersonal $resumenEliminacionCuenta,
         private readonly SolicitarBajaCuentaPersonal $solicitarBajaCuenta,
+        private readonly ListarAmbitosIdentidad $listarAmbitos,
+        private readonly CambiarAmbitoUsuario $cambiarAmbito,
     ) {
     }
 
@@ -53,6 +57,13 @@ final class PreferenciaController
         $datos['nivel'] = (string) ($_SESSION['nivel'] ?? '');
         $datos['centro_id'] = !empty($_SESSION['centro_id']) ? (int) $_SESSION['centro_id'] : null;
         $datos['persona_id'] = !empty($_SESSION['persona_id']) ? (int) $_SESSION['persona_id'] : null;
+        $ambitos = $this->listarAmbitos->ejecutar($id);
+        $datos['ambitos'] = $ambitos['opciones'];
+        $datos['puede_elegir_ambito'] = $ambitos['puede_elegir_ambito'];
+        $datos['ambito_actual'] = $this->listarAmbitos->valorActual(
+            $datos['nivel'],
+            $datos['centro_id'],
+        );
 
         return ContestarJson::ok($datos);
     }
@@ -229,6 +240,48 @@ final class PreferenciaController
         }
 
         return ContestarJson::ok(['codigos' => $codigos]);
+    }
+
+    public function guardarAmbito(Request $request, array $vars = []): Response
+    {
+        $id = $this->identidadId();
+        if ($id === null) {
+            return ContestarJson::error(_("Sesión caducada"), 401);
+        }
+        try {
+            $prefs = $this->obtener->ejecutar($id);
+            $ambitos = $this->listarAmbitos->ejecutar($id);
+            if (!$ambitos['puede_elegir_ambito']) {
+                return ContestarJson::error(_("Esta cuenta no puede cambiar de ámbito."), 403);
+            }
+            $cambio = $this->cambiarAmbito->ejecutar($id, (string) $request->input('ambito', ''));
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+        $_SESSION['nivel'] = $cambio['nivel'];
+        $_SESSION['centros'] = $cambio['centros'];
+        if ($cambio['nivel'] === 'centro') {
+            if ($cambio['centro_id'] !== null) {
+                $_SESSION['centro_id'] = $cambio['centro_id'];
+            } else {
+                unset($_SESSION['centro_id']);
+            }
+            unset($_SESSION['persona_id'], $_SESSION['personas_vinculo']);
+        } else {
+            $_SESSION['personas_vinculo'] = $prefs['personas'];
+            if ($cambio['persona_id'] !== null) {
+                $_SESSION['persona_id'] = $cambio['persona_id'];
+            } else {
+                unset($_SESSION['persona_id']);
+            }
+            unset($_SESSION['centro_id']);
+        }
+
+        return ContestarJson::ok([
+            'nivel' => $cambio['nivel'],
+            'centro_id' => $cambio['centro_id'],
+            'siguiente' => $cambio['siguiente'],
+        ]);
     }
 
     public function guardarTipo(Request $request, array $vars = []): Response

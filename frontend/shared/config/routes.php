@@ -22,6 +22,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/totp-verificar', [PageController::class, 'totpVerificar']);
     $r->addRoute('GET', '/totp-codigos', [PageController::class, 'totpCodigos']);
     $r->addRoute('GET', '/elegir-centro', [PageController::class, 'elegirCentro']);
+    $r->addRoute('GET', '/elegir-ambito', [PageController::class, 'elegirAmbito']);
     $r->addRoute('GET', '/elegir-cuenta', [PageController::class, 'elegirCuenta']);
     $r->addRoute('GET', '/elegir-persona', [PageController::class, 'elegirPersona']);
     $r->addRoute('GET', '/yo', [PageController::class, 'yo']);
@@ -47,6 +48,7 @@ return static function (RouteCollector $r): void {
         ['/cuenta/layout', 'acceso/view/cuenta_layout.php', 'cuenta-layout'],
         ['/cuenta/idioma', 'acceso/view/cuenta_idioma.php', 'cuenta-idioma'],
         ['/cuenta/centro', 'acceso/view/cuenta_centro.php', 'cuenta-centro'],
+        ['/cuenta/ambito', 'acceso/view/cuenta_ambito.php', 'cuenta-ambito'],
         ['/cuenta/persona', 'acceso/view/cuenta_persona.php', 'cuenta-persona'],
         ['/cuenta/tipo', 'acceso/view/cuenta_tipo.php', 'cuenta-tipo'],
         ['/cuenta/copias', 'acceso/view/cuenta_copias.php', 'cuenta-copias'],

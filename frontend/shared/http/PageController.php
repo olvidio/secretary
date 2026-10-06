@@ -7,6 +7,7 @@ namespace frontend\shared\http;
 use frontend\shared\config\CatalogoMenus;
 use frontend\shared\view\View;
 use src\acceso\application\ConfirmarBajaCuentaPersonal;
+use src\acceso\application\ListarAmbitosIdentidad;
 use src\acceso\application\ConfirmarEmailRegistro;
 use src\acceso\application\PrepararTotp;
 use src\acceso\application\RestablecerPassword;
@@ -40,6 +41,7 @@ final class PageController
         private readonly DatosOperador $operador,
         private readonly VersiónDespliegue $versión,
         private readonly RestablecerPassword $restablecerPassword,
+        private readonly ListarAmbitosIdentidad $listarAmbitos,
     ) {
     }
 
@@ -337,10 +339,34 @@ final class PageController
         ]));
     }
 
+    public function elegirAmbito(Request $request, array $vars = []): Response
+    {
+        if (empty($_SESSION['identidad_id'])) {
+            return Response::redirect('/login');
+        }
+        $id = (int) $_SESSION['identidad_id'];
+        $info = $this->listarAmbitos->ejecutar($id);
+        if (!$info['puede_elegir_ambito']) {
+            return Response::redirect('/elegir-centro');
+        }
+        $error = $_SESSION['login_error'] ?? null;
+        unset($_SESSION['login_error']);
+
+        return Response::html($this->view->standalone('login/view/elegir_ambito.php', [
+            'error' => $error,
+            'csrf' => ProteccionCsrf::renovarToken(),
+            'opciones' => $info['opciones'],
+        ]));
+    }
+
     public function elegirCentro(Request $request, array $vars = []): Response
     {
         if (empty($_SESSION['identidad_id'])) {
             return Response::redirect('/login');
+        }
+        $id = (int) $_SESSION['identidad_id'];
+        if ($this->listarAmbitos->ejecutar($id)['puede_elegir_ambito']) {
+            return Response::redirect('/elegir-ambito');
         }
         $centros = $_SESSION['centros'] ?? $_SESSION['pending_centros'] ?? [];
         if (!is_array($centros) || $centros === []) {
@@ -422,6 +448,7 @@ final class PageController
             'menuGrupos' => CatalogoMenus::gruposPara($layout, $club, $centroSg),
             'menuGrupoActivo' => $grupoActivo,
             'mostrarMenuTipo' => $this->puedeCambiarTipoSesion(),
+            'mostrarMenuAmbito' => $this->puedeCambiarTipoSesion(),
             'mostrarMenuPersonaActiva' => $this->puedeElegirPersonaActivaSesion(),
             'mostrarMenuBaja' => $this->puedeSolicitarBajaCuenta(),
             'cuentaEntrada' => $vars['cuenta'] ?? null,
@@ -439,6 +466,12 @@ final class PageController
     public function cuenta(Request $request, array $vars): Response
     {
         $nav = (string) ($vars['nav'] ?? 'cuenta-mail');
+        if (($nav === 'cuenta-tipo' || $nav === 'cuenta-centro') && $this->puedeCambiarTipoSesion()) {
+            return Response::redirect('/cuenta/ambito');
+        }
+        if ($nav === 'cuenta-ambito' && !$this->puedeCambiarTipoSesion()) {
+            return Response::redirect($this->siguienteHome());
+        }
         if ($nav === 'cuenta-tipo' && !$this->puedeCambiarTipoSesion()) {
             return Response::redirect($this->siguienteHome());
         }
@@ -556,6 +589,7 @@ final class PageController
             'idioma' => $this->idiomaUsuario(),
             'mostrarRemesas' => $this->mostrarRemesasPersona(),
             'mostrarMenuTipo' => $this->puedeCambiarTipoSesion(),
+            'mostrarMenuAmbito' => $this->puedeCambiarTipoSesion(),
             'mostrarMenuPersonaActiva' => $this->puedeElegirPersonaActivaSesion(),
             'mostrarMenuBaja' => $this->puedeSolicitarBajaCuenta(),
         ], $extra)));
@@ -685,9 +719,21 @@ final class PageController
 
             return '/yo';
         }
-        $centros = $_SESSION['centros'] ?? [];
-        if (is_array($centros) && count($centros) > 1 && empty($_SESSION['centro_id'])) {
-            return '/elegir-centro';
+        if (($_SESSION['nivel'] ?? '') === 'centro') {
+            $identidadId = isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : 0;
+            $centros = $_SESSION['centros'] ?? [];
+            if (!is_array($centros)) {
+                $centros = [];
+            }
+            $ruta = $this->listarAmbitos->rutaTrasLogin(
+                $identidadId,
+                'centro',
+                $centros,
+                isset($_SESSION['centro_id']) ? (int) $_SESSION['centro_id'] : null,
+            );
+            if ($ruta !== null) {
+                return $ruta;
+            }
         }
 
         return '/';
