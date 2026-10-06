@@ -128,8 +128,8 @@ final class ImportarExcelSecretario
                     // Instantánea de `apuntes` y presupuesto para el golden master y el
                     // listado legado. El libro diario (asientos) ya no se borra: D8.
                     $this->apuntes->borrarTodos();
-                    $this->presupuesto->borrarCuenta('P');
-                    $this->presupuesto->borrarCuenta('G');
+                    $this->presupuesto->vaciarCuenta('P');
+                    $this->presupuesto->vaciarCuenta('G');
                 }
                 AmbitoSeeder::sembrar($this->pdo);
             }
@@ -146,7 +146,7 @@ final class ImportarExcelSecretario
             AmbitoSeeder::poblarLibros($this->pdo, $destino['centro_id']);
             if (!$aislado) {
                 $nEntidades = $this->importarEntidades($book);
-                $nPresu = $this->importarPresupuestos($book);
+                $nPresu = $this->importarPresupuestos($book, $destino['ejercicio_id']);
                 $nApuntes = $this->persistirApuntes($filasExcel);
             }
             Nivel1Seeder::sembrar($this->pdo);
@@ -389,7 +389,7 @@ final class ImportarExcelSecretario
         return $n;
     }
 
-    private function importarPresupuestos(XlsxReader $book): int
+    private function importarPresupuestos(XlsxReader $book, int $ejercicioId): int
     {
         $n = 0;
         $pMap = [
@@ -404,7 +404,7 @@ final class ImportarExcelSecretario
             if ($val === null || $val === '') {
                 continue;
             }
-            $this->presupuesto->guardar(new LineaPresupuesto('P', $cod, new Dinero(number_format((float) $val, 2, '.', ''))));
+            $this->presupuesto->guardar($ejercicioId, new LineaPresupuesto('P', $cod, new Dinero(number_format((float) $val, 2, '.', ''))));
             $n++;
         }
         $gMap = [
@@ -419,7 +419,7 @@ final class ImportarExcelSecretario
             if ($val === null || $val === '') {
                 continue;
             }
-            $this->presupuesto->guardar(new LineaPresupuesto('G', $cod, new Dinero(number_format((float) $val, 2, '.', ''))));
+            $this->presupuesto->guardar($ejercicioId, new LineaPresupuesto('G', $cod, new Dinero(number_format((float) $val, 2, '.', ''))));
             $n++;
         }
 

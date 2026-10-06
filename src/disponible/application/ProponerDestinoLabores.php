@@ -50,7 +50,7 @@ final class ProponerDestinoLabores
         $desgrava = [];
         $partidasIn = [];
         foreach ($partidas as $p) {
-            $previsto = Dinero::fromInput($this->presupuesto->previsto('P', $p['codigo']))->toCents();
+            $previsto = Dinero::fromInput($this->presupuesto->previsto('P', $p['codigo'], $ctx->ejercicioId))->toCents();
             $hecho = $realizado[$p['codigo']] ?? 0;
             $hueco = max(0, $previsto - $hecho);
             $desgrava[$p['codigo']] = (bool) $p['desgrava'];

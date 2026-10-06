@@ -20,7 +20,7 @@ final class AplicarPrevisionAlPresupuesto
         foreach ($hoja['lineas'] as $fila) {
             $lineas[(string) $fila['codigo']] = (string) $fila['total'];
         }
-        $this->presupuesto->ejecutar('P', $lineas);
+        $this->presupuesto->ejecutar('P', $lineas, (string) ($hoja['etiqueta_presupuesto'] ?? ''));
 
         return $hoja;
     }

@@ -25,6 +25,7 @@ use src\configuracion\infrastructure\http\ConfiguracionController;
 use src\grisbi\infrastructure\http\GrisbiController;
 use src\informes\infrastructure\http\InformeController;
 use src\listados\infrastructure\http\AportacionesSgController;
+use src\listados\infrastructure\http\DonativosFundacionSgController;
 use src\listados\infrastructure\http\ListadoController;
 use src\personas\infrastructure\http\PersonaController;
 use src\personas\infrastructure\http\VinculoCentroController;
@@ -276,6 +277,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/grisbi/movimientos/{id:\d+}', [GrisbiController::class, 'editar']);
     $r->addRoute('POST', '/api/grisbi/movimientos/{id:\d+}/borrar', [GrisbiController::class, 'borrar']);
     $r->addRoute('GET', '/api/aportaciones-sg', [AportacionesSgController::class, 'list']);
+    $r->addRoute('GET', '/api/donativos-fundacion-sg', [DonativosFundacionSgController::class, 'get']);
     $r->addRoute('GET', '/api/listados', [ListadoController::class, 'list']);
     $r->addRoute('POST', '/api/listados', [ListadoController::class, 'save']);
     $r->addRoute('POST', '/api/listados/{id:\d+}/borrar', [ListadoController::class, 'delete']);

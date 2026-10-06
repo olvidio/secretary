@@ -96,7 +96,7 @@ final class CatalogoMenusTest extends TestCase
         foreach (['613-p', 'entrada-p', 'remesas', 'e37', 'centros', 'cierre', 'tesoreria', 'saldos'] as $fuera) {
             self::assertNotContains($fuera, $navs);
         }
-        foreach (['nombres', 'entrada-g', 'entradas-periodicas', 'ejecutar-entradas-periodicas', 'presupuesto-g', '613-g', 'aportaciones', 'plantillas-g', 'arqueo-g', 'conceptos-g', 'ejercicios'] as $dentro) {
+        foreach (['nombres', 'entrada-g', 'entradas-periodicas', 'ejecutar-entradas-periodicas', 'presupuesto-g', '613-g', 'aportaciones', 'donativos-fundacion', 'plantillas-g', 'arqueo-g', 'conceptos-g', 'ejercicios'] as $dentro) {
             self::assertContains($dentro, $navs);
         }
         $presupuesto = CatalogoMenus::gruposCentroSg()[2];

@@ -253,6 +253,7 @@ final class CatalogoRutas
             ['src\\plan\\infrastructure\\http\\ClubCuentasController', 'guardarPlantilla', 'centro'],
             ['src\\plan\\infrastructure\\http\\ClubCuentasController', 'aplicar', 'centro'],
             ['src\\listados\\infrastructure\\http\\AportacionesSgController', 'list', 'centro'],
+            ['src\\listados\\infrastructure\\http\\DonativosFundacionSgController', 'get', 'centro'],
             ['src\\listados\\infrastructure\\http\\ListadoController', 'list', 'centro'],
             ['src\\listados\\infrastructure\\http\\ListadoController', 'save', 'centro'],
             ['src\\listados\\infrastructure\\http\\ListadoController', 'delete', 'centro'],

@@ -19,8 +19,9 @@ En el libro P, las cifras se pueden generar primero en **Previsión personal** (
 ## Cómo se usa
 
 1. Abrir «Presupuesto P» o «Presupuesto G», según el libro que se quiera presupuestar.
-2. Recorrer la lista de conceptos y escribir en cada casilla el importe previsto para todo el año.
-3. Pulsar «Guardar»; aparece el aviso «Guardado».
+2. Elegir el **año** en el desplegable (por defecto el **ejercicio abierto** en sesión; puede elegirse el siguiente para planificar). Al guardar un año que aún no existía, se crea en estado planificado.
+3. Recorrer la lista de conceptos y escribir en cada casilla el importe previsto para todo el año.
+4. Pulsar «Guardar»; aparece el aviso «Guardado».
 
 ## Reglas que conviene saber
 

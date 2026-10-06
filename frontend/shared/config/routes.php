@@ -97,6 +97,7 @@ return static function (RouteCollector $r): void {
         ['/enviar-dl', 'envio_dl/view/form.php', 'enviar-dl'],
         ['/listados', 'listados/view/listado.php', 'listados'],
         ['/aportaciones', 'listados/view/aportaciones.php', 'aportaciones'],
+        ['/donativos-fundacion', 'listados/view/donativos_fundacion.php', 'donativos-fundacion'],
     ];
     foreach ($pages as [$path, $view, $nav]) {
         $extra = ['view' => $view, 'nav' => $nav];

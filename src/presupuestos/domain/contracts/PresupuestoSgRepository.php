@@ -9,8 +9,8 @@ use src\presupuestos\domain\entity\LineaPresupuesto;
 interface PresupuestoSgRepository
 {
     /** @return list<LineaPresupuesto> */
-    public function listar(int $centroId): array;
+    public function listar(int $centroId, int $ejercicioId): array;
 
-    public function guardar(int $centroId, LineaPresupuesto $linea): void;
+    public function guardar(int $centroId, int $ejercicioId, LineaPresupuesto $linea): void;
 
 }

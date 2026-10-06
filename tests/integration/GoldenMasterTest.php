@@ -110,8 +110,9 @@ final class GoldenMasterTest extends TestCase
         $resolverConceptos = ConceptosCentro::resolver($pdo);
         $this->compararOActualizar('conceptos_p', (new ListarConceptos($conceptoRepo, $resolverConceptos, $ambito))->ejecutar('P'));
         $this->compararOActualizar('conceptos_g', (new ListarConceptos($conceptoRepo, $resolverConceptos, $ambito))->ejecutar('G'));
-        $this->compararOActualizar('presupuesto_p', $this->dumpPresupuesto($presupuestoRepo, 'P'));
-        $this->compararOActualizar('presupuesto_g', $this->dumpPresupuesto($presupuestoRepo, 'G'));
+        $ejercicioAbiertoId = (int) $ambito->ejecutar()->ejercicioId;
+        $this->compararOActualizar('presupuesto_p', $this->dumpPresupuesto($presupuestoRepo, 'P', $ejercicioAbiertoId));
+        $this->compararOActualizar('presupuesto_g', $this->dumpPresupuesto($presupuestoRepo, 'G', $ejercicioAbiertoId));
 
         $resumen613 = new ObtenerResumen613(
             $configRepo,
@@ -153,10 +154,10 @@ final class GoldenMasterTest extends TestCase
     }
 
     /** @return list<array<string, mixed>> */
-    private function dumpPresupuesto(PresupuestoRepository $repo, string $cuenta): array
+    private function dumpPresupuesto(PresupuestoRepository $repo, string $cuenta, int $ejercicioId): array
     {
         $out = [];
-        foreach ($repo->listar($cuenta) as $linea) {
+        foreach ($repo->listar($cuenta, $ejercicioId) as $linea) {
             $out[] = $linea->toArray();
         }
         usort($out, static fn (array $a, array $b): int => $a['concepto_codigo'] <=> $b['concepto_codigo']);

@@ -84,8 +84,8 @@ final class ObtenerResumen613
 
         $centroSg = $this->esCentroSg($contexto->centroId);
         $presu = ($centroSg && $cuenta === 'G' && $this->presupuestoSg !== null)
-            ? $this->presupuestoSg->listar($contexto->centroId)
-            : $this->presupuesto->listar($cuenta);
+            ? $this->presupuestoSg->listar($contexto->centroId, $contexto->ejercicioId)
+            : $this->presupuesto->listar($cuenta, $contexto->ejercicioId);
         $partidasLabores = [];
         $codigosLabores = [];
         if ($cuenta === 'P') {
@@ -398,4 +398,5 @@ final class ObtenerResumen613
 
         return $centro !== null && CatalogoPlanesContables::esCentroSg($centro->planContableCodigo);
     }
+
 }

@@ -10,6 +10,16 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.24] — 2026-10-06
+
+### Añadido
+- **Donativos a Fundación** (centro sg): listado por destino 41+ con acumulado por persona en el ejercicio.
+- **Presupuesto P/G**: selector de **año** (ejercicio abierto por defecto; siguiente para planificar). Migraciones de esquema y reparación si el presupuesto quedó solo en el ejercicio planificado.
+
+### Cambiado
+- **Listado de aportaciones**: botón **Imprimir**, A4 horizontal y salto de página entre grupos.
+- **613**: el previsto usa el presupuesto del **ejercicio abierto** en sesión.
+
 ## [0.1.23] — 2026-10-06
 
 ### Corregido

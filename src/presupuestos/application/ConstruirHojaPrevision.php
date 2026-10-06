@@ -252,6 +252,20 @@ final class ConstruirHojaPrevision
         return $this->etiquetaPresupuestoPorDefecto();
     }
 
+    /** Ejercicio cuyas cifras de presupuesto alimentan el 613 frente al ejercicio abierto. */
+    public function ejercicioIdPresupuestoInformes(): int
+    {
+        $ctx = $this->contextoEstructura();
+        $trabajo = $ctx['ejercicio'];
+        $etiqueta = $this->etiquetaPresupuestoDefectoDe($ctx['centro_id'], $trabajo);
+        $objetivo = $this->ejercicioPorEtiquetaEn($ctx['centro_id'], $etiqueta);
+        if ($objetivo?->id !== null && $etiqueta !== $trabajo->etiqueta) {
+            return (int) $objetivo->id;
+        }
+
+        return (int) $trabajo->id;
+    }
+
     public static function anioDeEjercicio(Ejercicio $ejercicio): int
     {
         if (ctype_digit($ejercicio->etiqueta)) {

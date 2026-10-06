@@ -153,6 +153,10 @@ tr.cierre { background: #fffbeb; }
   flex: 1 1 100%;
   margin: 0;
 }
+h2.listado-donativos-cab {
+  margin: 0 0 .75rem;
+  font-size: 1.05rem;
+}
 .presu-num-s { margin: 0 0 1rem; }
 .presu-num-s label {
   display: inline-flex;
@@ -1236,6 +1240,28 @@ body.e37-hoja main { max-width: none; }
     padding: .12rem .25rem;
   }
   body.e37-hoja .print-hide { display: none !important; }
+  body.aportaciones-hoja .print-hide { display: none !important; }
+  body.aportaciones-hoja main {
+    max-width: none;
+    padding: 0;
+  }
+  body.aportaciones-hoja #listado-aportaciones > .aportaciones-grupo {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  body.aportaciones-hoja #listado-aportaciones > .aportaciones-grupo + .aportaciones-grupo {
+    break-before: page;
+    page-break-before: always;
+    margin-top: 0;
+  }
+  body.aportaciones-hoja table.listado-sg {
+    width: 100%;
+    font-size: 8pt;
+  }
+  body.aportaciones-hoja table.listado-sg th,
+  body.aportaciones-hoja table.listado-sg td {
+    padding: .12rem .2rem;
+  }
 }
 @page {
   size: A4 portrait;
@@ -2299,5 +2325,13 @@ body.layout-burger main { flex: 1; }
 }
 table.listado-sg { font-size: .85rem; }
 table.listado-sg td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+#listado-aportaciones > .aportaciones-grupo + .aportaciones-grupo {
+  margin-top: 2rem;
+}
+#listado-aportaciones .aportaciones-grupo h2 {
+  margin: 0 0 .5rem;
+  font-size: 1.05rem;
+}
 
 
