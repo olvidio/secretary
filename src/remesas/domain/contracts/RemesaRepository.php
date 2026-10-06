@@ -38,6 +38,9 @@ interface RemesaRepository
     /** @return list<SolicitudDetalle> */
     public function solicitudesPendientesDePersona(int $personaId): array;
 
+    /** @param list<int> $personaIds */
+    public function solicitudesPendientesDePersonas(array $personaIds): array;
+
     /**
      * @template T
      * @param callable(): T $trabajo

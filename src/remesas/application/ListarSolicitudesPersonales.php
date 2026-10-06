@@ -11,7 +11,7 @@ use src\remesas\domain\entity\SolicitudDetalle;
 final class ListarSolicitudesPersonales
 {
     public function __construct(
-        private readonly ResolverPersonaActual $ambito,
+        private readonly PersonasRemesaDeIdentidad $personasRemesa,
         private readonly RemesaRepository $remesas,
     ) {
     }
@@ -21,11 +21,9 @@ final class ListarSolicitudesPersonales
      */
     public function ejecutar(): array
     {
-        $ctx = $this->ambito->ejecutar();
-
         return array_map(
             static fn (SolicitudDetalle $s) => $s->toArray(),
-            $this->remesas->solicitudesPendientesDePersona($ctx->personaId),
+            $this->remesas->solicitudesPendientesDePersonas($this->personasRemesa->ejecutar()),
         );
     }
 }

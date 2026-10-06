@@ -14,18 +14,20 @@
 
 <section>
     <h2><?= _("Copias guardadas") ?></h2>
-    <table id="tabla-copias-personal" class="yo-copias-table">
-        <colgroup>
-            <col class="col-fichero">
-            <col class="col-fecha">
-            <col class="col-bytes">
-            <col class="col-acc">
-        </colgroup>
-        <thead>
-        <tr><th><?= _("Fichero") ?></th><th><?= _("Fecha") ?></th><th><?= _("Tamaño") ?></th><th><?= _("Acciones") ?></th></tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="tabla-scroll">
+        <table id="tabla-copias-personal" class="yo-copias-table">
+            <colgroup>
+                <col class="col-fichero">
+                <col class="col-fecha">
+                <col class="col-bytes">
+                <col class="col-acc">
+            </colgroup>
+            <thead>
+            <tr><th><?= _("Fichero") ?></th><th><?= _("Fecha") ?></th><th><?= _("Tamaño") ?></th><th><?= _("Acciones") ?></th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
     <p class="muted" id="sin-copias-personal" hidden><?= _("Aún no hay copias guardadas.") ?></p>
 </section>
 

@@ -4,7 +4,7 @@
     <label><?= _("Centro") ?>
         <select name="centro_id" required></select>
     </label>
-    <button type="submit"><?= _("Guardar") ?></button>
+    <button type="submit"><?= _("Cambiar") ?></button>
     <p class="ok" id="msg" hidden><?= _("Guardado") ?></p>
     <p class="muted" id="sin-centros" hidden><?= _("Esta cuenta no es secretario de ningún centro.") ?></p>
 </form>

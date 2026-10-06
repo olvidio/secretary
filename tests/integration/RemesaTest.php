@@ -45,6 +45,7 @@ use src\remesas\application\RechazarRemesa;
 use src\remesas\application\RegistrarGastosGeneralesDeRemesa;
 use src\remesas\application\RegistrarPlantillasDeRemesa;
 use src\remesas\application\ResolverMesRemesa;
+use src\remesas\application\PersonasRemesaDeIdentidad;
 use src\remesas\application\ResolverSolicitudDetalle;
 use src\remesas\application\SolicitarDetalleRemesa;
 use src\remesas\infrastructure\persistence\PdoRemesaRepository;
@@ -364,7 +365,10 @@ final class RemesaTest extends TestCase
             ),
             'rechazar' => new RechazarRemesa($ambitoCentro, $remesas, $asientos, $disponible),
             'solicitar' => new SolicitarDetalleRemesa($ambitoCentro, $remesas, $scl->id),
-            'resolverSol' => new ResolverSolicitudDetalle($resolver, $remesas),
+            'resolverSol' => new ResolverSolicitudDetalle(
+                new PersonasRemesaDeIdentidad($identidades, $yo->id),
+                $remesas,
+            ),
             'detalle' => new ObtenerDetalleRemesa(
                 $ambitoCentro,
                 $remesas,

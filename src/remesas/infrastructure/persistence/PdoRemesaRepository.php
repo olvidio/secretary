@@ -213,13 +213,26 @@ final class PdoRemesaRepository implements RemesaRepository
 
     public function solicitudesPendientesDePersona(int $personaId): array
     {
+        return $this->solicitudesPendientesDePersonas([$personaId]);
+    }
+
+    public function solicitudesPendientesDePersonas(array $personaIds): array
+    {
+        $personaIds = array_values(array_unique(array_filter(
+            $personaIds,
+            static fn (int $id): bool => $id > 0,
+        )));
+        if ($personaIds === []) {
+            return [];
+        }
+        $marcadores = implode(',', array_fill(0, count($personaIds), '?'));
         $st = $this->pdo->prepare(
             $this->sqlSolicitud() . "
-             WHERE r.persona_id = :p AND s.estado = 'pendiente'
+             WHERE r.persona_id IN ($marcadores) AND s.estado = 'pendiente'
                AND r.estado IN ('enviada', 'aceptada')
              ORDER BY s.solicitada_at"
         );
-        $st->execute([':p' => $personaId]);
+        $st->execute($personaIds);
         $out = [];
         foreach ($st->fetchAll() as $row) {
             $out[] = $this->hydrateSolicitud($row);

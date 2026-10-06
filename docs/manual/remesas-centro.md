@@ -7,14 +7,14 @@
 
 ## Para qué sirve
 
-Es la bandeja donde llega lo que cada persona envía al cerrar su mes: sus ingresos y gastos, agrupados por concepto. El centro lo revisa y decide. Al aceptar, esos importes pasan al libro personal del centro sin teclearlos.
+Es la bandeja donde llega lo que cada persona **comunica** al cerrar su mes: ingresos y gastos agrupados por concepto, más datos de referencia (nota, saldo de tesorería personal, **disponible** indicado). **No llega dinero**: solo información. El secretario **revisa y decide** (aceptar o rechazar). **Al aceptar**, el programa anota en contabilidad del centro lo acordado (resumen en P, disponible operativo, etc.); hasta entonces no hay asientos por esa remesa.
 
 ## Cómo se usa
 
 1. El desplegable **Estado** filtra por recibidas, aceptadas, rechazadas, sustituidas o todas. Pulsar **Filtrar** actualiza la tabla.
-2. La tabla da el mes, la persona, la versión, el estado, el disponible enviado (saldo de caja y banco menos el remanente) y la fecha de envío.
+2. La tabla da el mes, la persona, la versión, el estado, el **disponible comunicado** (saldo de caja y banco de la persona menos su remanente; dato informativo, no un pago) y la fecha de envío.
 3. **Ver** en una fila abre abajo el detalle de esa remesa, con una línea por concepto. Si hay versión anterior, se indica qué conceptos han cambiado. Volver a pulsar **Ver** en otra fila cambia el detalle.
-4. En el detalle: **Aceptar** o, escribiendo antes el motivo en «Nota al rechazar», **Rechazar**. Las dos piden confirmación. Si la persona envió el disponible (saldo de su caja y banco menos el remanente que se queda), aparece la casilla **Sustituir el disponible por este importe**.
+4. En el detalle: **Aceptar** o, escribiendo antes el motivo en «Nota al rechazar», **Rechazar**. Las dos piden confirmación. Si la persona indicó un disponible (saldo de su caja y banco menos el remanente), aparece la casilla **Sustituir el disponible por este importe**: sirve para **ajustar en el centro** el disponible operativo a esa cifra comunicada, en lugar de sumar solo el sobrante de la remesa. No transfiere dinero desde la cuenta personal.
 5. En cada línea del detalle, **Solicitar detalle** pide permiso a la persona para ver el desglose. Cuando autoriza, el botón pasa a **Ver detalle** / **Ocultar detalle** (alterna el panel con subcuentas, importes y gastos marcados como generales).
 
 ## Reglas que conviene saber
@@ -24,7 +24,7 @@ Es la bandeja donde llega lo que cada persona envía al cerrar su mes: sus ingre
 - Rechazar una remesa enviada no deja rastro. Rechazar una ya aceptada borra lo que hubiera anotado y deshace el disponible de esa remesa.
 - Los gastos que la persona marque como generales generan además los apuntes del libro general.
 - Los apuntes que vienen de una remesa no se editan ni se borran a mano: se corrigen pidiendo a la persona que reenvíe el mes.
-- La caja y el banco propios de la persona no viajan como movimientos. Sí se envía el disponible: el saldo de caja y banco menos el remanente que la persona deja en su cuenta.
+- La caja y el banco propios de la persona no viajan como movimientos. Sí se **comunica** el disponible (saldo menos remanente): es una **notificación** para decidir al aceptar; el dinero real sigue en la cuenta personal hasta que el secretario y la persona lo gestionen fuera del programa si hace falta.
 - Lo aceptado sale en el 613 P y en Cuentas personales, cortado por la fecha de cierre.
 - Las 7 que la persona ya hizo viajan en la remesa. Las de la propuesta de Disponible se apuntaron al confirmar y no se vuelven a cargar.
 

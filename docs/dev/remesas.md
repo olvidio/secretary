@@ -1,11 +1,12 @@
 # Remesas (D6, Fase 8)
 
-Envío mensual del libro personal (`X`) al libro P del centro. La tesorería del
-nivel 1 **no viaja como movimientos**. Se envía el **disponible**: saldo de
-caja+banco (a la fecha de cierre del mes) menos el **remanente** fijo de la
-persona (`personas.remanente_cents`), para que el centro actualice el
-disponible operativo. El grano es el total por `codigo_maestro`; el desglose de
-subcuentas queda en el nivel 1 y el centro solo lo ve si la persona autoriza.
+Envío mensual del libro personal (`X`) al libro P del centro: **solo datos** en
+BD (no hay pago ni transferencia bancaria). La tesorería del nivel 1 **no viaja
+como movimientos**. Se **comunica** el **disponible** (saldo caja+banco a
+cierre menos `personas.remanente_cents`) para que el secretario lo vea al
+aceptar; el centro actualiza contabilidad **solo tras Aceptar** (y opción
+`sustituir_disponible`). El grano es el total por `codigo_maestro`; el desglose
+de subcuentas queda en el nivel 1 y el centro solo lo ve si la persona autoriza.
 
 ## Flujo
 
@@ -68,7 +69,10 @@ un ejercicio D11 largo puede tener dos eneros.
 ## Detalle bajo petición
 
 El centro solicita el desglose de una línea. La persona autoriza o deniega
-(`GET/POST /api/yo/remesas/solicitudes`). El detalle autorizado es solo lectura
+(`GET/POST /api/yo/remesas/solicitudes`). Las pendientes se listan para **todas**
+las personas de la identidad (libro propio y nombre vinculado en el centro n), porque
+la remesa se dirige al `persona_id` del centro aunque la sesión use el libro personal.
+El detalle autorizado es solo lectura
 y **nunca** crea cuentas ni asientos en el centro.
 
 ## Informes

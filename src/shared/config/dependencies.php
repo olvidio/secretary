@@ -264,6 +264,7 @@ use src\remesas\application\AceptarRemesa;
 use src\remesas\application\EnviarRemesa;
 use src\remesas\application\ListarRemesasCentro;
 use src\remesas\application\ListarSolicitudesPersonales;
+use src\remesas\application\PersonasRemesaDeIdentidad;
 use src\remesas\application\ObtenerDetalleRemesa;
 use src\remesas\application\ObtenerRemesaCentro;
 use src\remesas\application\ObtenerRemesaPersonal;
@@ -627,6 +628,13 @@ return [
     PrevisualizarRemesa::class => autowire(),
     EnviarRemesa::class => autowire(),
     ObtenerRemesaPersonal::class => autowire(),
+    PersonasRemesaDeIdentidad::class => factory(static function (
+        IdentidadRepository $identidades,
+    ): PersonasRemesaDeIdentidad {
+        $identidadId = !empty($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : null;
+
+        return new PersonasRemesaDeIdentidad($identidades, $identidadId);
+    }),
     ListarSolicitudesPersonales::class => autowire(),
     ResolverSolicitudDetalle::class => autowire(),
     ListarRemesasCentro::class => autowire(),

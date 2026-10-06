@@ -17,10 +17,11 @@ Guarda, persona a persona, el dinero que aún hay que aplicar a labores apostól
 4. Revisar el texto («Deberías ingresar…») y pulsar **Confirmar y apuntar**. Eso anota las 7 en el libro P y baja el disponible.
 5. La persona ve el mismo texto en su pantalla de remesa.
 
-Al aceptar una remesa, si la persona envió el disponible (saldo de su caja y banco menos el remanente), se puede marcar **Sustituir el disponible por este importe**.
+Al aceptar una remesa, si la persona **indicó** un disponible (saldo de su caja y banco menos el remanente en el envío de **datos**, no un pago), se puede marcar **Sustituir el disponible por este importe** para que el disponible operativo del centro pase a coincidir con esa cifra comunicada.
 
 ## Reglas que conviene saber
 
+- La **remesa no mueve dinero** entre la persona y el centro: comunica importes. El **disponible** de esta pantalla es contabilidad del centro (labores 7, etc.); se actualiza al **aceptar** remesas y al **Confirmar y apuntar** destinos, no porque entre tesorería por la red.
 - Quien en Nombres no puede desgravar recibe solo partidas 7 que no desgravan.
 - Qué partidas desgravan se marca en Centros → labores apostólicas.
 - Los tramos (p. ej. 250 € al 80 % y el resto al 40 %) y el máximo (10 % de la base liquidable) están en Configuración. La base liquidable se escribe en Nombres; si falta, se toma el 111 de la previsión o el ingreso 111 proyectado a fin de año.

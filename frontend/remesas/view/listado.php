@@ -31,8 +31,9 @@
     <h2 id="remesa-detalle-titulo"><?= _("Detalle") ?></h2>
     <p id="remesa-detalle-meta" class="muted"></p>
     <p id="remesa-tesoreria" class="muted" hidden></p>
-    <label id="remesa-sustituir-wrap" hidden>
-        <input type="checkbox" id="remesa-sustituir"> <?= _("Sustituir el disponible por este importe") ?>
+    <label id="remesa-sustituir-wrap" class="inline" hidden>
+        <input type="checkbox" id="remesa-sustituir">
+        <span><?= _("Sustituir el disponible por este importe") ?></span>
     </label>
     <table id="tabla-remesa-lineas">
         <thead>

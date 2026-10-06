@@ -153,7 +153,8 @@ final class TesoreriaFisicaTest extends TestCase
 
         $cajaFisica = $fisicaRepo->listarActivasDeCentro($contexto->centroId, 'caja')[0];
         self::assertNotNull($cajaFisica->id);
-        $prestamo = new RegistrarPrestamoEntreLibros($asientoRepo, $cuentaRepo, $fisicaRepo, $configRepo, $ambito);
+        $centroRepo = new PdoCentroRepository($this->pdo);
+        $prestamo = new RegistrarPrestamoEntreLibros($asientoRepo, $cuentaRepo, $fisicaRepo, $configRepo, $ambito, $centroRepo);
         $pre = $prestamo->ejecutar([
             'cuenta_fisica_id' => $cajaFisica->id,
             'libro_origen' => 'G',
@@ -194,7 +195,7 @@ final class TesoreriaFisicaTest extends TestCase
         self::assertNotNull($bancoOrden1);
 
         $bancoPPre = $this->saldoCuentaCodigo($asientoRepo, $contexto, $desde, $hasta, 'P', 'BANCO.1/P');
-        $traspaso = new RegistrarTraspasoTesoreria($asientoRepo, $cuentaRepo, $fisicaRepo, $configRepo, $ambito);
+        $traspaso = new RegistrarTraspasoTesoreria($asientoRepo, $cuentaRepo, $fisicaRepo, $configRepo, $ambito, $centroRepo);
         $traspaso->ejecutar([
             'libro' => 'P',
             'cuenta_fisica_origen_id' => $cajaOrden1,

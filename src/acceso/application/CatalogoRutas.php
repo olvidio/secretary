@@ -192,6 +192,7 @@ final class CatalogoRutas
             ['src\\plan\\infrastructure\\http\\DestinosSgController', 'save', 'centro'],
             ['src\\presupuestos\\infrastructure\\http\\PresupuestoController', 'get', 'centro'],
             ['src\\presupuestos\\infrastructure\\http\\PresupuestoController', 'save', 'centro'],
+            ['src\\presupuestos\\infrastructure\\http\\PrevisionController', 'opcionesPersonal', 'centro'],
             ['src\\presupuestos\\infrastructure\\http\\PrevisionController', 'getPersonal', 'centro'],
             ['src\\presupuestos\\infrastructure\\http\\PrevisionController', 'savePersonal', 'centro'],
             ['src\\presupuestos\\infrastructure\\http\\PrevisionController', 'getConsolidada', 'centro'],

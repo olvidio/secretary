@@ -336,6 +336,17 @@ hr.separa-apunte { border: 0; border-top: 1px solid var(--line, #ccc); margin: 0
 .plantilla-linea { margin-bottom: .5rem; align-items: end; }
 .plantilla-preview { width: 100%; margin: 0; font-size: .85rem; }
 label { display: flex; flex-direction: column; gap: .2rem; font-size: .85rem; }
+label.inline {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: .45rem;
+}
+label.inline input[type=checkbox],
+label.inline input[type=radio] {
+  width: auto;
+  flex-shrink: 0;
+  margin-top: .15rem;
+}
 label[hidden] { display: none; }
 input, select, textarea, button { font: inherit; padding: .35rem .45rem; }
 button { background: var(--navy); color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
@@ -458,7 +469,7 @@ table.informe tr.subtotal td { border-top: 1px solid #cbd5e1; font-weight: 650; 
 .grid-form label.inline input[type=checkbox] { width: auto; margin-top: .2rem; flex-shrink: 0; }
 dl.datos-centro { display: grid; grid-template-columns: auto 1fr; gap: .2rem 1rem; margin: 0 0 1rem; }
 dl.datos-centro dt { font-weight: 600; margin: 0; }
-dl.datos-centro dd { margin: 0; }
+dl.datos-centro dd { margin: 0; overflow-wrap: anywhere; min-width: 0; }
 .login-alt { margin: 0; text-align: center; font-size: .9rem; }
 .totp-qr { display: flex; justify-content: center; padding: .5rem; background: #fff; border: 1px solid var(--line); border-radius: 6px; }
 .totp-qr img { display: block; }
@@ -1312,17 +1323,48 @@ body.admin { margin: 0; background: #f8fafc; }
   width: 100%;
   margin: 0 auto;
   padding: 1rem clamp(.85rem, 4vw, 1.25rem) 2rem;
-  overflow-x: hidden;
+  overflow-x: visible;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .yo-main h1 { font-size: clamp(1.2rem, 4.5vw, 1.4rem); }
 .yo-main h2 { font-size: clamp(1rem, 4vw, 1.15rem); }
+.yo-main > section,
+.yo-main > article,
+.yo-main > .yo-hero,
+.yo-main > .yo-month,
+.yo-main > .yo-con-ayuda {
+  min-width: 0;
+  max-width: 100%;
+}
 .yo-main section { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.yo-main table { font-size: .92rem; }
+.yo-main .tabla-scroll {
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+.yo-main table {
+  font-size: .92rem;
+  width: 100%;
+  table-layout: fixed;
+}
 .yo-main table th,
-.yo-main table td { padding: .45rem .55rem; }
+.yo-main table td {
+  padding: .45rem .55rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  vertical-align: top;
+}
+.yo-main table .num,
+.yo-main table th.num,
+.yo-main table td.num {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
 .yo-copias-table {
   table-layout: fixed;
   width: 100%;
+  min-width: 18rem;
   font-size: .8rem;
 }
 .yo-copias-table col.col-fichero { width: 32%; }
@@ -1418,7 +1460,11 @@ body.admin { margin: 0; background: #f8fafc; }
   padding: .55rem .7rem;
 }
 .yo-saldos span, .yo-flujo span { display: block; font-size: .85rem; color: #64748b; }
-.yo-saldos strong, .yo-flujo strong { font-size: 1.05rem; }
+.yo-saldos strong, .yo-flujo strong {
+  font-size: clamp(.95rem, 4.2vw, 1.05rem);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
 .yo-flujo .ing strong { color: #15803d; }
 .yo-flujo .gas strong { color: #b91c1c; }
 .yo-fabs {
@@ -1449,17 +1495,41 @@ body.admin { margin: 0; background: #f8fafc; }
   padding: .45rem .65rem;
 }
 .yo-dot { width: .7rem; height: .7rem; border-radius: 50%; flex: none; }
-.yo-leyenda .num { margin-left: auto; }
+.yo-leyenda .num {
+  margin-left: auto;
+  flex: none;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.yo-leyenda li { min-width: 0; }
 .yo-lista { list-style: none; padding: 0; margin: 0; display: grid; gap: .45rem; min-width: 0; }
 .yo-lista li {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   gap: .55rem;
   align-items: center;
   background: #fff;
   border-radius: 12px;
   padding: .65rem .7rem;
   min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.yo-lista li:not(:has(.yo-chip)):has(.imp) {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+.yo-lista li:not(:has(.yo-chip)):not(:has(.imp)):not(:has(button)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+#yo-remesa-sols li {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+}
+#yo-remesa-sols li button {
+  white-space: nowrap;
+  font-size: .82rem;
+  padding: .4rem .55rem;
 }
 .yo-lista li.yo-mov-caja {
   background: #fefce8;
@@ -1499,9 +1569,24 @@ body.admin { margin: 0; background: #f8fafc; }
   font-weight: 700;
   font-size: .8rem;
 }
-.yo-lista .meta { display: grid; }
-.yo-lista .meta small { color: #64748b; }
-.yo-lista .imp { font-variant-numeric: tabular-nums; font-weight: 600; }
+.yo-lista .meta {
+  display: grid;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.yo-lista .meta strong { overflow-wrap: anywhere; }
+.yo-lista .meta small { color: #64748b; overflow-wrap: anywhere; }
+.yo-lista .imp {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: right;
+  justify-self: end;
+  align-self: center;
+  flex-shrink: 0;
+  padding-left: .25rem;
+}
 .yo-lista .imp.ing { color: #15803d; }
 .yo-lista .imp.gas { color: #b91c1c; }
 .yo-mov-menu { position: relative; flex: none; }
@@ -1593,20 +1678,55 @@ body.admin { margin: 0; background: #f8fafc; }
   white-space: nowrap;
 }
 .yo-tabbar a.on { color: #0f766e; font-weight: 700; background: #ccfbf1; }
+.go-hoja { width: 100%; min-width: 0; max-width: 100%; }
 .go-cabecera h1 { margin: 0 0 .15rem; }
-.go-cabecera p { margin: 0 0 .85rem; }
-.go-tabla { width: 100%; border-collapse: collapse; }
-.go-tabla th, .go-tabla td { text-align: left; border-bottom: 1px solid #e2e8f0; }
-.go-tabla .num, .go-tabla th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.go-cabecera p { margin: 0 0 .85rem; word-break: break-word; }
+.go-tabla-scroll {
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: .5rem;
+}
+.go-tabla {
+  width: 100%;
+  min-width: 17.5rem;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.go-col-fecha { width: 19%; }
+.go-col-concepto { width: 34%; }
+.go-col-cuenta { width: 27%; }
+.go-col-importe { width: 20%; }
+.go-tabla th, .go-tabla td {
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.go-tabla td:nth-child(2),
+.go-tabla td:nth-child(3) { white-space: normal; }
+.go-tabla .num, .go-tabla th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 .go-tabla tfoot td { font-weight: 700; border-top: 2px solid #1a202c; border-bottom: 0; }
-.go-tabla small { color: #64748b; }
+.go-tabla tfoot td.num { background: #fff; }
+.go-tabla small { color: #64748b; display: block; }
+@media (max-width: 420px) {
+  .go-tabla { font-size: .84rem; }
+  .go-tabla th, .go-tabla td { padding: .35rem .28rem; }
+  .go-col-fecha { width: 21%; }
+  .go-col-importe { width: 23%; }
+}
 @media print {
   body.yo .yo-top,
   body.yo .yo-month,
   body.yo .login-version { display: none !important; }
   body.yo .yo-main { max-width: none; padding: 0; overflow: visible; }
   .go-cabecera h1 { font-size: 16pt; }
-  .go-tabla { font-size: 11pt; }
+  .go-tabla-scroll { overflow: visible; }
+  .go-tabla { font-size: 11pt; min-width: 0; }
 }
 .yo-modal {
   position: fixed;
@@ -1740,7 +1860,9 @@ body.admin { margin: 0; background: #f8fafc; }
   display: flex;
   justify-content: space-between;
   gap: .5rem;
+  min-width: 0;
 }
+.yo-cat-list li > span { min-width: 0; overflow-wrap: anywhere; }
 .yo-cat-list small { color: #64748b; }
 .yo-con-ayuda { margin: 0 0 1rem; }
 .yo-con-ayuda > h1,
@@ -1902,7 +2024,17 @@ body.admin { margin: 0; background: #f8fafc; }
   border-color: #94a3b8;
   color: #0f172a;
 }
-.yo-remesa-resumen { margin: .75rem 0 1rem; }
+.yo-remesa-resumen { margin: .75rem 0 1rem; min-width: 0; }
+.yo-remesa-resumen + p,
+.yo-main p:has(#yo-remesa-disponible),
+.yo-main p:has(#yo-remesa-neto),
+.yo-main p:has(#yo-remesa-remanente) {
+  overflow-wrap: anywhere;
+}
+.yo-main p strong {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 #yo-remesa-tesoreria {
   width: 7.2rem;
   max-width: 100%;
@@ -1931,6 +2063,12 @@ body.admin { margin: 0; background: #f8fafc; }
     grid-template-columns: minmax(0, 1fr) auto;
   }
   .yo-banco-asignar { min-height: 2.75rem; padding: .55rem .85rem; }
+  #yo-remesa-sols li {
+    grid-template-columns: 1fr 1fr;
+  }
+  #yo-remesa-sols li .meta {
+    grid-column: 1 / -1;
+  }
 }
 .remesa-linea-detalle {
   margin: 1rem 0 1.25rem;

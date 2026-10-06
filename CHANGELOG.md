@@ -10,6 +10,17 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.19] — 2026-10-06
+
+### Cambiado
+- En **Mis cuentas**, las pantallas (lista, remesa, g.o., etc.) se adaptan mejor al móvil: los **importes** ya no quedan fuera de pantalla.
+- En **Remesas** del centro, la casilla **Sustituir el disponible por este importe** va en la misma línea que el texto.
+- En preferencias de cuenta, el botón del centro pasa a decir **Cambiar** en lugar de Guardar.
+- Manual y ayuda: la **remesa comunica datos** (resumen y disponible indicado), **no transfiere dinero**; el secretario **acepta o rechaza** antes de que el centro anote nada.
+
+### Corregido
+- Si la persona tiene **libro personal vinculado** a un nombre del centro, las **solicitudes de detalle** de remesa ya aparecen en **Mis cuentas → Remesa** (antes solo coincidían si era la misma fila de persona en base de datos).
+
 ## [0.1.18] — 2026-10-06
 
 ### Añadido

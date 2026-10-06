@@ -1,6 +1,8 @@
 {
     "anio": 2026,
     "centro": "Montagut",
+    "es_centro_sg": false,
+    "es_club": false,
     "fecha_cierre": "2026-06-30",
     "fecha_inicio": "2026-01-01",
     "meses": 6,

@@ -12,7 +12,7 @@ use src\remesas\domain\entity\SolicitudDetalle;
 final class ResolverSolicitudDetalle
 {
     public function __construct(
-        private readonly ResolverPersonaActual $ambito,
+        private readonly PersonasRemesaDeIdentidad $personasRemesa,
         private readonly RemesaRepository $remesas,
     ) {
     }
@@ -20,9 +20,9 @@ final class ResolverSolicitudDetalle
     /** @param array<string, mixed> $datos */
     public function ejecutar(int $id, array $datos): SolicitudDetalle
     {
-        $ctx = $this->ambito->ejecutar();
         $solicitud = $this->remesas->solicitudPorId($id);
-        if ($solicitud === null || $solicitud->personaId !== $ctx->personaId) {
+        $personas = $this->personasRemesa->ejecutar();
+        if ($solicitud === null || $solicitud->personaId <= 0 || !in_array($solicitud->personaId, $personas, true)) {
             throw new InvalidArgumentException(_("Solicitud no encontrada"));
         }
         if ($solicitud->estado !== 'pendiente' || $solicitud->id === null) {

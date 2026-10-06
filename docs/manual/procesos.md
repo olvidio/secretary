@@ -27,19 +27,21 @@ Orden práctico: primero el cierre de vivienda del centro y los 613; las remesas
 
 ### 2. Remesa de la persona → bandeja del centro → disponible → partidas 7
 
+La persona **no envía dinero**, solo **datos** (resumen del mes y cifras de referencia, incluido el disponible que **notifica** al secretario). El secretario **espera a revisar** y solo al **Aceptar** (o al gestionar **Disponible** después) el centro anota lo que corresponda.
+
 Flujo mensual entre el libro personal y el centro.
 
 **Persona (Mis cuentas):**
 
 1. Anotar ingresos, gastos y traspasos del mes en Resumen, Lista o Banco.
-2. Si hay que dejar dinero en el banco, fijarlo antes en **Remanente** (menú del nombre, junto a Mail y Contraseña). Ir a **Remesa**, elegir el mes con ‹ ›, revisar las líneas, el saldo y el disponible (saldo menos remanente).
+2. Si hay que dejar dinero en el banco, fijarlo antes en **Remanente** (menú del nombre, junto a Mail y Contraseña). Ir a **Remesa**, elegir el mes con ‹ ›, revisar las líneas, el saldo y el **disponible que se comunicará** al centro (saldo menos remanente; informativo, no un pago).
 3. **Cerrar y enviar mes** (pide confirmación). Si el centro ya propuso destinos 7, el texto «Deberías ingresar…» aparece encima del botón.
 
 **Secretario (centro):**
 
 4. **Remesas** → **Filtrar** por recibidas → **Ver** el detalle.
-5. Revisar conceptos e importes. Si la persona mandó el disponible (saldo menos remanente), valorar **Sustituir el disponible por este importe**.
-6. **Aceptar** (o **Rechazar** con nota). Aceptar anota P contra la cuenta personal y suma al **disponible** (salvo sustitución por tesorería).
+5. Revisar conceptos e importes. Si la persona **indicó** un disponible (saldo menos remanente), valorar **Sustituir el disponible por este importe** (ajuste contable del disponible operativo a lo comunicado).
+6. **Aceptar** (o **Rechazar** con nota). Aceptar **registra en el centro** el resumen en P y actualiza el **disponible** operativo (salvo sustitución por la cifra comunicada). Rechazar deja todo como estaba.
 7. **Disponible** → revisar saldos → **Proponer destinos 7** → revisar el reparto → **Confirmar y apuntar**. Eso anota las 7 en P y baja el disponible.
 8. La persona ve el mismo texto de destinos 7 en su pantalla Remesa.
 

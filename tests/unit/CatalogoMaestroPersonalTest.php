@@ -13,11 +13,11 @@ final class CatalogoMaestroPersonalTest extends TestCase
     {
         $codigos = array_map(static fn (array $c): string => $c['codigo'], CatalogoMaestroPersonal::cuentas());
         self::assertContains('111', $codigos);
-        self::assertContains('21', $codigos);
+        self::assertContains('22', $codigos);
         self::assertContains('212', $codigos);
         self::assertContains('79', $codigos);
         self::assertNotContains('9', $codigos);
-        self::assertTrue(CatalogoMaestroPersonal::existe('21'));
+        self::assertTrue(CatalogoMaestroPersonal::existe('22'));
         self::assertFalse(CatalogoMaestroPersonal::existe('9'));
         self::assertFalse(CatalogoMaestroPersonal::existe('inventado'));
         self::assertCount(26, $codigos);

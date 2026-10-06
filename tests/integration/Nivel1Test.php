@@ -107,12 +107,12 @@ final class Nivel1Test extends TestCase
     {
         $deps = $this->deps();
         $cuenta = $deps['subcuentaA']->ejecutar([
-            'codigo_maestro' => '21',
+            'codigo_maestro' => '22',
             'codigo' => 'gas',
             'nombre' => 'Gas de casa',
         ]);
-        self::assertSame('21.gas', $cuenta->codigo);
-        self::assertSame('21', $cuenta->codigoMaestro);
+        self::assertSame('22.gas', $cuenta->codigo);
+        self::assertSame('22', $cuenta->codigoMaestro);
 
         $this->expectException(\InvalidArgumentException::class);
         $deps['subcuentaA']->ejecutar([

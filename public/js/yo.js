@@ -930,9 +930,9 @@
     if (periodo) periodo.textContent = fmtFecha(r.desde) + ' – ' + fmtFecha(r.hasta);
     const lineas = r.lineas || [];
     const vacia = qs('#go-vacia');
-    const tabla = qs('#go-tabla');
+    const tablaWrap = qs('#go-tabla-wrap');
     if (vacia) vacia.hidden = lineas.length > 0;
-    if (tabla) tabla.hidden = lineas.length === 0;
+    if (tablaWrap) tablaWrap.hidden = lineas.length === 0;
     const tbody = qs('#go-lineas');
     if (tbody) {
       tbody.innerHTML = lineas.map((m) => {
@@ -1079,7 +1079,11 @@
     const sols = await api('/api/yo/remesas/solicitudes');
     const ulS = qs('#yo-remesa-sols');
     const vacS = qs('#yo-remesa-sols-vacia');
-    const lista = sols.solicitudes || [];
+    if (!sols.ok && err) {
+      err.textContent = sols.error || t('error');
+      err.hidden = false;
+    }
+    const lista = sols.ok ? (sols.solicitudes || []) : [];
     if (vacS) vacS.hidden = lista.length > 0;
     if (ulS) {
       ulS.innerHTML = '';
