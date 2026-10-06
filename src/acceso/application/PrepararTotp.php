@@ -35,25 +35,23 @@ final class PrepararTotp
 
         return [
             'secreto' => $secreto,
-            'uri' => TotpRfc6238::otpauthUri($this->etiqueta($identidadId, $identidad), $secreto),
+            'uri' => TotpRfc6238::otpauthUri($this->etiqueta($identidad), $secreto),
             'email' => $identidad->email,
         ];
     }
 
-    private function etiqueta(int $identidadId, Identidad $identidad): string
+    private function etiqueta(Identidad $identidad): string
     {
-        $nombres = [];
-        foreach ($this->identidades->centrosDe($identidadId) as $centro) {
-            $nombres[] = $centro->nombre !== '' ? $centro->nombre : $centro->codigo;
-        }
-        if ($nombres !== []) {
-            $sitio = implode(', ', $nombres);
-        } elseif ($identidad->esAdmin) {
-            $sitio = _('Administrador');
+        if ($identidad->esAdmin) {
+            $nombre = _('Administrador');
+        } elseif (trim($identidad->nombre) !== '') {
+            $nombre = trim($identidad->nombre);
+        } elseif ($identidad->alias !== null && trim($identidad->alias) !== '') {
+            $nombre = trim($identidad->alias);
         } else {
-            $sitio = $identidad->alias ?? _('Libro personal');
+            $nombre = strstr($identidad->email, '@', true) ?: $identidad->email;
         }
 
-        return $sitio . ' - ' . $identidad->email;
+        return $nombre . ' - ' . $identidad->email;
     }
 }

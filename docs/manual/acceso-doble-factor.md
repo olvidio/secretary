@@ -19,6 +19,7 @@ Añade una comprobación más al entrar, además de la contraseña: un código d
 
 ## Reglas que conviene saber
 
+- El segundo factor queda ligado a **su cuenta** (identidad: correo y alias), no a un centro concreto. En la aplicación del móvil el QR muestra su **nombre o alias** y el correo, no el nombre del centro (aunque sea secretario de varios).
 - Los códigos de recuperación se muestran **una sola vez** y cada uno sirve una única vez.
 - El código de seis dígitos vale mientras está en pantalla; se admiten también los treinta segundos anteriores y posteriores, por si el reloj del móvil va desajustado.
 - Cinco códigos erróneos seguidos bloquean la cuenta durante quince minutos.

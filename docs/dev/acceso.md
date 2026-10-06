@@ -49,6 +49,8 @@ el login con ese correo entra en `/yo` y no puede leer el libro del centro.
 
 ## TOTP y cifrado
 
+- El secreto TOTP es **por identidad** (`identidad_totp.identidad_id`), no por centro.
+  La etiqueta del QR (`PrepararTotp`) usa nombre/alias y correo de la identidad, no el nombre del centro.
 - HMAC-SHA1, 30 s, 6 dígitos, ventana ±1 (`TotpRfc6238`).
 - El secreto se guarda cifrado (AES-256-GCM) con material derivado de `APP_KEY`
   (`hash('sha256', APP_KEY, true)`). Sin `APP_KEY` la aplicación no arranca las

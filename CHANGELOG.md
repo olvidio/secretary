@@ -10,6 +10,14 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.21] — 2026-10-06
+
+### Corregido
+- Al activar el **segundo factor**, el QR en la app del móvil muestra el **nombre o alias y el correo de la cuenta**, no el nombre del centro (el TOTP sigue siendo uno por identidad, como antes).
+
+### Cambiado
+- Manual y documentación de acceso sobre la etiqueta del TOTP.
+
 ## [0.1.20] — 2026-10-06
 
 ### Añadido
