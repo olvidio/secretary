@@ -54,6 +54,7 @@ final class DineroTest extends TestCase
         self::assertSame('10.50', Dinero::fromInput('10,50')->toString());
         self::assertSame('53540.00', Dinero::fromInput('53.540,00')->toString());
         self::assertSame('109240.00', Dinero::fromInput('109.240,00')->toString());
+        self::assertSame('1234.00', Dinero::fromInput('1.234')->toString());
     }
 
     public function testFromInputFormatoInterno(): void

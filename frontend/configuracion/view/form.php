@@ -1,8 +1,13 @@
 <?php $esClub = !empty($esClub); $esFundacion = !empty($esFundacion); $esCentroSg = !empty($esCentroSg); $esPlanPropio = $esClub || $esCentroSg; ?>
 <h1><?= _("Configuración") ?></h1>
 <form id="form-config" class="grid-form">
-    <label><?= _("Sigla") ?> <input name="centro" required></label>
-    <p class="muted"><?= _("El ejercicio contable (año, fechas, alta y cierre) se gestiona en Plan y ejercicio → Ejercicios. La fecha de corte del mes se cambia en Fecha cierre.") ?></p>
+    <div class="config-sigla">
+        <label><?= _("Sigla") ?> <input name="centro" required></label>
+        <?php if (empty($soloConsulta)): ?>
+        <button type="button" id="btn-guardar-sigla"><?= _("Guardar sigla") ?></button>
+        <?php endif; ?>
+    </div>
+    <p class="muted config-aviso-ejercicio"><?= _("El ejercicio contable (año, fechas, alta y cierre) se gestiona en Plan y ejercicio → Ejercicios. La fecha de corte del mes se cambia en Fecha cierre.") ?></p>
     <?php if (!$esPlanPropio): ?>
     <label><?= _("Tipo de centro") ?>
         <select name="tipo">
@@ -20,10 +25,13 @@
         <select name="plan_contable" required></select>
     </label>
     <?php endif; ?>
-    <?php if (empty($soloConsulta)): ?>
+    <?php if (!$esPlanPropio && empty($soloConsulta)): ?>
     <button type="submit"><?= _("Guardar") ?></button>
     <?php endif; ?>
+    <p class="ok" id="msg-sigla" hidden><?= _("Guardado") ?></p>
+    <?php if (!$esPlanPropio): ?>
     <p class="ok" id="msg" hidden><?= _("Guardado") ?></p>
+    <?php endif; ?>
 </form>
 <?php if ($esCentroSg && empty($soloConsulta)): ?>
 <section>
@@ -163,11 +171,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const planSelect = document.querySelector('#form-config [name=plan_contable]');
   if (planSelect) rellenarPlanes(planSelect, r.planes, r.config?.plan_contable);
   fillForm(document.getElementById('form-config'), r.config);
+  document.getElementById('btn-guardar-sigla')?.addEventListener('click', async () => {
+    const centro = document.querySelector('#form-config [name=centro]')?.value ?? '';
+    const s = await api('/api/configuracion', { method: 'POST', body: { centro } });
+    document.getElementById('msg-sigla').hidden = !s.ok;
+    if (!s.ok) alert(s.error);
+  });
   document.getElementById('form-config').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const body = formObj(ev.target);
     const s = await api('/api/configuracion', {method:'POST', body});
-    document.getElementById('msg').hidden = !s.ok;
+    const msg = document.getElementById('msg');
+    if (msg) msg.hidden = !s.ok;
     if (!s.ok) alert(s.error);
   });
   if (document.getElementById('tabla-usuarios')) cargarAssociacio();

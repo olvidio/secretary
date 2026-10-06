@@ -142,6 +142,17 @@ tr.cierre { background: #fffbeb; }
   flex: 0 0 auto;
   align-self: end;
 }
+.grid-form .config-sigla {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: end;
+  gap: .75rem 1rem;
+  flex: 0 0 auto;
+}
+.grid-form > .config-aviso-ejercicio {
+  flex: 1 1 100%;
+  margin: 0;
+}
 .presu-num-s { margin: 0 0 1rem; }
 .presu-num-s label {
   display: inline-flex;

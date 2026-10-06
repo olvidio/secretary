@@ -28,6 +28,8 @@ final class Dinero
         if (str_contains($raw, ',')) {
             $raw = str_replace('.', '', $raw);
             $raw = str_replace(',', '.', $raw);
+        } elseif (preg_match('/^-?\d{1,3}(\.\d{3})+$/', $raw) === 1) {
+            $raw = str_replace('.', '', $raw);
         }
         if (!is_numeric($raw)) {
             throw new InvalidArgumentException('La cantidad debe ser numérica');

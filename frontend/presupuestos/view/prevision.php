@@ -32,8 +32,7 @@ function cabeceraPrevision(anio) {
 }
 
 function fmtPrev(valorEs) {
-  if (!valorEs || valorEs === '0,00' || valorEs === '-0,00') return '';
-  return valorEs.endsWith(',00') ? valorEs.slice(0, -3) : valorEs;
+  return fmtEnteroEs(valorEs);
 }
 
 function pintarConsolidada(r) {

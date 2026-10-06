@@ -97,10 +97,12 @@ final class GuardarConfiguracion
         }
         $sigla = trim((string) ($datos['centro'] ?? ''));
         if ($planFijo) {
-            if ($sigla === '') {
-                throw new InvalidArgumentException(_("La sigla es obligatoria"));
+            if (array_key_exists('centro', $datos)) {
+                if ($sigla === '') {
+                    throw new InvalidArgumentException(_("La sigla es obligatoria"));
+                }
+                $this->guardarSigla($centroActivo, $sigla);
             }
-            $this->guardarSigla($centroActivo, $sigla);
             $sigla = $actual->centro;
         } elseif ($sigla === '') {
             $sigla = $actual->centro;

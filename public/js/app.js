@@ -73,6 +73,33 @@ function fmtFecha(iso) {
   return `${d}/${m}/${y}`;
 }
 
+/** Parsea importe es-ES (1.234,56 · 1.234 · 1234,5). */
+function parseImporteEs(valor) {
+  const s = String(valor).trim().replace(/\s/g, '');
+  if (!s) return NaN;
+  if (s.includes(',')) {
+    return Number(s.replace(/\./g, '').replace(',', '.'));
+  }
+  if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) {
+    return Number(s.replace(/\./g, ''));
+  }
+  return Number(s.replace(',', '.'));
+}
+
+/** Euros enteros con separador de miles (1.234). */
+function fmtEnteroEs(valor) {
+  if (valor === null || valor === undefined || String(valor).trim() === '') return '';
+  const n = parseImporteEs(valor);
+  if (!Number.isFinite(n)) return String(valor).trim();
+  const entero = Math.round(n);
+  if (entero === 0) return '';
+  return entero.toLocaleString(secretaryLocale(), {
+    useGrouping: true,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+}
+
 /** Importe en formato es-ES (1.234,56). Acepta entrada con coma o punto decimal. */
 function fmtImporteEs(valor) {
   if (valor === null || valor === undefined || String(valor).trim() === '') return '';

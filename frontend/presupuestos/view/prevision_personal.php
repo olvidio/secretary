@@ -61,54 +61,27 @@ function modoEtiqueta(modo) {
   return modo === 'puntual' ? I18N_PREV.puntual : '';
 }
 
-function fmtPrev(valorEs) {
-  if (!valorEs || valorEs === '0,00' || valorEs === '-0,00') return '';
-  return valorEs.endsWith(',00') ? valorEs.slice(0, -3) : valorEs;
-}
-
-function parseImporteEs(valorEs) {
-  const s = String(valorEs).trim().replace(/\s/g, '');
-  if (!s) return NaN;
-  if (s.includes(',')) {
-    return Number(s.replace(/\./g, '').replace(',', '.'));
-  }
-  if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) {
-    return Number(s.replace(/\./g, ''));
-  }
-  return Number(s.replace(',', '.'));
-}
-
 function fmtReferencia(l) {
   if (l.referencia_es) return l.referencia_es;
-  const acum = fmtEntero(l.acumulado_es);
-  const prev = fmtEntero(l.previsto_ejercicio_actual_es);
+  const acum = fmtEnteroEs(l.acumulado_es);
+  const prev = fmtEnteroEs(l.previsto_ejercicio_actual_es);
   if (!acum && !prev) return '';
   if (!prev) return acum;
   if (!acum) return '(' + prev + ')';
   return acum + ' (' + prev + ')';
 }
 
-function fmtEntero(valorEs) {
-  if (!valorEs || valorEs === '0,00' || valorEs === '-0,00') return '';
-  const n = parseImporteEs(valorEs);
-  if (!Number.isFinite(n)) return fmtPrev(valorEs);
-  const redondo = Math.round(n);
-  if (redondo === 0) return '';
-  return redondo.toLocaleString(secretaryLocale(), {
-    useGrouping: true,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
+function fmtPrevisionEs(valor) {
+  return fmtEnteroEs(valor);
 }
 
-/** Columna Previsión: euros enteros, sin céntimos ni separador de miles (evita confundir al guardar). */
-function fmtPrevisionEs(valor) {
-  if (valor === null || valor === undefined || String(valor).trim() === '') return '';
-  const n = parseImporteEs(String(valor).trim());
-  if (!Number.isFinite(n)) return String(valor).trim();
+function previsionEnteroParaGuardar(valor) {
+  const s = String(valor).trim();
+  if (!s) return '';
+  const n = parseImporteEs(s);
+  if (!Number.isFinite(n)) return s;
   const entero = Math.round(n);
-  if (entero === 0) return '';
-  return String(entero);
+  return entero === 0 ? '' : String(entero);
 }
 
 function etiquetaPrevisionSeleccionada() {
@@ -366,7 +339,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!id || id === 'todos') return;
     const lineas = {};
     ev.target.querySelectorAll('input[name]').forEach((i) => {
-      lineas[i.name] = i.value.trim() ? fmtPrevisionEs(i.value) : '';
+      lineas[i.name] = previsionEnteroParaGuardar(i.value);
     });
     const body = { lineas };
     const etiqueta = etiquetaPrevisionSeleccionada();

@@ -10,6 +10,15 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.23] — 2026-10-06
+
+### Corregido
+- **Fecha cierre**: al guardar la fecha de corte ya no falla con «La sigla es obligatoria» en centro sg, asociación o fundación.
+
+### Cambiado
+- **Configuración**: el botón **Guardar sigla** va junto al campo de sigla.
+- **Previsión personal** y **613**: la columna Previsión muestra miles con separador; al guardar se aceptan importes escritos con puntos de miles.
+
 ## [0.1.22] — 2026-10-06
 
 ### Corregido
