@@ -10,6 +10,11 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.22] — 2026-10-06
+
+### Corregido
+- Tras el código de seis dígitos, las cuentas con **personal y varios centros** ya no vuelven al login en bucle: la pantalla **Ámbito** (`/elegir-ambito`) estaba sin permiso en el catálogo de rutas.
+
 ## [0.1.21] — 2026-10-06
 
 ### Corregido
