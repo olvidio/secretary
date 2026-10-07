@@ -10,6 +10,16 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.25] — 2026-10-07
+
+### Añadido
+- En la **remesa** (previsualización personal y detalle autorizado en el centro), las **observaciones** de cada apunte aparecen junto a la subcuenta.
+
+### Cambiado
+- **Mis cuentas**: al imputar un gasto a **generales**, la explicación va en un bloque plegable y el formulario se desplaza para verse entero en el móvil; en ese modo no se ofrecen plantillas del centro.
+- **Remesas**: las líneas por concepto muestran el **nombre del maestro** (p. ej. `22. Ordinarios`).
+- Formulario de movimiento en móvil: mejor desplazamiento y margen inferior (safe area).
+
 ## [0.1.24] — 2026-10-06
 
 ### Añadido
