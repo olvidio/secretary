@@ -48,6 +48,7 @@ use src\remesas\application\ResolverMesRemesa;
 use src\remesas\application\PersonasRemesaDeIdentidad;
 use src\remesas\application\ResolverSolicitudDetalle;
 use src\remesas\application\SolicitarDetalleRemesa;
+use src\remesas\domain\services\MensajeRemesa;
 use src\remesas\infrastructure\persistence\PdoRemesaRepository;
 use src\shared\infrastructure\persistence\SchemaInstaller;
 use Tests\Soporte\BaseDeDatosAislada;
@@ -139,6 +140,18 @@ final class RemesaTest extends TestCase
         self::assertSame('enviada', $enviada->estado);
         self::assertSame(1, $enviada->version);
         self::assertNotNull($enviada->id);
+        self::assertNotNull($enviada->mensajeXml);
+        $msg = MensajeRemesa::leer($enviada->mensajeXml);
+        self::assertSame('aa', $msg->emisorIniciales);
+        self::assertSame('envio', $msg->accion);
+        self::assertSame(2750, $msg->disponibleCents);
+        self::assertSame($enviada->hashContenido, $msg->hash);
+        $importes = [];
+        foreach ($msg->lineas as $linea) {
+            $importes[$linea['codigo']] = $linea['cents'];
+        }
+        self::assertSame(1250, $importes['22']);
+        self::assertSame(5000, $importes['111']);
 
         $d['rechazar']->ejecutar((int) $enviada->id);
         self::assertSame(0, $this->contarAsientosRemesa());
@@ -146,6 +159,8 @@ final class RemesaTest extends TestCase
 
         $v2 = $d['enviar']->ejecutar(['anio' => $anio, 'mes' => 1]);
         self::assertSame(2, $v2->version);
+        self::assertNotNull($v2->mensajeXml);
+        self::assertSame('sustitucion', MensajeRemesa::leer($v2->mensajeXml)->accion);
         $d['aceptar']->ejecutar((int) $v2->id);
         self::assertSame(1, $this->contarAsientosRemesa());
         self::assertSame(1250, $this->realizado22($d));
@@ -211,6 +226,39 @@ final class RemesaTest extends TestCase
         }
 
         self::assertSame($cajaAntes, $d['saldos']->ejecutar($fecha)['caja']);
+    }
+
+    public function testAceptarRemesaConGastoGeneralesG208NoFallaIniciales(): void
+    {
+        $d = $this->deps();
+        $anio = $d['anio'];
+        $fecha = sprintf('%04d-02-15', $anio);
+        $gas = $d['cuentas']->buscar($d['centroId'], $d['personaId'], 'X', '22');
+        self::assertNotNull($gas?->id);
+
+        $d['registrar']->ejecutar([
+            'sentido' => 'gasto',
+            'fecha' => $fecha,
+            'cantidad' => '18.00',
+            'cuenta_id' => $gas->id,
+            'tesoreria' => 'CAJA',
+            'nota' => 'Reparación',
+            'gasto_generales' => '1',
+            'concepto_generales' => '208',
+        ]);
+
+        $enviada = $d['enviar']->ejecutar(['anio' => $anio, 'mes' => 2]);
+        $d['aceptar']->ejecutar((int) $enviada->id);
+
+        $apuntes = $d['listar']->ejecutar(['iniciales' => 'aa']);
+        $codigos = array_map(
+            static fn (array $a): string => $a['cuenta'] . '/' . $a['concepto_codigo'],
+            $apuntes,
+        );
+        self::assertContains('G/208', $codigos);
+        self::assertContains('P/211', $codigos);
+        self::assertContains('G/11', $codigos);
+        self::assertContains('P/111', $codigos);
     }
 
     private function contarAsientosRemesa(): int

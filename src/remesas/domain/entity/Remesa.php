@@ -31,6 +31,7 @@ final class Remesa
         public readonly ?string $nota,
         public readonly array $lineas = [],
         public readonly ?int $saldoTesoreriaCents = null,
+        public readonly ?string $mensajeXml = null,
     ) {
         if ($this->mes < 1 || $this->mes > 12) {
             throw new InvalidArgumentException('El mes debe estar entre 1 y 12');
@@ -71,6 +72,7 @@ final class Remesa
             $this->nota,
             $lineas,
             $this->saldoTesoreriaCents,
+            $this->mensajeXml,
         );
     }
 

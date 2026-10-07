@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="urn:secretario:mensajes:1.0"
+           xmlns="urn:secretario:mensajes:1.0"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+  <xs:element name="remesa">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="cabecera" type="Cabecera"/>
+        <xs:element name="periodo" type="Periodo"/>
+        <xs:element name="version" type="xs:positiveInteger"/>
+        <xs:element name="nota" type="xs:string" minOccurs="0"/>
+        <xs:element name="disponible" type="Disponible"/>
+        <xs:element name="lineas" type="Lineas"/>
+        <xs:element name="hash" type="Hash"/>
+      </xs:sequence>
+      <xs:attribute name="versionEsquema" type="xs:string" use="required" fixed="1"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="Cabecera">
+    <xs:sequence>
+      <xs:element name="idMensaje" type="Uuid"/>
+      <xs:element name="conversacion" type="Conversacion"/>
+      <xs:element name="accion" type="Accion"/>
+      <xs:element name="emitido" type="xs:dateTime"/>
+      <xs:element name="emisor" type="PartePersona"/>
+      <xs:element name="receptor" type="ParteCentro"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Periodo">
+    <xs:attribute name="anio" type="Anio" use="required"/>
+    <xs:attribute name="mes" type="Mes" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Disponible">
+    <xs:attribute name="moneda" type="xs:string" use="required" fixed="EUR"/>
+    <xs:attribute name="cents" type="xs:nonNegativeInteger" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Lineas">
+    <xs:sequence>
+      <xs:element name="linea" type="Linea" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Linea">
+    <xs:attribute name="codigo" type="CodigoMaestro" use="required"/>
+    <xs:attribute name="cents" type="xs:long" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Hash">
+    <xs:simpleContent>
+      <xs:extension base="Sha256">
+        <xs:attribute name="algoritmo" type="xs:string" use="required" fixed="sha-256"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="PartePersona">
+    <xs:simpleContent>
+      <xs:extension base="Parte">
+        <xs:attribute name="tipo" type="xs:string" use="required" fixed="persona"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="ParteCentro">
+    <xs:simpleContent>
+      <xs:extension base="Parte">
+        <xs:attribute name="tipo" type="xs:string" use="required" fixed="centro"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:simpleType name="Accion">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="envio"/>
+      <xs:enumeration value="sustitucion"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Uuid">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Parte">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="64"/>
+      <xs:pattern value="[^\s/]+"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Conversacion">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="160"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="CodigoMaestro">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="12"/>
+      <xs:pattern value="[0-9A-Za-z]+"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Anio">
+    <xs:restriction base="xs:int">
+      <xs:minInclusive value="1900"/>
+      <xs:maxInclusive value="2200"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Mes">
+    <xs:restriction base="xs:int">
+      <xs:minInclusive value="1"/>
+      <xs:maxInclusive value="12"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Sha256">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-f]{64}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>

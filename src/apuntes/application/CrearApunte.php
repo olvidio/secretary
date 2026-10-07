@@ -67,10 +67,7 @@ final class CrearApunte
         if ($concepto === null) {
             throw new InvalidArgumentException(sprintf(_("Concepto no válido para %s"), $cuenta));
         }
-        $iniciales = trim((string) ($datos['iniciales'] ?? ''));
-        if ($iniciales === '') {
-            $iniciales = '';
-        }
+        $iniciales = strtolower(trim((string) ($datos['iniciales'] ?? '')));
         if ($cuenta === 'P' && $iniciales === '' && $conceptoCodigo !== '32') {
             throw new InvalidArgumentException(_("Las iniciales son obligatorias en P"));
         }

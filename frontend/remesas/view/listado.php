@@ -46,7 +46,7 @@
         <p class="muted"><?= _("Subcuentas del libro personal que suman la línea. Solo lectura; no crea cuentas en el centro.") ?></p>
         <table id="tabla-remesa-linea-detalle">
             <thead>
-            <tr><th><?= _("Subcuenta") ?></th><th><?= _("Nombre") ?></th><th class="num"><?= _("Importe") ?></th><th><?= _("Generales / plantillas") ?></th></tr>
+            <tr><th><?= _("Subcuenta") ?></th><th><?= _("Nombre") ?></th><th class="num"><?= _("Importe") ?></th><th><?= _("Notas") ?></th><th><?= _("Generales / plantillas") ?></th></tr>
             </thead>
             <tbody></tbody>
         </table>

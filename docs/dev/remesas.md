@@ -55,13 +55,18 @@ Al aceptar, `RegistrarPlantillasDeRemesa` expande la plantilla (como en la
 entrada de apuntes del centro) con el mismo `remesa_id`.
 
 `hash_contenido` es SHA-256 del JSON canónico `(codigo, importe)` ordenado más
-la tesorería enviada. Un segundo envío con el mismo hash que la `enviada`
-pendiente no crea versión nueva.
+la tesorería enviada (el disponible, no el saldo bruto). Un segundo envío con
+el mismo hash que la `enviada` pendiente no crea versión nueva.
+
+El mismo contenido viaja en un XML (`urn:secretario:mensajes:1.0`), guardado en
+`remesas.mensaje_xml`. El desglose no va en ese documento. Ver
+`docs/dev/mensajes/remesa.md`.
 
 ## Esquema
 
 `migraciones/0010_remesas.sql`: `remesas`, `remesa_lineas`,
 `remesa_solicitudes_detalle`, FK `asientos.remesa_id`.
+`migraciones/0077_remesa_mensaje_xml.sql`: columna `mensaje_xml`.
 
 `UNIQUE (persona_id, ejercicio_id, anio, mes, version)`: el plan omitía `anio`;
 un ejercicio D11 largo puede tener dos eneros.

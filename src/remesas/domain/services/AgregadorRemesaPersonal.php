@@ -55,6 +55,7 @@ final class AgregadorRemesaPersonal
                         'cents' => 0,
                         'generales' => [],
                         'plantillas' => [],
+                        'apuntes' => [],
                     ];
                 }
                 if ($asiento->plantillaApunteId !== null && $cuenta->tipo === 'gasto') {
@@ -66,10 +67,12 @@ final class AgregadorRemesaPersonal
                         ];
                     }
                     $porMaestro[$maestro]['detalle'][$clave]['plantillas'][$pid]['cents'] += $cents;
+                    self::agregarApunte($porMaestro[$maestro]['detalle'][$clave], $cents, $asiento->glosa);
                     continue;
                 }
                 $porMaestro[$maestro]['importe'] += $cents;
                 $porMaestro[$maestro]['detalle'][$clave]['cents'] += $cents;
+                self::agregarApunte($porMaestro[$maestro]['detalle'][$clave], $cents, $asiento->glosa);
                 if ($asiento->gastoGenerales && $asiento->conceptoGenerales !== null
                     && $cuenta->tipo === 'gasto' && $cents !== 0) {
                     $cg = $asiento->conceptoGenerales;
@@ -107,6 +110,10 @@ final class AgregadorRemesaPersonal
                 if ($plantillas !== []) {
                     $fila['plantillas'] = $plantillas;
                 }
+                $apuntes = $item['apuntes'] ?? [];
+                if ($apuntes !== []) {
+                    $fila['apuntes'] = $apuntes;
+                }
                 $detalle[] = $fila;
             }
             usort($detalle, static fn (array $a, array $b): int => $a['codigo'] <=> $b['codigo']);
@@ -125,6 +132,20 @@ final class AgregadorRemesaPersonal
         }
 
         return $codigo;
+    }
+
+    /** @param array<string, mixed> $detalleItem */
+    private static function agregarApunte(array &$detalleItem, int $cents, ?string $glosa): void
+    {
+        if ($cents === 0) {
+            return;
+        }
+        $nota = $glosa !== null ? trim($glosa) : '';
+        $fila = ['cents' => $cents];
+        if ($nota !== '') {
+            $fila['nota'] = $nota;
+        }
+        $detalleItem['apuntes'][] = $fila;
     }
 
     /**

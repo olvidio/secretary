@@ -45,5 +45,7 @@ final class ListarSolicitudesPersonalesTest extends TestCase
 
         self::assertCount(1, $lista);
         self::assertSame(7, $lista[0]['persona_id']);
+        self::assertSame('22', $lista[0]['codigo_maestro']);
+        self::assertNotSame('', $lista[0]['nombre'] ?? '');
     }
 }

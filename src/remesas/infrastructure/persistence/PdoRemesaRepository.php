@@ -25,8 +25,8 @@ final class PdoRemesaRepository implements RemesaRepository
         }
         $st = $this->pdo->prepare(
             'INSERT INTO remesas (persona_id, centro_id, ejercicio_id, anio, mes, version, estado,
-                hash_contenido, enviada_at, resuelta_at, nota, saldo_tesoreria_cents)
-             VALUES (:persona, :centro, :ej, :anio, :mes, :ver, :estado, :hash, now(), NULL, :nota, :tes)
+                hash_contenido, enviada_at, resuelta_at, nota, saldo_tesoreria_cents, mensaje_xml)
+             VALUES (:persona, :centro, :ej, :anio, :mes, :ver, :estado, :hash, now(), NULL, :nota, :tes, :xml)
              RETURNING id, enviada_at'
         );
         $st->execute([
@@ -40,6 +40,7 @@ final class PdoRemesaRepository implements RemesaRepository
             ':hash' => $remesa->hashContenido,
             ':nota' => $remesa->nota,
             ':tes' => $remesa->saldoTesoreriaCents,
+            ':xml' => $remesa->mensajeXml,
         ]);
         $row = $st->fetch();
         if (!is_array($row)) {
@@ -319,6 +320,9 @@ final class PdoRemesaRepository implements RemesaRepository
             isset($row['saldo_tesoreria_cents']) && $row['saldo_tesoreria_cents'] !== null
                 ? (int) $row['saldo_tesoreria_cents']
                 : null,
+            isset($row['mensaje_xml']) && $row['mensaje_xml'] !== null && $row['mensaje_xml'] !== ''
+                ? (string) $row['mensaje_xml']
+                : null,
         );
     }
 
@@ -413,6 +417,22 @@ final class PdoRemesaRepository implements RemesaRepository
 
                     return $pl;
                 }, $plantillas);
+            }
+        }
+        if (!empty($item['apuntes']) && is_array($item['apuntes'])) {
+            $apuntes = [];
+            foreach ($item['apuntes'] as $ap) {
+                if (!is_array($ap)) {
+                    continue;
+                }
+                $filaAp = ['cents' => (int) ($ap['cents'] ?? 0)];
+                if (isset($ap['nota']) && trim((string) $ap['nota']) !== '') {
+                    $filaAp['nota'] = trim((string) $ap['nota']);
+                }
+                $apuntes[] = $filaAp;
+            }
+            if ($apuntes !== []) {
+                $fila['apuntes'] = $apuntes;
             }
         }
 

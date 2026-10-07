@@ -14,7 +14,8 @@ final class RemesaLinea
      *     nombre:string,
      *     cents:int,
      *     generales?:list<array{concepto:string,cents:int}>,
-     *     plantillas?:list<array{plantilla_id:int,cents:int,nombre?:string}>
+     *     plantillas?:list<array{plantilla_id:int,cents:int,nombre?:string}>,
+     *     apuntes?:list<array{cents:int,nota?:string}>
      * }> $detalle
      */
     public function __construct(
@@ -74,6 +75,27 @@ final class RemesaLinea
                 }
                 if ($plantillas !== []) {
                     $fila['plantillas'] = $plantillas;
+                }
+            }
+            if (!empty($item['apuntes']) && is_array($item['apuntes'])) {
+                $apuntes = [];
+                foreach ($item['apuntes'] as $ap) {
+                    if (!is_array($ap)) {
+                        continue;
+                    }
+                    $centsAp = (int) ($ap['cents'] ?? 0);
+                    $entry = [
+                        'cents' => $centsAp,
+                        'importe_es' => Dinero::fromCents(abs($centsAp))->formatEs(),
+                    ];
+                    $nota = isset($ap['nota']) ? trim((string) $ap['nota']) : '';
+                    if ($nota !== '') {
+                        $entry['nota'] = $nota;
+                    }
+                    $apuntes[] = $entry;
+                }
+                if ($apuntes !== []) {
+                    $fila['apuntes'] = $apuntes;
                 }
             }
             $detalle[] = $fila;

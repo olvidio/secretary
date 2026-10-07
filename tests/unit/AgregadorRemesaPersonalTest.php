@@ -52,6 +52,9 @@ final class AgregadorRemesaPersonalTest extends TestCase
         self::assertSame('22', $lineas[1]->codigoMaestro);
         self::assertSame(5250, $lineas[1]->importeCents);
         self::assertCount(2, $lineas[1]->detalle);
+        $gas = $lineas[1]->detalle[1];
+        self::assertSame('22.gas', $gas['codigo']);
+        self::assertSame([['cents' => 4000, 'nota' => 'Gas']], $gas['apuntes'] ?? []);
     }
 
     public function testIgnoraOtraContabilidad(): void
@@ -91,6 +94,7 @@ final class AgregadorRemesaPersonalTest extends TestCase
         self::assertSame('22', $lineas[0]->codigoMaestro);
         self::assertCount(1, $lineas[0]->detalle);
         self::assertSame([['concepto' => '204', 'cents' => 4000]], $lineas[0]->detalle[0]['generales'] ?? []);
+        self::assertSame([['cents' => 4000, 'nota' => 'Gas casa']], $lineas[0]->detalle[0]['apuntes'] ?? []);
     }
 
     public function testPlantillaNoSumaEnImportePeroViajaEnDetalle(): void
@@ -108,5 +112,6 @@ final class AgregadorRemesaPersonalTest extends TestCase
         self::assertSame('22', $lineas[0]->codigoMaestro);
         self::assertSame(0, $lineas[0]->importeCents);
         self::assertSame([['plantilla_id' => 7, 'cents' => 2500]], $lineas[0]->detalle[0]['plantillas'] ?? []);
+        self::assertSame([['cents' => 2500, 'nota' => 'Club']], $lineas[0]->detalle[0]['apuntes'] ?? []);
     }
 }

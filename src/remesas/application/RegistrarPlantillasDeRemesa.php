@@ -31,7 +31,7 @@ final class RegistrarPlantillasDeRemesa
         if ($persona === null) {
             throw new InvalidArgumentException(_("Persona no encontrada"));
         }
-        $iniciales = strtoupper($persona->iniciales);
+        $iniciales = strtolower(trim($persona->iniciales));
         $glosaBase = sprintf('Remesa %s %02d/%d v%d', $iniciales, $remesa->mes, $remesa->anio, $remesa->version);
 
         foreach ($remesa->lineas as $linea) {

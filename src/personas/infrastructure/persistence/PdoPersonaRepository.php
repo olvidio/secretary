@@ -51,6 +51,10 @@ final class PdoPersonaRepository implements PersonaRepository
 
     public function porIniciales(string $iniciales): ?Persona
     {
+        $iniciales = strtolower(trim($iniciales));
+        if ($iniciales === '') {
+            return null;
+        }
         $st = $this->pdo->prepare('SELECT * FROM personas WHERE iniciales = :i');
         $st->execute([':i' => $iniciales]);
         $row = $st->fetch();
@@ -60,6 +64,10 @@ final class PdoPersonaRepository implements PersonaRepository
 
     public function porInicialesDeCentro(int $centroId, string $iniciales): ?Persona
     {
+        $iniciales = strtolower(trim($iniciales));
+        if ($iniciales === '') {
+            return null;
+        }
         $st = $this->pdo->prepare(
             'SELECT * FROM personas WHERE centro_id = :c AND iniciales = :i'
         );

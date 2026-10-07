@@ -118,6 +118,13 @@
     if (cat && cuenta) cuenta.value = String(cat.id);
   }
 
+  function etiquetaMaestroRemesa(codigo, nombre) {
+    const c = String(codigo || '');
+    const n = String(nombre || '').trim();
+    if (n && n !== c) return c + '. ' + n;
+    return c;
+  }
+
   function resaltarCategoriaSeleccionada() {
     const grid = qs('#yo-cats-grid');
     const cuenta = qs('#yo-form [name="cuenta_id"]');
@@ -147,6 +154,17 @@
     if (hidden) hidden.value = state.generalesActivo ? '1' : '0';
     if (enGenerales) {
       fijarCategoriaGenerales();
+      requestAnimationFrame(() => {
+        const bloque = qs('#yo-generales-campos');
+        const sheet = qs('#yo-form.yo-sheet');
+        if (bloque && sheet) {
+          const sheetRect = sheet.getBoundingClientRect();
+          const bloqueRect = bloque.getBoundingClientRect();
+          if (bloqueRect.bottom > sheetRect.bottom - 8) {
+            bloque.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }
+        }
+      });
     } else if (grid && esGasto) {
       resaltarCategoriaSeleccionada();
     }
@@ -1043,8 +1061,11 @@
           (d.plantillas || []).forEach((p) => {
             gen += ' · ' + esc(p.nombre || ('Plantilla ' + p.plantilla_id)) + ' ' + esc(p.importe_es || '');
           });
+          (d.apuntes || []).forEach((a) => {
+            if (a.nota) gen += ' · ' + esc(a.nota) + (a.importe_es ? ' ' + esc(a.importe_es) : '');
+          });
         });
-        return '<li><span class="meta"><strong>' + esc(l.codigo_maestro + ' · ' + (l.nombre || ''))
+        return '<li><span class="meta"><strong>' + esc(etiquetaMaestroRemesa(l.codigo_maestro, l.nombre))
           + '</strong>' + (gen ? '<small>' + gen + '</small>' : '')
           + '</span><span class="imp">' + esc(l.importe_es) + '</span></li>';
       }).join('');
@@ -1089,7 +1110,7 @@
       ulS.innerHTML = '';
       lista.forEach((s) => {
         const li = document.createElement('li');
-        li.innerHTML = '<span class="meta"><strong>' + esc(s.codigo_maestro)
+        li.innerHTML = '<span class="meta"><strong>' + esc(etiquetaMaestroRemesa(s.codigo_maestro, s.nombre))
           + '</strong><small>' + esc(String(s.mes) + '/' + s.anio + ' v' + s.version) + '</small></span>'
           + '<button type="button" class="ok-btn" data-ok="1">Autorizar</button>'
           + '<button type="button" class="del" data-ok="0">Denegar</button>';

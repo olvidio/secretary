@@ -50,7 +50,9 @@ final class ResolverMesRemesa
      *   tesoreria_cents: int,
      *   remanente_cents: int,
      *   disponible_cents: int,
-     *   hasta: string
+     *   hasta: string,
+     *   emisor_iniciales: string,
+     *   receptor_codigo: string
      * }
      */
     public function ejecutar(int $anio, int $mes): array
@@ -103,12 +105,21 @@ final class ResolverMesRemesa
             }
         }
         $remanente = $this->remanentes->dePersona($ctx->personaId);
+        $personaDestino = $this->personas->porId($destino['persona_id']);
+        $centroDestino = $this->centros->porId($destino['centro_id']);
+        $iniciales = trim((string) ($personaDestino?->iniciales ?? ''));
+        $codigoCentro = trim((string) ($centroDestino?->codigo ?? ''));
+        if ($iniciales === '' || $codigoCentro === '') {
+            throw new InvalidArgumentException(_("No se puede nombrar el emisor o el receptor de la remesa"));
+        }
 
         return [
             'ctx' => $ctx,
             'ejercicio' => $ejercicioDestino,
             'destino_persona_id' => $destino['persona_id'],
             'destino_centro_id' => $destino['centro_id'],
+            'emisor_iniciales' => $iniciales,
+            'receptor_codigo' => $codigoCentro,
             'anio' => $anio,
             'mes' => $mes,
             'lineas' => $lineas,

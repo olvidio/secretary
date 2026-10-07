@@ -9,6 +9,7 @@ use src\remesas\domain\contracts\RemesaRepository;
 use src\remesas\domain\entity\Remesa;
 use src\remesas\domain\services\CalculoDisponibleRemesa;
 use src\remesas\domain\services\HashRemesa;
+use src\remesas\domain\services\MensajeRemesa;
 use src\shared\domain\value_objects\Dinero;
 
 final class EnviarRemesa
@@ -43,12 +44,26 @@ final class EnviarRemesa
             return $enviada;
         }
         $notaFinal = $nota !== '' ? $nota : null;
+        $emisor = (string) $preview['emisor_iniciales'];
+        $receptor = (string) $preview['receptor_codigo'];
 
-        return $this->remesas->enTransaccion(function () use ($personaId, $centroId, $ejercicio, $anio, $mes, $lineas, $hash, $notaFinal, $enviada, $tesoreria): Remesa {
+        return $this->remesas->enTransaccion(function () use ($personaId, $centroId, $ejercicio, $anio, $mes, $lineas, $hash, $notaFinal, $enviada, $tesoreria, $emisor, $receptor): Remesa {
             if ($enviada !== null && $enviada->id !== null) {
                 $this->remesas->marcarEstado($enviada->id, 'sustituida', true);
             }
             $version = $this->remesas->maxVersion($personaId, (int) $ejercicio->id, $anio, $mes) + 1;
+            $mensaje = MensajeRemesa::componer(
+                $receptor,
+                $emisor,
+                $anio,
+                $mes,
+                $version,
+                $notaFinal,
+                $tesoreria,
+                $lineas,
+                $hash,
+                $version === 1 ? 'envio' : 'sustitucion',
+            );
 
             return $this->remesas->guardarConLineas(new Remesa(
                 null,
@@ -65,6 +80,7 @@ final class EnviarRemesa
                 $notaFinal,
                 $lineas,
                 $tesoreria,
+                $mensaje->xml(),
             ));
         });
     }

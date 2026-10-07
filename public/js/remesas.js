@@ -43,6 +43,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (panelDetLinea) panelDetLinea.hidden = true;
   }
 
+  function textoNotasDetalle(item) {
+    const apuntes = item.apuntes || [];
+    if (!apuntes.length) return '';
+    return apuntes.map((a) => {
+      const imp = a.importe_es ? ' (' + esc(a.importe_es) + ' €)' : '';
+      const txt = a.nota ? esc(a.nota) : '—';
+      return txt + imp;
+    }).join('<br>');
+  }
+
   function textoExtrasDetalle(item) {
     const partes = [];
     (item.generales || []).forEach((g) => {
@@ -80,9 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
     items.forEach((x) => {
       const tr = document.createElement('tr');
       const extras = textoExtrasDetalle(x);
+      const notas = textoNotasDetalle(x);
       tr.innerHTML = '<td>' + esc(x.codigo || '') + '</td>'
         + '<td>' + esc(x.nombre || '') + '</td>'
         + '<td class="num">' + esc(x.importe_es || '') + '</td>'
+        + '<td>' + (notas ? notas : '<span class="muted">—</span>') + '</td>'
         + '<td>' + (extras ? extras : '<span class="muted">—</span>') + '</td>';
       tbDet.appendChild(tr);
     });
