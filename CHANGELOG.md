@@ -10,6 +10,14 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.27] — 2026-10-08
+
+### Añadido
+- **Copia de centro**: el fichero lleva el libro operativo de ese centro (nombres, cuentas, presupuesto, previsión, remesas, plantillas, arqueos, labores, extractos y cierres del libro personal de sus personas).
+
+### Cambiado
+- **Resúmenes**: el menú distingue **Arqueo Caja** (recuento de efectivo) y **Saldo banco** (importe del extracto). El 613 G propone también el dinero en banco a partir del último saldo guardado.
+
 ## [0.1.26] — 2026-10-08
 
 ### Añadido
