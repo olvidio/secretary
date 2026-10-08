@@ -79,13 +79,23 @@ final class PrevisionController
 
     public function getConsolidada(Request $request, array $vars = []): Response
     {
-        return ContestarJson::ok($this->consolidada->ejecutar());
+        try {
+            return ContestarJson::ok($this->consolidada->ejecutar(
+                self::etiquetaDe($request, null),
+            ));
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage(), 404);
+        }
     }
 
     public function aplicarPresupuesto(Request $request, array $vars = []): Response
     {
         try {
-            return ContestarJson::ok($this->aplicar->ejecutar());
+            $body = $request->json();
+
+            return ContestarJson::ok($this->aplicar->ejecutar(
+                self::etiquetaDe($request, $body),
+            ));
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
         }

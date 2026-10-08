@@ -1,5 +1,5 @@
 <h1 class="print-hide"><?= _("Previsión personal") ?></h1>
-<p class="muted print-hide"><?= _("Hoja 613 P por persona. acumulado(anterior): acumulado del ejercicio abierto y, entre paréntesis, la previsión ya guardada para ese ejercicio. Previsión: importes del año elegido (por defecto el ejercicio siguiente). Casilla vacía al guardar: no se guarda importe para ese concepto.") ?></p>
+<p class="muted print-hide"><?= _("Hoja 613 P por persona. acumulado(anterior): acumulado del ejercicio anterior al año elegido y, entre paréntesis, la previsión guardada para ese ejercicio (si existe). Previsión: importes del año elegido (por defecto el ejercicio siguiente). Casilla vacía al guardar: no se guarda importe para ese concepto.") ?></p>
 <p class="filters print-hide">
     <label><?= _("Persona") ?>
         <select id="sel-persona"><option value=""><?= _("Elegir…") ?></option></select>
@@ -22,7 +22,7 @@
     <thead>
     <tr>
         <th class="col-concepto"><?= _("Concepto") ?></th>
-        <th class="num col-calculado" title="<?= htmlspecialchars(_("Acumulado del ejercicio abierto (previsión guardada de ese ejercicio)"), ENT_QUOTES) ?>"><?= _("acumulado(anterior)") ?></th>
+        <th class="num col-calculado" title="<?= htmlspecialchars(_("Acumulado del ejercicio anterior al año elegido (previsión guardada de ese ejercicio)"), ENT_QUOTES) ?>"><?= _("acumulado(anterior)") ?></th>
         <th class="num col-importe"><?= _("Previsión") ?></th>
     </tr>
     </thead>
@@ -202,7 +202,7 @@ function appendFilasPrevision(tb, filas, editable) {
 function crearTablaPrevision() {
   const table = document.createElement('table');
   table.className = 'tabla-prevision tabla-prevision-personal';
-  const titCalc = <?= json_encode(_("Acumulado del ejercicio abierto (previsión guardada de ese ejercicio)"), JSON_UNESCAPED_UNICODE) ?>;
+  const titCalc = <?= json_encode(_("Acumulado del ejercicio anterior al año elegido (previsión guardada de ese ejercicio)"), JSON_UNESCAPED_UNICODE) ?>;
   table.innerHTML =
     '<colgroup><col class="col-concepto"><col class="col-calculado"><col class="col-importe"></colgroup>'
     + '<thead><tr>'

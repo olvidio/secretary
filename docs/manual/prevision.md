@@ -11,7 +11,7 @@ Junta las previsiones personales del 613 P en una sola hoja: una columna por nom
 
 ## Cómo se usa
 
-1. Abrir Previsión. Cada cifra de un nombre es la que se guardó en Previsión personal, no el calculado en vivo.
+1. Abrir Previsión. Elegir el **Año** (misma lista que en Previsión personal; por defecto el ejercicio siguiente). Cada cifra de un nombre es la que se guardó en Previsión personal para ese año, no el calculado en vivo.
 2. Si falta alguien, el aviso «Falta guardar la previsión de…» lista los nombres; hay que abrir su hoja y guardar.
 3. **Imprimir** saca la hoja en A4 horizontal: cabecera con el nombre del centro y el **año del ejercicio siguiente** (el presupuesto que se está preparando), bloques I–IX del 613, nombres en iniciales y cifras compactas.
 4. **Aplicar al presupuesto P** copia la columna Total a las líneas del 613 P en Presupuesto P (pide confirmación). El resto de conceptos de Presupuesto P no se toca.

@@ -13,9 +13,9 @@ final class AplicarPrevisionAlPresupuesto
     }
 
     /** @return array<string, mixed> */
-    public function ejecutar(): array
+    public function ejecutar(?string $etiqueta = null): array
     {
-        $hoja = $this->consolidada->ejecutar();
+        $hoja = $this->consolidada->ejecutar($etiqueta);
         $lineas = [];
         foreach ($hoja['lineas'] as $fila) {
             $lineas[(string) $fila['codigo']] = (string) $fila['total'];

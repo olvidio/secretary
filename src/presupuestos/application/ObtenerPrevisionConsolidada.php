@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace src\presupuestos\application;
 
+use InvalidArgumentException;
 use src\personas\domain\contracts\PersonaRepository;
 use src\presupuestos\domain\contracts\PrevisionPersonalRepository;
 use src\presupuestos\domain\services\AgrupadorPrevision613P;
@@ -19,10 +20,20 @@ final class ObtenerPrevisionConsolidada
     }
 
     /** @return array<string, mixed> */
-    public function ejecutar(): array
+    public function ejecutar(?string $etiquetaObjetivo = null): array
     {
         $datos = $this->hoja->contextoEstructura();
-        $etiqueta = $this->hoja->etiquetaPresupuestoPorDefecto();
+        $opciones = $this->hoja->opcionesPrevision();
+        $defecto = (string) ($opciones['etiqueta_defecto'] ?? $this->hoja->etiquetaPresupuestoPorDefecto());
+        /** @var list<string> $permitidas */
+        $permitidas = $opciones['etiquetas'] ?? [];
+        $etiqueta = trim((string) ($etiquetaObjetivo ?? ''));
+        if ($etiqueta === '') {
+            $etiqueta = $defecto;
+        }
+        if ($permitidas !== [] && !in_array($etiqueta, $permitidas, true)) {
+            throw new InvalidArgumentException(_("No hay ejercicio para el año elegido"));
+        }
         $objetivo = $this->hoja->ejercicioPorEtiqueta($etiqueta);
         $ejercicioId = $objetivo !== null && $objetivo->id !== null ? (int) $objetivo->id : 0;
         $personas = [];
@@ -96,7 +107,11 @@ final class ObtenerPrevisionConsolidada
         return [
             'ejercicio_id' => $ejercicioId > 0 ? $ejercicioId : null,
             'etiqueta_presupuesto' => $etiqueta,
+            'etiqueta_defecto' => $defecto,
+            'etiqueta_trabajo' => $opciones['etiqueta_trabajo'] ?? null,
+            'etiquetas' => $permitidas,
             'anio_presupuesto' => $etiqueta,
+            'anios_disponibles' => $permitidas,
             'personas' => $personas,
             'lineas' => $lineas,
             'filas' => $filas,

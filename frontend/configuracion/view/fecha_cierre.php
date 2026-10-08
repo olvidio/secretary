@@ -1,5 +1,10 @@
 <h1><?= _("Fecha de cierre") ?></h1>
 <p><?= _("Tras imprimir el 613, pase la fecha de cierre al mes siguiente. La entrada de apuntes usa este mes por defecto.") ?></p>
+<p class="muted print-hide"><?= _("Recuento de caja:") ?>
+    <a href="/arqueo-p"><?= _("Arqueo P") ?></a>
+    ·
+    <a href="/arqueo-g"><?= _("Arqueo G") ?></a>
+</p>
 <form id="form-cierre" class="grid-form">
     <label><?= _("Fecha cierre") ?> <input name="fecha_cierre" type="date" required></label>
     <button type="submit"><?= _("Guardar") ?></button>

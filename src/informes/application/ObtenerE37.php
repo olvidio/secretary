@@ -77,11 +77,12 @@ final class ObtenerE37
             'cuenta' => 'P',
             'desde' => $cfg->fechaInicio->format('Y-m-d'),
             'hasta' => $cfg->fechaCierre->format('Y-m-d'),
+            'por_fecha_imputacion' => true,
         ];
         if ($iniciales) {
             $filtros['iniciales'] = $iniciales;
         }
-        $apuntes = $this->listarApuntes->ejecutar($filtros);
+        $apuntes = self::apuntesConFechaImputacion($this->listarApuntes->ejecutar($filtros));
 
         $totArr = null;
         if ($iniciales) {
@@ -137,6 +138,22 @@ final class ObtenerE37
      * @param list<array<string, mixed>> $apuntes
      * @return list<array<string, mixed>>
      */
+    private static function apuntesConFechaImputacion(array $apuntes): array
+    {
+        return array_map(static function (array $a): array {
+            if (!empty($a['fecha_imputacion'])) {
+                $a['fecha'] = $a['fecha_imputacion'];
+                $a['fecha_es'] = $a['fecha_imputacion_es'] ?? $a['fecha_es'];
+            }
+
+            return $a;
+        }, $apuntes);
+    }
+
+    /**
+     * @param list<array<string, mixed>> $apuntes
+     * @return list<array<string, mixed>>
+     */
     private static function filasHoja(array $apuntes): array
     {
         $filas = [];
@@ -147,8 +164,10 @@ final class ObtenerE37
                 $celdas[$k] = $d->toString();
                 $celdas[$k . '_es'] = $d->formatEs();
             }
+            $fechaImputacion = (string) ($a['fecha_imputacion'] ?? $a['fecha'] ?? '');
             $filas[] = [
-                'fecha' => $a['fecha'] ?? '',
+                'fecha' => $fechaImputacion,
+                'fecha_es' => (string) ($a['fecha_imputacion_es'] ?? $a['fecha_es'] ?? ''),
                 'concepto' => (string) ($a['observaciones'] ?? ''),
                 'celdas' => $celdas,
             ];
@@ -167,7 +186,7 @@ final class ObtenerE37
             }
         }
 
-        $saldos = $this->asientos->saldosPorCuenta($centroId, $ejercicioId, $desde, $hasta, 'P');
+        $saldos = $this->asientos->saldosPorCuenta($centroId, $ejercicioId, $desde, $hasta, 'P', true);
         $out = [];
         foreach ($saldos as $row) {
             if (

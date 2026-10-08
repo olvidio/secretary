@@ -6,7 +6,7 @@
 
 ## Centro n
 
-- Menú: no sale en el menú; se entra por el enlace **Arqueo** del resumen mensual 613 P o 613 G
+- Menú: Resúmenes → **Arqueo P** o **Arqueo G** (junto a Fecha cierre). También el enlace **Arqueo** del resumen 613 P o 613 G, y los enlaces en la pantalla Fecha cierre.
 
 ## Para qué sirve
 
@@ -14,8 +14,8 @@ Sirve para contar el dinero que hay de verdad en la caja y compararlo con lo que
 
 ## Cómo se usa
 
-1. Entrar por el enlace **Arqueo** del 613. Arriba sale el saldo contable de esa caja y su reparto entre el libro personal y el general.
-2. Si el centro tiene más de una caja, elegirla en **Caja física**. La **Fecha** viene con la fecha de cierre y se puede cambiar.
+1. Entrar desde el menú, desde el enlace **Arqueo** del 613 o desde Fecha cierre. Arriba sale el saldo contable de esa caja y su reparto entre el libro personal y el general.
+2. Si el centro tiene más de una caja, elegirla en **Caja física**. La **Fecha** propone el día de hoy y se puede cambiar (por ejemplo para un recuento de otro día).
 3. En **Billetes** y **Monedas**, poner cuántas unidades hay de cada valor. No es el importe, sino el número de billetes o monedas.
 4. En **Vales / cheques** sí se pone el importe de cada uno (hasta dos vales y dos cheques).
 5. Mirar el **Total** y la **Diferencia**: sale en verde cuando es cero y en rojo cuando no.

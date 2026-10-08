@@ -7,13 +7,13 @@
 
 ## Para qué sirve
 
-Prepara el presupuesto del libro personal, persona a persona. Cada hoja replica los conceptos del 613 P. La columna **acumulado(anterior)** muestra una **referencia del ejercicio en curso**: lo acumulado hasta la fecha de corte y, entre paréntesis, la previsión ya guardada para ese mismo ejercicio (si existe). La columna **Previsión** es la del **año elegido** (por defecto el del ejercicio siguiente al abierto en el centro).
+Prepara el presupuesto del libro personal, persona a persona. Cada hoja replica los conceptos del 613 P. La columna **acumulado(anterior)** muestra una **referencia del ejercicio inmediatamente anterior al año elegido** en el desplegable: lo acumulado en ese ejercicio y, entre paréntesis, la previsión ya guardada para el mismo (si existe). La columna **Previsión** es la del **año elegido** (por defecto el del ejercicio siguiente al abierto en el centro).
 
 ## Cómo se usa
 
 1. Elegir la **persona**, o **Todos (imprimir)** para ver e imprimir las hojas de todas las personas activas del centro.
 2. Elegir el **año** (etiqueta del ejercicio: `2027`, `2026-27`, etc.). Por defecto es el **período siguiente** al abierto, con la misma duración (enero–diciembre, septiembre–agosto u otra). Sale aunque ese ejercicio aún no esté abierto: al guardar se crea en estado planificado y los importes quedan en ese período.
-3. Revisar **acumulado(anterior)**: acumulado actual (enteros) y, si hay cifra guardada para el ejercicio abierto, `(previsión actual)`.
+3. Revisar **acumulado(anterior)**: acumulado del ejercicio anterior al año elegido (enteros) y, si hay cifra guardada para ese ejercicio, `(previsión de ese ejercicio)`.
 4. Escribir en **Previsión** el importe del año elegido (enteros, sin céntimos). **Guardar** solo persiste lo escrito: una casilla vacía deja ese concepto sin importe guardado (equivalente a cero en la previsión consolidada).
 5. **Guardar**. Esas cifras quedan ligadas al ejercicio del año seleccionado y son las que luego salen en Previsión, en la columna de esa persona, para ese ejercicio.
 6. **Imprimir** saca la hoja en A5 vertical, con los capítulos del 613 P. La cabecera incluye persona, centro y el **año seleccionado**. Si una casilla de previsión está vacía, se imprime la proyección calculada.
@@ -21,17 +21,18 @@ Prepara el presupuesto del libro personal, persona a persona. Cada hoja replica 
 
 ## Reglas que conviene saber
 
-- **acumulado(anterior)** no es una proyección: es solo referencia (acumulado + previsión guardada del ejercicio de trabajo). No influye en lo que se guarda al pulsar **Guardar**.
+- **acumulado(anterior)** no es una proyección: es solo referencia (acumulado + previsión guardada del ejercicio anterior al año del desplegable). No influye en lo que se guarda al pulsar **Guardar**.
+- Si no existe ese ejercicio anterior en el centro, la columna queda en blanco.
 - Al **imprimir**, si una casilla de previsión sigue vacía, en la hoja puede mostrarse la proyección interna solo como ayuda visual; eso no se guarda en base de datos.
-- Si el ejercicio no tiene ejercicio anterior, los puntuales se quedan en lo acumulado de este año.
+- Si el ejercicio de referencia no tiene ejercicio anterior contable, los puntuales se quedan en lo acumulado de ese año de referencia.
 - Guardar una persona no toca el presupuesto P hasta que en Previsión se pulse «Aplicar al presupuesto P».
 - En pantalla y al imprimir, los bloques I a IX son los del 613 P (ingresos, gastos, disponible, etc.).
 
 ## Problemas frecuentes
 
 - **«Persona no encontrada en este centro»**: esa ficha no está activa en el centro abierto.
-- **acumulado(anterior) sigue siendo del ejercicio abierto** (acumulado real y, entre paréntesis, la previsión guardada de ese ejercicio), aunque el desplegable esté en el año siguiente.
+- **acumulado(anterior) vacío**: no hay ejercicio anterior al año elegido en el centro, o no hay apuntes/previsión en ese ejercicio de referencia.
 - **«La cantidad debe ser numérica»**: alguna casilla lleva texto o un símbolo que no se entiende. Dejarla vacía o escribir solo el número.
-- **acumulado(anterior) sin paréntesis**: aún no hay previsión guardada para esa persona en el ejercicio abierto en ese concepto.
-- **El calculado de 24 (u otro puntual) no parece el del año pasado**: hace falta un ejercicio anterior enlazado, con apuntes de esa persona en ese concepto.
+- **acumulado(anterior) sin paréntesis**: aún no hay previsión guardada para esa persona en el ejercicio de referencia en ese concepto.
+- **El calculado de 24 (u otro puntual) no parece el del año pasado**: hace falta un ejercicio anterior enlazado al de referencia, con apuntes de esa persona en ese concepto.
 - **La columna de esa persona en Previsión sigue a cero**: no se ha guardado esta hoja para el ejercicio correspondiente, o se eligió otra persona u otro año.

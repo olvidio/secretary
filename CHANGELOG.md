@@ -10,6 +10,21 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.26] — 2026-10-08
+
+### Añadido
+- **Resúmenes**: **Arqueo P** y **Arqueo G** en el menú (junto a Fecha cierre); enlaces desde la pantalla Fecha cierre.
+- **Previsión** (consolidada): selector de **año**, como en Previsión personal; aplicar al presupuesto P usa el año elegido.
+
+### Cambiado
+- **Previsión personal**: la columna **acumulado(anterior)** toma el ejercicio **anterior al año del desplegable** (p. ej. 2025 si se mira 2026), no el ejercicio abierto; si no hay ejercicio de referencia, queda en blanco.
+- **Cuentas personales (E37)** y **Resumen E37**: apuntes y totales por **fecha de imputación** (periodificación incluida); la hoja muestra esa fecha.
+- **Arqueo P/G**: la **Fecha** propone el **día de hoy**, no la fecha de cierre.
+- **Copia de centro**: cada asiento exporta las **iniciales** de la persona y, al restaurar, se reasigna `persona_id` si esas personas ya existen en el centro (el listado de nombres no viaja en la copia).
+
+### Corregido
+- Migraciones para recuperar `persona_id` en asientos tras restauraciones antiguas y reenlazar periodificación cuando proceda.
+
 ## [0.1.25] — 2026-10-07
 
 ### Añadido

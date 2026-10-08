@@ -27,9 +27,9 @@ Es un atajo al mismo dato que aparece en la pantalla de Configuración, para no 
 
 ## Centro n
 
-- Menú: Resúmenes → Fecha cierre
+- Menú: Resúmenes → Arqueo P, Arqueo G, Fecha cierre (en ese orden, junto al resto de informes)
 
-El cierre de mes reparte los gastos generales del mes al que pertenece esta fecha. Los traspasos también la usan como fecha por defecto. Si el cierre de mes muestra un mes que no toca, corregir aquí la fecha y volver a entrar en esa pantalla.
+En la propia pantalla de fecha de cierre hay enlaces a los arqueos. El cierre de mes reparte los gastos generales del mes al que pertenece esta fecha. Los traspasos también la usan como fecha por defecto. Si el cierre de mes muestra un mes que no toca, corregir aquí la fecha y volver a entrar en esa pantalla.
 
 ## Centro sg
 

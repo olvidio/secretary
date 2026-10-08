@@ -110,30 +110,59 @@ final class ConstruirHojaPrevision
         $guardadoObjetivo = $objetivo !== null && $objetivo->id !== null
             ? self::mapaGuardado($this->prevision->listarDePersona((int) $objetivo->id, $personaId))
             : [];
-        $guardadoActual = self::mapaGuardado($this->prevision->listarDePersona((int) $ejercicioTrabajo->id, $personaId));
+        $referencia = $this->ejercicioInmediatamenteAnterior($datos['centro_id'], $etiqueta);
+        if ($referencia !== null && $referencia->id !== null) {
+            $realizadoRef = $this->datosRealizado($datos['centro_id'], $referencia);
+            $acumuladoPersona = $realizadoRef['acumulado'][$personaId] ?? [];
+            $anteriorTotalPersona = $realizadoRef['anterior_total'][$personaId] ?? [];
+            $anteriorPeriodoPersona = $realizadoRef['anterior_periodo'][$personaId] ?? [];
+            $saldoCc = $realizadoRef['saldos_cc'][$personaId] ?? 0;
+            $periodoRef = $realizadoRef['periodo'];
+            $guardadoReferencia = self::mapaGuardado(
+                $this->prevision->listarDePersona((int) $referencia->id, $personaId),
+            );
+            $tieneEjercicioAnterior = $realizadoRef['anterior'] !== null;
+        } else {
+            $acumuladoPersona = [];
+            $anteriorTotalPersona = [];
+            $anteriorPeriodoPersona = [];
+            $saldoCc = 0;
+            $periodoRef = $ejercicioTrabajo->periodo();
+            $guardadoReferencia = [];
+            $tieneEjercicioAnterior = false;
+        }
 
         $lineas = CalculadoraHojaPrevision::lineas(
             $datos['estructura'],
-            $datos['acumulado'][$personaId] ?? [],
-            $datos['anterior_total'][$personaId] ?? [],
-            $datos['anterior_periodo'][$personaId] ?? [],
+            $acumuladoPersona,
+            $anteriorTotalPersona,
+            $anteriorPeriodoPersona,
             $guardadoObjetivo,
-            $datos['saldos_cc'][$personaId] ?? 0,
-            $datos['periodo']->mesesTranscurridos(),
-            $datos['periodo']->mesesTotales(),
+            $saldoCc,
+            $referencia !== null ? $periodoRef->mesesTranscurridos() : 0,
+            max(1, $periodoRef->mesesTotales()),
         );
         foreach ($lineas as $i => $l) {
             $codigo = (string) $l['codigo'];
-            $prevActual = $guardadoActual[$codigo] ?? null;
-            $lineas[$i]['previsto_ejercicio_actual_cents'] = $prevActual;
-            $lineas[$i]['previsto_ejercicio_actual_es'] = $prevActual !== null
-                ? \src\shared\domain\value_objects\Dinero::fromCents($prevActual)->formatEs()
+            $prevRef = $guardadoReferencia[$codigo] ?? null;
+            $lineas[$i]['previsto_ejercicio_actual_cents'] = $prevRef;
+            $lineas[$i]['previsto_ejercicio_actual_es'] = $prevRef !== null
+                ? \src\shared\domain\value_objects\Dinero::fromCents($prevRef)->formatEs()
                 : null;
+            if ($referencia === null) {
+                $lineas[$i]['acumulado'] = null;
+                $lineas[$i]['acumulado_es'] = null;
+                $lineas[$i]['acumulado_cents'] = 0;
+                $lineas[$i]['calculado'] = null;
+                $lineas[$i]['calculado_es'] = null;
+                $lineas[$i]['calculado_cents'] = 0;
+            }
         }
 
         return [
             'ejercicio_id' => $objetivo?->id,
             'ejercicio_trabajo_id' => $ejercicioTrabajo->id,
+            'etiqueta_referencia' => $referencia?->etiqueta,
             'etiqueta_presupuesto' => $etiqueta,
             'etiqueta_trabajo' => $ejercicioTrabajo->etiqueta,
             'etiqueta_defecto' => $defecto,
@@ -148,9 +177,30 @@ final class ConstruirHojaPrevision
                 'meses_transcurridos' => $datos['periodo']->mesesTranscurridos(),
                 'meses_totales' => $datos['periodo']->mesesTotales(),
             ],
-            'tiene_ejercicio_anterior' => $datos['anterior'] !== null,
+            'tiene_ejercicio_anterior' => $tieneEjercicioAnterior,
             'lineas' => $lineas,
         ];
+    }
+
+    /** Ejercicio cuyo período precede al de la etiqueta de previsión elegida (p. ej. 2025 si se mira 2026). */
+    public function ejercicioInmediatamenteAnterior(int $centroId, string $etiquetaObjetivo): ?Ejercicio
+    {
+        $etiquetaObjetivo = trim($etiquetaObjetivo);
+        if ($etiquetaObjetivo === '') {
+            return null;
+        }
+        $objetivo = $this->ejercicioPorEtiquetaEn($centroId, $etiquetaObjetivo);
+        if ($objetivo?->ejercicioAnteriorId !== null) {
+            return $this->ejercicios->porId($objetivo->ejercicioAnteriorId);
+        }
+        foreach ($this->ejercicios->listarDeCentro($centroId) as $ej) {
+            $siguiente = SiguientePeriodoEjercicio::calcular($ej);
+            if ($siguiente['etiqueta'] === $etiquetaObjetivo) {
+                return $ej;
+            }
+        }
+
+        return null;
     }
 
     /** @return list<string> */
@@ -291,13 +341,41 @@ final class ConstruirHojaPrevision
     public function datosCentro(): array
     {
         $base = $this->contextoEstructura();
-        $ejercicio = $base['ejercicio'];
-        $periodo = $base['periodo'];
+        $realizado = $this->datosRealizado($base['centro_id'], $base['ejercicio']);
+
+        return [
+            'centro_id' => $base['centro_id'],
+            'ejercicio' => $base['ejercicio'],
+            'anterior' => $realizado['anterior'],
+            'periodo' => $realizado['periodo'],
+            'estructura' => $base['estructura'],
+            'acumulado' => $realizado['acumulado'],
+            'anterior_total' => $realizado['anterior_total'],
+            'anterior_periodo' => $realizado['anterior_periodo'],
+            'saldos_cc' => $realizado['saldos_cc'],
+        ];
+    }
+
+    /**
+     * Realizado y saldos de un ejercicio concreto (y su anterior contable).
+     *
+     * @return array{
+     *   acumulado: array<int, array<string, int>>,
+     *   anterior_total: array<int, array<string, int>>,
+     *   anterior_periodo: array<int, array<string, int>>,
+     *   saldos_cc: array<int, int>,
+     *   periodo: PeriodoEjercicio,
+     *   anterior: ?Ejercicio
+     * }
+     */
+    private function datosRealizado(int $centroId, Ejercicio $ejercicio): array
+    {
+        $periodo = $ejercicio->periodo();
         $desde = $ejercicio->fechaInicio->format('Y-m-d');
         $hasta = $ejercicio->fechaCorte->format('Y-m-d');
         $ejercicioId = (int) $ejercicio->id;
         $acumulado = $this->asientos->realizadoPorConceptoYPersona(
-            $base['centro_id'],
+            $centroId,
             $ejercicioId,
             'P',
             $desde,
@@ -312,7 +390,7 @@ final class ConstruirHojaPrevision
             $antDesde = $anterior->fechaInicio->format('Y-m-d');
             $antFin = $anterior->fechaFin->format('Y-m-d');
             $anteriorTotal = $this->asientos->realizadoPorConceptoYPersona(
-                $base['centro_id'],
+                $centroId,
                 $anterior->id,
                 'P',
                 $antDesde,
@@ -324,7 +402,7 @@ final class ConstruirHojaPrevision
                 $anterior->fechaFin,
             );
             $anteriorPeriodo = $this->asientos->realizadoPorConceptoYPersona(
-                $base['centro_id'],
+                $centroId,
                 $anterior->id,
                 'P',
                 $antDesde,
@@ -333,7 +411,7 @@ final class ConstruirHojaPrevision
         }
         $saldosCc = [];
         foreach ($this->asientos->saldosPorCuenta(
-            $base['centro_id'],
+            $centroId,
             $ejercicioId,
             $desde,
             $hasta,
@@ -345,15 +423,12 @@ final class ConstruirHojaPrevision
         }
 
         return [
-            'centro_id' => $base['centro_id'],
-            'ejercicio' => $ejercicio,
-            'anterior' => $anterior,
-            'periodo' => $periodo,
-            'estructura' => $base['estructura'],
             'acumulado' => $acumulado,
             'anterior_total' => $anteriorTotal,
             'anterior_periodo' => $anteriorPeriodo,
             'saldos_cc' => $saldosCc,
+            'periodo' => $periodo,
+            'anterior' => $anterior,
         ];
     }
 

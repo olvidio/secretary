@@ -61,13 +61,14 @@ final class ObtenerPrevisionPersonal
         foreach ($lineas as $l) {
             $codigo = (string) $l['codigo'];
             $porCodigo[$codigo] = $l;
+            $prevRef = $l['previsto_ejercicio_actual_cents'] ?? null;
             $para[] = [
                 'codigo' => $codigo,
                 'etiqueta' => (string) $l['etiqueta'],
                 'grupo' => (string) ($l['grupo'] ?? AgrupadorPrevision613P::grupoDe($codigo)),
                 'total_cents' => (int) $l['calculado_cents'],
                 'acumulado_cents' => (int) $l['acumulado_cents'],
-                'prev_actual_cents' => (int) ($l['previsto_ejercicio_actual_cents'] ?? 0),
+                'prev_actual_cents' => $prevRef !== null ? (int) $prevRef : null,
                 'personas_cents' => [(int) ($l['previsto_cents'] ?? 0)],
             ];
         }
@@ -78,7 +79,11 @@ final class ObtenerPrevisionPersonal
             $prevCents = $f['personas_cents'][0] ?? 0;
             $prev = Dinero::fromCents($prevCents);
             $acumCents = (int) ($f['acumulado_cents'] ?? 0);
-            $prevActCents = (int) ($f['prev_actual_cents'] ?? 0);
+            $prevActRaw = $f['prev_actual_cents'] ?? null;
+            $prevActCents = $prevActRaw !== null ? (int) $prevActRaw : null;
+            $sinReferencia = $orig !== null
+                && ($orig['acumulado'] ?? null) === null
+                && ($orig['acumulado_es'] ?? null) === null;
             $filas[] = [
                 'tipo' => $f['tipo'],
                 'grupo' => $f['grupo'],
@@ -86,13 +91,19 @@ final class ObtenerPrevisionPersonal
                 'etiqueta' => $f['etiqueta'],
                 'editable' => $orig !== null,
                 'modo' => $orig['modo'] ?? null,
-                'acumulado_es' => $orig['acumulado_es'] ?? Dinero::fromCents($acumCents)->formatEs(),
-                'referencia_es' => self::referenciaEs($acumCents, $prevActCents),
-                'previsto_ejercicio_actual_es' => $prevActCents !== 0
-                    ? Dinero::fromCents($prevActCents)->formatEs()
-                    : ($orig['previsto_ejercicio_actual_es'] ?? null),
-                'calculado' => $calc->toString(),
-                'calculado_es' => $calc->formatEs(),
+                'acumulado_es' => $sinReferencia
+                    ? null
+                    : ($orig['acumulado_es'] ?? Dinero::fromCents($acumCents)->formatEs()),
+                'referencia_es' => $sinReferencia
+                    ? ''
+                    : self::referenciaEs($acumCents, $prevActCents ?? 0),
+                'previsto_ejercicio_actual_es' => $orig['previsto_ejercicio_actual_es'] ?? (
+                    $prevActCents !== null && $prevActCents !== 0
+                        ? Dinero::fromCents($prevActCents)->formatEs()
+                        : null
+                ),
+                'calculado' => $sinReferencia ? null : $calc->toString(),
+                'calculado_es' => $sinReferencia ? null : $calc->formatEs(),
                 'calculado_cents' => $f['total_cents'],
                 'previsto' => $orig !== null ? ($orig['previsto'] ?? null) : $prev->toString(),
                 'previsto_es' => $orig !== null ? ($orig['previsto_es'] ?? null) : $prev->formatEs(),

@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use src\presupuestos\application\ObtenerPrevisionPersonal;
 
-/** La columna acumulado(anterior) debe usar acumulado real + previsión del ejercicio abierto, no la proyección. */
+/** La columna acumulado(anterior) usa acumulado real + previsión guardada del ejercicio anterior al año elegido, no la proyección. */
 final class ReferenciaPrevisionPersonalTest extends TestCase
 {
     public function testReferenciaUsaAcumuladoYNoProyeccion(): void

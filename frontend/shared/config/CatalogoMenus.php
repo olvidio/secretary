@@ -46,6 +46,8 @@ final class CatalogoMenus
             ['nav' => 'e37', 'href' => '/e37', 'label' => _("Cuentas personales")],
             ['nav' => 'e37-resumen', 'href' => '/e37-resumen', 'label' => _("Resumen E37")],
             ['nav' => 'por-concepto', 'href' => '/por-concepto', 'label' => _("Por concepto")],
+            ['nav' => 'arqueo-p', 'href' => '/arqueo-p', 'label' => _("Arqueo P")],
+            ['nav' => 'arqueo-g', 'href' => '/arqueo-g', 'label' => _("Arqueo G")],
             ['nav' => 'conceptos-p', 'href' => '/conceptos-p', 'label' => _("Conceptos P")],
             ['nav' => 'conceptos-g', 'href' => '/conceptos-g', 'label' => _("Conceptos G")],
             ['nav' => 'plantillas-p', 'href' => '/plantillas-p', 'label' => _("Plantillas P")],
@@ -64,8 +66,6 @@ final class CatalogoMenus
     {
         return [
             ['nav' => 'inicio', 'href' => '/', 'label' => _("Inicio")],
-            ['nav' => 'arqueo-p', 'href' => '/arqueo-p', 'label' => _("Arqueo P")],
-            ['nav' => 'arqueo-g', 'href' => '/arqueo-g', 'label' => _("Arqueo G")],
             ['nav' => 'arqueo', 'href' => '/arqueo', 'label' => _("Arqueo")],
             ['nav' => 'aportaciones', 'href' => '/aportaciones', 'label' => _("Listado de aportaciones")],
             ['nav' => 'donativos-fundacion', 'href' => '/donativos-fundacion', 'label' => _("Donativos a Fundación")],
@@ -322,7 +322,7 @@ final class CatalogoMenus
 
             return 'centro';
         }
-        if ($nav === 'arqueo' || $nav === 'arqueo-g') {
+        if ($nav === 'arqueo') {
             return $layout === 'burger' ? 'movimientos' : 'utilidades';
         }
         foreach (self::clavesGrupos($layout) as $grupo) {
@@ -382,7 +382,7 @@ final class CatalogoMenus
             [
                 'id' => 'resumenes',
                 'label' => _("Resúmenes"),
-                'items' => ['613-p', '613-g', 'e37', 'e37-resumen', 'por-concepto', 'fecha-cierre'],
+                'items' => ['613-p', '613-g', 'e37', 'e37-resumen', 'por-concepto', 'arqueo-p', 'arqueo-g', 'fecha-cierre'],
             ],
             [
                 'id' => 'utilidades',
@@ -438,7 +438,7 @@ final class CatalogoMenus
             [
                 'id' => 'resumenes',
                 'label' => _("Resúmenes"),
-                'items' => ['613-p', '613-g', 'e37', 'e37-resumen', 'por-concepto', 'fecha-cierre'],
+                'items' => ['613-p', '613-g', 'e37', 'e37-resumen', 'por-concepto', 'arqueo-p', 'arqueo-g', 'fecha-cierre'],
             ],
             [
                 'id' => 'plan-contable',

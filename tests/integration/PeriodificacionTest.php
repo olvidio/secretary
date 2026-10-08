@@ -127,6 +127,22 @@ final class PeriodificacionTest extends TestCase
         $listadas = $deps['listar']->ejecutar(['cuenta' => 'G']);
         self::assertCount(1, $listadas);
 
+        $soloEnero = $deps['listar']->ejecutar([
+            'cuenta' => 'G',
+            'desde' => $y . '-01-01',
+            'hasta' => $y . '-01-31',
+            'por_fecha_imputacion' => true,
+        ]);
+        self::assertCount(1, $soloEnero);
+        $finFeb = (new \DateTimeImmutable($y . '-02-01'))->modify('last day of this month')->format('Y-m-d');
+        $soloFebrero = $deps['listar']->ejecutar([
+            'cuenta' => 'G',
+            'desde' => $y . '-02-01',
+            'hasta' => $finFeb,
+            'por_fecha_imputacion' => true,
+        ]);
+        self::assertCount(0, $soloFebrero);
+
         (new BorrarApunte($deps['asientos']))->ejecutar($filas[0]->id);
         self::assertSame(0, $this->contarAsientos());
     }

@@ -12,7 +12,11 @@ use src\asientos\domain\entity\Asiento;
 use src\asientos\domain\entity\Movimiento;
 use src\shared\infrastructure\persistence\ConverterDate;
 
-/** Volcado y restauración de un solo centro. No toca los demás. */
+/**
+ * Volcado y restauración de un solo centro. No toca los demás.
+ * El listado de nombres no viaja en la copia: tienen que existir ya en el centro.
+ * Cada asiento sí lleva las iniciales de su persona, para no perder el vínculo al restaurar.
+ */
 final class PdoCopiaCentro
 {
     private const VERSION = 1;
@@ -28,8 +32,10 @@ final class PdoCopiaCentro
     {
         $centro = $this->filaCentro($centroId);
         $st = $this->pdo->prepare(
-            'SELECT a.* FROM asientos a
+            'SELECT a.*, p.iniciales AS persona_iniciales
+             FROM asientos a
              JOIN ejercicios e ON e.id = a.ejercicio_id
+             LEFT JOIN personas p ON p.id = a.persona_id
              WHERE e.centro_id = :c AND a.anulado_at IS NULL
              ORDER BY a.fecha, a.libro, a.numero, a.id'
         );
@@ -63,12 +69,19 @@ final class PdoCopiaCentro
             }
             $asientos[] = [
                 'ref' => (int) $row['id'],
+                'par_ref' => isset($row['asiento_par_id']) && $row['asiento_par_id'] !== null
+                    ? (int) $row['asiento_par_id'] : null,
                 'libro' => (string) $row['libro'],
                 'fecha' => $fecha->format('Y-m-d'),
                 'fecha_operacion' => $fechaOp->format('Y-m-d'),
                 'glosa' => $row['glosa'] !== null ? (string) $row['glosa'] : null,
                 'tipo' => (string) $row['tipo'],
                 'origen' => (string) $row['origen'],
+                'iniciales' => $row['persona_iniciales'] !== null
+                    ? strtolower((string) $row['persona_iniciales']) : '',
+                'gasto_generales' => self::booleano($row['gasto_generales'] ?? false),
+                'concepto_generales' => isset($row['concepto_generales']) && $row['concepto_generales'] !== ''
+                    ? (string) $row['concepto_generales'] : null,
                 'lineas' => $lineas,
             ];
         }
@@ -119,12 +132,28 @@ final class PdoCopiaCentro
             )->execute([':c' => $centroId]);
             $this->pdo->prepare('DELETE FROM listados WHERE centro_id = :c')->execute([':c' => $centroId]);
             $n = 0;
+            $mapa = [];
+            $pendientesPar = [];
             foreach ($datos['asientos'] ?? [] as $fila) {
                 if (!is_array($fila)) {
                     continue;
                 }
-                $this->asientos->guardar($this->asientoDe($centroId, $fila), true);
+                $guardado = $this->asientos->guardar($this->asientoDe($centroId, $fila), true);
                 $n++;
+                $ref = (int) ($fila['ref'] ?? 0);
+                if ($ref > 0 && $guardado->id !== null) {
+                    $mapa[$ref] = $guardado->id;
+                }
+                $parRef = isset($fila['par_ref']) && $fila['par_ref'] !== null ? (int) $fila['par_ref'] : 0;
+                if ($parRef > 0 && $guardado->id !== null) {
+                    $pendientesPar[] = ['id' => $guardado->id, 'par_ref' => $parRef];
+                }
+            }
+            foreach ($pendientesPar as $item) {
+                $parNuevo = $mapa[$item['par_ref']] ?? null;
+                if ($parNuevo !== null) {
+                    $this->asientos->enlazar($item['id'], $parNuevo);
+                }
             }
             $this->restaurarListados($centroId, $datos['listados'] ?? []);
             $this->pdo->commit();
@@ -147,24 +176,41 @@ final class PdoCopiaCentro
             throw new InvalidArgumentException(sprintf(_('No hay ejercicio para la fecha %s'), $fecha));
         }
         $movimientos = [];
+        $inicialesLineas = [];
         foreach ($fila['lineas'] ?? [] as $linea) {
             if (!is_array($linea)) {
                 continue;
+            }
+            $inicialesLinea = strtolower(trim((string) ($linea['iniciales'] ?? '')));
+            if ($inicialesLinea !== '') {
+                $inicialesLineas[$inicialesLinea] = true;
             }
             $cuentaId = $this->cuentaId(
                 $centroId,
                 (string) ($linea['libro'] ?? $fila['libro'] ?? 'G'),
                 (string) ($linea['codigo'] ?? ''),
-                (string) ($linea['iniciales'] ?? ''),
+                $inicialesLinea,
             );
             $movimientos[] = new Movimiento(
                 null,
                 (int) ($linea['orden'] ?? (count($movimientos) + 1)),
                 $cuentaId,
-                null,
+                $inicialesLinea !== '' ? $this->personaIdDe($centroId, $inicialesLinea) : null,
                 (int) ($linea['debe_cents'] ?? 0),
                 (int) ($linea['haber_cents'] ?? 0),
             );
+        }
+
+        $iniciales = strtolower(trim((string) ($fila['iniciales'] ?? '')));
+        if ($iniciales === '' && count($inicialesLineas) === 1) {
+            $iniciales = (string) array_key_first($inicialesLineas);
+        }
+        $personaId = $iniciales !== '' ? $this->personaIdDe($centroId, $iniciales) : null;
+        if ($iniciales !== '' && $personaId === null) {
+            throw new InvalidArgumentException(sprintf(
+                _('No está la persona «%s» en este centro. La copia no trae el listado de nombres: tienen que existir antes de restaurar.'),
+                $iniciales
+            ));
         }
 
         return new Asiento(
@@ -176,12 +222,45 @@ final class PdoCopiaCentro
             isset($fila['glosa']) ? (string) $fila['glosa'] : null,
             (string) ($fila['tipo'] ?? 'normal'),
             (string) ($fila['origen'] ?? 'import'),
-            null,
+            $personaId,
             $movimientos,
             null,
             null,
             new DateTimeImmutable((string) ($fila['fecha_operacion'] ?? $fecha)),
+            null,
+            self::booleano($fila['gasto_generales'] ?? false),
+            isset($fila['concepto_generales']) && $fila['concepto_generales'] !== ''
+                ? (string) $fila['concepto_generales'] : null,
         );
+    }
+
+    private function personaIdDe(int $centroId, string $iniciales): ?int
+    {
+        $st = $this->pdo->prepare(
+            'SELECT id FROM personas
+             WHERE centro_id = :c AND lower(iniciales) = lower(:i)
+             ORDER BY activo DESC, id
+             LIMIT 1'
+        );
+        $st->execute([':c' => $centroId, ':i' => $iniciales]);
+        $id = $st->fetchColumn();
+
+        return $id !== false ? (int) $id : null;
+    }
+
+    private static function booleano(mixed $valor): bool
+    {
+        if (is_bool($valor)) {
+            return $valor;
+        }
+        if (is_int($valor) || is_float($valor)) {
+            return (int) $valor === 1;
+        }
+        if (is_string($valor)) {
+            return in_array(strtolower($valor), ['1', 't', 'true', 'yes', 'on'], true);
+        }
+
+        return false;
     }
 
     private function cuentaId(int $centroId, string $libro, string $codigo, string $iniciales): int

@@ -177,8 +177,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('form-arq');
   form.addEventListener('input', () => mostrarTotal(form));
 
-  const cfg = await api('/api/configuracion');
-  document.querySelector('[name=fecha]').value = cfg.config.fecha_cierre;
+  document.querySelector('[name=fecha]').value = new Date().toISOString().slice(0, 10);
   const r = await api('/api/arqueos/' + CUENTA);
   fisicaId = r.cuenta_fisica_id;
   const cajas = r.cajas_activas || [];

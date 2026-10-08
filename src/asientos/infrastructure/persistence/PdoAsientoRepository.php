@@ -384,12 +384,15 @@ final class PdoAsientoRepository implements AsientoRepository
         } else {
             $sql .= " AND a.libro IN ('P', 'G')";
         }
+        $fechaAsiento = !empty($filtros['por_fecha_imputacion'])
+            ? self::sqlFechaImputacion('a')
+            : 'a.fecha';
         if (!empty($filtros['desde'])) {
-            $sql .= ' AND a.fecha >= :desde';
+            $sql .= ' AND ' . $fechaAsiento . ' >= :desde';
             $params[':desde'] = $filtros['desde'];
         }
         if (!empty($filtros['hasta'])) {
-            $sql .= ' AND a.fecha <= :hasta';
+            $sql .= ' AND ' . $fechaAsiento . ' <= :hasta';
             $params[':hasta'] = $filtros['hasta'];
         }
         if (!empty($filtros['tipo'])) {
@@ -406,7 +409,7 @@ final class PdoAsientoRepository implements AsientoRepository
         if (!empty($filtros['iniciales'])) {
             $sql .= ' AND EXISTS (
                 SELECT 1 FROM personas p
-                WHERE p.id = a.persona_id AND p.iniciales = :iniciales
+                WHERE p.id = a.persona_id AND lower(p.iniciales) = lower(:iniciales)
             )';
             $params[':iniciales'] = strtolower((string) $filtros['iniciales']);
         }
@@ -415,7 +418,7 @@ final class PdoAsientoRepository implements AsientoRepository
             $params[':pid'] = (int) $filtros['persona_id'];
         }
 
-        $sql .= ' ORDER BY a.fecha, a.numero, a.id';
+        $sql .= ' ORDER BY ' . $fechaAsiento . ', a.numero, a.id';
 
         $st = $this->pdo->prepare($sql);
         $st->execute($params);
@@ -652,7 +655,9 @@ final class PdoAsientoRepository implements AsientoRepository
         ?string $desde = null,
         ?string $hasta = null,
         ?string $libro = null,
+        bool $porFechaImputacion = false,
     ): array {
+        $fechaAsiento = $porFechaImputacion ? self::sqlFechaImputacion('a') : 'a.fecha';
         $sql = 'SELECT c.id, c.libro, c.codigo, c.codigo_maestro, c.tipo, c.persona_id, c.cuenta_fisica_id,
                        COALESCE(SUM(m.debe - m.haber), 0) AS saldo_cents
                 FROM cuentas c
@@ -661,11 +666,11 @@ final class PdoAsientoRepository implements AsientoRepository
         $params = [':ej' => $ejercicioId, ':centro' => $centroId];
 
         if ($desde !== null) {
-            $sql .= ' AND a.fecha >= :desde';
+            $sql .= ' AND ' . $fechaAsiento . ' >= :desde';
             $params[':desde'] = $desde;
         }
         if ($hasta !== null) {
-            $sql .= ' AND a.fecha <= :hasta';
+            $sql .= ' AND ' . $fechaAsiento . ' <= :hasta';
             $params[':hasta'] = $hasta;
         }
 
@@ -838,6 +843,14 @@ final class PdoAsientoRepository implements AsientoRepository
         }
 
         return $out;
+    }
+
+    /** Fecha de imputación contable (D13): solo la pata `periodificacion` toma la del normal enlazado. */
+    private static function sqlFechaImputacion(string $alias): string
+    {
+        return 'CASE WHEN ' . $alias . ".tipo = 'periodificacion' THEN COALESCE("
+            . '(SELECT im.fecha FROM asientos im WHERE im.asiento_par_id = ' . $alias . '.id LIMIT 1), '
+            . $alias . '.fecha) ELSE ' . $alias . '.fecha END';
     }
 
     private function siguienteNumero(int $ejercicioId, string $libro): int

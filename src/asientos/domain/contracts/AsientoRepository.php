@@ -112,6 +112,7 @@ interface AsientoRepository
         ?string $desde = null,
         ?string $hasta = null,
         ?string $libro = null,
+        bool $porFechaImputacion = false,
     ): array;
 
     /**

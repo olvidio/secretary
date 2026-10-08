@@ -5,6 +5,9 @@
 <p class="muted print-hide"><?= _("Misma hoja 613 P: la primera columna es la suma y cada nombre lleva el importe guardado en su previsión personal.") ?></p>
 <p id="msg-pendientes" class="muted print-hide" hidden></p>
 <p class="filters print-hide">
+    <label><?= _("Año") ?>
+        <select id="sel-anio-prevision" disabled></select>
+    </label>
     <button type="button" id="btn-imprimir"><?= _("Imprimir") ?></button>
     <button type="button" id="btn-aplicar-presupuesto"><?= _("Aplicar al presupuesto P") ?></button>
 </p>
@@ -26,6 +29,68 @@ const I18N_PREV_C = {
   confirmar: <?= json_encode(_("¿Copiar la columna Total al presupuesto P? Se actualizan las líneas del 613 P."), JSON_UNESCAPED_UNICODE) ?>,
 };
 const CENTRO_PREV_C = <?= json_encode((string) ($centroNombre ?? ''), JSON_UNESCAPED_UNICODE) ?>;
+
+let sincAniosPrevision = false;
+
+function etiquetaPrevisionSeleccionada() {
+  const sel = document.getElementById('sel-anio-prevision');
+  if (!sel || sel.disabled || !sel.value) return '';
+  return sel.value;
+}
+
+function urlPrevisionConsolidada() {
+  let url = '/api/previsiones';
+  const etiqueta = etiquetaPrevisionSeleccionada();
+  if (etiqueta) url += '?etiqueta=' + encodeURIComponent(etiqueta);
+  return url;
+}
+
+function listaEtiquetas(r) {
+  const etiquetas = [];
+  const push = (valor) => {
+    const et = String(valor || '').trim();
+    if (et && !etiquetas.includes(et)) etiquetas.push(et);
+  };
+  const raw = (r && (r.etiquetas || r.anios_disponibles)) || [];
+  (Array.isArray(raw) ? raw : Object.values(raw)).forEach(push);
+  if (r) {
+    push(r.etiqueta_trabajo);
+    push(r.etiqueta_defecto);
+    push(r.etiqueta_presupuesto);
+  }
+  return etiquetas;
+}
+
+function pintarEtiquetasPrevision(r, forzarDefecto) {
+  const sel = document.getElementById('sel-anio-prevision');
+  if (!sel) return;
+  const prev = sel.value;
+  const etiquetas = listaEtiquetas(r);
+  [...sel.options].forEach((o) => {
+    if (o.value && !etiquetas.includes(o.value)) etiquetas.push(o.value);
+  });
+  const defecto = r && (r.etiqueta_defecto || r.etiqueta_presupuesto || r.anio_presupuesto);
+  sincAniosPrevision = true;
+  sel.innerHTML = '';
+  etiquetas.forEach((et) => {
+    const o = document.createElement('option');
+    o.value = et;
+    o.textContent = et;
+    sel.appendChild(o);
+  });
+  if (forzarDefecto && defecto && etiquetas.includes(String(defecto))) sel.value = String(defecto);
+  else if (prev && etiquetas.includes(prev)) sel.value = prev;
+  else if (defecto && etiquetas.includes(String(defecto))) sel.value = String(defecto);
+  else if (etiquetas.length) sel.value = etiquetas[etiquetas.length - 1];
+  sel.disabled = etiquetas.length === 0;
+  sincAniosPrevision = false;
+}
+
+async function cargarOpcionesPrevision() {
+  const r = await api('/api/previsiones/personal/opciones');
+  if (!r.ok) return;
+  pintarEtiquetasPrevision(r, true);
+}
 
 function cabeceraPrevision(anio) {
   return [I18N_PREV_C.cabecera, CENTRO_PREV_C, anio ? String(anio) : ''].filter(Boolean).join(' — ');
@@ -71,19 +136,33 @@ function pintarConsolidada(r) {
     pend.hidden = true;
     pend.textContent = '';
   }
+  pintarEtiquetasPrevision(r, false);
+}
+
+async function cargarConsolidada() {
+  const r = await api(urlPrevisionConsolidada());
+  if (!r.ok) return alert(r.error || I18N_PREV_C.errorCarga);
+  pintarConsolidada(r);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
   document.body.classList.add('prevision-hoja');
-  const r = await api('/api/previsiones');
-  if (!r.ok) return alert(r.error || I18N_PREV_C.errorCarga);
-  pintarConsolidada(r);
+  await cargarOpcionesPrevision();
+  await cargarConsolidada();
+
+  document.getElementById('sel-anio-prevision').addEventListener('change', () => {
+    if (sincAniosPrevision) return;
+    cargarConsolidada();
+  });
 
   document.getElementById('btn-imprimir').addEventListener('click', () => window.print());
 
   document.getElementById('btn-aplicar-presupuesto').addEventListener('click', async () => {
     if (!confirm(I18N_PREV_C.confirmar)) return;
-    const s = await api('/api/previsiones/aplicar-presupuesto', { method: 'POST', body: {} });
+    const body = {};
+    const etiqueta = etiquetaPrevisionSeleccionada();
+    if (etiqueta) body.etiqueta = etiqueta;
+    const s = await api('/api/previsiones/aplicar-presupuesto', { method: 'POST', body });
     document.getElementById('msg-prevision').hidden = !s.ok;
     if (!s.ok) return alert(s.error);
     pintarConsolidada(s);

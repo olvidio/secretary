@@ -17,7 +17,7 @@ Es la vista de conjunto de las cuentas personales: una línea por persona del ce
 
 ## Reglas que conviene saber
 
-- Se cuenta desde la fecha de inicio del ejercicio hasta la fecha de cierre del centro. Lo anotado después no entra.
+- Se cuenta desde la fecha de inicio del ejercicio hasta la fecha de cierre del centro, por **fecha de imputación** (igual que la hoja E37). Lo imputado después no entra.
 - Aparecen todas las personas dadas de alta en el centro, también las que no tengan movimientos; esas salen a cero.
 - **Ingresos**: suma de los ingresos personales (trabajo, familia y varios) y de los extraordinarios.
 - **Gastos**: suma de los gastos personales, es decir vivienda, ordinarios, ropa, «ca, crt, cv», médicos, coche y viajes, estudios y obligaciones económicas.
