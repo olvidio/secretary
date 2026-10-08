@@ -20,7 +20,7 @@ tabla; lo que no existía en el Excel va marcado como nuevo.
 | Saldos | Saldos |
 | Conceptos P / G | Conceptos P / Conceptos G |
 | Apuntes de un concepto | Por concepto |
-| Arqueo P / G | Arqueo P / Arqueo G |
+| Arqueo Caja / Banco | Arqueo Caja / Arqueo Banco |
 | Ayuda (Schema) | Ayuda |
 | *(nuevo)* | Centros: alta de otra entidad y de su secretario |
 | *(nuevo)* | Ejercicios: apertura y cierre de año |

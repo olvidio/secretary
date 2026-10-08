@@ -200,6 +200,7 @@ final class CatalogoRutas
             ['src\\presupuestos\\infrastructure\\http\\PrevisionController', 'savePersonal', 'centro'],
             ['src\\presupuestos\\infrastructure\\http\\PrevisionController', 'getConsolidada', 'centro'],
             ['src\\presupuestos\\infrastructure\\http\\PrevisionController', 'aplicarPresupuesto', 'centro'],
+            ['src\\arqueo\\infrastructure\\http\\ArqueoController', 'getTesoreria', 'centro'],
             ['src\\arqueo\\infrastructure\\http\\ArqueoController', 'get', 'centro'],
             ['src\\arqueo\\infrastructure\\http\\ArqueoController', 'save', 'centro'],
             ['src\\arqueo\\infrastructure\\http\\ArqueoController', 'capuchinos', 'centro'],

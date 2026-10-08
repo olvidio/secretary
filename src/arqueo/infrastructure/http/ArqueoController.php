@@ -58,6 +58,42 @@ final class ArqueoController
         ]);
     }
 
+    /** Arqueo de una tesorería física (caja o banco): saldo P+G de esa caja/banco. */
+    public function getTesoreria(Request $request, array $vars): Response
+    {
+        $tipo = strtolower(trim((string) ($vars['tipo'] ?? '')));
+        if (!in_array($tipo, ['caja', 'banco'], true)) {
+            return ContestarJson::error(_("Tipo de tesorería no válido"));
+        }
+        $centroId = $this->ambito->ejecutar()->centroId;
+        $fisicas = $this->fisicas->listarActivasDeCentro($centroId, $tipo);
+        $defecto = $fisicas[0] ?? null;
+        $payload = [
+            'tipo' => $tipo,
+            'fisicas_activas' => array_map(static fn ($f) => $f->toArray(), $fisicas),
+            'cuenta_fisica_id' => $defecto?->id,
+            'arqueo' => null,
+            'saldo_fisico' => '0.00',
+            'saldo_fisico_es' => '0,00',
+            'saldo_caja_p' => '0.00',
+            'saldo_caja_g' => '0.00',
+        ];
+        if ($defecto === null || $defecto->id === null) {
+            return ContestarJson::ok($payload);
+        }
+        $arqueo = $this->repo->ultimoPorFisica($defecto->id);
+        $desglose = $this->saldosFisica($defecto->id);
+
+        return ContestarJson::ok(array_merge($payload, [
+            'arqueo' => $arqueo?->toArray(),
+            'saldo_fisico' => $desglose['saldo_fisico'],
+            'saldo_fisico_es' => $desglose['saldo_fisico_es'] ?? $desglose['saldo_fisico'],
+            'saldo_caja_p' => $desglose['saldo_caja_p'],
+            'saldo_caja_g' => $desglose['saldo_caja_g'],
+            'fisica' => $defecto->toArray(),
+        ]));
+    }
+
     public function capuchinos(Request $request, array $vars): Response
     {
         try {

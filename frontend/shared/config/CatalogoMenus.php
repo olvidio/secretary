@@ -46,8 +46,8 @@ final class CatalogoMenus
             ['nav' => 'e37', 'href' => '/e37', 'label' => _("Cuentas personales")],
             ['nav' => 'e37-resumen', 'href' => '/e37-resumen', 'label' => _("Resumen E37")],
             ['nav' => 'por-concepto', 'href' => '/por-concepto', 'label' => _("Por concepto")],
-            ['nav' => 'arqueo-p', 'href' => '/arqueo-p', 'label' => _("Arqueo P")],
-            ['nav' => 'arqueo-g', 'href' => '/arqueo-g', 'label' => _("Arqueo G")],
+            ['nav' => 'arqueo-p', 'href' => '/arqueo-p', 'label' => _("Arqueo Caja")],
+            ['nav' => 'arqueo-g', 'href' => '/arqueo-g', 'label' => _("Saldo banco")],
             ['nav' => 'conceptos-p', 'href' => '/conceptos-p', 'label' => _("Conceptos P")],
             ['nav' => 'conceptos-g', 'href' => '/conceptos-g', 'label' => _("Conceptos G")],
             ['nav' => 'plantillas-p', 'href' => '/plantillas-p', 'label' => _("Plantillas P")],
@@ -161,7 +161,7 @@ final class CatalogoMenus
             'aportaciones',
             'donativos-fundacion',
             'plantillas-g',
-            'arqueo-g',
+            'arqueo-p',
             'fecha-cierre',
             'conceptos-g',
             'ayuda',
@@ -199,7 +199,7 @@ final class CatalogoMenus
                 ['donativos-fundacion', null],
             ]],
             ['id' => 'cierre-arqueo', 'label' => _("Cierre y arqueo"), 'items' => [
-                ['arqueo-g', _("Arqueo")],
+                ['arqueo-p', _("Arqueo")],
                 ['fecha-cierre', null],
             ]],
             ['id' => 'plan-periodo', 'label' => _("Plan y ejercicio"), 'items' => [

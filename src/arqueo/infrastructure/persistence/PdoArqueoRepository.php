@@ -74,7 +74,7 @@ final class PdoArqueoRepository implements ArqueoRepository
         }
         $st = $this->pdo->prepare(
             "SELECT * FROM arqueos
-             WHERE ejercicio_id = :ej AND fecha <= :fc AND cuenta IN ('P', 'G', 'C')
+             WHERE ejercicio_id = :ej AND fecha <= :fc AND cuenta IN ('P', 'G', 'C', 'B')
              ORDER BY fecha DESC, id DESC LIMIT 1"
         );
         $st->execute([':ej' => $ejercicioId, ':fc' => $fechaPg]);

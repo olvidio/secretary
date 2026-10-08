@@ -45,7 +45,8 @@ El saldo **físico** de la caja no cambia; sube P y baja G el mismo importe.
 
 El arqueo se cuadra contra el **saldo físico** (P+G) de la caja seleccionada, no contra un solo libro.
 
-- Rutas legadas `/api/arqueos/{P|G}`: interpretan P/G como la **primera caja activa** y muestran desglose `saldo_fisico`, `saldo_caja_p`, `saldo_caja_g`.
+- Pantallas `/arqueo-p` (caja) y `/arqueo-g` (saldo banco): `GET /api/arqueos/tesoreria/{caja|banco}` y `POST /api/arqueos/fisica/{id}` (cuenta legada C o B en BD). En banco el `desglose` lleva `saldo_extracto` en lugar de billetes/monedas.
+- Rutas legadas `/api/arqueos/{P|G}`: primera caja activa; preferir tesorería/física en UI nueva.
 - `GET/POST /api/arqueos/fisica/{id}` para una física concreta.
 - Si la diferencia conteo − saldo contable es múltiplo de 9 (y no cero), la pantalla ofrece **Buscar capuchinos**: apuntes de caja (origen C) cuyo importe, con dos cifras invertidas o la coma corrida, explicaría el descuadre. `GET /api/arqueos/capuchinos?diferencia=&hasta=`.
 - `ultimo('P')` / `ultimo('G')` del golden siguen filtrando por columna legada `arqueos.cuenta`.

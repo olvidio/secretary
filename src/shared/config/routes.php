@@ -184,6 +184,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/previsiones/aplicar-presupuesto', [PrevisionController::class, 'aplicarPresupuesto']);
 
     $r->addRoute('GET', '/api/arqueos/capuchinos', [ArqueoController::class, 'capuchinos']);
+    $r->addRoute('GET', '/api/arqueos/tesoreria/{tipo:caja|banco}', [ArqueoController::class, 'getTesoreria']);
     $r->addRoute('GET', '/api/arqueos/{cuenta:P|G}', [ArqueoController::class, 'get']);
     $r->addRoute('POST', '/api/arqueos/{cuenta:P|G}', [ArqueoController::class, 'save']);
     $r->addRoute('GET', '/api/arqueos/fisica/{id:\d+}', [ArqueoController::class, 'getFisica']);

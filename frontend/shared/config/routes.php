@@ -114,10 +114,10 @@ return static function (RouteCollector $r): void {
             $extra['informe'] = 'G';
         }
         if ($nav === 'arqueo-p') {
-            $extra['arqueo'] = 'P';
+            $extra['arqueoTesoreria'] = 'caja';
         }
         if ($nav === 'arqueo-g') {
-            $extra['arqueo'] = 'G';
+            $extra['arqueoTesoreria'] = 'banco';
         }
         if ($nav === 'presupuesto-p') {
             $extra['presupuesto'] = 'P';

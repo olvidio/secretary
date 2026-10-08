@@ -49,6 +49,16 @@ final class GuardarArqueo
      */
     public static function calcular(array $desglose): array
     {
+        if (array_key_exists('saldo_extracto', $desglose)) {
+            $total = Dinero::fromInput((string) ($desglose['saldo_extracto'] ?? '0'));
+
+            return [
+                'dinero' => Dinero::zero(),
+                'vales' => Dinero::zero(),
+                'total' => $total,
+            ];
+        }
+
         $dinero = Dinero::zero();
         foreach (['billetes' => [500, 200, 100, 50, 20, 10, 5], 'monedas' => [2, 1, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01]] as $grupo => $valores) {
             $cantidades = $desglose[$grupo] ?? [];

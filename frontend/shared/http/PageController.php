@@ -432,7 +432,7 @@ final class PageController
             return Response::redirect('/');
         }
         if (!$club && $nav === 'arqueo') {
-            return Response::redirect('/arqueo-g');
+            return Response::redirect('/arqueo-p');
         }
         $grupoActivo = str_starts_with($nav, 'cuenta-')
             ? ''
@@ -453,7 +453,7 @@ final class PageController
             'mostrarMenuBaja' => $this->puedeSolicitarBajaCuenta(),
             'cuentaEntrada' => $vars['cuenta'] ?? null,
             'cuentaInforme' => $vars['informe'] ?? null,
-            'cuentaArqueo' => $vars['arqueo'] ?? null,
+            'arqueoTesoreria' => $vars['arqueoTesoreria'] ?? null,
             'cuentaPresupuesto' => $vars['presupuesto'] ?? null,
             'textoAsumoNombres' => $this->documentos->textoCasillaNombres($this->idiomaUsuario()),
             'esClub' => $club,

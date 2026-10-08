@@ -126,6 +126,35 @@ final class ArqueoTest extends TestCase
         self::assertSame('20,00', $payload['dinero_arqueo_caja']);
     }
 
+    public function testSaldoBancoYProponerEn613G(): void
+    {
+        $configRepo = new PdoConfiguracionRepository($this->pdo);
+        $ambito = new ResolverAmbitoActual(
+            $configRepo,
+            new PdoCentroRepository($this->pdo),
+            new PdoEjercicioRepository($this->pdo),
+        );
+        $contexto = $ambito->ejecutar();
+        $cfg = $configRepo->get();
+        $fecha = $cfg->fechaCierre->format('Y-m-d');
+
+        $fisicaRepo = new PdoCuentaFisicaRepository($this->pdo);
+        $banco = $fisicaRepo->listarActivasDeCentro($contexto->centroId, 'banco')[0] ?? null;
+        self::assertNotNull($banco?->id);
+
+        $arqueoRepo = new PdoArqueoRepository($this->pdo);
+        $guardar = new GuardarArqueo($arqueoRepo, $ambito);
+        $arqueo = $guardar->ejecutar('B', $fecha, [
+            'saldo_extracto' => '1234,56',
+        ], $banco->id);
+
+        self::assertSame('1234.56', $arqueo->total->toString());
+        self::assertSame('1234,56', $arqueo->desglose['saldo_extracto'] ?? null);
+
+        $payload = $this->resumen613($configRepo, $ambito, $arqueoRepo)->ejecutar('G');
+        self::assertSame('1.234,56', $payload['dinero_arqueo_banco']);
+    }
+
     private function resumen613(
         PdoConfiguracionRepository $configRepo,
         ResolverAmbitoActual $ambito,

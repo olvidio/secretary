@@ -248,6 +248,7 @@ final class ObtenerResumen613
             $payload['saldo_banco_es'] = $banco->formatEs();
             $this->aplicarCamposManuales($payload, $contexto->ejercicioId, $cfg->fechaCierre, 'G');
             $this->aplicarArqueoCaja($payload, $contexto, $cfg->fechaCierre, $caja);
+            $this->aplicarArqueoBanco($payload, $contexto, $cfg->fechaCierre, $banco);
         } else {
             $ingresos = $sum(['11', '12', '13', '14', '15']);
             $gastos = $sum(['201', '202', '203', '204', '205', '206', '207', '208', '209', '210', '211', '212', '213', '214', '215']);
@@ -288,6 +289,7 @@ final class ObtenerResumen613
             $payload['saldo_banco_es'] = $banco->formatEs();
             $this->aplicarCamposManuales($payload, $contexto->ejercicioId, $cfg->fechaCierre, 'G');
             $this->aplicarArqueoCaja($payload, $contexto, $cfg->fechaCierre, $caja);
+            $this->aplicarArqueoBanco($payload, $contexto, $cfg->fechaCierre, $banco);
         }
 
         return $payload;
@@ -334,6 +336,28 @@ final class ObtenerResumen613
         $manual = trim((string) ($payload['dinero_arqueo_caja'] ?? ''));
         if ($manual === '') {
             $payload['dinero_arqueo_caja'] = $arqueo->total->formatEs();
+        }
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function aplicarArqueoBanco(
+        array &$payload,
+        \src\ambito\domain\value_objects\ContextoActual $contexto,
+        \DateTimeImmutable $fechaCierre,
+        Dinero $saldoBanco,
+    ): void {
+        $bancos = $this->fisicas->listarActivasDeCentro($contexto->centroId, 'banco');
+        $bancoFisicaId = $bancos[0]->id ?? null;
+        if ($bancoFisicaId === null) {
+            return;
+        }
+        $arqueo = $this->arqueos->ultimoCajaEnCierre($contexto->ejercicioId, $fechaCierre, $bancoFisicaId);
+        if ($arqueo === null) {
+            return;
+        }
+        $manual = trim((string) ($payload['dinero_arqueo_banco'] ?? ''));
+        if ($manual === '') {
+            $payload['dinero_arqueo_banco'] = $arqueo->total->formatEs();
         }
     }
 

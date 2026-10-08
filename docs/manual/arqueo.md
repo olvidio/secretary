@@ -6,11 +6,11 @@
 
 ## Centro n
 
-- Menú: Resúmenes → **Arqueo P** o **Arqueo G** (junto a Fecha cierre). También el enlace **Arqueo** del resumen 613 P o 613 G, y los enlaces en la pantalla Fecha cierre.
+- Menú: Resúmenes → **Arqueo Caja** o **Saldo banco** (rutas `/arqueo-p` y `/arqueo-g`). **Caja** cuenta el efectivo de la caja física (saldo contable P+G en esa caja). **Saldo banco** no recuenta billetes: se anota el importe del extracto y se compara con el saldo contable P+G en esa cuenta. No es un arqueo «solo del libro P» o «solo del G». Enlaces también desde Fecha cierre y desde el 613 G (caja y banco).
 
 ## Para qué sirve
 
-Sirve para contar el dinero que hay de verdad en la caja y compararlo con lo que dice la contabilidad. Se indica cuántos billetes y monedas hay de cada valor, más los vales y cheques, y la pantalla da el total y la diferencia.
+En **Arqueo Caja** se cuenta el efectivo y se compara con la contabilidad (billetes, monedas, vales y cheques). En **Saldo banco** se introduce el saldo del extracto y se compara con el contable; no hay desglose de billetes.
 
 ## Cómo se usa
 
@@ -26,7 +26,7 @@ Sirve para contar el dinero que hay de verdad en la caja y compararlo con lo que
 - El recuento se compara con el saldo físico de esa caja, que es la suma de lo que le corresponde en el libro personal y en el general: el dinero es el mismo, aunque la contabilidad lo reparta en dos libros.
 - El total es el dinero contado más los vales y cheques, desglosados debajo.
 - Guardar el arqueo no crea ni corrige apuntes: solo deja constancia del recuento. El descuadre se arregla corrigiendo apuntes.
-- El bloque final del 613 G propone **Dinero y vales de Caja** con el total del último arqueo guardado hasta la fecha de cierre (Arqueo P o Arqueo G; si no había ya un valor manual en el 613).
+- El bloque final del 613 G propone **Dinero y vales de Caja** y **Dinero en banco** con el último arqueo o saldo guardado hasta la fecha de cierre (si no había ya un valor manual en el 613).
 - Tras **Guardar arqueo** aparece un mensaje de confirmación con el total.
 - Si la diferencia no es cero pero es múltiplo de nueve, aparece **Buscar capuchinos**: eso suele pasar al escribir dos cifras al revés o al correr la coma. Se listan los apuntes de caja que, cambiados así, explicarían el descuadre, con el importe **Anotado**, el que tendría que ser en **Si fuera** y un enlace al apunte.
 
@@ -38,10 +38,10 @@ Sirve para contar el dinero que hay de verdad en la caja y compararlo con lo que
 
 ## Centro sg
 
-- Ruta: `/arqueo-g`
+- Ruta: `/arqueo-p` (caja física)
 - Menú: Cierre y arqueo → Arqueo
 
-Recuento de la caja del único libro. Se entra también desde el enlace **Arqueo** del 613. No hay reparto entre libro personal y general.
+Recuento de la caja del único libro. Se entra también desde el enlace **Arqueo Caja** del 613. No hay reparto entre libro personal y general (solo hay un libro).
 
 ## Asociación y fundación
 

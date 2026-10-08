@@ -6,7 +6,8 @@ $codigo613 = ($cuenta === 'G' && !empty($esCentroSg)) ? 'G-D' : $cuenta;
     <h1 class="print-hide"><?= sprintf(_("Resumen mensual 613 %s"), htmlspecialchars($codigo613, ENT_QUOTES)) ?></h1>
     <p class="print-hide informe-613-ayuda"><?= _("Las celdas azules admiten valores introducidos manualmente; se guardan al salir del campo.") ?></p>
     <p class="print-hide informe-613-acciones">
-        <a href="/arqueo-<?= strtolower($cuenta) ?>?from=613"><?= sprintf(_("Arqueo %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></a>
+        <a href="/arqueo-p?from=613&amp;libro=<?= strtolower($cuenta) ?>"><?= _("Arqueo Caja") ?></a><?php if ($cuenta === 'G'): ?>
+        · <a href="/arqueo-g?from=613&amp;libro=g"><?= _("Saldo banco") ?></a><?php endif; ?>
         · <button type="button" id="btn-imprimir"><?= _("Imprimir") ?></button>
         · <button type="button" id="btn-pdf"><?= _("Descargar PDF") ?></button>
     </p>
