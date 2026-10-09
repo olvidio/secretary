@@ -126,5 +126,12 @@ $codigo613 = ($cuenta === 'G' && !empty($esCentroSg)) ? 'G-D' : $cuenta;
     </article>
 </div>
 <script>window.CUENTA_613 = <?= json_encode($cuenta) ?>;</script>
+<?php
+$publicJs = dirname(__DIR__, 3) . '/public/js';
+if ($cuenta === 'P'): ?>
+<script src="/js/bloques613p.js?v=<?= (int) (@filemtime($publicJs . '/bloques613p.js') ?: 0) ?>"></script>
+<?php else: ?>
+<script src="/js/bloques613g.js?v=<?= (int) (@filemtime($publicJs . '/bloques613g.js') ?: 0) ?>"></script>
+<?php endif; ?>
 <script src="/js/html2pdf.bundle.min.js"></script>
 <script src="/js/resumen613.js?v=<?= (int) (@filemtime(dirname(__DIR__, 3) . '/public/js/resumen613.js') ?: 0) ?>"></script>

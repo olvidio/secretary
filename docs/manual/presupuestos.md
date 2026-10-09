@@ -20,7 +20,7 @@ En el libro P, las cifras se pueden generar primero en **Previsión personal** (
 
 1. Abrir «Presupuesto P» o «Presupuesto G», según el libro que se quiera presupuestar.
 2. Elegir el **año** en el desplegable (por defecto el **ejercicio abierto** en sesión; puede elegirse el siguiente para planificar). Al guardar un año que aún no existía, se crea en estado planificado.
-3. Recorrer la lista de conceptos y escribir en cada casilla el importe previsto para todo el año.
+3. **Presupuesto P** y **Presupuesto G** usan la misma estructura que el 613 P y el 613 G (o 613 G-D en centro sg): capítulos, subtotales y celdas azules editables. Escribir en cada casilla el importe previsto para todo el año.
 4. Pulsar «Guardar»; aparece el aviso «Guardado».
 
 ## Reglas que conviene saber
@@ -42,6 +42,6 @@ En el libro P, las cifras se pueden generar primero en **Previsión personal** (
 - Ruta: `/presupuesto-g`
 - Menú: Presupuesto e informes → Presupuesto
 
-Un solo presupuesto, el del libro único. Lo que se teclea es el importe anual; el 613 lo prorratea. Una casilla vacía cuenta como cero.
+Un solo presupuesto, el del libro único, en hoja 613 G-D (ingresos, gastos, disponible, destinos y saldo final). Lo que se teclea es el importe anual; el 613 lo prorratea. Una casilla vacía cuenta como cero.
 
 Los destinos del 42 al 54 no salen en esta lista hasta que el centro les pone nombre en **Plan y ejercicio → Conceptos** («Destinos del centro»). El 41, Necesidades generales, es fijo. No hay presupuesto P ni «Aplicar al presupuesto P».

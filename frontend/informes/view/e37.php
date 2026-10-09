@@ -4,37 +4,18 @@
 <h1 class="print-hide"><?= _("Cuentas personales (E37)") ?></h1>
 <p class="filters print-hide">
     <label><?= _("Persona") ?>
-        <select name="iniciales"><option value=""><?= _("Todas") ?></option></select>
+        <select name="iniciales">
+            <option value=""></option>
+            <option value="__todas__"><?= _("Todas") ?></option>
+        </select>
     </label>
     <button type="button" id="btn-imprimir" hidden><?= _("Imprimir") ?></button>
 </p>
 
-<table id="tabla-e37" class="print-hide">
-    <thead>
-    <tr><th><?= _("Fecha") ?></th><th><?= _("Inic.") ?></th><th><?= _("Concepto") ?></th><th><?= _("Observaciones") ?></th><th class="num"><?= _("Cantidad") ?></th></tr>
-    </thead>
-    <tbody></tbody>
-</table>
-<div id="tot" class="print-hide"></div>
+<p id="e37-cargando" class="muted print-hide" hidden><?= _("Cargando hojas…") ?></p>
 
 <div id="hoja-e37" class="informe-e37-wrap" hidden>
-    <article class="informe-e37" id="informe-e37">
-        <header class="informe-e37-cab">
-            <span><?= _("fecha cierre:") ?></span>
-            <span id="e37-fecha-cierre"></span>
-        </header>
-        <div class="informe-e37-scroll">
-            <table class="informe-e37-tabla">
-                <thead>
-                <tr class="informe-e37-codigos" id="e37-codigos"></tr>
-                <tr class="informe-e37-etiquetas" id="e37-etiquetas"></tr>
-                </thead>
-                <tbody id="e37-body"></tbody>
-                <tfoot id="e37-foot"></tfoot>
-            </table>
-        </div>
-        <p id="e37-aviso-saldo" class="aviso-saldo-cc" hidden></p>
-    </article>
+    <div id="e37-contenedor"></div>
 </div>
 
 <script>
@@ -72,54 +53,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     sel.appendChild(o);
   });
 
+  const TODAS = '__todas__';
   const params = new URLSearchParams(location.search);
-  if (params.get('iniciales')) sel.value = params.get('iniciales');
+  if (params.get('todas') === '1') sel.value = TODAS;
+  else if (params.get('iniciales')) sel.value = params.get('iniciales');
 
-  const lista = document.getElementById('tabla-e37');
-  const tot = document.getElementById('tot');
   const hoja = document.getElementById('hoja-e37');
+  const contenedor = document.getElementById('e37-contenedor');
+  const cargando = document.getElementById('e37-cargando');
   const btnPrint = document.getElementById('btn-imprimir');
+  const personasOrden = pers.personas || [];
 
-  function pintarLista(r) {
-    hoja.hidden = true;
-    document.body.classList.remove('e37-hoja');
-    lista.hidden = false;
-    tot.hidden = false;
-    btnPrint.hidden = true;
-    const tb = lista.querySelector('tbody');
-    tb.innerHTML = '';
-    (r.apuntes || []).forEach(a => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${esc(a.fecha_es)}</td><td>${esc(a.iniciales || '')}</td>
-        <td>${esc(a.concepto_codigo)}</td><td>${esc(a.observaciones || '')}</td>
-        <td class="num">${esc(a.cantidad_es)}</td>`;
-      tb.appendChild(tr);
-    });
-    tot.innerHTML = '';
-  }
-
-  function pintarHoja(r) {
-    lista.hidden = true;
-    tot.hidden = true;
-    hoja.hidden = false;
-    document.body.classList.add('e37-hoja');
-    btnPrint.hidden = false;
-
+  function crearArticuloE37(r) {
     const cols = r.columnas || [];
-    document.getElementById('e37-fecha-cierre').textContent = fechaCierreEs(r.config && r.config.fecha_cierre);
+    const art = document.createElement('article');
+    art.className = 'informe-e37 informe-e37-bloque';
 
-    const trCod = document.getElementById('e37-codigos');
+    const cab = document.createElement('header');
+    cab.className = 'informe-e37-cab';
+    cab.innerHTML = `<span><?= _("fecha cierre:") ?></span><span>${esc(fechaCierreEs(r.config && r.config.fecha_cierre))}</span>`;
+    art.appendChild(cab);
+
+    const scroll = document.createElement('div');
+    scroll.className = 'informe-e37-scroll';
+    const tabla = document.createElement('table');
+    tabla.className = 'informe-e37-tabla';
+
+    const thead = document.createElement('thead');
+    const trCod = document.createElement('tr');
+    trCod.className = 'informe-e37-codigos';
     trCod.innerHTML = '<th></th><th></th>' + cols.map(c =>
       `<th class="num">${esc(c.codigo || '')}</th>`
     ).join('');
-
-    const trEt = document.getElementById('e37-etiquetas');
+    const trEt = document.createElement('tr');
+    trEt.className = 'informe-e37-etiquetas';
     trEt.innerHTML = '<th><?= _("Fecha") ?></th><th><?= _("Concepto") ?></th>' + cols.map(c =>
       `<th class="num">${esc(c.etiqueta)}</th>`
     ).join('');
+    thead.appendChild(trCod);
+    thead.appendChild(trEt);
+    tabla.appendChild(thead);
 
-    const tb = document.getElementById('e37-body');
-    tb.innerHTML = '';
+    const tb = document.createElement('tbody');
     (r.filas || []).forEach(f => {
       const tr = document.createElement('tr');
       const celdas = cols.map(c => celdaNum(f.celdas[c.clave + '_es'])).join('');
@@ -127,9 +102,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         <td class="e37-concepto">${esc(f.concepto)}</td>${celdas}`;
       tb.appendChild(tr);
     });
+    tabla.appendChild(tb);
 
+    const tfoot = document.createElement('tfoot');
     const t = r.totales || {};
-    const nombre = (r.persona && r.persona.nombre) || sel.value;
+    const nombre = (r.persona && r.persona.nombre) || r.iniciales || '';
     const trTot = document.createElement('tr');
     trTot.className = 'informe-e37-total';
     trTot.innerHTML = `<td colspan="2">${esc(nombre)}</td>`
@@ -141,27 +118,77 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
           return celdaNum(es);
         }).join('');
-    document.getElementById('e37-foot').innerHTML = '';
-    document.getElementById('e37-foot').appendChild(trTot);
+    tfoot.appendChild(trTot);
+    tabla.appendChild(tfoot);
+    scroll.appendChild(tabla);
+    art.appendChild(scroll);
 
-    const avisoEl = document.getElementById('e37-aviso-saldo');
+    const avisoEl = document.createElement('p');
+    avisoEl.className = 'aviso-saldo-cc';
     if (r.aviso_saldo_cc) {
-      avisoEl.hidden = false;
       avisoEl.textContent = r.aviso_saldo_cc;
     } else {
       avisoEl.hidden = true;
-      avisoEl.textContent = '';
     }
+    art.appendChild(avisoEl);
+
+    return art;
+  }
+
+  function pintarHojas(lista) {
+    contenedor.innerHTML = '';
+    lista.forEach(r => contenedor.appendChild(crearArticuloE37(r)));
+    hoja.hidden = lista.length === 0;
+    document.body.classList.toggle('e37-hoja', lista.length > 0);
+    btnPrint.hidden = lista.length === 0;
+  }
+
+  function vaciarHoja() {
+    contenedor.innerHTML = '';
+    hoja.hidden = true;
+    btnPrint.hidden = true;
+    document.body.classList.remove('e37-hoja');
   }
 
   async function load() {
     const ini = sel.value;
-    const url = '/e37' + (ini ? '?iniciales=' + encodeURIComponent(ini) : '');
+    let url = '/e37';
+    if (ini === TODAS) url += '?todas=1';
+    else if (ini) url += '?iniciales=' + encodeURIComponent(ini);
     history.replaceState(null, '', url);
-    const r = await api('/api/informes/e37' + (ini ? '?iniciales=' + encodeURIComponent(ini) : ''));
-    if (!r.ok) return alert(r.error || <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>);
-    if (ini && r.columnas) pintarHoja(r);
-    else pintarLista(r);
+
+    if (!ini) {
+      vaciarHoja();
+      return;
+    }
+
+    sel.disabled = true;
+    cargando.hidden = false;
+    hoja.hidden = true;
+    btnPrint.hidden = true;
+
+    try {
+      if (ini !== TODAS) {
+        const r = await api('/api/informes/e37?iniciales=' + encodeURIComponent(ini));
+        if (!r.ok) return alert(r.error || <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>);
+        if (!r.columnas) return alert(<?= json_encode(_("No se pudo cargar la hoja."), JSON_UNESCAPED_UNICODE) ?>);
+        pintarHojas([r]);
+        return;
+      }
+      const hojas = [];
+      for (const p of personasOrden) {
+        const r = await api('/api/informes/e37?iniciales=' + encodeURIComponent(p.iniciales));
+        if (!r.ok) {
+          alert(r.error || <?= json_encode(_("Error"), JSON_UNESCAPED_UNICODE) ?>);
+          return;
+        }
+        if (r.columnas) hojas.push(r);
+      }
+      pintarHojas(hojas);
+    } finally {
+      sel.disabled = false;
+      cargando.hidden = true;
+    }
   }
 
   sel.onchange = () => load();

@@ -20,28 +20,6 @@
 
   const SEP = '<td class="sep" aria-hidden="true"></td>';
 
-  function nums(l) {
-    if (!l) return `<td class="num"></td>${SEP}<td class="num"></td>${SEP}<td class="num pct"></td>`;
-    return `<td class="num">${esc(enteroEs(l.previsto))}</td>${SEP}
-      <td class="num">${esc(enteroEs(l.realizado))}</td>${SEP}
-      <td class="num pct">${esc(pct(l.pct))}</td>`;
-  }
-
-  function fila(clase, etiqueta, l, extraTd) {
-    return `<tr class="${clase}"><td>${extraTd ?? ''}${esc(etiqueta)}</td>${SEP}${nums(l)}</tr>`;
-  }
-
-  /** IX. Saldo c/c personales — realizado editable (celda azul). */
-  function filaSaldoCc(clase, etiqueta, l) {
-    const prev = l ? esc(enteroEs(l.previsto)) : '';
-    const pctVal = l ? esc(pct(l.pct)) : '';
-    return `<tr class="${clase}"><td>${esc(etiqueta)}</td>${SEP}
-      <td class="num">${prev}</td>${SEP}
-      <td class="num"><input type="text" name="saldo_cc_personales" id="saldo-cc-personales"
-        class="informe-613-cocina-input informe-613-tabla-input" aria-label="Saldo en las c/c personales"></td>${SEP}
-      <td class="num pct">${pctVal}</td></tr>`;
-  }
-
   function linea(r, codigo) {
     return r.lineas.find((l) => l.codigo === codigo);
   }
@@ -50,71 +28,12 @@
     return r.lineas.filter((l) => codigos.includes(l.codigo));
   }
 
-  const GASTOS_G = ['201', '202', '203', '204', '205', '206', '207', '208', '209', '210', '211', '212', '213', '214', '215'];
-
-  /** Gastos G (201–215) → 01. Agua … 15. Otros. */
-  function etiquetaGastoG(l) {
-    const n = parseInt(String(l.codigo), 10) - 200;
-    const sub = String(n).padStart(2, '0');
-    const nombre = l.etiqueta.replace(/^\d+\.\s*/, '');
-    return `${sub}. ${nombre}`;
-  }
-
-  /** P/212 solo si hay movimiento contable (realizado distinto de cero). */
-  function mostrar212(r) {
-    const l = linea(r, '212');
-    if (!l) return false;
-    const n = parseFloat(String(l.realizado));
-    return Number.isFinite(n) && n !== 0;
-  }
-
-  /** Suma previsto/realizado/% de varias líneas del informe. */
-  function sumLineas(items) {
-    const valid = items.filter(Boolean);
-    if (valid.length === 0) return null;
-    let prev = 0;
-    let real = 0;
-    valid.forEach((l) => {
-      prev += parseFloat(String(l.previsto)) || 0;
-      real += parseFloat(String(l.realizado)) || 0;
-    });
-    return {
-      previsto: prev.toFixed(2),
-      realizado: real.toFixed(2),
-      pct: prev > 0 ? real / prev : null,
-    };
-  }
-
-  function nombreLinea(l) {
-    return l.etiqueta.replace(/^\d+\.\s*/, '');
-  }
-
-  /** Cap. II: 21 suma 211+212; subfilas indentadas con el detalle. */
-  function bloqueViviendaP(r) {
-    const l211 = linea(r, '211');
-    const l212 = linea(r, '212');
-    if (!l211 && !mostrar212(r)) return [];
-    const tot = sumLineas([l211, l212].filter(Boolean));
-    if (!tot) return [];
-    const out = [fila('sub sub-total', '1. Vivienda', tot)];
-    if (l211) {
-      out.push(fila('sub sub-sub', `211. ${nombreLinea(l211)}`, l211));
-    }
-    if (mostrar212(r) && l212) {
-      out.push(fila('sub sub-sub', `212. ${nombreLinea(l212)}`, l212));
-    }
-    return out;
-  }
-
-  /** Prefijo de capítulo (1, 2, 7…) → subnúmero visible (23 → 3. Ropa). */
-  function etiquetaSub(l, prefijoCapitulo, opts = {}) {
-    const { ancho = null } = opts;
-    const cod = String(l.codigo);
-    let sub = cod.startsWith(prefijoCapitulo) ? cod.slice(prefijoCapitulo.length) : cod;
-    sub = String(parseInt(sub, 10) || sub);
-    if (ancho !== null) sub = sub.padStart(ancho, '0');
-    const nombre = l.etiqueta.replace(/^\d+\.\s*/, '');
-    return `${sub}. ${nombre}`;
+  function fila(clase, etiqueta, l, extraTd) {
+    if (!l) return `<tr class="${clase}"><td>${extraTd ?? ''}${esc(etiqueta)}</td>${SEP}<td class="num"></td>${SEP}<td class="num"></td>${SEP}<td class="num pct"></td></tr>`;
+    return `<tr class="${clase}"><td>${extraTd ?? ''}${esc(etiqueta)}</td>${SEP}
+      <td class="num">${esc(enteroEs(l.previsto))}</td>${SEP}
+      <td class="num">${esc(enteroEs(l.realizado))}</td>${SEP}
+      <td class="num pct">${esc(pct(l.pct))}</td></tr>`;
   }
 
   function parseEsNum(valor) {
@@ -143,100 +62,6 @@
     if (!el || !String(el.value).trim()) return;
     const fmt = decimalEs(el.value, { vacio: '' });
     if (fmt) el.value = fmt;
-  }
-
-  function bloquesP(r) {
-    const tot = r.totales || {};
-    const out = [];
-    out.push(fila('sec sec-cab', 'I. Ingresos', tot.ingresos));
-    out.push(fila('sub-grp', '1. Personales', null));
-    lineas(r, ['111', '112', '113']).forEach((l) => {
-      out.push(fila('sub sub-italic', l.etiqueta, l));
-    });
-    out.push(fila('sub', '2. Extraordinarios', linea(r, '12')));
-    out.push(fila('sec sec-cab sec-divide', 'II. Gastos personales', tot.gastos));
-    bloqueViviendaP(r).forEach((html) => out.push(html));
-    lineas(r, ['22', '23', '24', '25', '26', '27', '28']).forEach((l) => {
-      out.push(fila('sub', etiquetaSub(l, '2'), l));
-    });
-    out.push(fila('sec sec-cab sec-total sec-divide', 'III. Disponible (ingresos-gastos)', tot.disponible));
-    out.push(fila('sec sec-cab sec-divide', 'IV. Ayudas familiares', linea(r, '4')));
-    out.push(fila('sec sec-cab sec-divide', 'V. Atención labores', tot.atencion_labores));
-    lineas(r, ['51', '52']).forEach((l, i) => {
-      out.push(fila('sub', `${i + 1}. ${l.etiqueta}`, l));
-    });
-    out.push(fila('sec sec-cab sec-divide', 'VI. Necesidades de la sede del ctr', linea(r, '6')));
-    out.push(fila('sec sec-cab sec-divide', 'VII. Otras labores apostólicas', tot.labores));
-    const laboresCodigos = r.partidas_labores || ['71', '72', '73', '74', '75', '76', '77', '78', '79'];
-    lineas(r, laboresCodigos).forEach((l) => {
-      out.push(fila('sub', etiquetaSub(l, '7'), l));
-    });
-    out.push(fila('sec sec-cab sec-total sec-divide', 'VIII. Saldo final (III-IV-V-VI-VII)', tot.saldo_final));
-    out.push(filaSaldoCc('sec sec-cab sec-azul sec-divide', 'IX. Saldo en las c/c personales', linea(r, '9')));
-    return out.join('');
-  }
-
-  function bloquesG(r) {
-    const tot = r.totales || {};
-    const out = [];
-    out.push(fila('sec sec-cab sec-total', 'I. Ingresos', tot.ingresos));
-    lineas(r, ['11', '12', '13', '14', '15']).forEach((l) => {
-      out.push(fila('sub', etiquetaSub(l, '1'), l));
-    });
-    out.push(fila('sec sec-cab sec-total sec-divide', 'II. Gastos', tot.gastos));
-    lineas(r, GASTOS_G).forEach((l) => {
-      out.push(fila('sub', etiquetaGastoG(l), l));
-    });
-    out.push(fila('sec sec-cab sec-total sec-divide', 'III. Disponible', tot.disponible));
-    out.push(fila('sub', '1. Saldo (ingresos-gastos)', tot.saldo_ingresos_gastos));
-    out.push(fila('sub', '2. Disponible al inicio', linea(r, '32')));
-    return out.join('');
-  }
-
-  /** 613 del centro sg: ingresos, gastos, disponible y los destinos que el centro ha nombrado. */
-  function bloquesCentroSg(r) {
-    const tot = r.totales || {};
-    const out = [];
-    out.push(fila('sec sec-cab sec-total', 'I. Ingresos', tot.ingresos));
-    lineas(r, ['11', '12', '13', '14']).forEach((l) => {
-      out.push(fila('sub', etiquetaSub(l, '1'), l));
-    });
-    out.push(fila('sec sec-cab sec-total sec-divide', 'II. Gastos', tot.gastos));
-    lineas(r, ['21', '22', '23', '24', '25', '26', '27', '28']).forEach((l) => {
-      out.push(fila('sub', etiquetaSub(l, '2'), l));
-    });
-    out.push(fila('sec sec-cab sec-total sec-divide', 'III. Disponible', tot.disponible));
-    out.push(fila('sub', '1. Saldo (ingresos-gastos)', tot.saldo_ingresos_gastos));
-    out.push(fila('sub', '2. Disponible a 1 de enero', linea(r, '32')));
-    out.push(fila('sec sec-cab sec-total sec-divide', 'IV. Destinos', tot.destinos));
-    (r.lineas || []).filter((l) => {
-      const n = parseInt(String(l.codigo), 10);
-      return n >= 41 && n <= 54;
-    }).forEach((l) => {
-      out.push(fila('sub', etiquetaSub(l, '4'), l));
-    });
-    out.push(fila('sec sec-cab sec-total', 'V. Saldo final (III-IV)', tot.saldo_final));
-    const s = r.resumen_sg || {};
-    out.push(fila('sub sec-divide', 'Nº de s del ctr', {
-      previsto: s.num_s_previsto,
-      realizado: s.num_s,
-      pct: null,
-    }));
-    out.push(fila('sub', 'Nº acumulado de aportaciones ordinarias', {
-      previsto: s.aportaciones_previsto,
-      realizado: s.aportaciones,
-      pct: s.aportaciones_pct,
-    }));
-    out.push(`<tr class="sub"><td>Media de las aportaciones ordinarias *</td>${SEP}
-      <td class="num">${esc(s.media_prevista_es || '')}</td>${SEP}
-      <td class="num">${esc(s.media_es || '')}</td>${SEP}
-      <td class="num pct">${esc(pct(s.media_pct))}</td></tr>`);
-    out.push(fila('sub', 'Nº de s sin aportación en el año', {
-      previsto: '',
-      realizado: s.sin_aportacion,
-      pct: null,
-    }));
-    return out.join('');
   }
 
   function renderResumenSg(r) {
@@ -359,8 +184,8 @@
 
     const tb = document.getElementById('informe-613-body');
     tb.innerHTML = CUENTA === 'P'
-      ? bloquesP(r)
-      : (r.plan_contable === 'H16s' ? bloquesCentroSg(r) : bloquesG(r));
+      ? Bloques613P.bloquesP(r)
+      : (r.plan_contable === 'H16s' ? Bloques613G.bloquesCentroSg(r) : Bloques613G.bloquesG(r));
 
     if (CUENTA === 'G' && r.plan_contable === 'H16s') renderResumenSg(r);
     else if (CUENTA === 'G') renderResumenG(r);

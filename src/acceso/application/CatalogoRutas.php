@@ -146,6 +146,7 @@ final class CatalogoRutas
             ['src\\ambito\\infrastructure\\http\\CentroController', 'vaciar', 'centro'],
             ['src\\ambito\\infrastructure\\http\\CentroController', 'addUsuario', 'centro'],
             ['src\\ambito\\infrastructure\\http\\CentroController', 'cambiarRol', 'centro'],
+            ['src\\ambito\\infrastructure\\http\\CentroController', 'quitarUsuario', 'centro'],
             ['src\\plan\\infrastructure\\http\\PartidaLaboresController', 'list', 'centro'],
             ['src\\plan\\infrastructure\\http\\PartidaLaboresController', 'save', 'centro'],
             ['src\\personas\\infrastructure\\http\\PersonaController', 'list', 'centro'],

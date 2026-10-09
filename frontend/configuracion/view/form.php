@@ -81,7 +81,7 @@
     <p id="centro-actual" class="muted"><?= _("Cargando…") ?></p>
     <table id="tabla-usuarios">
         <thead>
-        <tr><th><?= _("Alias") ?></th><th><?= _("Correo") ?></th><th><?= _("Nombre") ?></th><th><?= _("Rol") ?></th></tr>
+        <tr><th><?= _("Alias") ?></th><th><?= _("Correo") ?></th><th><?= _("Nombre") ?></th><th><?= _("Rol") ?></th><th></th></tr>
         </thead>
         <tbody></tbody>
     </table>
@@ -99,11 +99,6 @@
         <button type="submit"><?= _("Importar") ?></button>
     </form>
     <p class="ok" id="msg-import" hidden></p>
-    <p class="muted"><?= $esFundacion
-        ? _("Mientras estemos de pruebas: vaciar asientos para volver a cargar un fichero. Quedan la fundación y los usuarios.")
-        : _("Mientras estemos de pruebas: vaciar asientos para volver a cargar un fichero. Quedan la associació y los usuarios.") ?></p>
-    <button type="button" id="btn-vaciar" class="peligro"><?= _("Vaciar datos (pruebas)") ?></button>
-    <p class="ok" id="msg-vaciar" hidden></p>
     <?php endif; ?>
 </section>
 <?php endif; ?>
@@ -112,10 +107,6 @@ const I18N_CONFIG = {
   quitar: <?= json_encode(_("Quitar"), JSON_UNESCAPED_UNICODE) ?>,
   noCentro: <?= json_encode(_("No se pudo cargar el centro"), JSON_UNESCAPED_UNICODE) ?>,
   grisbiImportado: <?= json_encode(_("Grisbi importado."), JSON_UNESCAPED_UNICODE) ?>,
-  confirmVaciarClub: <?= json_encode($esFundacion
-    ? _("Esto borra los asientos de ESTA fundación para poder volver a importar. Quedan la fundación y los usuarios. ¿Seguro?")
-    : _("Esto borra los asientos de ESTA associació para poder volver a importar. Quedan la associació y los usuarios. ¿Seguro?"), JSON_UNESCAPED_UNICODE) ?>,
-  vaciadosClub: <?= json_encode(_("Vaciados %s asientos en %s ejercicio(s). Ya puedes importar el fichero."), JSON_UNESCAPED_UNICODE) ?>,
   excelSgImportado: <?= json_encode(_("Excel importado. Nombres: %s. Apuntes: %s. Fecha de cierre: %s."), JSON_UNESCAPED_UNICODE) ?>,
   faltaResponsable: <?= json_encode(_("Marque que el centro es responsable de los datos de las personas que da de alta."), JSON_UNESCAPED_UNICODE) ?>,
 };
@@ -130,10 +121,11 @@ async function cargarAssociacio() {
   }
   const c = r.centro || {};
   p.textContent = (c.nombre || c.codigo || '') + (c.plan_contable ? ' · plan ' + c.plan_contable : '');
+  const solo = document.body.classList.contains('solo-consulta');
+  const miId = Number(r.mi_identidad_id || 0);
   (r.usuarios || []).forEach((u) => {
     const tr = document.createElement('tr');
-    const solo = document.body.classList.contains('solo-consulta');
-    tr.innerHTML = '<td>' + esc(u.alias) + '</td><td>' + esc(u.email) + '</td><td>' + esc(u.nombre) + '</td><td>' + htmlRolCentro(u, solo) + '</td>';
+    tr.innerHTML = filaUsuariosCentroHtml(u, solo, miId);
     tb.appendChild(tr);
   });
 }
@@ -185,7 +177,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (msg) msg.hidden = !s.ok;
     if (!s.ok) alert(s.error);
   });
-  if (document.getElementById('tabla-usuarios')) cargarAssociacio();
+  if (document.getElementById('tabla-usuarios')) {
+    cargarAssociacio();
+    document.addEventListener('centro-usuarios-actualizados', () => cargarAssociacio());
+  }
   if (!document.getElementById('tabla-tramos')) return;
   loadTramos();
   const btnAddTramo = document.getElementById('btn-add-tramo');
@@ -262,13 +257,5 @@ document.getElementById('form-import-sg')?.addEventListener('submit', async (ev)
   } finally {
     btn.disabled = false;
   }
-});
-document.getElementById('btn-vaciar')?.addEventListener('click', async () => {
-  if (!confirm(I18N_CONFIG.confirmVaciarClub)) return;
-  const s = await api('/api/centros/vaciar', { method: 'POST', body: { confirmar: true } });
-  if (!s.ok) return alert(s.error);
-  const msg = document.getElementById('msg-vaciar');
-  msg.hidden = false;
-  msg.textContent = I18N_CONFIG.vaciadosClub.replace('%s', s.asientos || 0).replace('%s', s.ejercicios || 0);
 });
 </script>

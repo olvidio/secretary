@@ -21,7 +21,7 @@ final class CatalogoMenus
     {
         return [
             ['nav' => 'configuracion', 'href' => '/configuracion', 'label' => _("Configuración")],
-            ['nav' => 'centros', 'href' => '/centros', 'label' => _("Centros")],
+            ['nav' => 'centros', 'href' => '/centros', 'label' => _("Centro")],
             ['nav' => 'copias', 'href' => '/copias', 'label' => _("Copias")],
             ['nav' => 'nombres', 'href' => '/nombres', 'label' => _("Nombres")],
             ['nav' => 'ejercicios', 'href' => '/ejercicios', 'label' => _("Ejercicios")],
@@ -237,11 +237,53 @@ final class CatalogoMenus
         if (!$club) {
             return self::grupos($layout);
         }
-        return self::gruposFiltrados($layout, self::navsClub(), [
+        $grupos = self::gruposFiltrados($layout, self::navsClub(), [
             'entrada-g' => _("Entrada"),
             'conceptos-g' => _("Cuentas"),
             'plantillas-g' => _("Plantillas"),
         ], 'arqueo', _("Arqueo"));
+
+        return self::inyectarNavsSoloClub($grupos, $layout);
+    }
+
+    /**
+     * Pantallas que solo aparecen en el menú del plan Club (no en la casa n).
+     *
+     * @return list<string>
+     */
+    public static function navsSoloClubEnMenu(): array
+    {
+        return ['listados'];
+    }
+
+    /**
+     * @param list<Grupo> $grupos
+     * @return list<Grupo>
+     */
+    private static function inyectarNavsSoloClub(array $grupos, string $layout): array
+    {
+        $porNav = [];
+        foreach (self::items() as $item) {
+            $porNav[$item['nav']] = $item;
+        }
+        $grupoId = $layout === 'burger' ? 'movimientos' : 'generales';
+        foreach ($grupos as $i => $grupo) {
+            if ($grupo['id'] !== $grupoId) {
+                continue;
+            }
+            $ya = array_column($grupo['items'], 'nav');
+            $nuevos = $grupo['items'];
+            foreach (self::navsSoloClubEnMenu() as $nav) {
+                if (in_array($nav, $ya, true) || !isset($porNav[$nav])) {
+                    continue;
+                }
+                $nuevos[] = $porNav[$nav];
+            }
+            $grupos[$i]['items'] = $nuevos;
+            break;
+        }
+
+        return $grupos;
     }
 
     /**
@@ -325,6 +367,9 @@ final class CatalogoMenus
         if ($nav === 'arqueo') {
             return $layout === 'burger' ? 'movimientos' : 'utilidades';
         }
+        if ($nav === 'listados') {
+            return $layout === 'burger' ? 'movimientos' : 'generales';
+        }
         foreach (self::clavesGrupos($layout) as $grupo) {
             if (in_array($nav, $grupo['items'], true)) {
                 return $grupo['id'];
@@ -377,7 +422,7 @@ final class CatalogoMenus
             [
                 'id' => 'generales',
                 'label' => _("Generales"),
-                'items' => ['entrada-g', 'listados'],
+                'items' => ['entrada-g'],
             ],
             [
                 'id' => 'resumenes',
@@ -432,7 +477,6 @@ final class CatalogoMenus
                     'remesas',
                     'disponible',
                     'enviar-dl',
-                    'listados',
                 ],
             ],
             [

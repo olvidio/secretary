@@ -17,6 +17,32 @@ function htmlRolCentro(usuario, soloConsulta) {
     + '</select>';
 }
 
+function htmlQuitarUsuarioCentro(usuario, soloConsulta, miIdentidadId) {
+  if (soloConsulta || !usuario || !usuario.id) return '';
+  if (Number(miIdentidadId) === Number(usuario.id)) return '';
+  return '<button type="button" class="btn-quitar-usuario-centro" data-identidad-id="'
+    + Number(usuario.id) + '">' + esc(t('quitar')) + '</button>';
+}
+
+function filaUsuariosCentroHtml(usuario, soloConsulta, miIdentidadId) {
+  return '<td>' + esc(usuario.alias) + '</td>'
+    + '<td>' + esc(usuario.email) + '</td>'
+    + '<td>' + esc(usuario.nombre) + '</td>'
+    + '<td>' + htmlRolCentro(usuario, soloConsulta) + '</td>'
+    + '<td class="acciones-centro-usuario">' + htmlQuitarUsuarioCentro(usuario, soloConsulta, miIdentidadId) + '</td>';
+}
+
+async function quitarUsuarioCentro(identidadId) {
+  if (!identidadId) return { ok: false };
+  if (!confirm(t('quitar_usuario_centro_confirm'))) {
+    return { ok: false, cancelado: true };
+  }
+  return api('/api/centros/usuarios/quitar', {
+    method: 'POST',
+    body: { identidad_id: identidadId },
+  });
+}
+
 async function api(url, opts = {}) {
   const method = String(opts.method || 'GET').toUpperCase();
   if (
@@ -114,6 +140,16 @@ function fmtImporteEs(valor) {
     maximumFractionDigits: 2,
   });
 }
+
+document.addEventListener('click', async (ev) => {
+  const btn = ev.target.closest('.btn-quitar-usuario-centro');
+  if (!btn || document.body.classList.contains('solo-consulta')) return;
+  const identidadId = Number(btn.dataset.identidadId || 0);
+  const s = await quitarUsuarioCentro(identidadId);
+  if (s.cancelado) return;
+  if (!s.ok) return alert(s.error || t('error'));
+  document.dispatchEvent(new CustomEvent('centro-usuarios-actualizados', { detail: s }));
+});
 
 document.addEventListener('change', async (ev) => {
   const sel = ev.target.closest('select[data-rol-id]');

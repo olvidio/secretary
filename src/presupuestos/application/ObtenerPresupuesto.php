@@ -11,6 +11,8 @@ final class ObtenerPresupuesto
     public function __construct(
         private readonly ConstruirHojaPrevision $hoja,
         private readonly GuardarPresupuesto $presupuesto,
+        private readonly PresentarPresupuesto613P $presentar613P,
+        private readonly PresentarPresupuesto613G $presentar613G,
     ) {
     }
 
@@ -30,10 +32,17 @@ final class ObtenerPresupuesto
         $objetivo = $this->hoja->ejercicioPorEtiqueta($etiqueta);
         $ejercicioId = $objetivo?->id;
 
-        return array_merge($opts, [
+        $payload = array_merge($opts, [
             'etiqueta_presupuesto' => $etiqueta,
             'ejercicio_id' => $ejercicioId,
             'lineas' => $this->presupuesto->listarPorEjercicio($cuenta, $ejercicioId),
         ]);
+        if ($cuenta === 'P') {
+            $payload['vista_613'] = $this->presentar613P->ejecutar($ejercicioId, $etiqueta);
+        } elseif ($cuenta === 'G') {
+            $payload['vista_613'] = $this->presentar613G->ejecutar($ejercicioId, $etiqueta);
+        }
+
+        return $payload;
     }
 }

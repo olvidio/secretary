@@ -114,6 +114,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/centros/vaciar', [CentroController::class, 'vaciar']);
     $r->addRoute('POST', '/api/centros/usuarios', [CentroController::class, 'addUsuario']);
     $r->addRoute('POST', '/api/centros/usuarios/rol', [CentroController::class, 'cambiarRol']);
+    $r->addRoute('POST', '/api/centros/usuarios/quitar', [CentroController::class, 'quitarUsuario']);
     $r->addRoute('GET', '/api/centros/partidas-labores', [PartidaLaboresController::class, 'list']);
     $r->addRoute('POST', '/api/centros/partidas-labores', [PartidaLaboresController::class, 'save']);
 

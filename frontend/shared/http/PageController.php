@@ -434,6 +434,9 @@ final class PageController
         if (!$club && $nav === 'arqueo') {
             return Response::redirect('/arqueo-p');
         }
+        if (!$club && $nav === 'listados') {
+            return Response::redirect('/');
+        }
         $grupoActivo = str_starts_with($nav, 'cuenta-')
             ? ''
             : CatalogoMenus::grupoDe($layout, $nav, $centroSg);

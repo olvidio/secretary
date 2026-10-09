@@ -39,8 +39,7 @@ tabla; lo que no existía en el Excel va marcado como nuevo.
 - La cantidad sigue siendo siempre positiva: el signo lo pone el concepto.
 - En Configuración se sigue escribiendo **Curso** en lugar de Año, y **2024**
   para el curso 2024-2025, si la contabilidad va de septiembre a agosto.
-- Al crear un centro (o después, en Centros) se puede subir el `.xlsm` para
-  cargar el libro. Mientras se está de pruebas, **Vaciar datos** borra el libro
-  de ese centro para volver a cargarlo.
+- Al crear un centro (o después, en **Centro**) se puede subir el `.xlsm` para
+  cargar el libro; una importación posterior actualiza los movimientos del fichero.
 - Lo que se anota en Mis cuentas **no** mueve la caja del centro: llega al
   centro cuando la persona envía la remesa del mes.

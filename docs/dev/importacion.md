@@ -48,7 +48,7 @@ php bin/console.php import:excel [fichero.xlsm] [--dry-run] [--centro=Montagut] 
 
 Con `--centro=CODIGO` (o al importar desde **Centros** en la web) la pasada es **aislada**: no pisa el singleton `configuracion`, ni `apuntes`, ni el presupuesto global. Solo nombres y asientos de ese centro. El ejercicio abierto se alinea a las fechas del Excel.
 
-En `/centros` se puede adjuntar el `.xlsm` al crear otra entidad, o importarlo después en **Este centro**. **Vaciar datos (pruebas)** borra asientos, remesas, arqueos e `import_filas` de ese centro para recargar el Excel; conserva usuarios, cuentas y nombres.
+En `/centros` se puede adjuntar el `.xlsm` al crear otra entidad, o importarlo después en **Centro**. Una nueva importación sincroniza asientos por hash (D8); no hace falta vaciar antes. La API `POST /api/centros/vaciar` sigue existiendo para pruebas internas.
 
 `asientos:convertir` queda como no-op si el ejercicio ya tiene asientos: la conversión vive en la importación.
 

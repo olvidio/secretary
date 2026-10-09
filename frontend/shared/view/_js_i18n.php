@@ -55,6 +55,8 @@ $i18nJs = [
     'solo_consulta' => _("Esta cuenta es de solo consulta"),
     'rol_modificar' => _("Puede modificar"),
     'rol_consulta' => _("Solo consulta"),
+    'quitar' => _("Quitar"),
+    'quitar_usuario_centro_confirm' => _("¿Quitar el acceso de esta persona a este centro?"),
 ];
 ?>
 <script>

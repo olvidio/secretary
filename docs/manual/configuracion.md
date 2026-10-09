@@ -33,4 +33,4 @@ No hay tipo de centro, tipo de cierre, plan ni tramos de desgravación. El menú
 
 No hay menú Centros, ni tipo de centro, ni tipo de vivienda, ni tramos de desgravación. En esta pantalla se editan la sigla y los usuarios de esta asociación o fundación; el ejercicio contable, en **Ejercicios**. Al vincular un usuario se elige **Puede modificar** o **Solo consulta**. El de solo consulta ve los datos y no los guarda ni los borra. En la tabla se puede cambiar el rol; tiene que quedar al menos un usuario que pueda modificar.
 
-**Importar Grisbi** carga un `.gsb`. Las categorías nuevas se crean como cuentas y los movimientos como asientos. Volver a importar el mismo fichero no duplica. **Vaciar datos (pruebas)** borra los asientos para volver a cargar un fichero; quedan la entidad y los usuarios.
+**Importar Grisbi** carga un `.gsb`. Las categorías nuevas se crean como cuentas y los movimientos como asientos. Volver a importar actualiza o añade según el fichero, sin duplicar al azar.

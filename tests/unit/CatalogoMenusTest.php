@@ -13,6 +13,8 @@ final class CatalogoMenusTest extends TestCase
     {
         $navs = array_column(CatalogoMenus::items(), 'nav');
         self::assertSame($navs, array_values(array_unique($navs)));
+        $soloClub = CatalogoMenus::navsSoloClubEnMenu();
+        $navsCasa = array_values(array_diff($navs, $soloClub));
         foreach (['excel', 'burger'] as $layout) {
             $enGrupos = [];
             foreach (CatalogoMenus::grupos($layout) as $grupo) {
@@ -20,10 +22,18 @@ final class CatalogoMenusTest extends TestCase
                     $enGrupos[] = $item['nav'];
                 }
             }
-            sort($navs);
+            sort($navsCasa);
             $ordenados = $enGrupos;
             sort($ordenados);
-            self::assertSame($navs, $ordenados, 'Ítems sin grupo en layout ' . $layout);
+            self::assertSame($navsCasa, $ordenados, 'Ítems sin grupo en layout ' . $layout);
+        }
+        foreach ($soloClub as $nav) {
+            self::assertNotContains($nav, array_merge(
+                ...array_map(
+                    static fn (array $g): array => array_column($g['items'], 'nav'),
+                    CatalogoMenus::grupos('burger'),
+                ),
+            ));
         }
     }
 
@@ -70,6 +80,19 @@ final class CatalogoMenusTest extends TestCase
         self::assertContains('configuracion', $navs);
         self::assertContains('listados', $navs);
         self::assertContains('entrada-g', $navs);
+    }
+
+    public function testCasaNoMuestraListados(): void
+    {
+        foreach (['excel', 'burger'] as $layout) {
+            $navs = [];
+            foreach (CatalogoMenus::gruposPara($layout, false) as $grupo) {
+                foreach ($grupo['items'] as $item) {
+                    $navs[] = $item['nav'];
+                }
+            }
+            self::assertNotContains('listados', $navs, $layout);
+        }
     }
 
     public function testCentroSgMuestraElLibroDelExcel(): void
