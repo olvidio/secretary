@@ -1,8 +1,8 @@
 # Código de seguridad de seis dígitos
 
 - Ámbito: todos
-- Ruta: `/cuenta/totp`, `/totp-activar`, `/totp-verificar`, `/totp-codigos`
-- Menú: menú del nombre (esquina de arriba) → 2FA. Las pantallas de activación y de verificación salen solas al entrar cuando hacen falta
+- Ruta: `/cuenta/personal`, `/cuenta/totp`, `/totp-activar`, `/totp-verificar`, `/totp-codigos`
+- Menú: menú del nombre (esquina de arriba) → Personal, sección Segundo factor. Las pantallas de activación y de verificación salen solas al entrar cuando hacen falta
 - Quién: cualquier persona; obligatorio para el secretario del centro
 
 ## Para qué sirve
@@ -11,7 +11,7 @@ Añade una comprobación más al entrar, además de la contraseña: un código d
 
 ## Cómo se usa
 
-1. Entrar en «2FA» desde el menú del nombre y pulsar «Activar segundo factor». En las cuentas de secretario, esta pantalla aparece sola la primera vez.
+1. Entrar en **Personal** desde el menú del nombre, sección **Segundo factor**, y pulsar «Activar segundo factor». En las cuentas de secretario, la activación aparece sola la primera vez.
 2. Escanear el código QR con la aplicación (Google Authenticator, Aegis y similares). Si la cámara no va, abrir «Introducir clave manualmente» y teclear la clave.
 3. Escribir el código de seis dígitos que muestra la aplicación y pulsar «Confirmar».
 4. Aparecen ocho códigos de recuperación con el formato `XXXX-XXXX`. Guardarlos en un sitio seguro, fuera del móvil.

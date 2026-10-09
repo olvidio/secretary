@@ -42,16 +42,18 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/admin/legal', [PageController::class, 'adminLegal']);
     $r->addRoute('GET', '/admin/copias', [PageController::class, 'adminCopias']);
     $cuenta = [
-        ['/cuenta/mail', 'acceso/view/cuenta_mail.php', 'cuenta-mail'],
-        ['/cuenta/password', 'acceso/view/cuenta_password.php', 'cuenta-password'],
-        ['/cuenta/totp', 'acceso/view/cuenta_totp.php', 'cuenta-totp'],
-        ['/cuenta/layout', 'acceso/view/cuenta_layout.php', 'cuenta-layout'],
-        ['/cuenta/idioma', 'acceso/view/cuenta_idioma.php', 'cuenta-idioma'],
+        ['/mensajes', 'mensajes/view/lista.php', 'mensajes'],
+        ['/cuenta/personal', 'acceso/view/cuenta_personal.php', 'cuenta-personal'],
+        ['/cuenta/mail', 'acceso/view/cuenta_personal.php', 'cuenta-mail'],
+        ['/cuenta/password', 'acceso/view/cuenta_personal.php', 'cuenta-password'],
+        ['/cuenta/totp', 'acceso/view/cuenta_personal.php', 'cuenta-totp'],
+        ['/cuenta/layout', 'acceso/view/cuenta_personal.php', 'cuenta-layout'],
+        ['/cuenta/idioma', 'acceso/view/cuenta_personal.php', 'cuenta-idioma'],
         ['/cuenta/centro', 'acceso/view/cuenta_centro.php', 'cuenta-centro'],
         ['/cuenta/ambito', 'acceso/view/cuenta_ambito.php', 'cuenta-ambito'],
         ['/cuenta/persona', 'acceso/view/cuenta_persona.php', 'cuenta-persona'],
         ['/cuenta/tipo', 'acceso/view/cuenta_tipo.php', 'cuenta-tipo'],
-        ['/cuenta/copias', 'acceso/view/cuenta_copias.php', 'cuenta-copias'],
+        ['/cuenta/copias', 'acceso/view/cuenta_personal.php', 'cuenta-copias'],
         ['/cuenta/baja', 'acceso/view/cuenta_baja.php', 'cuenta-baja'],
     ];
     foreach ($cuenta as [$path, $view, $nav]) {

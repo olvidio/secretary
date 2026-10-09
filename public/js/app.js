@@ -50,6 +50,7 @@ async function api(url, opts = {}) {
     && (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE')
     && !String(url).startsWith('/api/preferencias')
     && !String(url).startsWith('/api/ayuda/')
+    && !String(url).startsWith('/api/mensajes')
   ) {
     return { ok: false, error: t('solo_consulta') };
   }
@@ -171,4 +172,19 @@ document.addEventListener('click', (ev) => {
   document.querySelectorAll('details.user-menu[open]').forEach((d) => {
     if (!d.contains(ev.target)) d.removeAttribute('open');
   });
+});
+
+async function pintarAvisosMensajes() {
+  const badges = document.querySelectorAll('.msg-badge');
+  if (!badges.length) return;
+  const r = await api('/api/mensajes/contador');
+  const n = r.ok ? Number(r.pendientes || 0) : 0;
+  badges.forEach((el) => {
+    el.hidden = n <= 0;
+    el.textContent = n > 99 ? '99+' : (n > 0 ? String(n) : '');
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  pintarAvisosMensajes();
 });

@@ -425,10 +425,11 @@ final class PageController
         $layout = $this->layoutUsuario();
         $club = $this->esPlanClub();
         $centroSg = $this->esPlanCentroSg();
-        if ($club && $nav !== '' && !str_starts_with($nav, 'cuenta-') && !in_array($nav, CatalogoMenus::navsClub(), true)) {
+        $esCuenta = str_starts_with($nav, 'cuenta-') || $nav === 'mensajes';
+        if ($club && $nav !== '' && !$esCuenta && !in_array($nav, CatalogoMenus::navsClub(), true)) {
             return Response::redirect('/');
         }
-        if ($centroSg && $nav !== '' && !str_starts_with($nav, 'cuenta-') && !in_array($nav, CatalogoMenus::navsCentroSg(), true)) {
+        if ($centroSg && $nav !== '' && !$esCuenta && !in_array($nav, CatalogoMenus::navsCentroSg(), true)) {
             return Response::redirect('/');
         }
         if (!$club && $nav === 'arqueo') {
@@ -437,7 +438,7 @@ final class PageController
         if (!$club && $nav === 'listados') {
             return Response::redirect('/');
         }
-        $grupoActivo = str_starts_with($nav, 'cuenta-')
+        $grupoActivo = str_starts_with($nav, 'cuenta-') || $nav === 'mensajes'
             ? ''
             : CatalogoMenus::grupoDe($layout, $nav, $centroSg);
 
@@ -484,9 +485,26 @@ final class PageController
         if ($nav === 'cuenta-baja' && !$this->puedeSolicitarBajaCuenta()) {
             return Response::redirect($this->siguienteHome());
         }
+        $anclasPersonal = [
+            'cuenta-mail' => 'mail',
+            'cuenta-password' => 'password',
+            'cuenta-totp' => 'totp',
+            'cuenta-layout' => 'layout',
+            'cuenta-idioma' => 'idioma',
+            'cuenta-copias' => 'copias',
+        ];
+        if (isset($anclasPersonal[$nav])) {
+            return Response::redirect('/cuenta/personal#' . $anclasPersonal[$nav]);
+        }
+        if ($nav === 'mensajes' && ($_SESSION['nivel'] ?? '') === 'admin') {
+            return $this->paginaAdmin(
+                (string) ($vars['view'] ?? 'mensajes/view/lista.php'),
+                'mensajes',
+            );
+        }
         if (($_SESSION['nivel'] ?? '') === 'persona') {
             return $this->paginaYo(
-                (string) ($vars['view'] ?? 'acceso/view/cuenta_mail.php'),
+                (string) ($vars['view'] ?? 'acceso/view/cuenta_personal.php'),
                 $nav,
             );
         }
@@ -519,7 +537,7 @@ final class PageController
     public function yoRemesas(Request $request, array $vars = []): Response
     {
         if (!$this->mostrarRemesasPersona()) {
-            return Response::redirect('/yo/centros');
+            return Response::redirect('/cuenta/personal#centros');
         }
 
         return $this->paginaYo('personal/view/remesas.php', 'yo-remesas');
@@ -542,7 +560,7 @@ final class PageController
 
     public function yoCentros(Request $request, array $vars = []): Response
     {
-        return $this->paginaYo('personal/view/centros.php', 'yo-centros');
+        return Response::redirect('/cuenta/personal#centros');
     }
 
     public function admin(Request $request, array $vars = []): Response

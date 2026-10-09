@@ -27,6 +27,7 @@ use src\informes\infrastructure\http\InformeController;
 use src\listados\infrastructure\http\AportacionesSgController;
 use src\listados\infrastructure\http\DonativosFundacionSgController;
 use src\listados\infrastructure\http\ListadoController;
+use src\mensajes\infrastructure\http\MensajeController;
 use src\personas\infrastructure\http\PersonaController;
 use src\personas\infrastructure\http\VinculoCentroController;
 use src\plan\infrastructure\http\ClubCuentasController;
@@ -77,6 +78,9 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/preferencias/centro', [PreferenciaController::class, 'guardarCentro']);
     $r->addRoute('POST', '/api/preferencias/persona', [PreferenciaController::class, 'guardarPersona']);
     $r->addRoute('POST', '/api/preferencias/tipo', [PreferenciaController::class, 'guardarTipo']);
+    $r->addRoute('GET', '/api/mensajes', [MensajeController::class, 'listar']);
+    $r->addRoute('GET', '/api/mensajes/contador', [MensajeController::class, 'contador']);
+    $r->addRoute('POST', '/api/mensajes/leidos', [MensajeController::class, 'leidos']);
     $r->addRoute('POST', '/api/preferencias/ambito', [PreferenciaController::class, 'guardarAmbito']);
     $r->addRoute('GET', '/api/preferencias/baja', [PreferenciaController::class, 'resumenBaja']);
     $r->addRoute('POST', '/api/preferencias/baja/solicitar', [PreferenciaController::class, 'solicitarBaja']);
@@ -129,6 +133,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/vinculos-centro/solicitudes/{id:\d+}/rechazar', [VinculoCentroController::class, 'rechazar']);
     $r->addRoute('GET', '/api/yo/vinculos-centro', [VinculoCentroController::class, 'listarYo']);
     $r->addRoute('GET', '/api/yo/vinculos-centro/centros', [VinculoCentroController::class, 'centrosDisponibles']);
+    $r->addRoute('GET', '/api/yo/vinculos-centro/centros/{id:\d+}/nombres', [VinculoCentroController::class, 'nombresPropios']);
+    $r->addRoute('POST', '/api/yo/vinculos-centro/propio', [VinculoCentroController::class, 'vincularPropio']);
     $r->addRoute('POST', '/api/yo/vinculos-centro', [VinculoCentroController::class, 'solicitarYo']);
     $r->addRoute('POST', '/api/yo/vinculos-centro/{id:\d+}/desvincular', [VinculoCentroController::class, 'desvincularYo']);
 

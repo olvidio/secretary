@@ -1,13 +1,13 @@
 # Preferencias de la cuenta
 
 - Ámbito: todos
-- Ruta: `/cuenta/mail`, `/cuenta/password`, `/cuenta/layout`, `/cuenta/idioma`, `/cuenta/centro`, `/cuenta/ambito`, `/cuenta/persona`, `/cuenta/tipo`, `/cuenta/baja`, `/confirmar-baja`
-- Menú: menú del nombre (esquina de arriba) → Mail, Contraseña, Remanente (libro personal), 2FA, Layout, Idioma, **Ámbito** (si es secretario y tiene libro personal), Centro (solo secretario sin libro personal) o Copia personal (persona), y solo si aplica Persona activa
+- Ruta: `/cuenta/personal`, `/cuenta/mail`, `/cuenta/password`, `/cuenta/totp`, `/cuenta/layout`, `/cuenta/idioma`, `/cuenta/copias`, `/cuenta/centro`, `/cuenta/ambito`, `/cuenta/persona`, `/cuenta/tipo`, `/cuenta/baja`, `/confirmar-baja`
+- Menú: menú del nombre (esquina de arriba) → Mensajes, **Ámbito** (si es secretario y tiene libro personal) o Centro (solo secretario sin libro personal), **Personal** (correo, contraseña, 2FA, layout, idioma y, en el libro personal, la copia), Remanente (libro personal), y solo si aplica Persona activa. Una línea separa **Salir**.
 - Quién: cualquier persona; el apartado del centro, solo el secretario del centro
 
 ## Para qué sirve
 
-Son las pantallas donde cada uno ajusta su cuenta: el correo, la contraseña, el código de seis dígitos, el aspecto de los menús, el idioma y con qué centro o nombre trabaja. El doble factor se explica en su propio apartado; la copia del libro personal, en el de Copia personal. El resto tiene un formulario y un botón «Guardar».
+**Personal** (`/cuenta/personal`) reúne el correo, la contraseña, el segundo factor, el aspecto de los menús, el idioma y, en el libro personal, el centro vinculado y la copia. Debajo del título, unas pestañas muestran un apartado cada vez. Los enlaces antiguos (`/cuenta/mail`, `/cuenta/password`, etc.) abren la pestaña correspondiente. El centro o el ámbito con el que se trabaja siguen en su propia entrada del menú.
 
 ## Cómo se usa
 

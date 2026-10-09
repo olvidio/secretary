@@ -89,12 +89,13 @@ Mis cuentas (`/yo`). No mueve la caja del centro: el mes llega al centro cuando 
 | Cargar el extracto del banco y clasificarlo | Banco |
 | Organizar sus categorías propias | Categorías |
 | Cerrar el mes y enviarlo al centro | Remesa |
+| Ver avisos del centro (destinos 7, detalle de remesa) | Mensajes (menú del nombre) |
 | Dejar una cantidad en el banco y no enviarla | Remanente (menú del nombre) |
 | Fijar lo que se repite cada mes | Cierre |
-| Pedir unirse a un centro n | Centros |
-| Guardar una copia de su libro | Copia personal |
+| Pedir unirse a un centro n | Personal → Centros |
+| Guardar una copia de su libro | Personal (menú del nombre) |
 | Preguntar cómo se usa el programa | Ayuda (menú del nombre) |
 
 ## Común
 
-El nombre de la esquina abre las preferencias: correo, contraseña y, en el libro personal, el remanente; también el doble factor, el aspecto de las pantallas, el idioma, el centro y, si la misma cuenta sirve para los dos modos, el tipo de cuenta.
+El nombre de la esquina abre **Mensajes** (avisos no leídos, con una bolita roja), **Personal** (correo, contraseña, segundo factor, aspecto, idioma y, en el libro personal, la copia) y, en el libro personal, el remanente; también el centro y, si la misma cuenta sirve para los dos modos, el ámbito.

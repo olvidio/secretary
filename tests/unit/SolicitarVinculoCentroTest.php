@@ -7,10 +7,12 @@ namespace Tests\unit;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use src\acceso\domain\contracts\IdentidadRepository;
+use src\acceso\domain\entity\VinculoCentro;
 use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\entity\Centro;
 use src\personas\application\SolicitarVinculoCentro;
 use src\personas\domain\contracts\SolicitudVinculoCentroRepository;
+use src\personas\domain\entity\SolicitudVinculoCentro;
 use src\plan\domain\services\CatalogoPlanesContables;
 
 final class SolicitarVinculoCentroTest extends TestCase
@@ -48,6 +50,27 @@ final class SolicitarVinculoCentroTest extends TestCase
             'centro_id' => 1,
             'anio' => 2026,
         ]);
+    }
+
+    public function testSecretarioPuedePedirVinculoPersonal(): void
+    {
+        $centros = $this->createStub(CentroRepository::class);
+        $centros->method('porId')->willReturn(new Centro(1, 'scl', 'Casa', 'n', 'vivienda', CatalogoPlanesContables::H16N));
+        $identidades = $this->createStub(IdentidadRepository::class);
+        $identidades->method('centrosDe')->willReturn([new VinculoCentro(1, 'admin', 'scl', 'Casa')]);
+        $identidades->method('tienePersonaEnAlgunCentro')->willReturn(false);
+        $solicitudes = $this->createMock(SolicitudVinculoCentroRepository::class);
+        $solicitudes->method('pendienteDeIdentidad')->willReturn(null);
+        $solicitudes->expects($this->once())->method('guardar')->willReturn(
+            new SolicitudVinculoCentro(9, 5, 1, 2026, 'pendiente', null, null),
+        );
+
+        $out = (new SolicitarVinculoCentro($solicitudes, $identidades, $centros))->ejecutar(5, [
+            'centro_id' => 1,
+            'anio' => 2026,
+        ]);
+
+        self::assertSame(9, $out['id']);
     }
 
     public function testRechazaSiYaHayVinculo(): void

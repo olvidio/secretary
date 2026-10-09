@@ -11,7 +11,7 @@ Sirve para cerrar el mes en el libro propio y **comunicar al centro** el resumen
 
 Los apuntes de caja y banco propios no se copian uno a uno. Junto al resumen se **notifica al secretario** el **disponible** (saldo de caja y banco a la fecha de cierre, menos el remanente fijado en Remanente): es una **información** de cuánto hay en la cuenta personal, no un ingreso automático en el centro. **Hasta que el secretario acepte la remesa** (y decida si sustituye el disponible u otras acciones en su pantalla), el centro no cambia sus cuentas por este envío.
 
-Si el centro ya confirmó destinos 7, el texto («Deberías ingresar…») aparece encima del botón de enviar.
+Si el centro ya confirmó destinos 7, el texto («Deberías ingresar…») aparece en **Mensajes** (menú del nombre) y también al entrar en **Remesa**, arriba del resumen del mes.
 
 ## Cómo se usa
 
@@ -19,7 +19,7 @@ Si el centro ya confirmó destinos 7, el texto («Deberías ingresar…») apare
 2. Revisar las líneas y el texto de estado, que indica si el mes está sin enviar, enviado o ya aceptado.
 3. Si se quiere, escribir una nota para el centro. El saldo de caja y banco viene relleno y se puede corregir (solo para que el secretario lo vea en la remesa). Debajo se ve el remanente que se queda, el neto del mes (ingresos menos gastos entre el día siguiente al cierre anterior y el cierre de este mes) y el **disponible que se comunicará** al centro. El remanente se cambia en el menú del nombre.
 4. Pulsar «Cerrar y enviar mes» y confirmar.
-5. En «Solicitudes de detalle» (misma pestaña **Remesa**, al final), si el centro ha pedido ver el desglose de una línea, pulsar «Autorizar» o «Denegar». No llega correo: hay que abrir **Mis cuentas → Remesa** para verlas.
+5. Si el centro pide el desglose de una línea, el aviso sale en **Mensajes** con enlace a esta pantalla. En «Solicitudes de detalle» (al final), pulsar «Autorizar» o «Denegar». No llega correo.
 
 ## Reglas que conviene saber
 

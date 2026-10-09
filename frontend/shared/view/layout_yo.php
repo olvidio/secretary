@@ -30,7 +30,6 @@ if (!empty($contentView) && is_file($contentView)) {
     <?php endif; ?>
     <a href="/yo/gastos-ordinarios" class="<?= ($nav ?? '') === 'yo-go' ? 'on' : '' ?>"><?= _("g.o.") ?></a>
     <a href="/yo/cierre" class="<?= ($nav ?? '') === 'yo-cierre' ? 'on' : '' ?>"><?= _("Cierre") ?></a>
-    <a href="/yo/centros" class="<?= ($nav ?? '') === 'yo-centros' ? 'on' : '' ?>"><?= _("Centros") ?></a>
 </nav>
 <?php include __DIR__ . '/_js_i18n.php'; ?>
 <script src="/js/app.js?v=<?= (int) (@filemtime(dirname(__DIR__, 3) . '/public/js/app.js') ?: 0) ?>"></script>

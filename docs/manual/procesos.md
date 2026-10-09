@@ -36,7 +36,7 @@ Flujo mensual entre el libro personal y el centro.
 
 1. Anotar ingresos, gastos y traspasos del mes en Resumen, Lista o Banco.
 2. Si hay que dejar dinero en el banco, fijarlo antes en **Remanente** (menú del nombre, junto a Mail y Contraseña). Ir a **Remesa**, elegir el mes con ‹ ›, revisar las líneas, el saldo y el **disponible que se comunicará** al centro (saldo menos remanente; informativo, no un pago).
-3. **Cerrar y enviar mes** (pide confirmación). Si el centro ya propuso destinos 7, el texto «Deberías ingresar…» aparece encima del botón.
+3. **Cerrar y enviar mes** (pide confirmación). Si el centro ya confirmó destinos 7, el texto «Deberías ingresar…» aparece en **Mensajes** (menú del nombre) y también encima del botón de la remesa.
 
 **Secretario (centro):**
 
@@ -76,7 +76,7 @@ Desde cero hasta la **primera remesa** aceptada. Pantallas clave: **Nombres**, *
 
 **Opción B — la persona pide acceso:**
 
-1. **Mis cuentas → Centros**: elegir centro **n**, año, mensaje → **Enviar solicitud**.
+1. **Personal → Centros** (menú del nombre): elegir centro **n**, año, mensaje → **Enviar solicitud**.
 2. **Nombres → Solicitudes de acceso personal**: **Dar de alta y vincular** (nombre nuevo) o **Vincular existente…** → **Vincular** (casilla de responsable de datos marcada).
 3. La persona queda vinculada; ya puede enviar remesas.
 

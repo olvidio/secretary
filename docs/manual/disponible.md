@@ -23,7 +23,7 @@ Orden habitual cuando hay dinero para labores (sobrante de trabajo, no un agujer
 1. Terminar apuntes del mes y, si toca, **Cierre de mes** (vivienda).
 2. Cada persona **cierra y envía** su mes; el secretario **Acepta** en **Remesas**. Al aceptar, el neto ingresos menos gastos de esa remesa se **aparca** (la c/c de esa persona queda a cero en contabilidad) y el importe pasa al **disponible** operativo de esta pantalla — salvo que se marque **Sustituir el disponible por este importe** con la tesorería que comunicó la persona.
 3. **Disponible → Proponer destinos 7**: el programa reparte el disponible entre las partidas 7 del centro (presupuesto, tramos de desgravación, tope de la base liquidable, quién puede desgravar).
-4. Revisar el texto «Deberías ingresar…» y **Confirmar y apuntar**. Se anotan los gastos 7 en P y, por el mismo total, un asiento que **liquida la c/c** (trabajo 111 contra CC). Baja el disponible y la persona ve el mismo texto en su **Remesa**.
+4. Revisar el texto «Deberías ingresar…» y **Confirmar y apuntar**. Se anotan los gastos 7 en P y, por el mismo total, un asiento que **liquida la c/c** (trabajo 111 contra CC). Baja el disponible. La persona lo ve en **Mensajes** (menú de su nombre, antes de Mail) y también en su **Remesa**.
 
 Las 7 que la persona ya anotó en su libro personal viajan en la remesa; **no** hay que volver a cargarlas en Disponible.
 
@@ -35,7 +35,7 @@ Si la **c/c sale negativa** (habitual tras cierre de vivienda sin remesa que la 
 2. Si hace falta, **Ajustar** el importe.
 3. Pulsar **Proponer destinos 7**. El programa reparte intentando cumplir el presupuesto de esas partidas y desgravar lo máximo (mejor tres personas con 100 € en el primer tramo que una con 300 €).
 4. Revisar el texto («Deberías ingresar…») y pulsar **Confirmar y apuntar**. Eso anota las 7 en el libro P y baja el disponible.
-5. La persona ve el mismo texto en su pantalla de remesa.
+5. La persona ve el mismo texto en **Mensajes** (bolita roja con los no leídos) y en su pantalla de remesa.
 
 Al aceptar una remesa, si la persona **indicó** un disponible (saldo de su caja y banco menos el remanente en el envío de **datos**, no un pago), se puede marcar **Sustituir el disponible por este importe** para que el disponible operativo del centro pase a coincidir con esa cifra comunicada.
 

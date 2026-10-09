@@ -15,7 +15,7 @@ Es la bandeja donde llega lo que cada persona **comunica** al cerrar su mes: ing
 2. La tabla da el mes, la persona, la versión, el estado, el **disponible comunicado** (saldo de caja y banco de la persona menos su remanente; dato informativo, no un pago) y la fecha de envío.
 3. **Ver** en una fila abre abajo el detalle de esa remesa, con una línea por concepto. Si hay versión anterior, se indica qué conceptos han cambiado. Volver a pulsar **Ver** en otra fila cambia el detalle.
 4. En el detalle: **Aceptar** o, escribiendo antes el motivo en «Nota al rechazar», **Rechazar**. Las dos piden confirmación. Si la persona indicó un disponible (saldo de su caja y banco menos el remanente), aparece la casilla **Sustituir el disponible por este importe**: sirve para **ajustar en el centro** el disponible operativo a esa cifra comunicada, en lugar de sumar solo el sobrante de la remesa. No transfiere dinero desde la cuenta personal.
-5. En cada línea del detalle, **Solicitar detalle** pide permiso a la persona para ver el desglose. Cuando autoriza, el botón pasa a **Ver detalle** / **Ocultar detalle** (alterna el panel con subcuentas, importes y gastos marcados como generales).
+5. En cada línea del detalle, **Solicitar detalle** pide permiso a la persona para ver el desglose. Ella lo ve en **Mensajes** (menú de su nombre), con enlace a su remesa para autorizar o denegar. Cuando autoriza, el botón pasa a **Ver detalle** / **Ocultar detalle** (alterna el panel con subcuentas, importes y gastos marcados como generales).
 
 ## Reglas que conviene saber
 

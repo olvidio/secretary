@@ -4,6 +4,7 @@
     <button type="button" id="yo-mes-sig" aria-label="<?= htmlspecialchars(_("Mes siguiente"), ENT_QUOTES) ?>">›</button>
 </div>
 <p class="muted"><?= _("Envío mensual al centro. La caja y el banco propios no viajan como movimientos. Se envía el disponible (saldo menos el remanente), para que el centro pueda actualizar el suyo.") ?></p>
+<p id="yo-asig" class="ok yo-asig" hidden></p>
 <p id="yo-remesa-msg" class="ok" hidden></p>
 <p id="yo-remesa-err" class="error" hidden></p>
 <section class="yo-remesa-resumen">
@@ -24,7 +25,6 @@
 <p><?= _("Neto del mes") ?>: <strong id="yo-remesa-neto">0,00</strong>
     <span class="muted" id="yo-remesa-periodo"></span></p>
 <p><?= _("Disponible que se envía") ?>: <strong id="yo-remesa-disponible">0,00</strong></p>
-<p id="yo-asig" class="ok" hidden></p>
 <p>
     <button type="button" id="yo-remesa-enviar"><?= _("Cerrar y enviar mes") ?></button>
 </p>

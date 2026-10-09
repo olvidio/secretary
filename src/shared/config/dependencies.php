@@ -338,7 +338,22 @@ return [
     RemesaRepository::class => autowire(PdoRemesaRepository::class),
     src\disponible\domain\contracts\SaldoDisponibleRepository::class => autowire(src\disponible\infrastructure\persistence\PdoSaldoDisponibleRepository::class),
     src\disponible\domain\contracts\AsignacionLaboresRepository::class => autowire(src\disponible\infrastructure\persistence\PdoAsignacionLaboresRepository::class),
+    src\mensajes\domain\contracts\MensajeRepository::class => autowire(src\mensajes\infrastructure\persistence\PdoMensajeRepository::class),
     src\disponible\domain\contracts\TramosDesgravacionRepository::class => autowire(src\disponible\infrastructure\persistence\PdoTramosDesgravacionRepository::class),
+    src\disponible\application\ListarAsignacionesPersona::class => factory(static function (
+        \src\acceso\domain\contracts\IdentidadRepository $identidades,
+        \src\disponible\domain\contracts\AsignacionLaboresRepository $asignaciones,
+        \src\plan\domain\contracts\PartidaLaboresRepository $partidas,
+    ): \src\disponible\application\ListarAsignacionesPersona {
+        $identidadId = !empty($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : null;
+
+        return new \src\disponible\application\ListarAsignacionesPersona(
+            $identidades,
+            $asignaciones,
+            $partidas,
+            $identidadId,
+        );
+    }),
     src\disponible\infrastructure\http\DisponibleController::class => autowire(),
     src\envio_dl\domain\contracts\EnvioDlRepository::class => autowire(src\envio_dl\infrastructure\persistence\PdoEnvioDlRepository::class),
     src\envio_dl\infrastructure\http\EnvioDlController::class => autowire(),

@@ -71,6 +71,8 @@ final class CatalogoMenus
             ['nav' => 'donativos-fundacion', 'href' => '/donativos-fundacion', 'label' => _("Donativos a Fundación")],
             ['nav' => 'entradas-periodicas', 'href' => '/entradas-periodicas', 'label' => _("Entradas periódicas")],
             ['nav' => 'ejecutar-entradas-periodicas', 'href' => '/ejecutar-entradas-periodicas', 'label' => _("Ejecutar periódicas")],
+            ['nav' => 'mensajes', 'href' => '/mensajes', 'label' => _("Mensajes")],
+            ['nav' => 'cuenta-personal', 'href' => '/cuenta/personal', 'label' => _("Personal")],
             ['nav' => 'cuenta-mail', 'href' => '/cuenta/mail', 'label' => _("Mail")],
             ['nav' => 'cuenta-password', 'href' => '/cuenta/password', 'label' => _("Contraseña")],
             ['nav' => 'cuenta-totp', 'href' => '/cuenta/totp', 'label' => _("2FA")],

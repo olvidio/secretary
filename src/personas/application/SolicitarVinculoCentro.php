@@ -35,9 +35,6 @@ final class SolicitarVinculoCentro
         if ($anio < 2000 || $anio > 2100) {
             throw new InvalidArgumentException(_("Indique el año del ejercicio"));
         }
-        if ($this->identidades->centrosDe($identidadId) !== []) {
-            throw new InvalidArgumentException(_("Las cuentas de secretario no solicitan acceso como persona"));
-        }
         if ($this->identidades->tienePersonaEnAlgunCentro($identidadId)) {
             throw new InvalidArgumentException(_("Ya tiene un centro vinculado. Desvincúlese antes de solicitar otro."));
         }

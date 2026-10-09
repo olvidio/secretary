@@ -2217,6 +2217,70 @@ td.col-acc { white-space: nowrap; }
 }
 .user-menu summary::-webkit-details-marker { display: none; }
 .user-menu summary::after { content: " ▾"; opacity: .75; font-size: .8em; }
+.msg-badge {
+  display: inline-block;
+  min-width: 1.15em;
+  margin-left: .35em;
+  padding: 0 .4em;
+  border-radius: 999px;
+  background: #c0392b;
+  color: #fff;
+  font-size: .75em;
+  font-weight: 700;
+  line-height: 1.45;
+  text-align: center;
+  vertical-align: middle;
+}
+.msg-badge[hidden] { display: none; }
+.mensajes-lista { list-style: none; padding: 0; margin: 1rem 0; }
+.mensajes-lista li {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: .75rem 1rem;
+  margin: 0 0 .6rem;
+}
+.mensajes-lista li.nuevo { border-left: 4px solid #c0392b; }
+.mensajes-lista .meta { margin: 0 0 .35rem; }
+.mensajes-lista .meta small { margin-left: .6rem; color: #718096; }
+.cuenta-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin: .75rem 0 1.25rem;
+}
+.cuenta-tabs a {
+  padding: .35rem .75rem;
+  border-radius: 999px;
+  background: #edf2f7;
+  color: #1a202c !important;
+  text-decoration: none;
+  font-size: .95rem;
+}
+.cuenta-tabs a:hover { background: #e2e8f0; }
+.cuenta-seccion { display: none; margin: 0 0 1.5rem; }
+.cuenta-seccion:target { display: block; }
+main:not(:has(.cuenta-seccion:target)) #mail.cuenta-seccion { display: block; }
+.cuenta-tabs:not(:has(~ .cuenta-seccion:target)) a[data-tab="mail"],
+.cuenta-tabs:has(~ #mail:target) a[data-tab="mail"],
+.cuenta-tabs:has(~ #password:target) a[data-tab="password"],
+.cuenta-tabs:has(~ #totp:target) a[data-tab="totp"],
+.cuenta-tabs:has(~ #layout:target) a[data-tab="layout"],
+.cuenta-tabs:has(~ #idioma:target) a[data-tab="idioma"],
+.cuenta-tabs:has(~ #centros:target) a[data-tab="centros"],
+.cuenta-tabs:has(~ #copias:target) a[data-tab="copias"] {
+  background: #0f766e;
+  color: #fff !important;
+  font-weight: 700;
+}
+.cuenta-seccion h2 { margin: 0 0 .4rem; }
+.yo-asig {
+  margin: .75rem 0 1rem;
+  padding: .65rem .85rem;
+  border-radius: 6px;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  font-weight: 600;
+}
 .user-menu summary:hover { background: rgba(255,255,255,.12); }
 .user-menu ul {
   position: absolute;
@@ -2231,6 +2295,11 @@ td.col-acc { white-space: nowrap; }
   border-radius: 6px;
   box-shadow: 0 6px 18px rgba(0,0,0,.18);
   z-index: 60;
+}
+.user-menu-sep {
+  height: 0;
+  margin: .35rem .6rem;
+  border-top: 1px solid #e2e8f0;
 }
 .user-menu a {
   display: block;

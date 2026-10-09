@@ -16,10 +16,12 @@ use src\personas\application\AprobarSolicitudVinculoCentro;
 use src\personas\application\DesvincularPersonaCentro;
 use src\personas\application\ListarCandidatosVinculoCentro;
 use src\personas\application\ListarCentrosDisponiblesPersona;
+use src\personas\application\ListarNombresParaVinculoPropio;
 use src\personas\application\ListarSolicitudesVinculoCentro;
 use src\personas\application\ListarVinculosPersona;
 use src\personas\application\RechazarSolicitudVinculoCentro;
 use src\personas\application\SolicitarVinculoCentro;
+use src\personas\application\VincularNombrePropio;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
@@ -30,6 +32,8 @@ final class VinculoCentroController
         private readonly SolicitarVinculoCentro $solicitar,
         private readonly ListarVinculosPersona $listarVinculos,
         private readonly ListarCentrosDisponiblesPersona $centrosDisponibles,
+        private readonly ListarNombresParaVinculoPropio $nombresPropios,
+        private readonly VincularNombrePropio $vincularPropio,
         private readonly ListarSolicitudesVinculoCentro $listarSolicitudes,
         private readonly ListarCandidatosVinculoCentro $candidatos,
         private readonly AprobarSolicitudVinculoCentro $aprobar,
@@ -62,6 +66,38 @@ final class VinculoCentroController
         return ContestarJson::ok([
             'centros' => $this->centrosDisponibles->ejecutar($identidadId),
         ]);
+    }
+
+    public function nombresPropios(Request $request, array $vars = []): Response
+    {
+        try {
+            $identidadId = (int) ($_SESSION['identidad_id'] ?? 0);
+            if ($identidadId <= 0) {
+                return ContestarJson::error(_("No autenticado"), 401);
+            }
+
+            return ContestarJson::ok([
+                'nombres' => $this->nombresPropios->ejecutar($identidadId, (int) ($vars['id'] ?? 0)),
+            ]);
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+    }
+
+    public function vincularPropio(Request $request, array $vars = []): Response
+    {
+        try {
+            $identidadId = (int) ($_SESSION['identidad_id'] ?? 0);
+            if ($identidadId <= 0) {
+                return ContestarJson::error(_("No autenticado"), 401);
+            }
+            $fila = $this->vincularPropio->ejecutar($identidadId, $request->json());
+            $_SESSION['personas_vinculo'] = $this->identidades->personasVinculoDe($identidadId);
+
+            return ContestarJson::ok(['vinculo' => $fila]);
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
     }
 
     public function solicitarYo(Request $request, array $vars = []): Response
