@@ -10,6 +10,20 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.30] — 2026-10-09
+
+### Añadido
+- **Mensajes**: bandeja en el menú del nombre (antes de Ámbito), con bolita roja de no leídos. Avisa de destinos 7 («Deberías ingresar…») y de peticiones de detalle de remesa, con enlace a la pantalla que toca (migración 0081).
+- **Personal**: correo, contraseña, segundo factor, layout, idioma, centros y copia del libro personal en una sola página, con pestañas. Los enlaces antiguos siguen abriendo la pestaña correspondiente.
+- **Centros** (libro personal): si el secretario administra ese centro, puede vincular su cuenta con su nombre sin esperar una solicitud.
+
+### Cambiado
+- Menú del nombre: Mensajes, Ámbito o Centro, Personal; una línea separa **Salir**.
+- **Mis cuentas**: Centros sale de la barra inferior y pasa a Personal.
+
+### Corregido
+- **Remesa**: el texto «Deberías ingresar…» se ve al entrar, porque se lee del nombre del centro y no del libro personal.
+
 ## [0.1.29] — 2026-10-09
 
 ### Añadido
