@@ -10,6 +10,17 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.29] — 2026-10-09
+
+### Añadido
+- **Presupuesto P** y **Presupuesto G**: hoja con la misma estructura que el 613 (capítulos, subtotales y celdas editables), en lugar de una sola tabla plana.
+- **Centros**: **Quitar** en un secretario revoca su acceso a ese centro (desvincular usuario).
+
+### Cambiado
+- **Centros → Importar Excel**: se puede **volver a importar** el mismo fichero para actualizar movimientos; no hace falta vaciar datos antes (importación idempotente).
+- **Cuentas personales (E37)**: pantalla reorganizada (mejor lectura en pantalla).
+- **Manual**: Centros, Configuración, Presupuesto, Usuario e importación (agentes).
+
 ## [0.1.28] — 2026-10-09
 
 ### Corregido
