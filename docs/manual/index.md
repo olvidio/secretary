@@ -32,6 +32,7 @@ La contabilidad del secretario: libro personal (P) y libro general (G).
 | Consultar la lista de conceptos | Conceptos P / Conceptos G |
 | Recibir el mes que envía una persona | Remesas |
 | Ver y aplicar el disponible a labores 7 | Disponible |
+| Tras el mes: dónde van los saldos c/c (partidas 7) | Disponible, Procesos contables habituales, Saldos |
 | Guardar o recuperar una copia de todo | Copias |
 | Preguntar cómo se usa el programa | Ayuda |
 

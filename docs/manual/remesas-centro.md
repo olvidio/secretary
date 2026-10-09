@@ -19,7 +19,7 @@ Es la bandeja donde llega lo que cada persona **comunica** al cerrar su mes: ing
 
 ## Reglas que conviene saber
 
-- Aceptar anota los importes en el libro personal del centro, contra la cuenta personal de esa persona, con fecha del último día del mes. El sobrante (ingresos menos gastos) se aparca para dejar esa cuenta a cero y suma al **disponible** (salvo si se sustituye por la tesorería enviada).
+- Aceptar anota los importes en el libro personal del centro, contra la cuenta personal de esa persona, con fecha del último día del mes. El sobrante (ingresos menos gastos) se aparca para dejar esa **c/c** a cero y suma al **disponible** (salvo si se sustituye por la tesorería enviada). El reparto entre partidas 7 concretas (71, 72…) se hace después en **Disponible**, no al aceptar la remesa.
 - Si ya se había aceptado otra versión del mismo mes, lo anotado por ella se borra y queda «sustituida». No se duplica nada.
 - Rechazar una remesa enviada no deja rastro. Rechazar una ya aceptada borra lo que hubiera anotado y deshace el disponible de esa remesa.
 - Los gastos que la persona marque como generales generan además los apuntes del libro general.

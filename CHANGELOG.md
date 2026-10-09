@@ -10,6 +10,14 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.28] — 2026-10-09
+
+### Corregido
+- **Disponible → Confirmar y apuntar**: error al grabar («violates check constraint asientos_tipo_check»): la liquidación de la cuenta corriente usa el tipo `asignacion_cc`, que faltaba en la base de datos (migración 0080).
+
+### Añadido
+- **Manual / ayuda**: flujo saldo c/c y partidas 7 (Disponible, Procesos contables, Saldos, Remesas).
+
 ## [0.1.27] — 2026-10-08
 
 ### Añadido

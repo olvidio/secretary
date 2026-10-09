@@ -29,6 +29,7 @@ Además tiene un botón que ejecuta unas revisiones automáticas y señala, pers
 - **A:** apuntes que no mueven caja ni banco; deberían cuadrar (ingresos = gastos). En la tabla, positivo = más ingresos que gastos.
 - **C** y **B:** apuntes desde caja o banco del centro; misma regla de signo y también deberían cuadrar por persona.
 - **c/c:** saldo de la cuenta corriente personal (concepto 9). La suma de todas las c/c es el **IX del 613 P**.
+- La c/c **no indica en qué partida 7** (71, 72…) hay que anotar: eso se hace en **Disponible → Proponer destinos 7** después de **aceptar remesas**, cuando hay disponible operativo para labores. C/c negativa: cuadrar con **111**, no con partidas 7 (ver ficha Disponible).
 - Un saldo personal negativo con arqueo de caja y banco cuadrado **puede ser coherente**: el arqueo mira el dinero físico (P+G juntos). El negativo de la cuenta personal es vivienda u otro gasto A que aún no tiene 111, no un billete que falte en el cajón.
 - El total físico de una caja es la suma de lo que hay en P y en G: el dinero es el mismo, aunque la contabilidad lo reparta en dos libros.
 - Caja y Banco del resumen suman todas las cajas y bancos del centro.

@@ -4,7 +4,7 @@
 
 Guía paso a paso de los flujos que cruzan varias pantallas de un **centro n**. Para el detalle de cada botón, ver la ficha de la pantalla correspondiente. El libro personal tiene sus propias fichas (Resumen, Remesa, Banco, Centros).
 
-Palabras clave: **cierro el mes**, **cerrar el mes del centro**, **remesa**, **disponible**, **partidas 7**, **importar extracto del banco**, **dar de alta persona nueva**, **primera remesa**, **vincular cuenta**.
+Palabras clave: **cierro el mes**, **cerrar el mes del centro**, **remesa**, **disponible**, **partidas 7**, **saldo c/c**, **cuenta corriente**, **colocar en partida 7**, **importar extracto del banco**, **dar de alta persona nueva**, **primera remesa**, **vincular cuenta**.
 
 ## Para qué sirve
 
@@ -22,8 +22,9 @@ Flujo del secretario cuando **cierra el mes** contable del centro: no confundir 
 4. **Cierre de mes**: revisar la tabla de reparto y pulsar **Generar apuntes**. Si falta vivienda de meses anteriores, **Regularizar meses anteriores** antes.
 5. **613 P** y **613 G**: abrir cada resumen, revisar previsto/realizado, rellenar celdas azules si hace falta, **Imprimir** o **Descargar PDF** para archivar o enviar.
 6. **Remesas**: cuando las personas envíen su mes (ver proceso 2), **Filtrar** por recibidas, **Ver** cada una, **Aceptar** o **Rechazar**. Aceptar no sustituye el cierre de vivienda del centro: son cosas distintas (cierre reparte gastos G; remesa trae el resumen personal de cada uno).
+7. **Saldos** (opcional): revisar la columna **c/c**. Negativa: falta 111 u otra contrapartida A, no partidas 7. Positiva con remesas pendientes: suele resolverse al **aceptar** remesas y luego **Disponible → Proponer destinos 7** (ver proceso 2 y ficha Disponible).
 
-Orden práctico: primero el cierre de vivienda del centro y los 613; las remesas personales pueden llegar en paralelo y aceptarse cuando estén listas.
+Orden práctico: primero el cierre de vivienda del centro y los 613; las remesas personales pueden llegar en paralelo y aceptarse cuando estén listas. Los saldos c/c **no se reparten a mano** entre códigos 71, 72…: lo hace la propuesta de Disponible tras aceptar remesas.
 
 ### 2. Remesa de la persona → bandeja del centro → disponible → partidas 7
 
@@ -102,3 +103,4 @@ Comprobar en **Nombres** que «vivienda aporta a generales», exenciones de mese
 - **Importación con movimientos omitidos**: fechas fuera del ejercicio abierto; revisar Ejercicios o la fecha del movimiento.
 - **Solicitud de acceso sin respuesta**: el secretario debe resolverla en Nombres; hasta entonces la persona no puede enviar remesa.
 - **613 con IX negativo tras el cierre**: ver ficha de Resumen 613 P y Cierre de mes; no confundir con el disponible de G.
+- **Terminé los apuntes del mes y quiero saber en qué partida 7 colocar los saldos c/c**: no se elige partida a mano en Entrada P. Revisar Saldos: c/c negativa → 111 (Cierre de mes, E37). Sobrante para labores → aceptar remesas y **Disponible → Proponer destinos 7** (ficha Disponible).
