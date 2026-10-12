@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\integration;
 
+use InvalidArgumentException;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\TestCase;
@@ -112,6 +113,26 @@ final class CopiaCentroInicialesTest extends TestCase
             'SELECT persona_id FROM asientos WHERE anulado_at IS NULL AND libro = \'P\' LIMIT 1'
         )->fetchColumn();
         self::assertSame($persona->id, (int) $personaId);
+
+        $datos['centro_id'] = $centroId + 1000;
+        $copias->restaurar($centroId, $datos);
+        $lista = (new ListarApuntes(
+            $asientos,
+            $cuentas,
+            $personas,
+            new ProyectorAsientoAFilaExcel(),
+            $ambito,
+        ))->ejecutar(['iniciales' => 'jrm']);
+        self::assertCount(1, $lista);
+
+        $ajena = $datos;
+        $ajena['codigo'] = 'otro-centro';
+        try {
+            $copias->restaurar($centroId, $ajena);
+            self::fail('Debía rechazar una copia de otra sigla');
+        } catch (InvalidArgumentException $e) {
+            self::assertStringContainsString('otro centro', $e->getMessage());
+        }
     }
 
     public function testLaCopiaTraePresupuestoYPrevision(): void

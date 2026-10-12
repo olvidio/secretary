@@ -27,8 +27,16 @@
       <td class="num pct">${esc(pct(l.pct))}</td>`;
   }
 
-  function numsSoloPrevisto(l, codigo) {
-    const valEs = l?.previsto_es ?? (l?.previsto != null ? enteroEs(l.previsto) : '');
+  function textoEntero(l) {
+    if (typeof fmtEnteroEs === 'function') return fmtEnteroEs(l?.previsto ?? '');
+    const t = enteroEs(l?.previsto);
+    return t === '0' ? '' : t;
+  }
+
+  function numsSoloPrevisto(l, codigo, enteros) {
+    const valEs = enteros
+      ? textoEntero(l)
+      : (l?.previsto_es ?? (l?.previsto != null ? enteroEs(l.previsto) : ''));
     const inp = codigo
       ? `<input type="text" name="${esc(codigo)}" class="informe-613-cocina-input informe-613-tabla-input num" `
         + `value="${esc(valEs)}" aria-label="${esc(codigo)}">`
@@ -40,8 +48,8 @@
     return `<tr class="${clase}"><td>${extraTd ?? ''}${esc(etiqueta)}</td>${SEP}${nums(l)}</tr>`;
   }
 
-  function filaPresupuesto(clase, etiqueta, l, codigoEditable) {
-    return `<tr class="${clase}"><td>${esc(etiqueta)}</td>${SEP}${numsSoloPrevisto(l, codigoEditable)}</tr>`;
+  function filaPresupuesto(clase, etiqueta, l, codigoEditable, enteros) {
+    return `<tr class="${clase}"><td>${esc(etiqueta)}</td>${SEP}${numsSoloPrevisto(l, codigoEditable, enteros)}</tr>`;
   }
 
   function linea(r, codigo) {
@@ -96,8 +104,8 @@
     const presu = !!opts.presupuesto;
     const tot = r.totales || {};
     const out = [];
-    const cab = (clase, etq, l) => (presu ? filaPresupuesto(clase, etq, l, null) : fila(clase, etq, l));
-    const det = (clase, etq, l, cod) => (presu ? filaPresupuesto(clase, etq, l, cod) : fila(clase, etq, l));
+    const cab = (clase, etq, l) => (presu ? filaPresupuesto(clase, etq, l, null, true) : fila(clase, etq, l));
+    const det = (clase, etq, l, cod) => (presu ? filaPresupuesto(clase, etq, l, cod, true) : fila(clase, etq, l));
 
     out.push(cab('sec sec-cab sec-total', 'I. Ingresos', tot.ingresos));
     lineas(r, ['11', '12', '13', '14']).forEach((l) => {

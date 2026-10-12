@@ -37,8 +37,12 @@ final class PresentarPresupuesto613G
 
         $prevIndex = [];
         foreach ($this->presupuesto->listarPorEjercicio('G', $ejercicioId) as $row) {
-            $prevIndex[(string) $row['concepto_codigo']] = Dinero::fromInput((string) ($row['previsto'] ?? '0'));
+            $importe = Dinero::fromInput((string) ($row['previsto'] ?? '0'));
+            $prevIndex[(string) $row['concepto_codigo']] = $esCentroSg ? $importe->redondearEuros() : $importe;
         }
+
+        $fmt = static fn (Dinero $d): string => $esCentroSg ? $d->formatEnteroEs() : $d->formatEs();
+        $ceroEs = $esCentroSg ? '0' : '0,00';
 
         $lineas = [];
         foreach ($defs as $def) {
@@ -50,9 +54,9 @@ final class PresentarPresupuesto613G
                 'codigo' => $def['codigo'],
                 'etiqueta' => $def['etiqueta'],
                 'previsto' => $previsto->toString(),
-                'previsto_es' => $previsto->formatEs(),
+                'previsto_es' => $fmt($previsto),
                 'realizado' => '0.00',
-                'realizado_es' => '0,00',
+                'realizado_es' => $ceroEs,
                 'pct' => null,
             ];
         }
@@ -62,7 +66,7 @@ final class PresentarPresupuesto613G
             $index[$l['codigo']] = $l;
         }
 
-        $sum = static function (array $codigos) use ($index): array {
+        $sum = static function (array $codigos) use ($index, $fmt, $ceroEs): array {
             $prev = Dinero::zero();
             foreach ($codigos as $c) {
                 if (!isset($index[$c])) {
@@ -73,9 +77,9 @@ final class PresentarPresupuesto613G
 
             return [
                 'previsto' => $prev->toString(),
-                'previsto_es' => $prev->formatEs(),
+                'previsto_es' => $fmt($prev),
                 'realizado' => '0.00',
-                'realizado_es' => '0,00',
+                'realizado_es' => $ceroEs,
                 'pct' => null,
             ];
         };
@@ -110,23 +114,23 @@ final class PresentarPresupuesto613G
                     'destinos' => $destinos,
                     'saldo_ingresos_gastos' => [
                         'previsto' => $saldoIngGastosPrev->toString(),
-                        'previsto_es' => $saldoIngGastosPrev->formatEs(),
+                        'previsto_es' => $fmt($saldoIngGastosPrev),
                         'realizado' => '0.00',
-                        'realizado_es' => '0,00',
+                        'realizado_es' => $ceroEs,
                         'pct' => null,
                     ],
                     'disponible' => [
                         'previsto' => $dispPrev->toString(),
-                        'previsto_es' => $dispPrev->formatEs(),
+                        'previsto_es' => $fmt($dispPrev),
                         'realizado' => '0.00',
-                        'realizado_es' => '0,00',
+                        'realizado_es' => $ceroEs,
                         'pct' => null,
                     ],
                     'saldo_final' => [
                         'previsto' => $saldoPrev->toString(),
-                        'previsto_es' => $saldoPrev->formatEs(),
+                        'previsto_es' => $fmt($saldoPrev),
                         'realizado' => '0.00',
-                        'realizado_es' => '0,00',
+                        'realizado_es' => $ceroEs,
                     ],
                 ],
             ];
@@ -148,15 +152,15 @@ final class PresentarPresupuesto613G
                 'gastos' => $gastos,
                 'saldo_ingresos_gastos' => [
                     'previsto' => $saldoIngGastosPrev->toString(),
-                    'previsto_es' => $saldoIngGastosPrev->formatEs(),
+                    'previsto_es' => $fmt($saldoIngGastosPrev),
                     'realizado' => '0.00',
-                    'realizado_es' => '0,00',
+                    'realizado_es' => $ceroEs,
                 ],
                 'disponible' => [
                     'previsto' => $dispPrev->toString(),
-                    'previsto_es' => $dispPrev->formatEs(),
+                    'previsto_es' => $fmt($dispPrev),
                     'realizado' => '0.00',
-                    'realizado_es' => '0,00',
+                    'realizado_es' => $ceroEs,
                 ],
             ],
         ];

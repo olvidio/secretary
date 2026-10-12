@@ -57,6 +57,17 @@ final class DineroTest extends TestCase
         self::assertSame('1234.00', Dinero::fromInput('1.234')->toString());
     }
 
+    public function testRedondearEuros(): void
+    {
+        self::assertSame('10.00', (new Dinero('10.40'))->redondearEuros()->toString());
+        self::assertSame('10.00', (new Dinero('10.49'))->redondearEuros()->toString());
+        self::assertSame('11.00', (new Dinero('10.50'))->redondearEuros()->toString());
+        self::assertSame('-2.00', (new Dinero('-1.50'))->redondearEuros()->toString());
+        self::assertSame('0.00', (new Dinero('-0.49'))->redondearEuros()->toString());
+        self::assertSame('19.500', (new Dinero('19500.40'))->formatEnteroEs());
+        self::assertSame('0', Dinero::zero()->formatEnteroEs());
+    }
+
     public function testFromInputFormatoInterno(): void
     {
         self::assertSame('1200.00', Dinero::fromInput('1200.00')->toString());

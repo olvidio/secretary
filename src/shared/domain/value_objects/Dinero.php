@@ -111,6 +111,32 @@ final class Dinero
         return number_format((float) $this->amount, 2, ',', '.');
     }
 
+    /** Al euro más cercano; a partir de 50 céntimos, se aleja del cero. */
+    public function redondearEuros(): self
+    {
+        $negativo = $this->isNegative();
+        $abs = $negativo ? $this->neg() : $this;
+        $euros = bcdiv($abs->amount, '1', 0);
+        $centimos = bcsub($abs->amount, $euros, 2);
+        if (bccomp($centimos, '0.50', 2) >= 0) {
+            $euros = bcadd($euros, '1', 0);
+        }
+        $redondeado = new self($euros . '.00');
+
+        return $negativo && !$redondeado->isZero() ? $redondeado->neg() : $redondeado;
+    }
+
+    /** Euros enteros en formato es-ES (1.234), ya redondeados. */
+    public function formatEnteroEs(): string
+    {
+        $entero = $this->redondearEuros();
+        $negativo = $entero->isNegative();
+        $euros = explode('.', $negativo ? $entero->neg()->toString() : $entero->toString())[0];
+        $grupos = preg_replace('/\B(?=(\d{3})+(?!\d))/', '.', $euros);
+
+        return ($negativo ? '-' : '') . ($grupos ?? $euros);
+    }
+
     private static function normalize(string $amount): string
     {
         $amount = str_replace(',', '.', trim($amount));

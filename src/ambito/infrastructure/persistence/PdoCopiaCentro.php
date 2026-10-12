@@ -149,7 +149,7 @@ final class PdoCopiaCentro
         if ((int) ($datos['version'] ?? 0) !== self::VERSION || ($datos['ambito'] ?? '') !== 'centro') {
             throw new InvalidArgumentException(_('La copia no es de un centro de este programa'));
         }
-        if ((int) ($datos['centro_id'] ?? 0) !== $centroId) {
+        if (!$this->esLaMismaEntidad($centroId, $datos)) {
             throw new InvalidArgumentException(_('Esta copia es de otro centro y no se puede restaurar aquí'));
         }
         $this->pdo->beginTransaction();
@@ -602,6 +602,24 @@ final class PdoCopiaCentro
         }
 
         return $id;
+    }
+
+    /**
+     * La sigla identifica el centro. El id numérico cambia si se vuelve a crear
+     * la entidad o se restaura en otra base.
+     *
+     * @param array<string, mixed> $datos
+     */
+    private function esLaMismaEntidad(int $centroId, array $datos): bool
+    {
+        $codigoCopia = strtolower(trim((string) ($datos['codigo'] ?? '')));
+        if ($codigoCopia !== '') {
+            $fila = $this->filaCentro($centroId);
+
+            return strtolower(trim((string) $fila['codigo'])) === $codigoCopia;
+        }
+
+        return (int) ($datos['centro_id'] ?? 0) === $centroId;
     }
 
     /** @return array<string, mixed> */

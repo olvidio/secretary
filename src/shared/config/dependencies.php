@@ -153,6 +153,7 @@ use src\presupuestos\application\GuardarPresupuesto;
 use src\presupuestos\application\GuardarPrevisionPersonal;
 use src\presupuestos\application\ObtenerPrevisionConsolidada;
 use src\presupuestos\application\ObtenerPrevisionPersonal;
+use src\presupuestos\application\PresentarPresupuesto613G;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
 use src\presupuestos\domain\contracts\PresupuestoSgRepository;
 use src\presupuestos\domain\contracts\PrevisionPersonalRepository;
@@ -543,6 +544,8 @@ return [
     ObtenerE37::class => autowire(),
     CalcularSaldos::class => autowire(),
     ObtenerSaldosTesoreria::class => autowire(),
+    PresentarPresupuesto613G::class => autowire()
+        ->constructorParameter('destinosSg', get(DestinoSgRepository::class)),
     GuardarPresupuesto::class => autowire(),
     GuardarArqueo::class => autowire(),
     ListarCuentasFisicas::class => autowire(),

@@ -42,6 +42,6 @@ En el libro P, las cifras se pueden generar primero en **Previsión personal** (
 - Ruta: `/presupuesto-g`
 - Menú: Presupuesto e informes → Presupuesto
 
-Un solo presupuesto, el del libro único, en hoja 613 G-D (ingresos, gastos, disponible, destinos y saldo final). Lo que se teclea es el importe anual; el 613 lo prorratea. Una casilla vacía cuenta como cero.
+Un solo presupuesto, el del libro único, en hoja 613 G-D (ingresos, gastos, disponible, destinos y saldo final). Lo que se teclea es el importe anual, en euros enteros: si se escribe con decimales, se redondea al euro más cercano. El 613 lo prorratea. Una casilla vacía cuenta como cero.
 
 Los destinos del 42 al 54 no salen en esta lista hasta que el centro les pone nombre en **Plan y ejercicio → Conceptos** («Destinos del centro»). El 41, Necesidades generales, es fijo. No hay presupuesto P ni «Aplicar al presupuesto P».

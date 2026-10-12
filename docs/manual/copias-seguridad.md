@@ -20,7 +20,7 @@ Permite guardar una copia de **este** centro o associació y volver a ella si al
 
 - La copia es solo de este centro: asientos y listados. Otro centro, aunque lo lleve el mismo usuario, tiene su propia lista y no se restaura con ésta.
 - Restaurar sustituye los asientos de este centro posteriores a la copia. Los demás centros no cambian.
-- Una copia de otro centro se rechaza: el fichero queda ligado a la sigla y al centro con el que se creó.
+- Una copia de otro centro se rechaza. El fichero queda ligado a la **sigla** con la que se creó. Si el centro se ha vuelto a dar de alta con la misma sigla, la copia entra aunque el número interno haya cambiado.
 - Conviene descargar de vez en cuando alguna copia y guardarla fuera del servidor: si se pierde la máquina, se pierden también las copias que solo estén allí.
 - La copia no incluye los ficheros de Excel: hay que archivarlos aparte.
 - Tampoco incluye la configuración del servidor, que es la que descifra los códigos del segundo factor. Al restaurar en otra máquina habrá que volver a configurarlo.
@@ -34,6 +34,7 @@ Permite guardar una copia de **este** centro o associació y volver a ella si al
 - **«El fichero debe ser una copia .sql o .dump»**: el fichero elegido no es una copia, o se ha comprimido. Hay que subirlo tal como se descargó.
 - **«La copia supera el tamaño máximo (256 MB)»**: hay que dejarla en el servidor y restaurarla desde el listado.
 - **«No existe el fichero de copia indicado»**: se ha borrado o cambiado de nombre. Recargar la pantalla.
+- **«Esta copia es de otro centro y no se puede restaurar aquí»**: la sigla del fichero no es la de este centro. Hay que restaurarla desde el centro con esa sigla.
 - **Avisa de comprobar el estado del programa**: la copia puede ser anterior a una actualización; que lo revise quien administra la instalación antes de seguir.
 
 ## Centro n
