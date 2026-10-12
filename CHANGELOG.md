@@ -10,6 +10,15 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.31] — 2026-10-12
+
+### Cambiado
+- **Centro sg, presupuesto**: los importes se anotan en euros enteros; si se escriben con decimales, se redondean al euro más cercano. En destinos salen el 41 y los del 42 al 54 que ya tienen nombre.
+- **Centro sg, 613 y fecha de cierre**: no aparece el enlace «Saldo banco». En ese centro solo hay caja.
+
+### Corregido
+- **Copia de centro**: se restaura si la sigla del fichero es la de este centro, aunque el número interno haya cambiado.
+
 ## [0.1.30] — 2026-10-09
 
 ### Añadido
