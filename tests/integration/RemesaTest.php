@@ -47,6 +47,10 @@ use src\remesas\application\RegistrarPlantillasDeRemesa;
 use src\remesas\application\ResolverMesRemesa;
 use src\remesas\application\PersonasRemesaDeIdentidad;
 use src\remesas\application\ResolverSolicitudDetalle;
+use src\mensajes\application\RefrescarBandejaDePersona;
+use src\mensajes\application\SincronizarBandeja;
+use src\mensajes\infrastructure\persistence\PdoMensajeRepository;
+use src\plan\infrastructure\persistence\PdoPartidaLaboresRepository;
 use src\remesas\application\SolicitarDetalleRemesa;
 use src\remesas\domain\services\MensajeRemesa;
 use src\remesas\infrastructure\persistence\PdoRemesaRepository;
@@ -259,6 +263,8 @@ final class RemesaTest extends TestCase
         self::assertContains('P/211', $codigos);
         self::assertContains('G/11', $codigos);
         self::assertContains('P/111', $codigos);
+        self::assertSame(1, count(array_filter($codigos, static fn (string $c): bool => $c === 'P/211')));
+        self::assertSame(0, count(array_filter($codigos, static fn (string $c): bool => $c === 'P/22')));
     }
 
     private function contarAsientosRemesa(): int
@@ -367,6 +373,22 @@ final class RemesaTest extends TestCase
             $asigRepo,
             $personas,
             new \src\ambito\application\AsegurarCuentaDisponiblePersona($cuentas),
+            new \src\disponible\application\ApuntarLaboresConsumidosRemesa(
+                $cuentas,
+                $asientos,
+                $personas,
+                new \src\ambito\application\AsegurarCuentaCorrientePersona($cuentas),
+            ),
+        );
+        $refrescarBandeja = new RefrescarBandejaDePersona(
+            $identidades,
+            new SincronizarBandeja(
+                $identidades,
+                $asigRepo,
+                new PdoPartidaLaboresRepository($this->pdo, new \src\plan\infrastructure\persistence\PdoPlanConceptoRepository($this->pdo)),
+                $remesas,
+                new PdoMensajeRepository($this->pdo),
+            ),
         );
 
         return [
@@ -410,6 +432,7 @@ final class RemesaTest extends TestCase
                 $gastosGenerales,
                 $this->plantillasDeRemesa($asientos, $conceptosRepo, $conceptos, $personas, $config, $cuentas, $ambitoCentro, $ejercicios),
                 $disponible,
+                $refrescarBandeja,
             ),
             'rechazar' => new RechazarRemesa($ambitoCentro, $remesas, $asientos, $disponible),
             'solicitar' => new SolicitarDetalleRemesa($ambitoCentro, $remesas, $scl->id),

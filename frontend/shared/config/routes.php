@@ -40,6 +40,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/admin/centros', [PageController::class, 'adminCentros']);
     $r->addRoute('GET', '/admin/usuarios', [PageController::class, 'adminUsuarios']);
     $r->addRoute('GET', '/admin/legal', [PageController::class, 'adminLegal']);
+    $r->addRoute('GET', '/admin/ayuda', [PageController::class, 'adminAyuda']);
     $r->addRoute('GET', '/admin/copias', [PageController::class, 'adminCopias']);
     $cuenta = [
         ['/mensajes', 'mensajes/view/lista.php', 'mensajes'],

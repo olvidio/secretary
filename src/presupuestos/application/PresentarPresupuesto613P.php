@@ -32,7 +32,7 @@ final class PresentarPresupuesto613P
 
         $prevIndex = [];
         foreach ($this->presupuesto->listarPorEjercicio('P', $ejercicioId) as $row) {
-            $prevIndex[(string) $row['concepto_codigo']] = Dinero::fromInput((string) ($row['previsto'] ?? '0'));
+            $prevIndex[(string) $row['concepto_codigo']] = Dinero::fromInput((string) ($row['previsto'] ?? '0'))->redondearEuros();
         }
 
         $lineas = [];
@@ -45,7 +45,7 @@ final class PresentarPresupuesto613P
                 'codigo' => $def['codigo'],
                 'etiqueta' => $def['etiqueta'],
                 'previsto' => $previsto->toString(),
-                'previsto_es' => $previsto->formatEs(),
+                'previsto_es' => $previsto->formatEnteroEs(),
                 'realizado' => '0.00',
                 'realizado_es' => '0,00',
                 'pct' => null,
@@ -68,7 +68,7 @@ final class PresentarPresupuesto613P
 
             return [
                 'previsto' => $prev->toString(),
-                'previsto_es' => $prev->formatEs(),
+                'previsto_es' => $prev->formatEnteroEs(),
                 'realizado' => '0.00',
                 'realizado_es' => '0,00',
                 'pct' => null,
@@ -100,7 +100,7 @@ final class PresentarPresupuesto613P
                 'gastos' => $gastos,
                 'disponible' => [
                     'previsto' => $dispPrev->toString(),
-                    'previsto_es' => $dispPrev->formatEs(),
+                    'previsto_es' => $dispPrev->formatEnteroEs(),
                     'realizado' => '0.00',
                     'realizado_es' => '0,00',
                 ],
@@ -108,13 +108,13 @@ final class PresentarPresupuesto613P
                 'labores' => $lab,
                 'saldo_final' => [
                     'previsto' => $saldoPrev->toString(),
-                    'previsto_es' => $saldoPrev->formatEs(),
+                    'previsto_es' => $saldoPrev->formatEnteroEs(),
                     'realizado' => '0.00',
                     'realizado_es' => '0,00',
                 ],
             ],
             'valores' => array_map(
-                static fn (Dinero $d): string => $d->formatEs(),
+                static fn (Dinero $d): string => $d->formatEnteroEs(),
                 $prevIndex,
             ),
         ];

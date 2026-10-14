@@ -18,7 +18,8 @@ final class VersiónDespliegue
     public function etiqueta(): string
     {
         $datos = $this->datosJson();
-        if ($datos !== null && ($datos['version'] ?? '') !== '') {
+        if ($datos !== null && ($datos['version'] ?? '') !== ''
+            && $this->versionJsonCorrespondeAlCheckout($datos)) {
             return (string) $datos['version'];
         }
 
@@ -84,6 +85,39 @@ final class VersiónDespliegue
         $out = [];
         $cmd = sprintf(
             'git -c safe.directory=%s describe --tags --always 2>/dev/null',
+            escapeshellarg($this->raízProyecto),
+        );
+        exec($cmd, $out, $code);
+        if ($code !== 0 || ($out[0] ?? '') === '') {
+            return null;
+        }
+
+        return (string) $out[0];
+    }
+
+    /** @param array{version?: string, fecha?: string, commit?: string} $datos */
+    private function versionJsonCorrespondeAlCheckout(array $datos): bool
+    {
+        $anotado = trim((string) ($datos['commit'] ?? ''));
+        if ($anotado === '') {
+            return !is_dir($this->raízProyecto . '/.git') || $this->gitHeadCorto() !== null;
+        }
+        $actual = $this->gitHeadCorto();
+        if ($actual === null) {
+            return false;
+        }
+
+        return str_starts_with($actual, $anotado) || str_starts_with($anotado, $actual);
+    }
+
+    private function gitHeadCorto(): ?string
+    {
+        if (!is_dir($this->raízProyecto . '/.git')) {
+            return null;
+        }
+        $out = [];
+        $cmd = sprintf(
+            'git -c safe.directory=%s rev-parse --short HEAD 2>/dev/null',
             escapeshellarg($this->raízProyecto),
         );
         exec($cmd, $out, $code);

@@ -78,6 +78,7 @@ final class ResponderPreguntaAyuda
             $pregunta,
             $pregunta->huella($version),
             $respuesta,
+            $ambito->codigo,
         );
 
         return $respuesta;

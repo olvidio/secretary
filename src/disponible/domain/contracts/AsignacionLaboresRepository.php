@@ -48,6 +48,14 @@ interface AsignacionLaboresRepository
     public function instruccionesPendientesDePersona(int $centroId, int $personaId): array;
 
     /**
+     * @return list<array{persona_id:int, lineas:list<array{codigo_maestro:string, importe_cents:int}>}>
+     */
+    public function instruccionesAbiertasDeCentro(int $centroId): array;
+
+    /** @return array{cents:int, ejercicio_id:int}|null */
+    public function descartarInstruccionesPendientes(int $centroId, int $personaId): ?array;
+
+    /**
      * Gastos 7 del ejercicio por persona (debe − haber).
      *
      * @return list<array{persona_id:int, codigo_maestro:string, cents:int}>

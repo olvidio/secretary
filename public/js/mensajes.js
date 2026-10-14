@@ -26,10 +26,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     li.innerHTML = '<p class="meta"><strong>' + esc(m.titulo || '') + '</strong>'
       + (fecha ? '<small>' + esc(fecha) + '</small>' : '') + '</p>'
       + '<p>' + esc(m.cuerpo || '') + '</p>'
-      + accion;
+      + accion
+      + '<p><button type="button" class="del" data-descartar="' + esc(String(m.id)) + '">'
+      + esc(typeof t === 'function' ? t('quitar') : 'Quitar') + '</button></p>';
     lista.appendChild(li);
   });
   lista.addEventListener('click', async (ev) => {
+    const btnDesc = ev.target.closest('button[data-descartar]');
+    if (btnDesc) {
+      ev.preventDefault();
+      const mid = parseInt(btnDesc.getAttribute('data-descartar') || '0', 10);
+      if (!mid || !confirm(typeof t === 'function' ? t('mensajes_quitar_confirm') : '¿Quitar este aviso?')) {
+        return;
+      }
+      const quitar = await api('/api/mensajes/' + mid + '/descartar', { method: 'POST', body: {} });
+      if (!quitar.ok) {
+        alert(quitar.error || (typeof t === 'function' ? t('error') : 'Error'));
+        return;
+      }
+      btnDesc.closest('li')?.remove();
+      if (lista.children.length === 0 && vacio) vacio.hidden = false;
+      if (typeof pintarAvisosMensajes === 'function') pintarAvisosMensajes();
+      return;
+    }
     const a = ev.target.closest('a[data-ir-yo]');
     if (!a || document.body.classList.contains('yo')) return;
     ev.preventDefault();

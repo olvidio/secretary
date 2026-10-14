@@ -391,6 +391,20 @@ final class PdoIdentidadRepository implements IdentidadRepository
         $st->execute([':p' => $personaId]);
     }
 
+    public function identidadesDePersona(int $personaId): array
+    {
+        $st = $this->pdo->prepare(
+            'SELECT identidad_id FROM identidad_persona WHERE persona_id = :p ORDER BY identidad_id'
+        );
+        $st->execute([':p' => $personaId]);
+        $out = [];
+        foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $id) {
+            $out[] = (int) $id;
+        }
+
+        return $out;
+    }
+
     public function identidadDePersona(int $personaId): ?Identidad
     {
         $st = $this->pdo->prepare(

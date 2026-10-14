@@ -6,6 +6,7 @@ namespace src\mensajes\infrastructure\http;
 
 use src\mensajes\application\ContarMensajesNoLeidos;
 use src\mensajes\application\ListarMensajes;
+use src\mensajes\application\DescartarMensaje;
 use src\mensajes\application\MarcarMensajesLeidos;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
@@ -17,6 +18,7 @@ final class MensajeController
         private readonly ListarMensajes $listar,
         private readonly ContarMensajesNoLeidos $contar,
         private readonly MarcarMensajesLeidos $marcar,
+        private readonly DescartarMensaje $descartar,
     ) {
     }
 
@@ -51,6 +53,22 @@ final class MensajeController
             $ids = [];
         }
         $this->marcar->ejecutar($id, array_map(static fn ($v): int => (int) $v, $ids));
+
+        return ContestarJson::ok();
+    }
+
+    public function descartarMensaje(Request $request, array $vars = []): Response
+    {
+        $id = $this->identidadId();
+        if ($id === null) {
+            return ContestarJson::error(_('Sesión caducada'), 401);
+        }
+        $mensajeId = isset($vars['id']) ? (int) $vars['id'] : 0;
+        try {
+            $this->descartar->ejecutar($id, $mensajeId);
+        } catch (\InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage(), 404);
+        }
 
         return ContestarJson::ok();
     }

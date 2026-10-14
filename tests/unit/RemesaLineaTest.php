@@ -27,4 +27,30 @@ final class RemesaLineaTest extends TestCase
         self::assertSame('Club', $out['detalle'][0]['plantillas'][0]['nombre']);
         self::assertSame('25,00', $out['detalle'][0]['plantillas'][0]['importe_es']);
     }
+
+    public function testImporteSinGeneralesRestaLoMarcadoComoGeneral(): void
+    {
+        $linea = new RemesaLinea(null, null, '211', 5000, [[
+            'codigo' => '211',
+            'nombre' => 'Vivienda general',
+            'cents' => 5000,
+            'generales' => [['concepto' => '208', 'cents' => 5000]],
+        ]]);
+        self::assertSame(0, $linea->importeCentsSinGenerales());
+
+        $mixta = new RemesaLinea(null, null, '22', 9000, [
+            [
+                'codigo' => '22',
+                'nombre' => 'Ordinarios',
+                'cents' => 4000,
+            ],
+            [
+                'codigo' => '22.gas',
+                'nombre' => 'Gas',
+                'cents' => 5000,
+                'generales' => [['concepto' => '208', 'cents' => 5000]],
+            ],
+        ]);
+        self::assertSame(4000, $mixta->importeCentsSinGenerales());
+    }
 }

@@ -44,6 +44,9 @@ $i18nJs = [
     'remesa_enviada_v' => _("Remesa enviada (v"),
     'disponible_actualizado' => _("Disponible actualizado"),
     'anotado_persona_remesa' => _("Anotado. La persona lo verá en Mensajes (menú de su nombre)."),
+    'instrucciones_persona_remesa' => _("Instrucciones registradas. La persona las verá en Mensajes y en Remesa hasta que las incluya en una remesa aceptada o se retiren."),
+    'instruccion_quitar_confirm' => _("¿Retirar esta instrucción? Vuelve el importe al disponible operativo y desaparece el aviso para la persona."),
+    'instruccion_retirada' => _("Instrucción retirada"),
     'apuntado_movimientos_apuntes' => _("Apuntado. Los movimientos aparecen en Apuntes."),
     'propuesta_borrador' => _("Borrador #"),
     'propuesta_revisar_7' => _(". Revisar y confirmar para apuntar las 7."),
@@ -56,6 +59,7 @@ $i18nJs = [
     'rol_modificar' => _("Puede modificar"),
     'rol_consulta' => _("Solo consulta"),
     'quitar' => _("Quitar"),
+    'mensajes_quitar_confirm' => _("¿Quitar este aviso de la lista?"),
     'quitar_usuario_centro_confirm' => _("¿Quitar el acceso de esta persona a este centro?"),
 ];
 ?>

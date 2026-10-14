@@ -1,7 +1,7 @@
 <?php $esCentroSg = !empty($esCentroSg); ?>
 <div class="informe-613-wrap presupuesto-613-wrap">
     <h1 class="print-hide"><?= _("Presupuesto G") ?></h1>
-    <p class="print-hide informe-613-ayuda"><?= _("Las celdas azules son editables (previsto anual). El 613 prorratea × meses / 12.") ?></p>
+    <p class="print-hide informe-613-ayuda"><?= _("Las celdas azules son editables (previsto anual, euros enteros). El 613 prorratea × meses / 12.") ?></p>
     <?php if ($esCentroSg): ?>
     <p class="print-hide muted"><?= _("Los destinos del 42 al 54 se nombran en") ?>
         <a href="/conceptos-g"><?= _("Conceptos") ?></a><?= _(", en Plan y ejercicio.") ?></p>

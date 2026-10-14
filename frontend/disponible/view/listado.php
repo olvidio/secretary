@@ -26,7 +26,18 @@
         <tbody></tbody>
     </table>
     <p>
-        <button type="button" id="btn-confirmar"><?= _("Confirmar y apuntar") ?></button>
+        <button type="button" id="btn-confirmar"><?= _("Confirmar instrucciones") ?></button>
     </p>
+</section>
+<section id="instrucciones-pendientes">
+    <h2><?= _("Instrucciones pendientes de remesa") ?></h2>
+    <p class="muted"><?= _("Lo que la persona debe ingresar en su libro y enviar en una remesa. No hay asiento en P del centro hasta aceptar esa remesa. Puede retirar la instrucción si ya no aplica (devuelve el disponible).") ?></p>
+    <p id="instr-vacio" class="muted" hidden><?= _("No hay instrucciones abiertas.") ?></p>
+    <table id="tabla-instrucciones" hidden>
+        <thead>
+        <tr><th><?= _("Persona") ?></th><th><?= _("Texto") ?></th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 </section>
 <script src="/js/disponible.js"></script>

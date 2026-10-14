@@ -1,6 +1,6 @@
 <div class="informe-613-wrap presupuesto-613-wrap">
     <h1 class="print-hide"><?= _("Presupuesto P") ?></h1>
-    <p class="print-hide informe-613-ayuda"><?= _("Las celdas azules son editables (previsto anual). El 613 prorratea × meses / 12.") ?></p>
+    <p class="print-hide informe-613-ayuda"><?= _("Las celdas azules son editables (previsto anual, euros enteros). El 613 prorratea × meses / 12.") ?></p>
     <p class="print-hide informe-613-acciones">
         <a href="/prevision-personal"><?= _("Previsión personal") ?></a>
         · <a href="/prevision"><?= _("Previsión") ?></a>

@@ -36,6 +36,25 @@ final class VersiónDespliegueTest extends TestCase
         @rmdir($directorio);
     }
 
+    public function testIgnoraVersionJsonDeOtroCommit(): void
+    {
+        $directorio = sys_get_temp_dir() . '/secretary-version-' . uniqid('', true);
+        mkdir($directorio . '/var', 0775, true);
+        file_put_contents(
+            $directorio . '/var/version.json',
+            json_encode(['version' => 'v0.1.27', 'commit' => 'deadbeef'], JSON_THROW_ON_ERROR),
+        );
+        file_put_contents($directorio . '/VERSION', "v0.1.31\n");
+
+        $servicio = new VersiónDespliegue($directorio);
+        self::assertSame('v0.1.31', $servicio->etiqueta());
+
+        @unlink($directorio . '/var/version.json');
+        @unlink($directorio . '/VERSION');
+        @rmdir($directorio . '/var');
+        @rmdir($directorio);
+    }
+
     public function testSinFuentesDevuelveDesarrollo(): void
     {
         $directorio = sys_get_temp_dir() . '/secretary-version-' . uniqid('', true);

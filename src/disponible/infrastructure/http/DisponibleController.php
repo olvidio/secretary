@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace src\disponible\infrastructure\http;
 
 use InvalidArgumentException;
+use src\ambito\application\ResolverAmbitoActual;
 use src\disponible\application\AjustarDisponible;
+use src\disponible\application\CancelarInstruccionesDestinos7;
 use src\disponible\application\ConfirmarAsignacionLabores;
+use src\disponible\application\ListarInstruccionesDestinos7Pendientes;
 use src\disponible\application\GuardarTramosDesgravacion;
 use src\disponible\application\ListarAsignacionesPersona;
 use src\disponible\application\ListarDisponibles;
@@ -26,6 +29,9 @@ final class DisponibleController
         private readonly ObtenerTramosDesgravacion $obtenerTramos,
         private readonly GuardarTramosDesgravacion $guardarTramos,
         private readonly ListarAsignacionesPersona $asignacionesPersona,
+        private readonly ListarInstruccionesDestinos7Pendientes $instruccionesPendientes,
+        private readonly CancelarInstruccionesDestinos7 $cancelarInstrucciones,
+        private readonly ResolverAmbitoActual $ambito,
     ) {
     }
 
@@ -78,5 +84,29 @@ final class DisponibleController
     public function yoAsignaciones(Request $request, array $vars = []): Response
     {
         return ContestarJson::ok($this->asignacionesPersona->ejecutar());
+    }
+
+    public function instruccionesPendientes(Request $request, array $vars = []): Response
+    {
+        return ContestarJson::ok(['instrucciones' => $this->instruccionesPendientes->ejecutar()]);
+    }
+
+    public function descartarInstruccion(Request $request, array $vars = []): Response
+    {
+        try {
+            $personaId = (int) $request->input('persona_id', 0);
+            $centroId = (int) $request->input('centro_id', 0);
+            if ($personaId <= 0) {
+                throw new InvalidArgumentException(_('Persona no válida'));
+            }
+            if ($centroId <= 0) {
+                $centroId = $this->ambito->ejecutar()->centroId;
+            }
+            $this->cancelarInstrucciones->ejecutar($centroId, $personaId);
+
+            return ContestarJson::ok();
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
     }
 }

@@ -26,6 +26,7 @@ final class ConstructorAsientoAsignacion
         int $cuenta111Id,
         array $lineas,
         string $glosa,
+        ?int $remesaId = null,
     ): ?Asiento {
         if ($cuenta111Id <= 0) {
             throw new InvalidArgumentException('Falta la cuenta 111 del plan P');
@@ -60,7 +61,7 @@ final class ConstructorAsientoAsignacion
             null,
             null,
             $fecha,
-            null,
+            $remesaId,
         );
     }
 }

@@ -20,6 +20,7 @@ final class ConstructorAsientoLiquidacionCc
         int $ccId,
         int $totalCents,
         string $glosa,
+        ?int $remesaId = null,
     ): ?Asiento {
         if ($totalCents <= 0) {
             return null;
@@ -45,7 +46,7 @@ final class ConstructorAsientoLiquidacionCc
             null,
             null,
             $fecha,
-            null,
+            $remesaId,
         );
     }
 }

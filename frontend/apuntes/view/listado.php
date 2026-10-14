@@ -360,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <select name="cuenta"><option value=""><?= _("P y G") ?></option><option>P</option><option>G</option></select>
     <select name="origen"><option value="">A/B/C</option><option>A</option><option>B</option><option>C</option></select>
     <select name="iniciales"><option value=""><?= _("Iniciales") ?></option></select>
-    <input name="concepto" placeholder="<?= htmlspecialchars(_("Concepto"), ENT_QUOTES) ?>">
+    <select name="concepto"><option value=""><?= _("Todos") ?></option></select>
     <input type="date" name="desde">
     <input type="date" name="hasta">
     <button type="submit"><?= _("Filtrar") ?></button>
@@ -758,9 +758,44 @@ async function cargarPersonasFiltro(form) {
   });
 }
 
+async function cargarConceptosFiltro(form) {
+  const sel = form.querySelector('[name=concepto]');
+  const prev = sel.value;
+  const vacioLabel = sel.querySelector('option[value=""]')?.textContent || '';
+  const cuenta = (form.querySelector('[name=cuenta]')?.value || '').trim();
+  const peticiones = [];
+  if (!cuenta || cuenta === 'P') peticiones.push(api('/api/conceptos?cuenta=P'));
+  if (!cuenta || cuenta === 'G') peticiones.push(api('/api/conceptos?cuenta=G'));
+  const respuestas = await Promise.all(peticiones);
+  for (const r of respuestas) {
+    if (!r.ok) return alert(r.error || I18N_APUNTES.error);
+  }
+  const porCodigo = new Map();
+  respuestas.forEach((r) => {
+    (r.conceptos || []).forEach((c) => {
+      porCodigo.set(c.codigo, c.etiqueta || (c.codigo + ' ' + (c.nombre || '')));
+    });
+  });
+  const codigos = [...porCodigo.keys()].sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+  sel.replaceChildren();
+  const vacio = document.createElement('option');
+  vacio.value = '';
+  vacio.textContent = vacioLabel;
+  sel.appendChild(vacio);
+  codigos.forEach((cod) => {
+    const o = document.createElement('option');
+    o.value = cod;
+    o.textContent = porCodigo.get(cod);
+    sel.appendChild(o);
+  });
+  if (prev && codigos.includes(prev)) sel.value = prev;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('filtros');
   await cargarPersonasFiltro(form);
+  await cargarConceptosFiltro(form);
+  form.querySelector('[name=cuenta]')?.addEventListener('change', () => cargarConceptosFiltro(form));
   aplicarFiltrosUrl(form);
   mostrarVolver();
   form.onsubmit = (ev) => {

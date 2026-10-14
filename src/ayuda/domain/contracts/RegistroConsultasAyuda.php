@@ -6,6 +6,7 @@ namespace src\ayuda\domain\contracts;
 
 use DateTimeImmutable;
 use src\ayuda\domain\value_objects\PreguntaAyuda;
+use src\ayuda\domain\value_objects\PreguntaAyudaPendiente;
 use src\ayuda\domain\value_objects\RespuestaAyuda;
 
 interface RegistroConsultasAyuda
@@ -18,8 +19,13 @@ interface RegistroConsultasAyuda
         PreguntaAyuda $pregunta,
         string $huella,
         RespuestaAyuda $respuesta,
+        ?string $ambitoCodigo = null,
     ): void;
 
     /** Consultas que han llegado al modelo desde esa fecha (para el límite diario). */
     public function consultasAlModeloDesde(?int $identidadId, DateTimeImmutable $desde): int;
+
+    /** Preguntas distintas que la IA no pudo contestar (origen ia, resuelta false). */
+    /** @return list<PreguntaAyudaPendiente> */
+    public function listarPendientes(): array;
 }

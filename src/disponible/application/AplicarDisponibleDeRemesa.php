@@ -24,6 +24,7 @@ final class AplicarDisponibleDeRemesa
         private readonly AsignacionLaboresRepository $asignaciones,
         private readonly PersonaRepository $personas,
         private readonly AsegurarCuentaDisponiblePersona $asegurarDisp,
+        private readonly ApuntarLaboresConsumidosRemesa $apuntarLabores,
     ) {
     }
 
@@ -31,11 +32,12 @@ final class AplicarDisponibleDeRemesa
      * @param list<array{cuenta_id:int, tipo:string, importe_cents:int, codigo_maestro:string}> $lineasAsiento
      * @return list<array{cuenta_id:int, tipo:string, importe_cents:int, codigo_maestro:string}>
      */
-    public function filtrarLineas(Remesa $remesa, array $lineasAsiento): array
+    public function filtrarLineas(Remesa $remesa, array $lineasAsiento, DateTimeImmutable $fecha): array
     {
         $pendientes = $this->asignaciones->pendientesConfirmadosDePersona($remesa->centroId, $remesa->personaId);
         $aplicado = ConsumidorAsignacionesRemesa::aplicar($lineasAsiento, $pendientes);
-        if ($remesa->id !== null) {
+        if ($remesa->id !== null && $aplicado['consumos'] !== []) {
+            $this->apuntarLabores->ejecutar($remesa, $fecha, $aplicado['consumos'], $pendientes);
             $this->asignaciones->registrarConsumos((int) $remesa->id, $aplicado['consumos']);
         }
 

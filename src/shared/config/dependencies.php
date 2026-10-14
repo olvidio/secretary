@@ -22,6 +22,7 @@ use src\administracion\application\ResumenEliminacionUsuario;
 use src\administracion\application\GuardarPlanContable;
 use src\administracion\infrastructure\http\AdminCentroController;
 use src\administracion\infrastructure\http\AdminPlanController;
+use src\administracion\infrastructure\http\AdminAyudaController;
 use src\administracion\infrastructure\http\AdminLegalController;
 use src\administracion\infrastructure\http\AdminUsuarioController;
 use src\ambito\application\CrearCentro;
@@ -92,12 +93,14 @@ use src\apuntes\infrastructure\persistence\PdoCentroBancoRepository;
 use src\apuntes\infrastructure\persistence\PdoEntradaPeriodicaRepository;
 use src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository;
 use src\arqueo\application\BuscarCapuchinos;
+use src\ayuda\application\ListarPreguntasAyudaPendientes;
 use src\ayuda\application\ListarTemasAyuda;
 use src\ayuda\application\ResponderPreguntaAyuda;
 use src\ayuda\domain\contracts\RegistroConsultasAyuda;
 use src\ayuda\domain\contracts\RepositorioDocumentacion;
 use src\ayuda\domain\services\BuscadorDocumentacion;
 use src\ayuda\domain\services\ConstructorPromptAyuda;
+use src\ayuda\domain\services\FormateadorPreguntasAyudaPendientes;
 use src\ayuda\domain\services\InterpreteRespuestaIA;
 use src\ayuda\infrastructure\http\AyudaController;
 use src\ayuda\infrastructure\llm\ClienteChatCompatibleOpenAI;
@@ -345,6 +348,7 @@ return [
         \src\acceso\domain\contracts\IdentidadRepository $identidades,
         \src\disponible\domain\contracts\AsignacionLaboresRepository $asignaciones,
         \src\plan\domain\contracts\PartidaLaboresRepository $partidas,
+        \src\mensajes\application\SincronizarBandeja $sincronizarBandeja,
     ): \src\disponible\application\ListarAsignacionesPersona {
         $identidadId = !empty($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : null;
 
@@ -352,6 +356,7 @@ return [
             $identidades,
             $asignaciones,
             $partidas,
+            $sincronizarBandeja,
             $identidadId,
         );
     }),
@@ -532,6 +537,9 @@ return [
     src\administracion\application\AdminReiniciarTotpUsuario::class => autowire(),
     AdminUsuarioController::class => autowire(),
     AdminLegalController::class => autowire(),
+    AdminAyudaController::class => autowire(),
+    ListarPreguntasAyudaPendientes::class => autowire(),
+    FormateadorPreguntasAyudaPendientes::class => autowire(),
     EstadisticasSg::class => autowire(PdoEstadisticasSg::class),
     RealizadoPorConceptoCentroSg::class => autowire(),
     ObtenerResumen613::class => autowire()

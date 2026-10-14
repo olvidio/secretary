@@ -81,16 +81,14 @@ Todo en `ayuda_consultas` (migración `0029_ayuda_ia.sql`):
 - **Límite:** `AYUDA_IA_LIMITE_DIARIO` consultas al modelo por usuario y día.
   Imprescindible si el servidor está en internet: sin él, cualquiera con cuenta
   puede agotar la cuota o la factura.
-- **Registro:** las filas con `resuelta = false` son la lista de tareas del
-  manual. Son preguntas reales que el manual no sabe contestar:
-
-  ```sql
-  SELECT pregunta, COUNT(*) FROM ayuda_consultas
-   WHERE NOT resuelta GROUP BY pregunta ORDER BY 2 DESC;
-  ```
+- **Registro:** las filas con `resuelta = false` y `origen = 'ia'` son la lista
+  de tareas del manual. Se exportan desde **Administración → Manual / ayuda**
+  (`/admin/ayuda`) en Markdown o JSON. Flujo completo:
+  `docs/dev/ayuda_pendientes_manual.md`.
 
 Solo se guardan las consultas que han llegado al modelo. Las respuestas
-reutilizadas no cuentan para el límite.
+reutilizadas no cuentan para el límite. Cada fila guarda también `ambito`
+(centro-n, persona, etc.) para priorizar ampliaciones.
 
 ## Degradación
 

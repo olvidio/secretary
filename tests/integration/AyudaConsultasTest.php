@@ -111,6 +111,52 @@ final class AyudaConsultasTest extends TestCase
         self::assertSame(0, $this->registro->consultasAlModeloDesde(12345, $desde));
     }
 
+    public function testListarPendientesAgrupaPorPregunta(): void
+    {
+        $sin = RespuestaAyuda::sinRespuesta(OrigenRespuesta::Ia);
+        $this->registro->guardar(
+            null,
+            new PreguntaAyuda('¿Dónde está X?'),
+            'huella-p1',
+            $sin,
+            'centro-n',
+        );
+        $this->registro->guardar(
+            null,
+            new PreguntaAyuda('¿Dónde está X?'),
+            'huella-p2',
+            $sin,
+            'centro-n',
+        );
+
+        $lista = $this->registro->listarPendientes();
+        self::assertCount(1, $lista);
+        self::assertSame('¿Dónde está X?', $lista[0]->pregunta);
+        self::assertSame(2, $lista[0]->veces);
+        self::assertSame(['centro-n'], $lista[0]->ambitos);
+    }
+
+    public function testListarPendientesIncluyeConsultante(): void
+    {
+        $sin = RespuestaAyuda::sinRespuesta(OrigenRespuesta::Ia);
+        $this->pdo->exec(
+            "INSERT INTO identidades (email, alias, password_hash, nombre)
+             VALUES ('ayuda@test.local', 'ayudante', 'x', 'Ana Ayuda')"
+        );
+        $id = (int) $this->pdo->lastInsertId('identidades_id_seq');
+        $this->registro->guardar(
+            $id,
+            new PreguntaAyuda('¿Quién soy?'),
+            'huella-q',
+            $sin,
+            'persona',
+        );
+        $lista = $this->registro->listarPendientes();
+        self::assertCount(1, $lista);
+        self::assertCount(1, $lista[0]->consultantes);
+        self::assertSame('ayudante · ayuda@test.local', $lista[0]->consultantes[0]->etiqueta());
+    }
+
     public function testNoCuentanLasConsultasAntiguas(): void
     {
         $this->registro->guardar(

@@ -203,6 +203,7 @@ final class RegistroDeAyudaEnMemoria implements RegistroConsultasAyuda
         PreguntaAyuda $pregunta,
         string $huella,
         RespuestaAyuda $respuesta,
+        ?string $ambitoCodigo = null,
     ): void {
         $this->preguntasGuardadas[] = $pregunta->texto;
     }
@@ -210,6 +211,11 @@ final class RegistroDeAyudaEnMemoria implements RegistroConsultasAyuda
     public function consultasAlModeloDesde(?int $identidadId, DateTimeImmutable $desde): int
     {
         return $this->consultasPrevias;
+    }
+
+    public function listarPendientes(): array
+    {
+        return [];
     }
 }
 

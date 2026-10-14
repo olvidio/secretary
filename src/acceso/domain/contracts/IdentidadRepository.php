@@ -92,6 +92,9 @@ interface IdentidadRepository
 
     public function identidadDePersona(int $personaId): ?Identidad;
 
+    /** @return list<int> */
+    public function identidadesDePersona(int $personaId): array;
+
     /**
      * @return list<array{id:int, email:string, alias:?string, nombre:string, rol:string}>
      */

@@ -10,6 +10,22 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.32] — 2026-10-14
+
+### Añadido
+- **Administración → Manual / ayuda**: listado y export (Markdown/JSON) de preguntas que la IA no pudo contestar, con **quién** las hizo; comando `ayuda:pendientes-export` (migración 0082).
+- **Disponible**: bloque **Instrucciones pendientes de remesa**; el secretario puede **Quitar** una instrucción (devuelve el disponible).
+- **Mensajes**: botón **Quitar** en avisos de detalle de remesa; en destinos 7 retira la instrucción pendiente (migraciones 0083–0084).
+
+### Cambiado
+- **Destinos 7**: al **Confirmar instrucciones** ya no se apunta en P del centro; queda pendiente hasta **aceptar** una remesa con esas partidas 7 (entonces se apuntan 7 y liquidación c/c). Mismo efecto al **Quitar** desde Mensajes o Disponible (desaparece también el texto en Remesa).
+- **Presupuesto P y G** (centro-n): importes en **euros enteros** al elaborar y guardar.
+- **Apuntes** (centro-n): filtro de concepto como desplegable con opción «Todos».
+- **Versión en el pie**: si `var/version.json` es de otro commit (típico en local), se usa el fichero `VERSION` del repo.
+
+### Corregido
+- **Remesa**: al aceptar, no se duplicaba el importe en P cuando una línea llevaba gasto general (p. ej. G/208) desglosado en el detalle.
+
 ## [0.1.31] — 2026-10-12
 
 ### Cambiado

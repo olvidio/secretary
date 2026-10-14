@@ -8,6 +8,7 @@ use RuntimeException;
 use src\acceso\domain\contracts\IdentidadRepository;
 use src\disponible\domain\contracts\AsignacionLaboresRepository;
 use src\disponible\domain\services\RepartidorLabores;
+use src\mensajes\application\SincronizarBandeja;
 use src\plan\domain\contracts\PartidaLaboresRepository;
 
 /**
@@ -20,6 +21,7 @@ final class ListarAsignacionesPersona
         private readonly IdentidadRepository $identidades,
         private readonly AsignacionLaboresRepository $asignaciones,
         private readonly PartidaLaboresRepository $partidas,
+        private readonly SincronizarBandeja $sincronizarBandeja,
         private readonly ?int $identidadId,
     ) {
     }
@@ -30,6 +32,7 @@ final class ListarAsignacionesPersona
         if ($this->identidadId === null) {
             throw new RuntimeException(_("Sesión de persona incompleta"));
         }
+        $this->sincronizarBandeja->ejecutar($this->identidadId);
         $filas = [];
         $lineas = [];
         $etiquetasPorCentro = [];

@@ -16,6 +16,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (msg) err.hidden = true;
   }
 
+  async function cargarInstrucciones() {
+    const tbI = document.querySelector('#tabla-instrucciones tbody');
+    const vacI = document.getElementById('instr-vacio');
+    const tbl = document.getElementById('tabla-instrucciones');
+    if (!tbI) return;
+    const r = await api('/api/disponible/instrucciones-pendientes');
+    tbI.innerHTML = '';
+    const lista = r.ok ? (r.instrucciones || []) : [];
+    if (vacI) vacI.hidden = lista.length > 0;
+    if (tbl) tbl.hidden = lista.length === 0;
+    lista.forEach((ins) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + esc((ins.iniciales || '') + ' · ' + (ins.nombre || '')) + '</td>'
+        + '<td>' + esc(ins.texto || '') + '</td>'
+        + '<td><button type="button" class="del">' + esc(t('quitar')) + '</button></td>';
+      tr.querySelector('button').onclick = async () => {
+        if (!confirm(t('instruccion_quitar_confirm'))) return;
+        const q = await api('/api/disponible/instrucciones-pendientes/descartar', {
+          method: 'POST',
+          body: { persona_id: ins.persona_id },
+        });
+        if (!q.ok) return alert(q.error || t('error'));
+        mostrarOk(t('instruccion_retirada'));
+        cargar();
+        cargarInstrucciones();
+      };
+      tbI.appendChild(tr);
+    });
+  }
+
   async function cargar() {
     mostrarError('');
     const r = await api('/api/disponible');
@@ -43,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       tb.appendChild(tr);
     });
+    cargarInstrucciones();
   }
 
   document.getElementById('btn-proponer').onclick = async () => {
@@ -81,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
       mostrarError(r.error || t('no_se_pudo_confirmar'));
       return;
     }
-    mostrarOk(t('anotado_persona_remesa'));
+    mostrarOk(t('instrucciones_persona_remesa'));
     asignacionId = null;
     propuesta.hidden = true;
     cargar();

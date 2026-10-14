@@ -363,6 +363,18 @@ if ($cmd === 'db:restore') {
     exit(0);
 }
 
+if ($cmd === 'ayuda:pendientes-export') {
+    $formato = 'md';
+    foreach (array_slice($argv, 2) as $arg) {
+        if (is_string($arg) && str_starts_with($arg, '--formato=')) {
+            $formato = strtolower(substr($arg, strlen('--formato=')));
+        }
+    }
+    $caso = $kernel->container()->get(\src\ayuda\application\ListarPreguntasAyudaPendientes::class);
+    fwrite(STDOUT, $formato === 'json' ? $caso->exportarJson() : $caso->comoMarkdown());
+    exit(0);
+}
+
 fwrite(STDOUT, "Uso:\n"
     . "  php bin/console.php db:migrate\n"
     . "  php bin/console.php db:status\n"
@@ -375,5 +387,6 @@ fwrite(STDOUT, "Uso:\n"
     . "  php bin/console.php cuentas:duplicados-correo\n"
     . "  php bin/console.php cuentas:fusionar-correo --email=... --principal=ID [--confirmar]\n"
     . "  php bin/console.php cuentas:purga-bajas-centro\n"
-    . "  php bin/console.php sg:reparar-traspasos [--centro=CODIGO] [--execute]\n");
+    . "  php bin/console.php sg:reparar-traspasos [--centro=CODIGO] [--execute]\n"
+    . "  php bin/console.php ayuda:pendientes-export [--formato=md|json]\n");
 exit(1);

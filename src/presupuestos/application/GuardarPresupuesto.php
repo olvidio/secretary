@@ -40,9 +40,7 @@ final class GuardarPresupuesto
                 continue;
             }
             $imp = $previsto === '' || $previsto === null ? Dinero::zero() : Dinero::fromInput((string) $previsto);
-            if ($propio) {
-                $imp = $imp->redondearEuros();
-            }
+            $imp = $imp->redondearEuros();
             $linea = new LineaPresupuesto($cuenta, $codigo, $imp);
             if ($propio) {
                 $this->presupuestoSg->guardar($centroId, $ejercicioId, $linea);

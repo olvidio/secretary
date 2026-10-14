@@ -146,7 +146,7 @@ final class PdoAsignacionLaboresRepository implements AsignacionLaboresRepositor
              FROM asignaciones_labores_lineas l
              INNER JOIN asignaciones_labores a ON a.id = l.asignacion_id
              WHERE a.centro_id = :c AND a.estado = 'confirmada'
-               AND l.persona_id = :p AND l.pendiente_cents > 0
+               AND l.persona_id = :p AND l.pendiente_cents > 0 AND l.descartado_at IS NULL
              ORDER BY a.id, l.codigo_maestro"
         );
         $st->execute([':c' => $centroId, ':p' => $personaId]);
@@ -167,6 +167,70 @@ final class PdoAsignacionLaboresRepository implements AsignacionLaboresRepositor
         return $out;
     }
 
+    public function instruccionesAbiertasDeCentro(int $centroId): array
+    {
+        $st = $this->pdo->prepare(
+            "SELECT l.persona_id, l.codigo_maestro, l.pendiente_cents
+             FROM asignaciones_labores_lineas l
+             INNER JOIN asignaciones_labores a ON a.id = l.asignacion_id
+             WHERE a.centro_id = :c AND a.estado = 'confirmada'
+               AND l.pendiente_cents > 0 AND l.descartado_at IS NULL
+             ORDER BY l.persona_id, l.codigo_maestro"
+        );
+        $st->execute([':c' => $centroId]);
+        $porPersona = [];
+        foreach ($st->fetchAll() as $row) {
+            $pid = (int) $row['persona_id'];
+            $cod = (string) $row['codigo_maestro'];
+            $cents = (int) $row['pendiente_cents'];
+            if (!isset($porPersona[$pid])) {
+                $porPersona[$pid] = [];
+            }
+            $porPersona[$pid][$cod] = ($porPersona[$pid][$cod] ?? 0) + $cents;
+        }
+        $out = [];
+        foreach ($porPersona as $personaId => $codigos) {
+            $lineas = [];
+            foreach ($codigos as $cod => $cents) {
+                $lineas[] = ['codigo_maestro' => $cod, 'importe_cents' => $cents];
+            }
+            $out[] = ['persona_id' => $personaId, 'lineas' => $lineas];
+        }
+
+        return $out;
+    }
+
+    public function descartarInstruccionesPendientes(int $centroId, int $personaId): ?array
+    {
+        $st = $this->pdo->prepare(
+            "SELECT COALESCE(SUM(l.pendiente_cents), 0)::int AS total, MIN(a.ejercicio_id)::int AS ejercicio_id
+             FROM asignaciones_labores_lineas l
+             INNER JOIN asignaciones_labores a ON a.id = l.asignacion_id
+             WHERE a.centro_id = :c AND a.estado = 'confirmada'
+               AND l.persona_id = :p AND l.pendiente_cents > 0 AND l.descartado_at IS NULL"
+        );
+        $st->execute([':c' => $centroId, ':p' => $personaId]);
+        $row = $st->fetch();
+        if (!is_array($row)) {
+            return null;
+        }
+        $total = (int) $row['total'];
+        $ejercicioId = (int) ($row['ejercicio_id'] ?? 0);
+        if ($total <= 0 || $ejercicioId <= 0) {
+            return null;
+        }
+        $this->pdo->prepare(
+            "UPDATE asignaciones_labores_lineas l
+                SET pendiente_cents = 0, descartado_at = now()
+               FROM asignaciones_labores a
+              WHERE l.asignacion_id = a.id
+                AND a.centro_id = :c AND a.estado = 'confirmada'
+                AND l.persona_id = :p AND l.pendiente_cents > 0 AND l.descartado_at IS NULL"
+        )->execute([':c' => $centroId, ':p' => $personaId]);
+
+        return ['cents' => $total, 'ejercicio_id' => $ejercicioId];
+    }
+
     /**
      * @return list<array{id:int, codigo_maestro:string, pendiente_cents:int, importe_cents:int, asignacion_id:int}>
      */
@@ -175,7 +239,8 @@ final class PdoAsignacionLaboresRepository implements AsignacionLaboresRepositor
         $sql = 'SELECT l.id, l.codigo_maestro, l.pendiente_cents, l.importe_cents, l.asignacion_id
                 FROM asignaciones_labores_lineas l
                 INNER JOIN asignaciones_labores a ON a.id = l.asignacion_id
-                WHERE a.centro_id = :c AND l.persona_id = :p AND l.pendiente_cents > 0';
+                WHERE a.centro_id = :c AND l.persona_id = :p AND l.pendiente_cents > 0
+                  AND l.descartado_at IS NULL';
         $params = [':c' => $centroId, ':p' => $personaId];
         if ($estado !== null) {
             $sql .= ' AND a.estado = :e';

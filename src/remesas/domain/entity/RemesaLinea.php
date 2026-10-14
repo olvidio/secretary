@@ -27,6 +27,22 @@ final class RemesaLinea
     ) {
     }
 
+    /** Importe que va al asiento P de remesa; lo marcado como generales se contabiliza aparte (P/211, G/11, G…). */
+    public function importeCentsSinGenerales(): int
+    {
+        $generales = 0;
+        foreach ($this->detalle as $item) {
+            foreach ($item['generales'] ?? [] as $gen) {
+                if (!is_array($gen)) {
+                    continue;
+                }
+                $generales += abs((int) ($gen['cents'] ?? 0));
+            }
+        }
+
+        return max(0, $this->importeCents - $generales);
+    }
+
     /** @return array<string, mixed> */
     public function toArray(): array
     {

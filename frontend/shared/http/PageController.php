@@ -588,6 +588,11 @@ final class PageController
         return $this->paginaAdmin('admin/view/legal.php', 'admin-legal');
     }
 
+    public function adminAyuda(Request $request, array $vars = []): Response
+    {
+        return $this->paginaAdmin('admin/view/ayuda.php', 'admin-ayuda');
+    }
+
     public function adminCopias(Request $request, array $vars = []): Response
     {
         return $this->paginaAdmin('admin/view/copias.php', 'admin-copias');

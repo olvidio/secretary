@@ -37,12 +37,11 @@ final class PresentarPresupuesto613G
 
         $prevIndex = [];
         foreach ($this->presupuesto->listarPorEjercicio('G', $ejercicioId) as $row) {
-            $importe = Dinero::fromInput((string) ($row['previsto'] ?? '0'));
-            $prevIndex[(string) $row['concepto_codigo']] = $esCentroSg ? $importe->redondearEuros() : $importe;
+            $prevIndex[(string) $row['concepto_codigo']] = Dinero::fromInput((string) ($row['previsto'] ?? '0'))->redondearEuros();
         }
 
-        $fmt = static fn (Dinero $d): string => $esCentroSg ? $d->formatEnteroEs() : $d->formatEs();
-        $ceroEs = $esCentroSg ? '0' : '0,00';
+        $fmt = static fn (Dinero $d): string => $d->formatEnteroEs();
+        $ceroEs = '0';
 
         $lineas = [];
         foreach ($defs as $def) {

@@ -20,18 +20,30 @@ final class PdoMensajeRepository implements MensajeRepository
              VALUES (:i, :k, :t, CAST(:p AS jsonb))
              ON CONFLICT (identidad_id, clave) DO UPDATE SET
                tipo = EXCLUDED.tipo,
+               descartado_manual = CASE
+                 WHEN mensajes.payload IS DISTINCT FROM EXCLUDED.payload THEN FALSE
+                 ELSE mensajes.descartado_manual
+               END,
                leido_at = CASE
+                 WHEN mensajes.payload IS DISTINCT FROM EXCLUDED.payload THEN NULL
+                 WHEN mensajes.descartado_manual THEN mensajes.leido_at
                  WHEN mensajes.payload = EXCLUDED.payload AND mensajes.cerrado_at IS NULL
                    THEN mensajes.leido_at
                  ELSE NULL
                END,
                creado_at = CASE
+                 WHEN mensajes.payload IS DISTINCT FROM EXCLUDED.payload THEN now()
+                 WHEN mensajes.descartado_manual THEN mensajes.creado_at
                  WHEN mensajes.payload = EXCLUDED.payload AND mensajes.cerrado_at IS NULL
                    THEN mensajes.creado_at
                  ELSE now()
                END,
                payload = EXCLUDED.payload,
-               cerrado_at = NULL'
+               cerrado_at = CASE
+                 WHEN mensajes.payload IS DISTINCT FROM EXCLUDED.payload THEN NULL
+                 WHEN mensajes.descartado_manual THEN mensajes.cerrado_at
+                 ELSE NULL
+               END'
         )->execute([
             ':i' => $identidadId,
             ':k' => $clave,
@@ -42,7 +54,7 @@ final class PdoMensajeRepository implements MensajeRepository
 
     public function cerrarSalvo(int $identidadId, array $clavesVivas): void
     {
-        $sql = "UPDATE mensajes SET cerrado_at = now()
+        $sql = "UPDATE mensajes SET cerrado_at = now(), descartado_manual = FALSE
                 WHERE identidad_id = :i AND cerrado_at IS NULL
                   AND tipo IN ('destinos_7', 'remesa_detalle')";
         $params = [':i' => $identidadId];
@@ -112,5 +124,35 @@ final class PdoMensajeRepository implements MensajeRepository
             'UPDATE mensajes SET leido_at = now()
              WHERE identidad_id = :i AND leido_at IS NULL AND id IN (' . implode(', ', $marcas) . ')'
         )->execute($params);
+    }
+
+    public function descartar(int $identidadId, int $id): bool
+    {
+        $st = $this->pdo->prepare(
+            'UPDATE mensajes
+                SET cerrado_at = now(), descartado_manual = TRUE
+              WHERE id = :id AND identidad_id = :i AND cerrado_at IS NULL'
+        );
+        $st->execute([':id' => $id, ':i' => $identidadId]);
+
+        return $st->rowCount() > 0;
+    }
+
+    public function porId(int $identidadId, int $id): ?array
+    {
+        $st = $this->pdo->prepare(
+            'SELECT id, clave, tipo FROM mensajes WHERE id = :id AND identidad_id = :i LIMIT 1'
+        );
+        $st->execute([':id' => $id, ':i' => $identidadId]);
+        $row = $st->fetch();
+        if (!is_array($row)) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $row['id'],
+            'clave' => (string) $row['clave'],
+            'tipo' => (string) $row['tipo'],
+        ];
     }
 }

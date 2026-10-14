@@ -16,7 +16,7 @@ La bolita roja del nombre y de la entrada Mensajes indica cuántos hay sin leer.
 1. Pulsar el nombre de la esquina. Si hay avisos nuevos, se ve un número en rojo.
 2. Entrar en **Mensajes**. La lista muestra el título, la fecha y el texto.
 3. Si el aviso pide hacer algo, el enlace lleva a la pantalla (la **remesa** personal, para autorizar o denegar el desglose, o para ver el destino 7).
-4. Al abrir la lista, esos avisos quedan leídos y la bolita desaparece. Siguen en la lista hasta que ya no procedan (la persona incluye esas partidas 7 en una remesa aceptada, o responde a la petición de detalle).
+4. Al abrir la lista, esos avisos quedan leídos y la bolita desaparece. Siguen hasta que el centro **acepta** una remesa con esas partidas 7 (entonces se apuntan en el centro y desaparece el aviso y el banner de Remesa), responde a la petición de detalle, o pulsa **Quitar** (retira la instrucción pendiente, devuelve el disponible en el centro y quita también el banner de Remesa).
 
 Si se abre Mensajes desde la contabilidad del centro y el enlace va al libro personal, el programa cambia a Mis cuentas y abre la remesa.
 

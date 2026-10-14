@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use FastRoute\RouteCollector;
 use src\administracion\infrastructure\http\AdminCentroController;
+use src\administracion\infrastructure\http\AdminAyudaController;
 use src\administracion\infrastructure\http\AdminLegalController;
 use src\administracion\infrastructure\http\AdminPlanController;
 use src\administracion\infrastructure\http\AdminUsuarioController;
@@ -81,6 +82,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/mensajes', [MensajeController::class, 'listar']);
     $r->addRoute('GET', '/api/mensajes/contador', [MensajeController::class, 'contador']);
     $r->addRoute('POST', '/api/mensajes/leidos', [MensajeController::class, 'leidos']);
+    $r->addRoute('POST', '/api/mensajes/{id:\d+}/descartar', [MensajeController::class, 'descartarMensaje']);
     $r->addRoute('POST', '/api/preferencias/ambito', [PreferenciaController::class, 'guardarAmbito']);
     $r->addRoute('GET', '/api/preferencias/baja', [PreferenciaController::class, 'resumenBaja']);
     $r->addRoute('POST', '/api/preferencias/baja/solicitar', [PreferenciaController::class, 'solicitarBaja']);
@@ -115,6 +117,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/admin/legal/buscar', [AdminLegalController::class, 'buscar']);
     $r->addRoute('GET', '/api/admin/legal/expediente/{id:\d+}', [AdminLegalController::class, 'ver']);
     $r->addRoute('GET', '/api/admin/legal/expediente/{id:\d+}/export', [AdminLegalController::class, 'exportar']);
+    $r->addRoute('GET', '/api/admin/ayuda/pendientes', [AdminAyudaController::class, 'listar']);
+    $r->addRoute('GET', '/api/admin/ayuda/pendientes/export', [AdminAyudaController::class, 'exportar']);
     $r->addRoute('POST', '/api/centros/vaciar', [CentroController::class, 'vaciar']);
     $r->addRoute('POST', '/api/centros/usuarios', [CentroController::class, 'addUsuario']);
     $r->addRoute('POST', '/api/centros/usuarios/rol', [CentroController::class, 'cambiarRol']);
@@ -258,6 +262,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/disponible/ajustar', [DisponibleController::class, 'ajustar']);
     $r->addRoute('POST', '/api/disponible/proponer', [DisponibleController::class, 'proponer']);
     $r->addRoute('POST', '/api/disponible/asignaciones/{id:\d+}/confirmar', [DisponibleController::class, 'confirmar']);
+    $r->addRoute('GET', '/api/disponible/instrucciones-pendientes', [DisponibleController::class, 'instruccionesPendientes']);
+    $r->addRoute('POST', '/api/disponible/instrucciones-pendientes/descartar', [DisponibleController::class, 'descartarInstruccion']);
     $r->addRoute('GET', '/api/desgravacion-tramos', [DisponibleController::class, 'tramos']);
     $r->addRoute('POST', '/api/desgravacion-tramos', [DisponibleController::class, 'guardarTramos']);
     $r->addRoute('GET', '/api/yo/asignaciones', [DisponibleController::class, 'yoAsignaciones']);

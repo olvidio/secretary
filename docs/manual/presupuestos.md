@@ -20,7 +20,7 @@ En el libro P, las cifras se pueden generar primero en **Previsión personal** (
 
 1. Abrir «Presupuesto P» o «Presupuesto G», según el libro que se quiera presupuestar.
 2. Elegir el **año** en el desplegable (por defecto el **ejercicio abierto** en sesión; puede elegirse el siguiente para planificar). Al guardar un año que aún no existía, se crea en estado planificado.
-3. **Presupuesto P** y **Presupuesto G** usan la misma estructura que el 613 P y el 613 G (o 613 G-D en centro sg): capítulos, subtotales y celdas azules editables. Escribir en cada casilla el importe previsto para todo el año.
+3. **Presupuesto P** y **Presupuesto G** usan la misma estructura que el 613 P y el 613 G (o 613 G-D en centro sg): capítulos, subtotales y celdas azules editables. Escribir en cada casilla el importe previsto para todo el año, en euros enteros.
 4. Pulsar «Guardar»; aparece el aviso «Guardado».
 
 ## Reglas que conviene saber
@@ -28,7 +28,7 @@ En el libro P, las cifras se pueden generar primero en **Previsión personal** (
 - La lista de conceptos viene dada: hay una fila por cada concepto del libro y no se pueden añadir ni quitar filas desde aquí.
 - Lo que se teclea es el importe **anual**. El resumen 613 lo reparte en proporción a los meses transcurridos del ejercicio sobre los meses totales; en un ejercicio de enero a diciembre eso equivale a multiplicar por los meses y dividir entre doce.
 - Una casilla vacía cuenta como cero.
-- Los importes admiten coma o punto como separador de decimales.
+- Lo que se teclea es el importe anual, en euros enteros: si se escribe con decimales, se redondea al euro más cercano. Se admite coma o punto.
 - P y G son independientes: guardar uno no toca el otro.
 - En P, «Aplicar al presupuesto P» desde Previsión solo actualiza las líneas del 613 P; el resto de conceptos de esta lista se deja como está.
 

@@ -26,8 +26,14 @@
       <td class="num pct">${esc(pct(l.pct))}</td>`;
   }
 
+  function textoEntero(l) {
+    if (typeof fmtEnteroEs === 'function') return fmtEnteroEs(l?.previsto ?? '');
+    const t = enteroEs(l?.previsto);
+    return t === '0' ? '' : t;
+  }
+
   function numsSoloPrevisto(l, codigo) {
-    const valEs = l?.previsto_es ?? (l?.previsto != null ? enteroEs(l.previsto) : '');
+    const valEs = textoEntero(l);
     const inp = codigo
       ? `<input type="text" name="${esc(codigo)}" class="informe-613-cocina-input informe-613-tabla-input num" `
         + `value="${esc(valEs)}" aria-label="${esc(codigo)}">`

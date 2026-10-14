@@ -81,8 +81,8 @@
     const presu = !!opts.presupuesto;
     const tot = r.totales || {};
     const out = [];
-    const cab = (clase, etq, l) => (presu ? filaPresupuesto(clase, etq, l, null) : fila(clase, etq, l));
-    const det = (clase, etq, l, cod) => (presu ? filaPresupuesto(clase, etq, l, cod) : fila(clase, etq, l));
+    const cab = (clase, etq, l) => (presu ? filaPresupuesto(clase, etq, l, null, true) : fila(clase, etq, l));
+    const det = (clase, etq, l, cod) => (presu ? filaPresupuesto(clase, etq, l, cod, true) : fila(clase, etq, l));
 
     out.push(cab('sec sec-cab sec-total', 'I. Ingresos', tot.ingresos));
     lineas(r, ['11', '12', '13', '14', '15']).forEach((l) => {
@@ -94,7 +94,7 @@
     });
     out.push(cab('sec sec-cab sec-total sec-divide', 'III. Disponible', tot.disponible));
     out.push(presu
-      ? filaPresupuesto('sub', '1. Saldo (ingresos-gastos)', tot.saldo_ingresos_gastos, null)
+      ? filaPresupuesto('sub', '1. Saldo (ingresos-gastos)', tot.saldo_ingresos_gastos, null, true)
       : fila('sub', '1. Saldo (ingresos-gastos)', tot.saldo_ingresos_gastos));
     out.push(det('sub', '2. Disponible al inicio', linea(r, '32'), '32'));
     return out.join('');

@@ -349,6 +349,7 @@ final class CatalogoMenus
             ['nav' => 'admin-centros', 'href' => '/admin/centros', 'label' => _("Entidades")],
             ['nav' => 'admin-usuarios', 'href' => '/admin/usuarios', 'label' => _("Usuarios")],
             ['nav' => 'admin-legal', 'href' => '/admin/legal', 'label' => _("Legal")],
+            ['nav' => 'admin-ayuda', 'href' => '/admin/ayuda', 'label' => _("Manual / ayuda")],
             ['nav' => 'admin-copias', 'href' => '/admin/copias', 'label' => _("Copias de la base")],
         ];
     }

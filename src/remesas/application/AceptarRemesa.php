@@ -10,6 +10,7 @@ use src\ambito\domain\contracts\CuentaRepository;
 use src\ambito\domain\contracts\EjercicioRepository;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\disponible\application\AplicarDisponibleDeRemesa;
+use src\mensajes\application\RefrescarBandejaDePersona;
 use src\disponible\domain\services\SobranteRemesa;
 use src\personal\application\ResolverPeriodoPersonal;
 use src\personal\domain\services\PeriodoPersonal;
@@ -31,6 +32,7 @@ final class AceptarRemesa
         private readonly RegistrarGastosGeneralesDeRemesa $gastosGenerales,
         private readonly RegistrarPlantillasDeRemesa $plantillasDeRemesa,
         private readonly AplicarDisponibleDeRemesa $disponible,
+        private readonly RefrescarBandejaDePersona $refrescarBandeja,
     ) {
     }
 
@@ -93,7 +95,7 @@ final class AceptarRemesa
                 $this->asientos->borrarPorRemesaId($previa->id);
                 $this->remesas->marcarEstado($previa->id, 'sustituida', true);
             }
-            $filtradas = $this->disponible->filtrarLineas($remesa, $lineasAsiento);
+            $filtradas = $this->disponible->filtrarLineas($remesa, $lineasAsiento, $fecha);
             $sobrante = SobranteRemesa::cents($filtradas);
             $asiento = ConstructorAsientoRemesa::construir(
                 (int) $ejercicio->id,
@@ -123,6 +125,7 @@ final class AceptarRemesa
         if ($aceptada === null) {
             throw new InvalidArgumentException(_("No se pudo releer la remesa aceptada"));
         }
+        $this->refrescarBandeja->ejecutar($remesa->personaId);
 
         return $aceptada;
     }
@@ -134,6 +137,10 @@ final class AceptarRemesa
     {
         $out = [];
         foreach ($remesa->lineas as $linea) {
+            $importeCents = $linea->importeCentsSinGenerales();
+            if ($importeCents === 0) {
+                continue;
+            }
             $cuenta = $this->cuentas->buscar($remesa->centroId, null, 'P', $linea->codigoMaestro);
             if ($cuenta === null || $cuenta->id === null) {
                 throw new InvalidArgumentException(sprintf(_("No existe en el plan P del centro el concepto %s"), $linea->codigoMaestro));
@@ -144,7 +151,7 @@ final class AceptarRemesa
             $out[] = [
                 'cuenta_id' => $cuenta->id,
                 'tipo' => $cuenta->tipo,
-                'importe_cents' => $linea->importeCents,
+                'importe_cents' => $importeCents,
                 'codigo_maestro' => $linea->codigoMaestro,
             ];
         }

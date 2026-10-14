@@ -25,3 +25,6 @@ Pulsar la versión (p. ej. `v0.1.3`) en el pie de entrar, registrarse o cualquie
 
 - **Muestra «desarrollo»**: en local aún no se ha generado `var/version.json`
   (`php tools/release/escribir_version.php`).
+- **Versión antigua en local** (p. ej. v0.1.27 con el repo en v0.1.31): suele quedar un
+  `var/version.json` de un despliegue anterior; el programa lo ignora si el commit no coincide
+  con el checkout y lee `VERSION`. Opcional: `php tools/release/escribir_version.php`.

@@ -24,4 +24,10 @@ interface MensajeRepository
 
     /** @param list<int> $ids */
     public function marcarLeidos(int $identidadId, array $ids): void;
+
+    /** Oculta un aviso abierto; no vuelve a mostrarse mientras el contenido sea el mismo. */
+    public function descartar(int $identidadId, int $id): bool;
+
+    /** @return array{id:int, clave:string, tipo:string}|null */
+    public function porId(int $identidadId, int $id): ?array;
 }
