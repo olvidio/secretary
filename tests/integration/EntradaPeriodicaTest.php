@@ -86,7 +86,7 @@ final class EntradaPeriodicaTest extends TestCase
             new DateTimeImmutable('2026-01-01'),
         ));
         (new PdoPobladorCentro($this->pdo))->ejecutar($centro->id);
-        $personas->guardar(new Persona(null, 'Ana', 'Test', 'AT', null, null, null, null, null, 1, $centro->id));
+        $personas->guardar(new Persona(null, 'Ana', 'Test', 'at', null, null, null, null, null, 1, $centro->id));
 
         $ambito = new ResolverAmbitoActual($config, $centros, $ejercicios, $centro->id);
         $conceptos = ConceptosCentro::resolver($this->pdo);
@@ -96,7 +96,7 @@ final class EntradaPeriodicaTest extends TestCase
 
         $guardar = new GuardarEntradaPeriodica($repo, $ambito, $centroSg, $conceptos, $personas, $plantillasRepo);
         $entrada = $guardar->ejecutar([
-            'iniciales' => 'AT',
+            'iniciales' => 'at',
             'concepto_codigo' => '21',
             'observaciones' => 'Cuota',
             'cantidad' => '25,00',
@@ -184,7 +184,7 @@ final class EntradaPeriodicaTest extends TestCase
             new DateTimeImmutable('2026-01-01'),
         ));
         (new PdoPobladorCentro($this->pdo))->ejecutar($centro->id);
-        $personas->guardar(new Persona(null, 'Ana', 'Test', 'AT', null, null, null, null, null, 1, $centro->id));
+        $personas->guardar(new Persona(null, 'Ana', 'Test', 'at', null, null, null, null, null, 1, $centro->id));
 
         $ambito = new ResolverAmbitoActual($config, $centros, $ejercicios, $centro->id);
         $conceptos = ConceptosCentro::resolver($this->pdo);
@@ -204,7 +204,7 @@ final class EntradaPeriodicaTest extends TestCase
 
         $guardar = new GuardarEntradaPeriodica($repo, $ambito, $centroSg, $conceptos, $personas, $plantillasRepo);
         $entrada = $guardar->ejecutar([
-            'iniciales' => 'AT',
+            'iniciales' => 'at',
             'concepto_codigo' => ReferenciaPlantillaEnConcepto::codigo((int) $plantilla['id']),
             'observaciones' => '',
             'cantidad' => '10,00',

@@ -249,12 +249,21 @@
         },
         {
             "codigo": "9",
-            "etiqueta": "Saldo en las c\/c personales",
+            "etiqueta": "Saldo contable (persona–centro)",
             "pct": null,
             "previsto": "0.00",
             "previsto_es": "0,00",
             "realizado": "216.36",
             "realizado_es": "216,36"
+        },
+        {
+            "codigo": "90",
+            "etiqueta": "Saldo en cuentas corrientes",
+            "pct": null,
+            "previsto": "0.00",
+            "previsto_es": "0,00",
+            "realizado": "0.00",
+            "realizado_es": "0,00"
         }
     ],
     "observaciones": null,

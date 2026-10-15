@@ -6,8 +6,12 @@
     "hasta": "2026-06-30",
     "por_persona": [
         {
+            "deuda": "0.00",
+            "deuda_es": "0,00",
             "iniciales": "ac",
             "nombre": "Antoni Companys",
+            "saldable": "0.00",
+            "saldable_es": "0,00",
             "saldo_a": "0.00",
             "saldo_a_es": "0,00",
             "saldo_apuntes_a": "0.00",
@@ -17,11 +21,17 @@
             "saldo_apuntes_c": "-650.00",
             "saldo_apuntes_c_es": "-650,00",
             "saldo_cc": "0.00",
-            "saldo_cc_es": "0,00"
+            "saldo_cc_es": "0,00",
+            "superavit": "3194.38",
+            "superavit_es": "3.194,38"
         },
         {
+            "deuda": "0.00",
+            "deuda_es": "0,00",
             "iniciales": "fb",
             "nombre": "Francesc Boix",
+            "saldable": "0.00",
+            "saldable_es": "0,00",
             "saldo_a": "130.00",
             "saldo_a_es": "130,00",
             "saldo_apuntes_a": "130.00",
@@ -31,11 +41,17 @@
             "saldo_apuntes_c": "0.00",
             "saldo_apuntes_c_es": "0,00",
             "saldo_cc": "130.00",
-            "saldo_cc_es": "130,00"
+            "saldo_cc_es": "130,00",
+            "superavit": "0.00",
+            "superavit_es": "0,00"
         },
         {
+            "deuda": "0.00",
+            "deuda_es": "0,00",
             "iniciales": "ds",
             "nombre": "Daniel Serrabou",
+            "saldable": "0.00",
+            "saldable_es": "0,00",
             "saldo_a": "0.00",
             "saldo_a_es": "0,00",
             "saldo_apuntes_a": "0.00",
@@ -45,11 +61,17 @@
             "saldo_apuntes_c": "-10.00",
             "saldo_apuntes_c_es": "-10,00",
             "saldo_cc": "0.00",
-            "saldo_cc_es": "0,00"
+            "saldo_cc_es": "0,00",
+            "superavit": "0.00",
+            "superavit_es": "0,00"
         },
         {
+            "deuda": "0.00",
+            "deuda_es": "0,00",
             "iniciales": "jrm",
             "nombre": "Josep Maria Ribot",
+            "saldable": "0.00",
+            "saldable_es": "0,00",
             "saldo_a": "0.00",
             "saldo_a_es": "0,00",
             "saldo_apuntes_a": "0.00",
@@ -59,11 +81,17 @@
             "saldo_apuntes_c": "0.00",
             "saldo_apuntes_c_es": "0,00",
             "saldo_cc": "0.00",
-            "saldo_cc_es": "0,00"
+            "saldo_cc_es": "0,00",
+            "superavit": "0.00",
+            "superavit_es": "0,00"
         },
         {
+            "deuda": "0.00",
+            "deuda_es": "0,00",
             "iniciales": "rd",
             "nombre": "Rafa Dionis",
+            "saldable": "0.00",
+            "saldable_es": "0,00",
             "saldo_a": "86.36",
             "saldo_a_es": "86,36",
             "saldo_apuntes_a": "86.36",
@@ -73,11 +101,17 @@
             "saldo_apuntes_c": "0.00",
             "saldo_apuntes_c_es": "0,00",
             "saldo_cc": "86.36",
-            "saldo_cc_es": "86,36"
+            "saldo_cc_es": "86,36",
+            "superavit": "0.00",
+            "superavit_es": "0,00"
         },
         {
+            "deuda": "0.00",
+            "deuda_es": "0,00",
             "iniciales": "af",
             "nombre": "Agustí Fontarnau",
+            "saldable": "0.00",
+            "saldable_es": "0,00",
             "saldo_a": "0.00",
             "saldo_a_es": "0,00",
             "saldo_apuntes_a": "0.00",
@@ -87,11 +121,17 @@
             "saldo_apuntes_c": "0.00",
             "saldo_apuntes_c_es": "0,00",
             "saldo_cc": "0.00",
-            "saldo_cc_es": "0,00"
+            "saldo_cc_es": "0,00",
+            "superavit": "0.00",
+            "superavit_es": "0,00"
         },
         {
+            "deuda": "0.00",
+            "deuda_es": "0,00",
             "iniciales": "jmg",
             "nombre": "Josep Maria Grau",
+            "saldable": "0.00",
+            "saldable_es": "0,00",
             "saldo_a": "0.00",
             "saldo_a_es": "0,00",
             "saldo_apuntes_a": "0.00",
@@ -101,11 +141,17 @@
             "saldo_apuntes_c": "0.00",
             "saldo_apuntes_c_es": "0,00",
             "saldo_cc": "0.00",
-            "saldo_cc_es": "0,00"
+            "saldo_cc_es": "0,00",
+            "superavit": "3086.00",
+            "superavit_es": "3.086,00"
         },
         {
+            "deuda": "0.00",
+            "deuda_es": "0,00",
             "iniciales": "qr",
             "nombre": "Quico Ribas",
+            "saldable": "0.00",
+            "saldable_es": "0,00",
             "saldo_a": "0.00",
             "saldo_a_es": "0,00",
             "saldo_apuntes_a": "0.00",
@@ -115,11 +161,17 @@
             "saldo_apuntes_c": "2750.00",
             "saldo_apuntes_c_es": "2.750,00",
             "saldo_cc": "0.00",
-            "saldo_cc_es": "0,00"
+            "saldo_cc_es": "0,00",
+            "superavit": "0.00",
+            "superavit_es": "0,00"
         },
         {
+            "deuda": "0.00",
+            "deuda_es": "0,00",
             "iniciales": "pp",
             "nombre": "Pere Puig",
+            "saldable": "0.00",
+            "saldable_es": "0,00",
             "saldo_a": "0.00",
             "saldo_a_es": "0,00",
             "saldo_apuntes_a": "0.00",
@@ -129,11 +181,17 @@
             "saldo_apuntes_c": "0.00",
             "saldo_apuntes_c_es": "0,00",
             "saldo_cc": "0.00",
-            "saldo_cc_es": "0,00"
+            "saldo_cc_es": "0,00",
+            "superavit": "4800.00",
+            "superavit_es": "4.800,00"
         },
         {
+            "deuda": "0.00",
+            "deuda_es": "0,00",
             "iniciales": "mv",
             "nombre": "Manel Vicente",
+            "saldable": "0.00",
+            "saldable_es": "0,00",
             "saldo_a": "0.00",
             "saldo_a_es": "0,00",
             "saldo_apuntes_a": "0.00",
@@ -143,7 +201,9 @@
             "saldo_apuntes_c": "0.00",
             "saldo_apuntes_c_es": "0,00",
             "saldo_cc": "0.00",
-            "saldo_cc_es": "0,00"
+            "saldo_cc_es": "0,00",
+            "superavit": "343.00",
+            "superavit_es": "343,00"
         }
     ],
     "saldo_a": "216.36",
