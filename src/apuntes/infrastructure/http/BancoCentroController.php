@@ -10,6 +10,7 @@ use src\apuntes\application\ImportarCsvBancoCentro;
 use src\apuntes\application\ListarPendientesBancoCentro;
 use src\apuntes\application\PreferenciaBancoCentro;
 use src\importacion\domain\services\CatalogoBancosCsv;
+use src\importacion\domain\services\IdentificarBancoExtracto;
 use src\importacion\infrastructure\excel\ExtractoCaixaBankDesdeArchivo;
 use src\importacion\infrastructure\http\RecibirFicheroExtractoBanco;
 use src\shared\infrastructure\http\ContestarJson;
@@ -55,17 +56,20 @@ final class BancoCentroController
 
     public function importar(Request $request, array $vars = []): Response
     {
-        $banco = trim((string) $request->input('banco', ''));
         $fisicaRaw = trim((string) $request->input('cuenta_fisica_id', ''));
         $fisicaId = $fisicaRaw !== '' ? (int) $fisicaRaw : null;
         $temporal = null;
+        $banco = '';
         try {
-            $recibido = RecibirFicheroExtractoBanco::recibir($request, $banco);
+            $recibido = RecibirFicheroExtractoBanco::recibir($request);
             $temporal = $recibido['temporal'];
+            $identificar = new IdentificarBancoExtracto();
             if ($recibido['csv'] !== null) {
+                $banco = $identificar->desdeCsv($recibido['csv']);
                 $res = $this->importar->ejecutar($banco, $fisicaId, $recibido['csv']);
             } else {
                 $filas = ExtractoCaixaBankDesdeArchivo::filas((string) $temporal);
+                $banco = $identificar->desdeFilas($filas);
                 $res = $this->importar->ejecutar($banco, $fisicaId, filasExcel: $filas);
             }
         } catch (InvalidArgumentException $e) {
@@ -78,7 +82,10 @@ final class BancoCentroController
         } catch (InvalidArgumentException) {
         }
 
-        return ContestarJson::ok($res);
+        return ContestarJson::ok($res + [
+            'banco' => $banco,
+            'banco_nombre' => CatalogoBancosCsv::nombre($banco),
+        ]);
     }
 
     public function categorizar(Request $request, array $vars = []): Response

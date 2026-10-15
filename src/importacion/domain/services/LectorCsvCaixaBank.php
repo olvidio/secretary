@@ -7,15 +7,26 @@ namespace src\importacion\domain\services;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use src\importacion\domain\contracts\LectorExtractoEnFilas;
+use src\importacion\domain\contracts\ReconocedorExtractoBanco;
 use src\importacion\domain\value_objects\LineaExtractoBanco;
 use src\shared\domain\value_objects\Dinero;
 
 /**
  * Extracto CaixaBank (CaixaBankNow: Extraer movimientos en Excel o CSV).
  * Cabeceras en castellano o catalán. Suele ir con punto y coma y decimales con coma.
+ * Variante «Moviments del compte …» / «Movimientos del cuenta …»: filas de título, luego
+ * Data · Data valor · Moviment · Més dades · Import · Saldo (fechas a veces en ISO desde Excel).
  */
-final class LectorCsvCaixaBank implements LectorExtractoEnFilas
+final class LectorCsvCaixaBank implements LectorExtractoEnFilas, ReconocedorExtractoBanco
 {
+    /** @var array{fecha:int, movimiento:int, extra:int, importe:int} */
+    private const COLUMNAS_MOVIMENTS_COMPTE = [
+        'fecha' => 0,
+        'movimiento' => 2,
+        'extra' => 3,
+        'importe' => 4,
+    ];
+
     public function leer(string $contenido): array
     {
         $contenido = $this->aUtf8($this->sinBom($contenido));
@@ -57,6 +68,15 @@ final class LectorCsvCaixaBank implements LectorExtractoEnFilas
                 break;
             }
         }
+        if ($idx === null && $this->tieneMarcaMovimentsCompte($filas)) {
+            $idx = self::COLUMNAS_MOVIMENTS_COMPTE;
+            foreach ($filas as $i => $cols) {
+                if ($this->pareceFilaMovimiento($cols, $idx)) {
+                    $desde = $i;
+                    break;
+                }
+            }
+        }
         if ($idx === null) {
             throw new InvalidArgumentException(
                 'Este fichero no parece un extracto CaixaBank. Compruebe el banco origen.'
@@ -79,6 +99,28 @@ final class LectorCsvCaixaBank implements LectorExtractoEnFilas
         }
 
         return $out;
+    }
+
+    public function reconoceFilas(array $filas): bool
+    {
+        foreach ($filas as $cols) {
+            if ($this->filaVacia($cols)) {
+                continue;
+            }
+            if ($this->indices($cols) !== null) {
+                return true;
+            }
+        }
+        if (!$this->tieneMarcaMovimentsCompte($filas)) {
+            return false;
+        }
+        foreach ($filas as $cols) {
+            if ($this->pareceFilaMovimiento($cols, self::COLUMNAS_MOVIMENTS_COMPTE)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -105,13 +147,72 @@ final class LectorCsvCaixaBank implements LectorExtractoEnFilas
         if ($fecha === null || $mov === null || $importe === null) {
             return null;
         }
+        if ($this->pareceFechaOperacion($this->celda($cabecera, $fecha))) {
+            return null;
+        }
 
         return [
             'fecha' => $fecha,
             'movimiento' => $mov,
-            'extra' => $this->buscar($map, ['mas datos', 'mes dades', 'mes datos', 'detalle', 'detall']) ?? -1,
+            'extra' => $this->buscar($map, [
+                'mas datos', 'mes dades', 'mes datos', 'mes dades', 'detalle', 'detall', 'more data',
+            ]) ?? -1,
             'importe' => $importe,
         ];
+    }
+
+    /**
+     * @param list<list<string>> $filas
+     */
+    private function tieneMarcaMovimentsCompte(array $filas): bool
+    {
+        foreach ($filas as $cols) {
+            $titulo = trim((string) ($cols[0] ?? ''));
+            if ($titulo === '') {
+                continue;
+            }
+            $n = $this->normalizar($titulo);
+            if (str_contains($n, 'moviments del compte')
+                || str_contains($n, 'movimientos del cuenta')
+                || str_contains($n, 'movimientos de la cuenta')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param list<string> $cols
+     * @param array{fecha:int, movimiento:int, extra:int, importe:int} $idx
+     */
+    private function pareceFilaMovimiento(array $cols, array $idx): bool
+    {
+        if ($this->filaVacia($cols)) {
+            return false;
+        }
+        $fechaRaw = $this->celda($cols, $idx['fecha']);
+        $importeRaw = $this->celda($cols, $idx['importe']);
+        if ($importeRaw === '') {
+            return false;
+        }
+
+        return $this->pareceFechaOperacion($fechaRaw);
+    }
+
+    private function pareceFechaOperacion(string $raw): bool
+    {
+        $raw = trim($raw);
+        if ($raw === '') {
+            return false;
+        }
+        try {
+            $this->fecha($raw);
+
+            return true;
+        } catch (InvalidArgumentException) {
+            return false;
+        }
     }
 
     /**

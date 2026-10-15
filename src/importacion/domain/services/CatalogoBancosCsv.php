@@ -20,6 +20,7 @@ final class CatalogoBancosCsv
             ['id' => 'caixabank', 'nombre' => 'CaixaBank'],
             ['id' => 'bbva', 'nombre' => 'BBVA'],
             ['id' => 'sabadell', 'nombre' => 'Banco Sabadell'],
+            ['id' => 'santander', 'nombre' => 'Banco Santander'],
         ];
     }
 
@@ -31,6 +32,7 @@ final class CatalogoBancosCsv
             'caixabank' => new LectorCsvCaixaBank(),
             'bbva' => new LectorCsvBbva(),
             'sabadell' => new LectorCsvSabadell(),
+            'santander' => new LectorCsvSantander(),
             default => throw new InvalidArgumentException('Banco no soportado: elija uno de la lista'),
         };
     }
@@ -45,5 +47,17 @@ final class CatalogoBancosCsv
         }
 
         return false;
+    }
+
+    public static function nombre(string $banco): string
+    {
+        $id = strtolower(trim($banco));
+        foreach (self::todos() as $fila) {
+            if ($fila['id'] === $id) {
+                return $fila['nombre'];
+            }
+        }
+
+        return $banco;
     }
 }

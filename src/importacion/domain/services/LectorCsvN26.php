@@ -7,6 +7,7 @@ namespace src\importacion\domain\services;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use src\importacion\domain\contracts\LectorCsvBanco;
+use src\importacion\domain\contracts\ReconocedorExtractoBanco;
 use src\importacion\domain\value_objects\LineaExtractoBanco;
 use src\shared\domain\value_objects\Dinero;
 
@@ -15,7 +16,7 @@ use src\shared\domain\value_objects\Dinero;
  * Admite el formato clásico (Date / Payee) y el actual (Booking Date / Partner Name).
  * Cabeceras en inglés, alemán, español o francés.
  */
-final class LectorCsvN26 implements LectorCsvBanco
+final class LectorCsvN26 implements LectorCsvBanco, ReconocedorExtractoBanco
 {
     public function leer(string $contenido): array
     {
@@ -47,6 +48,24 @@ final class LectorCsvN26 implements LectorCsvBanco
         return $out;
     }
 
+    public function reconoceFilas(array $filas): bool
+    {
+        foreach ($filas as $cols) {
+            if ($this->filaVacia($cols)) {
+                continue;
+            }
+            try {
+                $this->indices($cols);
+
+                return true;
+            } catch (InvalidArgumentException|\Throwable) {
+                continue;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @param list<string> $cabecera
      * @return array{fecha:int, payee:int, cuenta:int, tipo:int, ref:int, importe:int, categoria:?int}
@@ -55,7 +74,7 @@ final class LectorCsvN26 implements LectorCsvBanco
     {
         $map = [];
         foreach ($cabecera as $i => $nombre) {
-            $map[$this->normalizar($nombre)] = $i;
+            $map[$this->normalizar((string) $nombre)] = $i;
         }
         $fecha = $this->buscar($map, [
             'booking date', 'buchungsdatum', 'fecha de reserva', 'fecha contable',
@@ -193,6 +212,7 @@ final class LectorCsvN26 implements LectorCsvBanco
     private function buscarContiene(array $map, array $alguno, array $todos): ?int
     {
         foreach ($map as $nombre => $i) {
+            $nombre = (string) $nombre;
             $okAlguno = false;
             foreach ($alguno as $a) {
                 if (str_contains($nombre, $a)) {

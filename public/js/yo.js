@@ -1145,34 +1145,8 @@
   }
 
   async function pintarBanco() {
-    const sel = qs('#yo-banco-sel');
     const form = qs('#yo-banco-form');
-    if (!sel || !form) return;
-    const b = await api('/api/yo/banco/bancos');
-    if (!b.ok) return alert(b.error || t('error'));
-    const bancos = b.bancos || [];
-    if (bancos.length) {
-      sel.innerHTML = bancos.map((x) =>
-        '<option value="' + esc(x.id) + '">' + esc(x.nombre) + '</option>'
-      ).join('');
-      const guardado = b.banco && bancos.some((x) => x.id === b.banco) ? b.banco : '';
-      if (guardado) sel.value = guardado;
-    }
-    const inputFichero = qs('#yo-banco-fichero');
-    function actualizarAcceptBanco() {
-      if (!inputFichero) return;
-      inputFichero.accept = sel.value === 'caixabank'
-        ? '.csv,.xls,.xlsx,text/csv'
-        : '.csv,text/csv';
-    }
-    async function guardarPreferenciaBanco() {
-      await api('/api/yo/banco/preferencia', { method: 'POST', body: { banco: sel.value } });
-    }
-    sel.onchange = () => {
-      actualizarAcceptBanco();
-      guardarPreferenciaBanco();
-    };
-    actualizarAcceptBanco();
+    if (!form) return;
     await cargarCategorias();
     await pintarListasBanco();
     form.onsubmit = async (ev) => {
@@ -1197,12 +1171,12 @@
       }
       if (msg) {
         msg.hidden = false;
-        msg.textContent = 'Nuevos: ' + r.nuevos + '. Ya estaban: ' + r.repetidos
+        let texto = 'Nuevos: ' + r.nuevos + '. Ya estaban: ' + r.repetidos
           + (r.omitidos ? '. Omitidos: ' + r.omitidos : '') + '.';
+        if (r.banco_nombre || r.banco) texto += ' (' + (r.banco_nombre || r.banco) + ')';
+        msg.textContent = texto;
       }
-      const bancoId = sel.value;
       form.reset();
-      sel.value = bancoId;
       await pintarListasBanco();
     };
   }

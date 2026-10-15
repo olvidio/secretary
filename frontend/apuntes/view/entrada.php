@@ -6,16 +6,14 @@
 <details class="yo-ayuda-bloque" id="entrada-banco-bloque">
     <summary><?= _("Importar extracto del banco") ?></summary>
     <div class="yo-ayuda-cuerpo">
-        <p class="muted"><?= _("Sube el extracto del banco. Cada origen tiene un formato distinto. La siguiente vez solo se crean movimientos nuevos. Lo importado entra en Por categorizar hasta que le asignes concepto e iniciales si procede.") ?></p>
+        <p class="muted"><?= _("Sube el extracto del banco (CSV o Excel). El formato se reconoce solo; no hace falta elegir el banco. La siguiente vez solo se crean movimientos nuevos. Lo importado entra en Por categorizar hasta que le asignes concepto e iniciales si procede.") ?></p>
         <p class="muted"><?= _("N26: en la web, cuenta → Descargas → actividad de la cuenta → CSV.") ?></p>
         <p class="muted"><?= _("CaixaBank: CaixaBankNow → Cuentas → tu cuenta. Carga todo el periodo (pulsa «Ver más movimientos» si aparece) y elige Extraer movimientos / Descargar en Excel (.xls). También admite CSV si lo guardas así.") ?></p>
         <p class="muted"><?= _("BBVA: Cuentas → la cuenta → Movimientos → Descargar en Excel o CSV.") ?></p>
         <p class="muted"><?= _("Banco Sabadell: Operativa diaria → Cuentas → Saldos y movimientos → Descargar → Excel o CSV.") ?></p>
+        <p class="muted"><?= _("Banco Santander: movimientos de la cuenta → descargar extracto en Excel (.xls).") ?></p>
     </div>
     <form id="entrada-banco-form" class="yo-banco-form">
-        <label><?= _("Banco") ?>
-            <select name="banco" id="entrada-banco-sel" required></select>
-        </label>
         <label id="wrap-banco-fisica" hidden><?= _("Cuenta de tesorería") ?>
             <select name="cuenta_fisica_id" id="entrada-banco-fisica" disabled></select>
         </label>
@@ -718,9 +716,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function pintarImportBancoCentro() {
-  const selBanco = document.getElementById('entrada-banco-sel');
   const form = document.getElementById('entrada-banco-form');
-  if (!selBanco || !form) return;
+  if (!form) return;
 
   const errBanco = document.getElementById('entrada-banco-err');
   const msgBanco = document.getElementById('entrada-banco-msg');
@@ -754,16 +751,6 @@ async function pintarImportBancoCentro() {
     }
   }
 
-  const b = await api('/api/banco-centro/bancos');
-  if (!b.ok) return mostrarErrBanco(b.error || 'Error');
-  (b.bancos || []).forEach(x => {
-    const o = document.createElement('option');
-    o.value = x.id;
-    o.textContent = x.nombre;
-    selBanco.appendChild(o);
-  });
-  if (b.banco && (b.bancos || []).some(x => x.id === b.banco)) selBanco.value = b.banco;
-
   const tes = await api('/api/tesoreria');
   const fisicas = (tes.cuentas_fisicas || []).filter(f => f.activo && f.tipo === 'banco');
   const wrapFisica = document.getElementById('wrap-banco-fisica');
@@ -781,18 +768,6 @@ async function pintarImportBancoCentro() {
     wrapFisica.hidden = false;
   }
   syncFisicaImport();
-
-  const inputFichero = document.getElementById('entrada-banco-fichero');
-  function actualizarAcceptBanco() {
-    if (!inputFichero) return;
-    inputFichero.accept = selBanco.value === 'caixabank'
-      ? '.csv,.xls,.xlsx,text/csv' : '.csv,text/csv';
-  }
-  selBanco.onchange = () => {
-    actualizarAcceptBanco();
-    api('/api/banco-centro/preferencia', { method: 'POST', body: { banco: selBanco.value } });
-  };
-  actualizarAcceptBanco();
 
   let conceptosG = [];
   let conceptosP = [];
@@ -992,11 +967,8 @@ async function pintarImportBancoCentro() {
       if (r.omitidos) t += I18N_ENTRADA.importOmitidos.replace('%s', r.omitidos);
       msg.textContent = t;
     }
-    const bancoId = selBanco.value;
     form.reset();
-    selBanco.value = bancoId;
     syncFisicaImport();
-    actualizarAcceptBanco();
     await pintarPendientesBanco();
   };
 }

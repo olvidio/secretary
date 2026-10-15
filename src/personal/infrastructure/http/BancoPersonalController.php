@@ -11,6 +11,7 @@ use src\personal\application\ListarPendientesBanco;
 use src\personal\application\ListarPlantillasCentroPersonal;
 use src\personal\application\PreferenciaBancoPersonal;
 use src\importacion\domain\services\CatalogoBancosCsv;
+use src\importacion\domain\services\IdentificarBancoExtracto;
 use src\importacion\infrastructure\excel\ExtractoCaixaBankDesdeArchivo;
 use src\importacion\infrastructure\http\RecibirFicheroExtractoBanco;
 use src\shared\infrastructure\http\ContestarJson;
@@ -58,15 +59,18 @@ final class BancoPersonalController
 
     public function importar(Request $request, array $vars = []): Response
     {
-        $banco = trim((string) $request->input('banco', ''));
         $temporal = null;
+        $banco = '';
         try {
-            $recibido = RecibirFicheroExtractoBanco::recibir($request, $banco);
+            $recibido = RecibirFicheroExtractoBanco::recibir($request);
             $temporal = $recibido['temporal'];
+            $identificar = new IdentificarBancoExtracto();
             if ($recibido['csv'] !== null) {
+                $banco = $identificar->desdeCsv($recibido['csv']);
                 $res = $this->importar->ejecutar($banco, $recibido['csv']);
             } else {
                 $filas = ExtractoCaixaBankDesdeArchivo::filas((string) $temporal);
+                $banco = $identificar->desdeFilas($filas);
                 $res = $this->importar->ejecutar($banco, filas: $filas);
             }
         } catch (InvalidArgumentException $e) {
@@ -79,7 +83,10 @@ final class BancoPersonalController
         } catch (InvalidArgumentException) {
         }
 
-        return ContestarJson::ok($res);
+        return ContestarJson::ok($res + [
+            'banco' => $banco,
+            'banco_nombre' => CatalogoBancosCsv::nombre($banco),
+        ]);
     }
 
     public function categorizar(Request $request, array $vars = []): Response

@@ -6,22 +6,20 @@ namespace src\importacion\infrastructure\http;
 
 use InvalidArgumentException;
 use RuntimeException;
-use src\importacion\domain\services\CatalogoBancosCsv;
 use src\shared\infrastructure\http\Request;
 
 final class RecibirFicheroExtractoBanco
 {
     public const MAX_BYTES = 2 * 1024 * 1024;
 
+    /** @var list<string> */
+    private const EXTENSIONES = ['csv', 'xls', 'xlsx'];
+
     /**
      * @return array{csv:?string, temporal:?string}
      */
-    public static function recibir(Request $request, string $banco, string $campo = 'fichero'): array
+    public static function recibir(Request $request, string $campo = 'fichero'): array
     {
-        $banco = strtolower(trim($banco));
-        if (!CatalogoBancosCsv::existe($banco)) {
-            throw new InvalidArgumentException(_("Banco no soportado: elija uno de la lista"));
-        }
         $info = $request->file($campo);
         if ($info === null) {
             throw new InvalidArgumentException(_("Falta el fichero del extracto"));
@@ -35,12 +33,10 @@ final class RecibirFicheroExtractoBanco
         }
         $nombre = (string) ($info['name'] ?? '');
         $ext = strtolower(pathinfo($nombre, PATHINFO_EXTENSION));
-        $permitidas = self::extensiones($banco);
-        if (!in_array($ext, $permitidas, true)) {
+        if (!in_array($ext, self::EXTENSIONES, true)) {
             throw new InvalidArgumentException(sprintf(
-                _("Para %s use %s"),
-                self::nombreBanco($banco),
-                implode(', ', $permitidas),
+                _('Use un extracto en %s'),
+                implode(', ', self::EXTENSIONES),
             ));
         }
         $size = (int) ($info['size'] ?? 0);
@@ -77,26 +73,6 @@ final class RecibirFicheroExtractoBanco
             return;
         }
         unlink($real);
-    }
-
-    /** @return list<string> */
-    private static function extensiones(string $banco): array
-    {
-        return match ($banco) {
-            'caixabank', 'bbva', 'sabadell' => ['csv', 'xls', 'xlsx'],
-            default => ['csv'],
-        };
-    }
-
-    private static function nombreBanco(string $banco): string
-    {
-        foreach (CatalogoBancosCsv::todos() as $fila) {
-            if ($fila['id'] === $banco) {
-                return $fila['nombre'];
-            }
-        }
-
-        return $banco;
     }
 
     private static function temporal(string $origen, string $ext): string

@@ -6,6 +6,7 @@ namespace src\importacion\domain\services;
 
 use InvalidArgumentException;
 use src\importacion\domain\contracts\LectorExtractoEnFilas;
+use src\importacion\domain\contracts\ReconocedorExtractoBanco;
 use src\importacion\domain\value_objects\LineaExtractoBanco;
 
 /**
@@ -16,7 +17,7 @@ use src\importacion\domain\value_objects\LineaExtractoBanco;
  * También la variante corta Fecha; Concepto; Importe; Saldo.
  * La fecha que se asienta es la de operación. Decimales con coma y miles con punto.
  */
-final class LectorCsvSabadell implements LectorExtractoEnFilas
+final class LectorCsvSabadell implements LectorExtractoEnFilas, ReconocedorExtractoBanco
 {
     use TablaExtractoCsv;
 
@@ -78,6 +79,20 @@ final class LectorCsvSabadell implements LectorExtractoEnFilas
         }
 
         return $out;
+    }
+
+    public function reconoceFilas(array $filas): bool
+    {
+        foreach ($filas as $cols) {
+            if ($this->filaVacia($cols)) {
+                continue;
+            }
+            if ($this->indices($cols) !== null) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

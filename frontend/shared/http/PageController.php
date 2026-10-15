@@ -22,7 +22,6 @@ use src\legal\domain\services\CatalogoDocumentosLegales;
 use src\legal\domain\services\DatosOperador;
 use src\legal\infrastructure\http\HuellaAceptacionHttp;
 use src\legal\infrastructure\markdown\RenderizadorMarkdownLegal;
-use src\importacion\domain\services\CatalogoBancosCsv;
 use src\plan\domain\services\CatalogoPlanesContables;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
@@ -529,9 +528,7 @@ final class PageController
 
     public function yoBanco(Request $request, array $vars = []): Response
     {
-        return $this->paginaYo('personal/view/banco.php', 'yo-banco', [
-            'bancos' => CatalogoBancosCsv::todos(),
-        ]);
+        return $this->paginaYo('personal/view/banco.php', 'yo-banco');
     }
 
     public function yoRemesas(Request $request, array $vars = []): Response

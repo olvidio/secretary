@@ -6,17 +6,18 @@ namespace src\importacion\domain\services;
 
 use InvalidArgumentException;
 use src\importacion\domain\contracts\LectorExtractoEnFilas;
+use src\importacion\domain\contracts\ReconocedorExtractoBanco;
 use src\importacion\domain\value_objects\LineaExtractoBanco;
 
 /**
  * Extracto de movimientos de BBVA (banca online: descargar Excel o CSV).
  *
- * Cabecera documentada en exportaciones reales:
- * Fecha; F.Valor; Concepto; Movimiento; Importe; Divisa; Disponible; Observaciones.
- * La fecha que se asienta es la de operación (Fecha), no la de valor.
+ * Exportaciones CSV/Excel de movimientos (web o histórico). Cabeceras en castellano, catalán u otro
+ * idioma de la app del banco: se reconocen por nombre de columna normalizado, no por idioma fijo.
+ * La fecha que se asienta es la de operación, no la de valor.
  * Decimales con punto o con coma. Puede haber filas de titular antes de la cabecera.
  */
-final class LectorCsvBbva implements LectorExtractoEnFilas
+final class LectorCsvBbva implements LectorExtractoEnFilas, ReconocedorExtractoBanco
 {
     use TablaExtractoCsv;
 
@@ -80,24 +81,42 @@ final class LectorCsvBbva implements LectorExtractoEnFilas
         return $out;
     }
 
+    public function reconoceFilas(array $filas): bool
+    {
+        foreach ($filas as $cols) {
+            if ($this->filaVacia($cols)) {
+                continue;
+            }
+            if ($this->indices($cols) !== null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @param list<string> $cabecera
-     * @return array{fecha:int, concepto:int, movimiento:int, observaciones:int, importe:int}|null
+     * @return array{fecha:int, concepto:int, movimiento:int, observaciones:int, importe:int, codi:int, remesa:int}|null
      */
     private function indices(array $cabecera): ?array
     {
         $map = $this->mapaCabecera($cabecera);
         $fecha = $this->buscarColumna($map, [
             'fecha', 'fecha operacion', 'fecha oper', 'fecha de operacion', 'f operacion',
+            'data proces', 'data process', 'fecha proceso', 'fecha proces',
         ]);
         if ($fecha === null) {
-            $fecha = $this->buscarColumna($map, ['f valor', 'fecha valor']);
+            $fecha = $this->buscarColumna($map, ['f valor', 'fecha valor', 'data valor']);
         }
-        $importe = $this->buscarColumna($map, ['importe', 'importe eur', 'importe euros']);
-        $concepto = $this->buscarColumna($map, ['concepto']);
+        $importe = $this->buscarColumna($map, ['importe', 'importe eur', 'importe euros', 'import']);
+        $concepto = $this->buscarColumna($map, ['concepto', 'concepte']);
         $movimiento = $this->buscarColumna($map, ['movimiento']);
-        $firma = $this->buscarColumna($map, ['f valor', 'disponible']) !== null
+        $formatoHistorico = $this->buscarColumna($map, ['codi', 'codigo']) !== null
+            && $this->buscarColumna($map, ['remesa']) !== null;
+        $formatoWeb = $this->buscarColumna($map, ['f valor', 'disponible']) !== null
             || ($concepto !== null && $movimiento !== null);
+        $firma = $formatoHistorico || $formatoWeb;
         if ($fecha === null || $importe === null || !$firma) {
             return null;
         }
@@ -106,14 +125,16 @@ final class LectorCsvBbva implements LectorExtractoEnFilas
             'fecha' => $fecha,
             'concepto' => $concepto ?? -1,
             'movimiento' => $movimiento ?? -1,
-            'observaciones' => $this->buscarColumna($map, ['observaciones']) ?? -1,
+            'observaciones' => $this->buscarColumna($map, ['observaciones', 'observacions']) ?? -1,
             'importe' => $importe,
+            'codi' => $this->buscarColumna($map, ['codi', 'codigo']) ?? -1,
+            'remesa' => $this->buscarColumna($map, ['remesa']) ?? -1,
         ];
     }
 
     /**
      * @param list<string> $cols
-     * @param array{fecha:int, concepto:int, movimiento:int, observaciones:int, importe:int} $idx
+     * @param array{fecha:int, concepto:int, movimiento:int, observaciones:int, importe:int, codi:int, remesa:int} $idx
      */
     private function linea(array $cols, array $idx, int $n): ?LineaExtractoBanco
     {
@@ -121,6 +142,8 @@ final class LectorCsvBbva implements LectorExtractoEnFilas
         $concepto = $idx['concepto'] >= 0 ? $this->celda($cols, $idx['concepto']) : '';
         $mov = $idx['movimiento'] >= 0 ? $this->celda($cols, $idx['movimiento']) : '';
         $obs = $idx['observaciones'] >= 0 ? $this->celda($cols, $idx['observaciones']) : '';
+        $codi = $idx['codi'] >= 0 ? $this->celda($cols, $idx['codi']) : '';
+        $remesa = $idx['remesa'] >= 0 ? $this->celda($cols, $idx['remesa']) : '';
         $importeRaw = $this->celda($cols, $idx['importe']);
         if ($fechaRaw === '' && $concepto === '' && $importeRaw === '') {
             return null;
@@ -151,6 +174,8 @@ final class LectorCsvBbva implements LectorExtractoEnFilas
             mb_strtolower($concepto),
             mb_strtolower($mov),
             mb_strtolower($obs),
+            mb_strtolower($codi),
+            mb_strtolower($remesa),
         ]));
 
         return new LineaExtractoBanco($fecha, $dinero->toCents(), $texto, $huella);

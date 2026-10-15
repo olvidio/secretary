@@ -10,6 +10,17 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.34] — 2026-10-15
+
+### Añadido
+- **Importar extracto del banco** (libro personal y Entrada G): **Banco Santander** (Excel `.xls` con bloque «CUENTA SANTANDER»).
+- **BBVA**: extracto **Histórico movimientos** (CSV/Excel), cabeceras en castellano o catalán (`Data`/`Data Procés`, `Import`/`Importe`, `Codi`+`Remesa`, etc.).
+- **CaixaBank**: variante **«Moviments del compte»** (título + cabecera catalán o columnas fijas sin fila de títulos).
+
+### Cambiado
+- **Banco / Entrada G**: ya **no hace falta elegir el banco** en un desplegable; al subir CSV o Excel (`.xls`/`.xlsx`) se **detecta el formato** (N26, CaixaBank, BBVA, Santander o Sabadell) y el aviso indica qué banco se ha reconocido.
+- **Manual** y textos de ayuda de importación bancaria actualizados.
+
 ## [0.1.33] — 2026-10-15
 
 ### Añadido

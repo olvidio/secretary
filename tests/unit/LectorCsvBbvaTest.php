@@ -80,4 +80,37 @@ CSV;
     {
         self::assertInstanceOf(LectorCsvBbva::class, CatalogoBancosCsv::lector('bbva'));
     }
+
+    public function testLeeHistoricoMovimientosCsvCastellano(): void
+    {
+        $csv = <<<'CSV'
+Fecha operación,Fecha valor,Código,Concepto,Observaciones,Oficina,Importe,Saldo,Remesa
+08/10/2026,08/10/2026,00007,TRANSFERENCIAS,Factura 2415,6051,-122.75,25725.86,ES0182140000071961583816
+CSV;
+        $lineas = (new LectorCsvBbva())->leer($csv);
+        self::assertCount(1, $lineas);
+        self::assertSame('2026-10-08', $lineas[0]->fecha);
+        self::assertSame(-12275, $lineas[0]->cents);
+        self::assertSame('TRANSFERENCIAS · Factura 2415', $lineas[0]->concepto);
+    }
+
+    public function testLeeHistoricoMovimientosCsvCatalan(): void
+    {
+        $csv = <<<'CSV'
+Data Procés,Data Valor,Codi,Concepte,Observacions,Oficina,Import,Saldo,Remesa
+08/10/2026,08/10/2026,00007,TRANSFERÈNCIES,Factura 2415,6051,-122.75,25725.86,ES0182140000071961583816
+07/10/2026,07/10/2026,00128,CÀRREC D'AIGUA,"N 2026280000328747 AIGUES DE MANRESA, S.A.",3507,-43.46,25877.71,ES0182140000071923309501
+07/10/2026,07/10/2026,00186,ABONAMENT REMESA DE CÀRRECS,046234148 ES95005G61703468,3507,650.0,25921.17,ES0182140000071923309500
+CSV;
+        $lineas = (new LectorCsvBbva())->leer($csv);
+        self::assertCount(3, $lineas);
+        self::assertSame('2026-10-08', $lineas[0]->fecha);
+        self::assertSame(-12275, $lineas[0]->cents);
+        self::assertSame('TRANSFERÈNCIES · Factura 2415', $lineas[0]->concepto);
+        self::assertSame(-4346, $lineas[1]->cents);
+        self::assertStringContainsString('AIGUES DE MANRESA', $lineas[1]->concepto);
+        self::assertSame(65000, $lineas[2]->cents);
+        self::assertSame('ingreso', $lineas[2]->sentido());
+        self::assertNotSame($lineas[0]->huella, $lineas[2]->huella);
+    }
 }
