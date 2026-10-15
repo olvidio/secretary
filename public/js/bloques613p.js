@@ -49,6 +49,14 @@
     return `<tr class="${clase}"><td>${esc(etiqueta)}</td>${SEP}${numsSoloPrevisto(l, codigoEditable)}</tr>`;
   }
 
+  function filaSoloRealizado(clase, etiqueta, l) {
+    const real = l ? esc(enteroEs(l.realizado)) : '';
+    return `<tr class="${clase}"><td>${esc(etiqueta)}</td>${SEP}
+      <td class="num"></td>${SEP}
+      <td class="num">${real}</td>${SEP}
+      <td class="num pct"></td></tr>`;
+  }
+
   function filaSaldoCc(clase, etiqueta, l, modoPresupuesto) {
     if (modoPresupuesto) {
       return filaPresupuesto(clase, etiqueta, l, '9');
@@ -58,7 +66,7 @@
     return `<tr class="${clase}"><td>${esc(etiqueta)}</td>${SEP}
       <td class="num">${prev}</td>${SEP}
       <td class="num"><input type="text" name="saldo_cc_personales" id="saldo-cc-personales"
-        class="informe-613-cocina-input informe-613-tabla-input" aria-label="Saldo en las c/c personales"></td>${SEP}
+        class="informe-613-cocina-input informe-613-tabla-input" aria-label="Saldo contable persona-centro"></td>${SEP}
       <td class="num pct">${pctVal}</td></tr>`;
   }
 
@@ -171,7 +179,13 @@
       out.push(det('sub', etiquetaSub(l, '7'), l, l.codigo));
     });
     out.push(cab('sec sec-cab sec-total sec-divide', 'VIII. Saldo final (III-IV-V-VI-VII)', tot.saldo_final));
-    out.push(filaSaldoCc('sec sec-cab sec-azul sec-divide', 'IX. Saldo en las c/c personales', linea(r, '9'), presu));
+    out.push(filaSaldoCc('sec sec-cab sec-azul sec-divide', 'IX. Saldo contable (persona–centro)', linea(r, '9'), presu));
+    if (!presu) {
+      const l90 = linea(r, '90');
+      if (l90) {
+        out.push(filaSoloRealizado('sec sec-cab sec-divide', '90. Saldo en cuentas corrientes', l90));
+      }
+    }
     return out.join('');
   }
 

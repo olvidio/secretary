@@ -29,9 +29,9 @@ Si el centro ya confirmó destinos 7, el texto («Deberías ingresar…») apare
 - Un mes sin ingresos ni gastos también se puede enviar; así se anula un envío que el centro ya había aceptado.
 - El botón de enviar se desactiva si el año contable de ese mes está cerrado en el centro.
 - El mes empieza el día siguiente al cierre del mes anterior y llega hasta la fecha de cierre elegida en la pantalla de cierre, no necesariamente del día 1 al último día.
-- El **disponible indicado** en la remesa es el saldo menos el remanente (cero si el saldo no cubre el remanente). No mueve tesorería: solo informa al secretario. Qué hacer con esa cifra (y con el resumen de conceptos) lo decide el secretario al **Aceptar**, incluida la opción de sustituir el disponible registrado en el centro.
+- El saldo de caja y banco que va relleno es el concepto 90. El centro lo suma en la línea **90** del 613 P cuando acepta la remesa. El **disponible indicado** es ese saldo menos el remanente (cero si el saldo no cubre el remanente). No mueve tesorería: solo informa al secretario. Qué hacer con esa cifra (y con el resumen de conceptos) lo decide el secretario al **Aceptar**, incluida la opción de sustituir el disponible registrado en el centro.
 - Los gastos marcados como «Generales» viajan indicando su concepto, para que el centro los anote también en sus cuentas.
-- El «Historial de este mes» muestra las versiones enviadas, en qué estado quedó cada una y el disponible que se **comunicó** en esa versión.
+- El «Historial de este mes» muestra las versiones enviadas, en qué estado quedó cada una, el disponible que se **comunicó** en esa versión y, si el centro escribió algo al rechazar, esa nota (junto con la nota que enviaste tú, si la había).
 - Las 7 que ya se hayan anotado en el libro viajan en la remesa. Las de la propuesta del centro se apuntaron al confirmar; no hay que volver a cargarlas a mano para que cuenten.
 
 ## Problemas frecuentes

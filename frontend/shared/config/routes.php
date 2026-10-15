@@ -68,6 +68,7 @@ return static function (RouteCollector $r): void {
         ['/nombres', 'personas/view/listado.php', 'nombres'],
         ['/prevision-personal', 'presupuestos/view/prevision_personal.php', 'prevision-personal'],
         ['/prevision', 'presupuestos/view/prevision.php', 'prevision'],
+        ['/prevision-resumen-e37', 'presupuestos/view/prevision_resumen_e37.php', 'prevision-resumen-e37'],
         ['/presupuesto-p', 'presupuestos/view/form.php', 'presupuesto-p'],
         ['/presupuesto-g', 'presupuestos/view/form.php', 'presupuesto-g'],
         ['/apuntes', 'apuntes/view/listado.php', 'apuntes'],

@@ -230,6 +230,7 @@ final class Resumen613CentroSgTest extends TestCase
             new PdoPresupuestoSg($this->pdo),
             null,
             $realizadoSg,
+            new \src\remesas\infrastructure\persistence\PdoRemesaRepository($this->pdo),
         );
         $payload = $caso->ejecutar('G');
         foreach ($payload['lineas'] as $l) {

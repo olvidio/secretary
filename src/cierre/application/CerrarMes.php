@@ -11,6 +11,7 @@ use src\ambito\domain\value_objects\ContextoActual;
 use src\apuntes\application\CrearApunte;
 use src\apuntes\application\ListarApuntes;
 use src\asientos\domain\contracts\AsientoRepository;
+use src\cierre\application\AplicarSuperavitVivienda;
 use src\cierre\domain\services\MesesSinCierre;
 use src\cierre\domain\services\RepartoCierre;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
@@ -29,6 +30,7 @@ final class CerrarMes
         private readonly ListarApuntes $listarApuntes,
         private readonly ResolverAmbitoActual $ambito,
         private readonly MesesSinCierre $mesesSinCierre,
+        private readonly AplicarSuperavitVivienda $superavit,
     ) {
     }
 
@@ -66,18 +68,20 @@ final class CerrarMes
                 'base_reparto_es' => $preparado['base_reparto']->formatEs(),
                 'restante_es' => $preparado['restante']->formatEs(),
                 'tipo_cierre' => $cfg->tipoCierre,
-                'lineas' => $this->lineasPreview($reparto),
+                'lineas' => $this->lineasPreview($reparto, $this->superavit->prevision()),
                 'meses_faltantes' => $this->detectarMesesFaltantes($cfg, $contexto),
             ];
         }
 
         $creados = $this->generarParaRango($cfg, $contexto, $desde, $hasta, $reparto);
+        $superavit = $this->superavit->ejecutar();
 
         return [
             'preview' => false,
             'creados' => count($creados),
             'gastos_generales' => $gastos->toString(),
             'apuntes' => $creados,
+            'superavit_personas' => $superavit['personas'],
         ];
     }
 
@@ -139,9 +143,12 @@ final class CerrarMes
             ];
         }
 
+        $superavit = $this->superavit->ejecutar();
+
         return [
             'creados' => $totalCreados,
             'meses' => $procesados,
+            'superavit_personas' => $superavit['personas'],
         ];
     }
 
@@ -393,12 +400,19 @@ final class CerrarMes
 
     /**
      * @param list<array{persona: Persona, importe: Dinero, importe_bruto: Dinero, ya_imputado: Dinero}> $reparto
+     * @param list<array{iniciales: string, superavit_es: string, saldaria_es: string}> $previsionSuperavit
      * @return list<array<string, mixed>>
      */
-    private function lineasPreview(array $reparto): array
+    private function lineasPreview(array $reparto, array $previsionSuperavit = []): array
     {
+        $porIni = [];
+        foreach ($previsionSuperavit as $fila) {
+            $porIni[strtolower($fila['iniciales'])] = $fila;
+        }
         $prev = [];
         foreach ($reparto as $r) {
+            $ini = strtolower($r['persona']->iniciales);
+            $super = $porIni[$ini] ?? null;
             $prev[] = [
                 'iniciales' => $r['persona']->iniciales,
                 'nombre' => $r['persona']->nombreCompleto(),
@@ -406,6 +420,8 @@ final class CerrarMes
                 'importe_es' => $r['importe']->formatEs(),
                 'importe_bruto_es' => $r['importe_bruto']->formatEs(),
                 'ya_imputado_es' => $r['ya_imputado']->formatEs(),
+                'superavit_es' => $super['superavit_es'] ?? '0,00',
+                'saldaria_deuda_es' => $super['saldaria_es'] ?? '0,00',
             ];
         }
 

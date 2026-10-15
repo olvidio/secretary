@@ -48,7 +48,7 @@ final class ProyectorAsientoAFilaExcel
         }
 
         $cuentasMov = $this->cuentasDe($asiento, $cuentasPorId);
-        if ($asiento->tipo === 'asignacion_cc') {
+        if ($asiento->tipo === 'asignacion_cc' || $asiento->tipo === 'liquidacion_deuda' || $asiento->tipo === 'superavit_vivienda') {
             return [];
         }
         if ($asiento->tipo === 'remesa' || $asiento->origen === 'remesa') {

@@ -6,6 +6,7 @@ namespace src\apuntes\application;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
+use src\ambito\application\AsegurarCuentaDeudaVivienda;
 use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\contracts\CuentaFisicaRepository;
@@ -154,6 +155,7 @@ final class CrearApunte
             fn (): \src\ambito\domain\entity\Cuenta => $this->resolverDeudores($centroId),
             $origenAsiento,
             ContabilidadCentroSg::admiteTraspasoCajaBanco($this->codigoPlanContable($centroId)),
+            fn (int $personaId): \src\ambito\domain\entity\Cuenta => $this->resolverDeudaCierre($centroId, $personaId),
         );
 
         if ($resultado['asientos'] === []) {
@@ -364,6 +366,16 @@ final class CrearApunte
         }
 
         return $cuenta;
+    }
+
+    private function resolverDeudaCierre(int $centroId, int $personaId): \src\ambito\domain\entity\Cuenta
+    {
+        $persona = $this->personas->porId($personaId);
+        if ($persona === null || $persona->centroId !== $centroId) {
+            throw new InvalidArgumentException(_("Persona no encontrada para la deuda de vivienda"));
+        }
+
+        return (new AsegurarCuentaDeudaVivienda($this->cuentas))->ejecutar($persona);
     }
 
     private function resolverDeudores(int $centroId): \src\ambito\domain\entity\Cuenta

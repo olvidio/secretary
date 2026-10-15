@@ -26,6 +26,7 @@ use src\asientos\infrastructure\persistence\PdoAsientoRepository;
 use src\conceptos\infrastructure\persistence\PdoConceptoRepository;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\importacion\application\ImportarExcelSecretario;
+use src\cierre\application\MedirSuperavitVivienda;
 use src\informes\application\CalcularSaldos;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\presupuestos\infrastructure\persistence\PdoPresupuestoRepository;
@@ -270,13 +271,16 @@ final class TesoreriaFisicaTest extends TestCase
         PdoCuentaRepository $cuentas,
         ResolverAmbitoActual $ambito,
     ): CalcularSaldos {
+        $listar = new ListarApuntes($asientos, $cuentas, $personas, new ProyectorAsientoAFilaExcel(), $ambito);
+
         return new CalcularSaldos(
             $asientos,
             $config,
             $personas,
             $ambito,
-            new ListarApuntes($asientos, $cuentas, $personas, new ProyectorAsientoAFilaExcel(), $ambito),
+            $listar,
             ConceptosCentro::resolver($this->pdo),
+            new MedirSuperavitVivienda($config, $personas, $asientos, $listar, $ambito),
         );
     }
 }

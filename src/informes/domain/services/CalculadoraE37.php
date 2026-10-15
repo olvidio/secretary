@@ -60,7 +60,9 @@ final class CalculadoraE37
             ['clave' => 'nec_sede', 'etiqueta' => 'Necesidad', 'codigo' => '6'],
             ['clave' => 'lab_ap', 'etiqueta' => 'Lab.ap.', 'codigo' => '71 79'],
             ['clave' => 'saldo_final', 'etiqueta' => 'saldo F.', 'codigo' => ''],
-            ['clave' => 'saldo_cc', 'etiqueta' => 'saldo', 'codigo' => '9'],
+            ['clave' => 'saldo_cc', 'etiqueta' => 'Saldo cont.', 'codigo' => '9'],
+            ['clave' => 'deuda_viv', 'etiqueta' => 'Deuda viv.', 'codigo' => ''],
+            ['clave' => 'superavit_viv', 'etiqueta' => 'Sup. viv.', 'codigo' => ''],
         ];
     }
 
@@ -87,9 +89,22 @@ final class CalculadoraE37
 
     public static function avisoSaldoCcNegativo(): string
     {
-        return 'Un saldo c/c negativo suele ser el cierre automático de vivienda de un mes '
-            . 'que no iba en la remesa. Aportar de más el mes siguiente no lo cancela: ese extra '
-            . 'cubre los gastos de ese mes, no la c/c anterior. No es un agujero de caja.';
+        return 'Un saldo contable negativo es un descuadre de apuntes A (no es la deuda de vivienda del cierre). '
+            . 'La deuda de vivienda va en su columna y se salda en Saldos, sin un ingreso 111.';
+    }
+
+    public static function avisoDeudaVivienda(): string
+    {
+        return 'Deuda de vivienda del cierre, pendiente de cobro. No es trabajo: en Saldos, «Saldar» '
+            . 'aplica primero el superávit de vivienda (lo ingresado por encima de la cuota) y, si no alcanza, el saldo contable. '
+            . 'No aumenta el 111 ni la columna Vivienda.';
+    }
+
+    public static function avisoSuperavitVivienda(): string
+    {
+        return 'Superávit de vivienda: lo ingresado en vivienda, sin el cierre automático, supera la cuota del ejercicio. '
+            . 'Ese exceso está dentro de la columna Vivienda y deja el Disponible, y con él el saldo F., más bajo. '
+            . 'No es un descubierto: la persona ha puesto en vivienda más de lo que le toca.';
     }
 
     public static function claveDeCodigo(string $codigo): ?string
@@ -107,7 +122,12 @@ final class CalculadoraE37
      * @param array<string, int> $porCodigoMaestro codigo_maestro => cents
      * @return array<string, Dinero>
      */
-    public static function totalesDesdeMovimientos(array $porCodigoMaestro, int $saldoCcCents): array
+    public static function totalesDesdeMovimientos(
+        array $porCodigoMaestro,
+        int $saldoCcCents,
+        int $deudaCents = 0,
+        int $superavitCents = 0,
+    ): array
     {
         $tot = [];
         foreach (self::mapaImportes() as $k => $codigos) {
@@ -118,6 +138,8 @@ final class CalculadoraE37
             }
         }
         $tot['saldo_cc'] = Dinero::fromCents($saldoCcCents);
+        $tot['deuda_viv'] = Dinero::fromCents($deudaCents);
+        $tot['superavit_viv'] = Dinero::fromCents($superavitCents > 0 ? $superavitCents : 0);
 
         $gastos = $tot['vivienda']->add($tot['ordinarios'])->add($tot['ropa'])->add($tot['ca_crt'])
             ->add($tot['medicos'])->add($tot['coche'])->add($tot['estudios'])->add($tot['obl_econ']);

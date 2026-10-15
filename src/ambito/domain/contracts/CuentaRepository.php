@@ -55,5 +55,17 @@ interface CuentaRepository
     /** Cuenta colectiva de deudores por vivienda (libro G). */
     public function deudoresVivienda(int $centroId): ?Cuenta;
 
+    /** Deuda de vivienda imputada en el cierre (`DEUDA.VIV.<INICIALES>`). */
+    public function deudaViviendaDe(int $centroId, int $personaId): ?Cuenta;
+
+    /** Regularización al saldar esa deuda (libro P o G). */
+    public function regularizacionDeuda(int $centroId, string $libro): ?Cuenta;
+
+    /** Superávit de vivienda de una persona (`SUPERAVIT.VIV.<INICIALES>`, libro P). */
+    public function superavitViviendaDe(int $centroId, int $personaId): ?Cuenta;
+
+    /** Superávit colectivo de vivienda (libro G). */
+    public function superavitVivienda(int $centroId): ?Cuenta;
+
     public function guardar(Cuenta $cuenta): Cuenta;
 }

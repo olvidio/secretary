@@ -20,7 +20,7 @@ final class AgrupadorPrevision613P
         'VI' => 'VI. Necesidades de la sede',
         'VII' => 'VII. Otras labores apostólicas',
         'VIII' => 'VIII. Saldo final',
-        'IX' => 'IX. Saldo en las c/c personales',
+        'IX' => 'IX. Saldo contable (persona–centro)',
     ];
 
     /**

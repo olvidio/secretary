@@ -112,25 +112,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     trTot.innerHTML = `<td colspan="2">${esc(nombre)}</td>`
       + cols.map(c => {
           const es = t[c.clave + '_es'];
-          if (c.clave === 'saldo_cc' && r.aviso_saldo_cc) {
+          if ((c.clave === 'saldo_cc' && r.aviso_saldo_cc) || (c.clave === 'deuda_viv' && r.aviso_deuda)) {
             const txt = fmtHoja(es);
             return `<td class="num saldo-cc-neg">${txt ? esc(txt) : ''}</td>`;
+          }
+          if (c.clave === 'superavit_viv' && r.aviso_superavit) {
+            const txt = fmtHoja(es);
+            return `<td class="num superavit-viv">${txt ? esc(txt) : ''}</td>`;
           }
           return celdaNum(es);
         }).join('');
     tfoot.appendChild(trTot);
+    function filaAviso(texto) {
+      const tr = document.createElement('tr');
+      tr.className = 'informe-e37-aviso';
+      tr.innerHTML = `<td colspan="${2 + cols.length}">${esc(texto)}</td>`;
+      return tr;
+    }
+    if (r.aviso_saldo_cc) tfoot.appendChild(filaAviso(r.aviso_saldo_cc));
+    if (r.aviso_deuda) tfoot.appendChild(filaAviso(r.aviso_deuda));
+    if (r.aviso_superavit) tfoot.appendChild(filaAviso(r.aviso_superavit));
     tabla.appendChild(tfoot);
     scroll.appendChild(tabla);
     art.appendChild(scroll);
-
-    const avisoEl = document.createElement('p');
-    avisoEl.className = 'aviso-saldo-cc';
-    if (r.aviso_saldo_cc) {
-      avisoEl.textContent = r.aviso_saldo_cc;
-    } else {
-      avisoEl.hidden = true;
-    }
-    art.appendChild(avisoEl);
 
     return art;
   }

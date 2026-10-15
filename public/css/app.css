@@ -537,7 +537,32 @@ button.yo-pill.on:hover { background: #1e3a8a; border-color: #1e3a8a; }
 .yo-plantillas-grid button.on { outline-color: #7c3aed; background: #ede9fe; }
 .yo-lista-generales { font-size: .7rem; color: #1e40af; margin-left: .35rem; }
 .arqueo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .5rem; }
-.arqueo-fecha input[type=date] { width: 10.5rem; max-width: 100%; }
+.fecha-campo {
+  display: inline-flex;
+  align-items: center;
+  gap: .2rem;
+  max-width: 100%;
+  vertical-align: middle;
+}
+.fecha-campo input.fecha-es { width: 7.6rem; max-width: 100%; }
+.fecha-campo input.fecha-picker {
+  width: 1.6rem;
+  height: 1.7rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  flex: none;
+}
+.fecha-campo input.fecha-picker::-webkit-datetime-edit { display: none; }
+.fecha-campo input.fecha-picker::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  margin: 0;
+  opacity: 1;
+}
+.arqueo-fecha .fecha-campo { max-width: 100%; }
 .arqueo-total {
   margin: 1rem 0;
   padding: .65rem 1rem;
@@ -610,6 +635,7 @@ button[type="button"].arqueo-capuchinos-btn {
   color: #4a5568;
 }
 td.saldo-cc-neg { color: var(--err); font-weight: 600; }
+td.superavit-viv { font-weight: 600; }
 .comprobacion-item h3 { margin: 0 0 .35rem; font-size: 1rem; }
 .comprobacion-estado { font-weight: normal; color: #666; }
 .comprobacion-ayuda { font-size: .85rem; color: #4a5568; margin: .5rem 0 0; }
@@ -980,6 +1006,22 @@ body.e37-hoja main { max-width: none; }
   font-weight: 700;
   background: #fff;
   border-top: 2px solid #1a202c;
+}
+.informe-e37-aviso td {
+  white-space: normal;
+  font-weight: 400;
+  text-align: left;
+  font-size: .9rem;
+  color: #4a5568;
+  padding: .45rem .35rem 0;
+  border: none;
+  background: transparent;
+}
+.informe-e37-resumen-prevision tbody td {
+  font-weight: 400;
+}
+.informe-e37-resumen-prevision tbody td.saldo-cc-neg {
+  font-weight: 400;
 }
 .informe-e37-bloque + .informe-e37-bloque {
   margin-top: 2rem;
@@ -1832,14 +1874,16 @@ body.admin { margin: 0; background: #f8fafc; }
   display: grid;
   gap: .7rem;
 }
-.yo-sheet label:has(> input[type=date]) {
+.yo-sheet label:has(> input[type=date]),
+.yo-sheet label:has(.fecha-campo) {
   flex-direction: row;
   align-items: center;
   gap: .5rem;
   width: fit-content;
   max-width: 100%;
 }
-.yo-sheet input[type=date] {
+.yo-sheet input[type=date],
+.yo-sheet .fecha-campo input.fecha-es {
   width: 10.5rem;
   max-width: 100%;
   flex: none;
@@ -1936,6 +1980,7 @@ body.admin { margin: 0; background: #f8fafc; }
   margin: 0 0 .15rem;
 }
 .yo-desdoblar-parte input[type=date],
+.yo-desdoblar-parte .fecha-campo,
 .yo-desdoblar-parte select { max-width: 100%; }
 .yo-sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
 .yo-cat-form { display: grid; gap: .6rem; background: #fff; padding: 1rem; border-radius: 12px; }

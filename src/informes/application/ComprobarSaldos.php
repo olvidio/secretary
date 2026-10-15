@@ -39,6 +39,7 @@ final class ComprobarSaldos
         $comprobaciones = [
             $this->checkPartidaDoble($hayDescuadrados),
             $this->checkSaldoGlobal($saldoGlobal, $saldosData['saldo_a_es']),
+            $this->checkDeuda($saldosData['por_persona']),
             $this->checkApuntesA($personas),
         ];
 
@@ -152,9 +153,36 @@ final class ComprobarSaldos
             'personas' => $personas,
             'ayuda' => 'Los apuntes A (sin caja/banco) deben cuadrar por persona: cada gasto '
                 . 'personal lleva su contrapartida, normalmente un ingreso 111 (Trabajo). '
+                . 'El cierre de vivienda no entra en este cuadre: queda en la deuda de vivienda '
+                . 'y se salda aparte, sin un 111. '
                 . 'Si sobran ingresos, suele faltar el gasto de vivienda: P/211 si aporta a generales '
-                . '(cuadra con G/11) o P/212 si es vivienda personal. '
-                . 'Si falta, el saldo de la cuenta personal queda distinto de cero.',
+                . '(cuadra con G/11) o P/212 si es vivienda personal.',
+        ];
+    }
+
+    /**
+     * @param list<array<string, mixed>> $porPersona
+     * @return array<string, mixed>
+     */
+    private function checkDeuda(array $porPersona): array
+    {
+        $n = 0;
+        foreach ($porPersona as $p) {
+            if (Dinero::fromInput((string) ($p['deuda'] ?? '0'))->isNegative()) {
+                ++$n;
+            }
+        }
+
+        return [
+            'id' => 'deuda_vivienda',
+            'titulo' => 'Deuda de vivienda',
+            'ok' => $n === 0,
+            'mensaje' => $n === 0
+                ? 'Ninguna persona tiene deuda de vivienda pendiente del cierre.'
+                : $n . ' persona(s) con deuda de vivienda del cierre. En Saldos, «Saldar»: primero el superávit de vivienda y, si no alcanza, el saldo contable. No aumenta el 111.',
+            'ayuda' => 'El cierre anota la vivienda (211 y 11) y deja lo pendiente en la cuenta de deuda, '
+                . 'fuera del saldo contable. Si lo ingresado en vivienda supera la cuota, ese superávit salda la deuda. '
+                . 'Lo que falte sale del saldo contable positivo.',
         ];
     }
 }

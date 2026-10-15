@@ -574,6 +574,35 @@ final class PdoAsientoRepository implements AsientoRepository
         }
     }
 
+    public function reemplazarSuperavitVivienda(int $ejercicioId, array $pares): int
+    {
+        $transaccionPropia = !$this->pdo->inTransaction();
+        if ($transaccionPropia) {
+            $this->pdo->beginTransaction();
+        }
+        try {
+            $st = $this->pdo->prepare(
+                "DELETE FROM asientos WHERE ejercicio_id = :ej AND tipo = 'superavit_vivienda'"
+            );
+            $st->execute([':ej' => $ejercicioId]);
+            $n = 0;
+            foreach ($pares as $par) {
+                $this->guardarEnlazados($par[0], $par[1]);
+                $n += 2;
+            }
+            if ($transaccionPropia) {
+                $this->pdo->commit();
+            }
+
+            return $n;
+        } catch (\Throwable $e) {
+            if ($transaccionPropia && $this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
     public function contarApertura(int $ejercicioId): int
     {
         $st = $this->pdo->prepare(

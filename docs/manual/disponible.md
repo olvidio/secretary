@@ -9,13 +9,14 @@
 
 Guarda, persona a persona, el dinero que aún hay que aplicar a labores apostólicas (las partidas 7: fundaciones, prelatura, etc.). No es la cuenta corriente de las comprobaciones: se puede corregir a mano, porque no siempre coincide con ingresos menos gastos.
 
-Palabras clave: **saldo c/c**, **cuenta corriente**, **colocar en partida 7**, **destinos 7**, **dónde poner el saldo de las personas**.
+Palabras clave: **saldo contable**, **cuenta corriente (banco)**, **colocar en partida 7**, **destinos 7**, **concepto 90**.
 
-## Cuenta corriente (c/c) y partidas 7
+## Saldo contable (9) vs cuenta corriente banco (90) y partidas 7
 
-Tras anotar los movimientos del mes, en **Saldos** o **Cuentas personales (E37)** aparece la columna **c/c** (concepto 9). Esa cifra **no se reparte a mano** entre códigos 71, 72… ni se anota como un apunte suelto en Entrada P.
+En **Saldos** y **E37** la columna **Saldo cont.** (concepto **9**) es el saldo de la cuenta **CC** (persona–centro). **No** es el banco ni se reparte a mano entre 71, 72…
 
-- La **c/c** es el saldo contable de la persona (lo que falta por cuadrar con ingresos A, sobre todo **111** trabajo o vivienda). Lo normal es que quede en **cero** cuando el mes está bien cerrado.
+- Lo normal es **cero** cuando los apuntes A cuadran. La vivienda del cierre no se cuadra con un 111: queda en **Deuda viv.** y se salda en Saldos.
+- En la **remesa**, la persona comunica **cuenta corriente (banco)** (concepto **90**, informativo: caja+banco a cierre). De ahí sale el **disponible** que puede ir a partidas 7; **no** crea apuntes en P del centro.
 - Las **partidas 7** son gastos de labores apostólicas definidos en Centros → labores apostólicas. **Qué importe va a cada código 7** lo propone el programa, no el secretario mirando la c/c persona a persona.
 
 Orden habitual cuando hay dinero para labores (sobrante de trabajo, no un agujero de vivienda):
@@ -27,7 +28,7 @@ Orden habitual cuando hay dinero para labores (sobrante de trabajo, no un agujer
 
 Las 7 que la persona ya anotó en su libro personal viajan en la remesa; **no** hay que volver a cargarlas en Disponible.
 
-Si la **c/c sale negativa** (habitual tras cierre de vivienda sin remesa que la cubra): **no** se corrige con partidas 7. Hay que cuadrar con **111** u otra contrapartida A (ver **Saldos**, **Comprobaciones**, **Cierre de mes** y **E37**). El negativo no es «dinero disponible para la prelatura».
+Si **Deuda viv.** sale en negativo: **no** se corrige con partidas 7 ni con un 111. En **Saldos**, **Saldar**: primero el superávit de vivienda y, si no alcanza, el saldo contable. El saldo contable negativo, si lo hay, es otro descuadre de apuntes A.
 
 ## Cómo se usa
 

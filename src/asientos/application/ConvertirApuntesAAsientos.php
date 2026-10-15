@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace src\asientos\application;
 
 use InvalidArgumentException;
+use src\ambito\application\AsegurarCuentaDeudaVivienda;
 use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\contracts\CuentaRepository;
 use src\plan\domain\services\CatalogoPlanesContables;
@@ -68,6 +69,7 @@ final class ConvertirApuntesAAsientos
             fn (): \src\ambito\domain\entity\Cuenta => $this->resolverDeudores($centroId),
             $origenAsiento,
             $this->admiteTraspasoCajaBanco($centroId),
+            fn (int $personaId): \src\ambito\domain\entity\Cuenta => $this->resolverDeudaCierre($personaId),
         );
 
         $guardados = 0;
@@ -111,6 +113,16 @@ final class ConvertirApuntesAAsientos
         }
 
         return $cuenta;
+    }
+
+    private function resolverDeudaCierre(int $personaId): \src\ambito\domain\entity\Cuenta
+    {
+        $persona = $this->personas->porId($personaId);
+        if ($persona === null) {
+            throw new InvalidArgumentException(_("Persona no encontrada para la deuda de vivienda"));
+        }
+
+        return (new AsegurarCuentaDeudaVivienda($this->cuentas))->ejecutar($persona);
     }
 
     private function resolverDeudores(int $centroId): \src\ambito\domain\entity\Cuenta

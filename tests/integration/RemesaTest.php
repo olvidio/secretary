@@ -26,6 +26,7 @@ use src\cierre\application\GenerarApertura;
 use src\conceptos\infrastructure\persistence\PdoConceptoRepository;
 use src\asientos\infrastructure\persistence\PdoAsientoRepository;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
+use src\cierre\application\MedirSuperavitVivienda;
 use src\informes\application\CalcularSaldos;
 use src\personal\application\AsegurarPlanPersonal;
 use src\personal\application\CrearSubcuentaPersonal;
@@ -157,9 +158,19 @@ final class RemesaTest extends TestCase
         self::assertSame(1250, $importes['22']);
         self::assertSame(5000, $importes['111']);
 
-        $d['rechazar']->ejecutar((int) $enviada->id);
+        $d['rechazar']->ejecutar((int) $enviada->id, ['nota' => 'Revise el gas']);
         self::assertSame(0, $this->contarAsientosRemesa());
         self::assertSame(0, $this->realizado22($d));
+        $trasRechazo = $d['preview']->ejecutar($anio, 1);
+        $v1Rechazada = null;
+        foreach ($trasRechazo['historial'] as $fila) {
+            if ($fila['version'] === 1 && $fila['estado'] === 'rechazada') {
+                $v1Rechazada = $fila;
+                break;
+            }
+        }
+        self::assertNotNull($v1Rechazada);
+        self::assertSame('Revise el gas', $v1Rechazada['nota']);
 
         $v2 = $d['enviar']->ejecutar(['anio' => $anio, 'mes' => 1]);
         self::assertSame(2, $v2->version);
@@ -460,7 +471,7 @@ final class RemesaTest extends TestCase
                 $config,
                 $personas,
                 $ambitoCentro,
-                new ListarApuntes(
+                $listarParaSaldos = new ListarApuntes(
                     $asientos,
                     $cuentas,
                     $personas,
@@ -468,6 +479,7 @@ final class RemesaTest extends TestCase
                     $ambitoCentro,
                 ),
                 $conceptos,
+                new MedirSuperavitVivienda($config, $personas, $asientos, $listarParaSaldos, $ambitoCentro),
             ),
         ];
     }

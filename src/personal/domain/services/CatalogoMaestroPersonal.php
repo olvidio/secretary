@@ -6,7 +6,7 @@ namespace src\personal\domain\services;
 
 use src\conceptos\domain\services\CatalogoConceptos;
 
-/** Códigos del plan maestro admitidos en el libro X (Fase 7). Sin el 9 (saldo c/c). */
+/** Códigos del plan maestro admitidos en el libro X (Fase 7). Sin 9 (saldo contable) ni 90 (informativo). */
 final class CatalogoMaestroPersonal
 {
     /**
@@ -16,7 +16,7 @@ final class CatalogoMaestroPersonal
     {
         $out = [];
         foreach (CatalogoConceptos::todos() as $c) {
-            if ($c['cuenta'] !== 'P' || $c['naturaleza'] === 'saldo') {
+            if ($c['cuenta'] !== 'P' || in_array($c['naturaleza'], ['saldo', 'informacion'], true)) {
                 continue;
             }
             $tipo = $c['naturaleza'] === 'ingreso' ? 'ingreso' : 'gasto';

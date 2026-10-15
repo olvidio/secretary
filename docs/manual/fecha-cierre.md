@@ -13,7 +13,7 @@ Es un atajo al mismo dato que aparece en la pantalla de Configuración, para no 
 ## Cómo se usa
 
 1. Terminar el mes y sacar el resumen 613.
-2. Abrir esta pantalla, poner la fecha de cierre del mes siguiente y pulsar «Guardar».
+2. Abrir esta pantalla, poner la fecha de cierre del mes siguiente (día/mes/año) y pulsar «Guardar».
 
 ## Reglas que conviene saber
 

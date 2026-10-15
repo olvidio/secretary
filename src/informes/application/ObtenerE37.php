@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace src\informes\application;
 
 use src\ambito\application\ResolverAmbitoActual;
+use src\cierre\application\MedirSuperavitVivienda;
+use src\cierre\domain\services\CuentasDeudaVivienda;
 use src\apuntes\application\ListarApuntes;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
@@ -20,6 +22,7 @@ final class ObtenerE37
         private readonly AsientoRepository $asientos,
         private readonly ListarApuntes $listarApuntes,
         private readonly ResolverAmbitoActual $ambito,
+        private readonly MedirSuperavitVivienda $superavit,
     ) {
     }
 
@@ -38,13 +41,18 @@ final class ObtenerE37
             $hasta,
         );
 
-        $saldosCc = $this->saldosCcPorPersona($contexto->centroId, $contexto->ejercicioId, $desde, $hasta);
+        $saldosCc = $this->saldosPorMaestro($contexto->centroId, $contexto->ejercicioId, $desde, $hasta, '9');
+        $deudas = $this->saldosPorMaestro($contexto->centroId, $contexto->ejercicioId, $desde, $hasta, CuentasDeudaVivienda::MAESTRO);
+        $superavits = $this->superavitPorIniciales();
 
         $filas = [];
         foreach ($this->personas->listarDeCentro($contexto->centroId) as $p) {
+            $ini = strtolower(trim($p->iniciales));
             $tot = CalculadoraE37::totalesDesdeMovimientos(
                 $movs[$p->iniciales] ?? [],
                 $saldosCc[$p->iniciales] ?? 0,
+                $deudas[$p->iniciales] ?? 0,
+                $superavits[$ini] ?? 0,
             );
             $fila = [
                 'iniciales' => $p->iniciales,
@@ -58,14 +66,27 @@ final class ObtenerE37
         }
 
         $aviso = null;
+        $avisoDeuda = null;
+        $avisoSuperavit = null;
         foreach ($filas as $fila) {
-            if (Dinero::fromInput((string) ($fila['saldo_cc'] ?? '0'))->isNegative()) {
+            if ($aviso === null && Dinero::fromInput((string) ($fila['saldo_cc'] ?? '0'))->isNegative()) {
                 $aviso = CalculadoraE37::avisoSaldoCcNegativo();
-                break;
+            }
+            if ($avisoDeuda === null && Dinero::fromInput((string) ($fila['deuda_viv'] ?? '0'))->isNegative()) {
+                $avisoDeuda = CalculadoraE37::avisoDeudaVivienda();
+            }
+            if ($avisoSuperavit === null && Dinero::fromInput((string) ($fila['superavit_viv'] ?? '0'))->toCents() > 0) {
+                $avisoSuperavit = CalculadoraE37::avisoSuperavitVivienda();
             }
         }
 
-        return ['config' => $cfg->toArray(), 'filas' => $filas, 'aviso_saldo_cc' => $aviso];
+        return [
+            'config' => $cfg->toArray(),
+            'filas' => $filas,
+            'aviso_saldo_cc' => $aviso,
+            'aviso_deuda' => $avisoDeuda,
+            'aviso_superavit' => $avisoSuperavit,
+        ];
     }
 
     /** @return array<string, mixed> */
@@ -94,10 +115,14 @@ final class ObtenerE37
                 $desde,
                 $hasta,
             );
-            $saldosCc = $this->saldosCcPorPersona($contexto->centroId, $contexto->ejercicioId, $desde, $hasta);
+            $saldosCc = $this->saldosPorMaestro($contexto->centroId, $contexto->ejercicioId, $desde, $hasta, '9');
+            $deudas = $this->saldosPorMaestro($contexto->centroId, $contexto->ejercicioId, $desde, $hasta, CuentasDeudaVivienda::MAESTRO);
+            $superavits = $this->superavitPorIniciales();
             $tot = CalculadoraE37::totalesDesdeMovimientos(
                 $movs[$iniciales] ?? [],
                 $saldosCc[$iniciales] ?? 0,
+                $deudas[$iniciales] ?? 0,
+                $superavits[strtolower(trim($iniciales))] ?? 0,
             );
             $totArr = [];
             foreach ($tot as $k => $d) {
@@ -110,12 +135,22 @@ final class ObtenerE37
             if (Dinero::fromInput((string) ($totArr['saldo_cc'] ?? '0'))->isNegative()) {
                 $aviso = CalculadoraE37::avisoSaldoCcNegativo();
             }
+            $avisoDeuda = null;
+            if (Dinero::fromInput((string) ($totArr['deuda_viv'] ?? '0'))->isNegative()) {
+                $avisoDeuda = CalculadoraE37::avisoDeudaVivienda();
+            }
+            $avisoSuperavit = null;
+            if (Dinero::fromInput((string) ($totArr['superavit_viv'] ?? '0'))->toCents() > 0) {
+                $avisoSuperavit = CalculadoraE37::avisoSuperavitVivienda();
+            }
             $out = [
                 'config' => $cfg->toArray(),
                 'iniciales' => $iniciales,
                 'apuntes' => $apuntes,
                 'totales' => $totArr,
                 'aviso_saldo_cc' => $aviso,
+                'aviso_deuda' => $avisoDeuda,
+                'aviso_superavit' => $avisoSuperavit,
                 'persona' => $p !== null
                     ? ['iniciales' => $p->iniciales, 'nombre' => $p->nombreCompleto()]
                     : ['iniciales' => $iniciales, 'nombre' => $iniciales],
@@ -176,9 +211,25 @@ final class ObtenerE37
         return $filas;
     }
 
-    /** @return array<string, int> iniciales => saldo_cc cents */
-    private function saldosCcPorPersona(int $centroId, int $ejercicioId, string $desde, string $hasta): array
+    /** @return array<string, int> iniciales en minúsculas => céntimos de superávit */
+    private function superavitPorIniciales(): array
     {
+        $out = [];
+        foreach ($this->superavit->ejecutar() as $ini => $row) {
+            $out[$ini] = $row['superavit']->toCents();
+        }
+
+        return $out;
+    }
+
+    /** @return array<string, int> iniciales => cents */
+    private function saldosPorMaestro(
+        int $centroId,
+        int $ejercicioId,
+        string $desde,
+        string $hasta,
+        string $maestro,
+    ): array {
         $personasPorId = [];
         foreach ($this->personas->listarDeCentro($centroId) as $p) {
             if ($p->id !== null) {
@@ -192,7 +243,7 @@ final class ObtenerE37
             if (
                 $row['tipo'] !== 'personal'
                 || $row['persona_id'] === null
-                || $row['codigo_maestro'] !== '9'
+                || $row['codigo_maestro'] !== $maestro
             ) {
                 continue;
             }

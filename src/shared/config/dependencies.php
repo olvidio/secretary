@@ -155,6 +155,7 @@ use src\presupuestos\application\ConstruirHojaPrevision;
 use src\presupuestos\application\GuardarPresupuesto;
 use src\presupuestos\application\GuardarPrevisionPersonal;
 use src\presupuestos\application\ObtenerPrevisionConsolidada;
+use src\presupuestos\application\ObtenerPrevisionResumenE37;
 use src\presupuestos\application\ObtenerPrevisionPersonal;
 use src\presupuestos\application\PresentarPresupuesto613G;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
@@ -314,6 +315,7 @@ return [
     ObtenerPrevisionPersonal::class => autowire(),
     GuardarPrevisionPersonal::class => autowire(),
     ObtenerPrevisionConsolidada::class => autowire(),
+    ObtenerPrevisionResumenE37::class => autowire(),
     AplicarPrevisionAlPresupuesto::class => autowire(),
     PrevisionController::class => autowire(),
     ArqueoRepository::class => autowire(PdoArqueoRepository::class),
@@ -547,7 +549,8 @@ return [
         ->constructorParameter('destinosSg', get(DestinoSgRepository::class))
         ->constructorParameter('presupuestoSg', get(PresupuestoSgRepository::class))
         ->constructorParameter('estadisticasSg', get(EstadisticasSg::class))
-        ->constructorParameter('realizadoCentroSg', get(RealizadoPorConceptoCentroSg::class)),
+        ->constructorParameter('realizadoCentroSg', get(RealizadoPorConceptoCentroSg::class))
+        ->constructorParameter('remesas', get(RemesaRepository::class)),
     GuardarInforme613Mes::class => autowire(),
     ObtenerE37::class => autowire(),
     CalcularSaldos::class => autowire(),

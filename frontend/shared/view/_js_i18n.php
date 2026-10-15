@@ -25,6 +25,7 @@ $i18nJs = [
     'sin_detalle' => _("Sin detalle"),
     'borrar_movimiento_confirm' => _("¿Borrar este movimiento?"),
     'quitar_fecha_cierre_confirm' => _("¿Quitar la fecha concreta y volver a la regla por defecto?"),
+    'calendario' => _("Calendario"),
     'enviar_mes_centro_confirm' => _("¿Enviar este mes al centro? Se manda el disponible (saldo menos remanente), no todo el saldo."),
     'borrar_apunte_confirm' => _("¿Borrar apunte?"),
     'guardar_cambios_obs_confirm' => _("Ha modificado algún campo además de observaciones. ¿Guardar los cambios?"),

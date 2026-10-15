@@ -20,6 +20,7 @@ final class AsegurarCuentaCorrientePersona
         if ($persona->id === null || $persona->centroId === null) {
             return;
         }
+        (new AsegurarCuentaDeudaVivienda($this->cuentas))->ejecutar($persona);
         if ($this->cuentas->personalDe($persona->centroId, $persona->id) !== null) {
             return;
         }

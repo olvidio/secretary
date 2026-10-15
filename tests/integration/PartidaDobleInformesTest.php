@@ -22,6 +22,7 @@ use src\asientos\infrastructure\persistence\PdoAsientoRepository;
 use src\conceptos\infrastructure\persistence\PdoConceptoRepository;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\importacion\application\ImportarExcelSecretario;
+use src\cierre\application\MedirSuperavitVivienda;
 use src\informes\application\CalcularSaldos;
 use src\personas\infrastructure\persistence\PdoPersonaRepository;
 use src\presupuestos\infrastructure\persistence\PdoPresupuestoRepository;
@@ -198,6 +199,7 @@ final class PartidaDobleInformesTest extends TestCase
             $ctx['ambito'],
             $ctx['listarApuntes'],
             $ctx['resolverConceptos'],
+            new MedirSuperavitVivienda($ctx['config'], $ctx['personas'], $ctx['asientos'], $ctx['listarApuntes'], $ctx['ambito']),
         );
     }
 }

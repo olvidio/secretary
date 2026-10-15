@@ -22,7 +22,7 @@ Flujo del secretario cuando **cierra el mes** contable del centro: no confundir 
 4. **Cierre de mes**: revisar la tabla de reparto y pulsar **Generar apuntes**. Si falta vivienda de meses anteriores, **Regularizar meses anteriores** antes.
 5. **613 P** y **613 G**: abrir cada resumen, revisar previsto/realizado, rellenar celdas azules si hace falta, **Imprimir** o **Descargar PDF** para archivar o enviar.
 6. **Remesas**: cuando las personas envíen su mes (ver proceso 2), **Filtrar** por recibidas, **Ver** cada una, **Aceptar** o **Rechazar**. Aceptar no sustituye el cierre de vivienda del centro: son cosas distintas (cierre reparte gastos G; remesa trae el resumen personal de cada uno).
-7. **Saldos** (opcional): revisar la columna **c/c**. Negativa: falta 111 u otra contrapartida A, no partidas 7. Positiva con remesas pendientes: suele resolverse al **aceptar** remesas y luego **Disponible → Proponer destinos 7** (ver proceso 2 y ficha Disponible).
+7. **Saldos** (opcional): **Deuda viv.** negativa se salda con el botón **Saldar** (primero el superávit de vivienda, luego el saldo contable; no aumenta el 111). Saldo contable negativo: falta otra contrapartida A, no partidas 7. Positiva con remesas pendientes: suele resolverse al **aceptar** remesas y luego **Disponible → Proponer destinos 7**.
 
 Orden práctico: primero el cierre de vivienda del centro y los 613; las remesas personales pueden llegar en paralelo y aceptarse cuando estén listas. Los saldos c/c **no se reparten a mano** entre códigos 71, 72…: lo hace la propuesta de Disponible tras aceptar remesas.
 
@@ -102,5 +102,5 @@ Comprobar en **Nombres** que «vivienda aporta a generales», exenciones de mese
 - **Remesa aceptada pero las 7 no aparecen**: las del centro se apuntan en **Disponible** con **Confirmar y apuntar**; las que la persona hizo en su libro ya viajan en la remesa.
 - **Importación con movimientos omitidos**: fechas fuera del ejercicio abierto; revisar Ejercicios o la fecha del movimiento.
 - **Solicitud de acceso sin respuesta**: el secretario debe resolverla en Nombres; hasta entonces la persona no puede enviar remesa.
-- **613 con IX negativo tras el cierre**: ver ficha de Resumen 613 P y Cierre de mes; no confundir con el disponible de G.
-- **Terminé los apuntes del mes y quiero saber en qué partida 7 colocar los saldos c/c**: no se elige partida a mano en Entrada P. Revisar Saldos: c/c negativa → 111 (Cierre de mes, E37). Sobrante para labores → aceptar remesas y **Disponible → Proponer destinos 7** (ficha Disponible).
+- **613 con IX negativo tras el cierre**: el IX es el saldo contable (concepto 9). La vivienda del cierre está en **Deuda viv.**, en Saldos y en el E37. El disponible de G es el resultado de la casa.
+- **Terminé los apuntes del mes y quiero saber en qué partida 7 colocar los saldos**: no se elige partida a mano en Entrada P. Deuda de vivienda → **Saldos → Saldar** (superávit de vivienda y, si falta, saldo contable). Sobrante para labores → aceptar remesas y **Disponible → Proponer destinos 7**.

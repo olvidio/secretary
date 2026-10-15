@@ -56,7 +56,7 @@ final class AgrupadorPrevision613PTest extends TestCase
         self::assertCount(3, $porGrupo['V']);
         // 8000 - 500 - 150 - 200 - 800 = 6350
         self::assertSame(6350, $porGrupo['VIII'][0]['total_cents']);
-        self::assertSame('IX. Saldo en las c/c personales', $porGrupo['IX'][0]['etiqueta']);
+        self::assertSame('IX. Saldo contable (persona–centro)', $porGrupo['IX'][0]['etiqueta']);
     }
 
     /**

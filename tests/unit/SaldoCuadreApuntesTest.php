@@ -15,6 +15,7 @@ final class SaldoCuadreApuntesTest extends TestCase
         $apuntes = [
             ['cuenta' => 'P', 'origen' => 'A', 'iniciales' => 'aa', 'concepto_codigo' => '22', 'cantidad' => '10.00'],
             ['cuenta' => 'P', 'origen' => 'A', 'iniciales' => 'aa', 'concepto_codigo' => '111', 'cantidad' => '10.00'],
+            ['cuenta' => 'P', 'origen' => 'A', 'iniciales' => 'aa', 'concepto_codigo' => '211', 'cantidad' => '40.00', 'es_cierre' => true],
             ['cuenta' => 'P', 'origen' => 'C', 'iniciales' => 'bb', 'concepto_codigo' => '201', 'cantidad' => '5.00'],
             ['cuenta' => 'G', 'origen' => 'C', 'iniciales' => 'bb', 'concepto_codigo' => '201', 'cantidad' => '99.00'],
         ];

@@ -16,7 +16,7 @@
     <label><?= _("Nota para el centro") ?> <input id="yo-remesa-nota" maxlength="200"></label>
 </p>
 <p>
-    <label><?= _("Saldo de tu cuenta (caja+banco a la fecha de cierre)") ?>
+    <label><?= _("Cuenta corriente (banco): caja+banco a la fecha de cierre (concepto 90, informativo)") ?>
         <input id="yo-remesa-tesoreria" inputmode="decimal">
     </label>
 </p>

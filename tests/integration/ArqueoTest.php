@@ -170,6 +170,12 @@ final class ArqueoTest extends TestCase
             new PdoInforme613MesRepository($this->pdo),
             $arqueoRepo,
             new PdoCuentaFisicaRepository($this->pdo),
+            null,
+            null,
+            null,
+            null,
+            null,
+            new \src\remesas\infrastructure\persistence\PdoRemesaRepository($this->pdo),
         );
     }
 }

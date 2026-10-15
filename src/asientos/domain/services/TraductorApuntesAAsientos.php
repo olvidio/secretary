@@ -7,6 +7,7 @@ namespace src\asientos\domain\services;
 use InvalidArgumentException;
 use src\ambito\domain\entity\Cuenta;
 use src\apuntes\domain\entity\Apunte;
+use src\cierre\domain\services\CuentasDeudaVivienda;
 use src\asientos\domain\entity\Asiento;
 use src\asientos\domain\entity\Movimiento;
 use src\personas\domain\entity\Persona;
@@ -24,6 +25,7 @@ final class TraductorApuntesAAsientos
      * @param callable(string, string): Cuenta $cuentaTesoreria (libro, codigoMaestro CAJA|BANCO)
      * @param callable(int): Cuenta $cuentaPersonalDe (personaId)
      * @param callable(): Cuenta $cuentaDeudoresVivienda
+     * @param callable(int): Cuenta|null $cuentaDeudaCierre personaId; cierre P/211 y P/6
      * @return array{asientos: list<Asiento>, omitidos_concepto_9: int, traspasos_fusionados: int}
      */
     public function traducir(
@@ -36,6 +38,7 @@ final class TraductorApuntesAAsientos
         callable $cuentaDeudoresVivienda,
         string $origenAsiento = 'import',
         bool $admiteTraspasoCajaBanco = true,
+        ?callable $cuentaDeudaCierre = null,
     ): array {
         $omitidos9 = 0;
         $fusionados = 0;
@@ -88,6 +91,7 @@ final class TraductorApuntesAAsientos
                 $cuentaPersonalDe,
                 $cuentaDeudoresVivienda,
                 $origenAsiento,
+                $cuentaDeudaCierre,
             );
         }
 
@@ -281,6 +285,7 @@ final class TraductorApuntesAAsientos
         callable $cuentaPersonalDe,
         callable $cuentaDeudoresVivienda,
         string $origenAsiento,
+        ?callable $cuentaDeudaCierre = null,
     ): Asiento {
         $libro = $apunte->cuenta;
         $concepto = $this->resolverCuentaConcepto($cuentaConcepto, $libro, $apunte->conceptoCodigo);
@@ -302,6 +307,7 @@ final class TraductorApuntesAAsientos
             $cuentaPersonalDe,
             $cuentaDeudoresVivienda,
             $personaId,
+            $cuentaDeudaCierre,
         );
         if ($apunte->cantidad->isNegative()) {
             $movimientos = $this->invertirMovimientos($movimientos);
@@ -335,6 +341,7 @@ final class TraductorApuntesAAsientos
         callable $cuentaPersonalDe,
         callable $cuentaDeudoresVivienda,
         ?int $personaId,
+        ?callable $cuentaDeudaCierre = null,
     ): array {
         $libro = $apunte->cuenta;
         $origen = $apunte->origen;
@@ -344,7 +351,7 @@ final class TraductorApuntesAAsientos
             $contrapartida = match ($origen) {
                 'C' => $cuentaTesoreria($libro, 'CAJA'),
                 'B' => $cuentaTesoreria($libro, 'BANCO'),
-                'A' => $this->contrapartidaOrigenA($apunte, $personaId, $cuentaPersonalDe, $cuentaDeudoresVivienda),
+                'A' => $this->contrapartidaOrigenA($apunte, $personaId, $cuentaPersonalDe, $cuentaDeudoresVivienda, $cuentaDeudaCierre),
                 default => throw new InvalidArgumentException('Origen no válido: ' . $origen),
             };
 
@@ -358,7 +365,7 @@ final class TraductorApuntesAAsientos
             $contrapartida = match ($origen) {
                 'C' => $cuentaTesoreria($libro, 'CAJA'),
                 'B' => $cuentaTesoreria($libro, 'BANCO'),
-                'A' => $this->contrapartidaOrigenA($apunte, $personaId, $cuentaPersonalDe, $cuentaDeudoresVivienda),
+                'A' => $this->contrapartidaOrigenA($apunte, $personaId, $cuentaPersonalDe, $cuentaDeudoresVivienda, $cuentaDeudaCierre),
                 default => throw new InvalidArgumentException('Origen no válido: ' . $origen),
             };
 
@@ -394,12 +401,20 @@ final class TraductorApuntesAAsientos
         ?int $personaId,
         callable $cuentaPersonalDe,
         callable $cuentaDeudoresVivienda,
+        ?callable $cuentaDeudaCierre = null,
     ): Cuenta {
         if ($apunte->cuenta === 'P') {
             if ($personaId === null) {
                 throw new InvalidArgumentException(
                     'Origen A en P requiere iniciales de persona (concepto ' . $apunte->conceptoCodigo . ')'
                 );
+            }
+            if (
+                $apunte->esCierre
+                && $cuentaDeudaCierre !== null
+                && CuentasDeudaVivienda::esConceptoCierre($apunte->conceptoCodigo)
+            ) {
+                return $cuentaDeudaCierre($personaId);
             }
 
             return $cuentaPersonalDe($personaId);

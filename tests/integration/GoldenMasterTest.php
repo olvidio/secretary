@@ -26,6 +26,7 @@ use src\configuracion\application\ObtenerConfiguracion;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\importacion\application\ImportarExcelSecretario;
 use src\informes\application\CalcularSaldos;
+use src\cierre\application\MedirSuperavitVivienda;
 use src\informes\application\ObtenerE37;
 use src\informes\application\ObtenerResumen613;
 use src\informes\infrastructure\persistence\PdoInforme613MesRepository;
@@ -124,15 +125,22 @@ final class GoldenMasterTest extends TestCase
             new PdoInforme613MesRepository($pdo),
             $arqueoRepo,
             new PdoCuentaFisicaRepository($pdo),
+            null,
+            null,
+            null,
+            null,
+            null,
+            new \src\remesas\infrastructure\persistence\PdoRemesaRepository($pdo),
         );
         $this->compararOActualizar('resumen_613_p', $resumen613->ejecutar('P'));
         $this->compararOActualizar('resumen_613_g', $resumen613->ejecutar('G'));
 
-        $e37 = new ObtenerE37($configRepo, $personaRepo, $asientoRepo, $listarApuntes, $ambito);
+        $medirSuperavit = new MedirSuperavitVivienda($configRepo, $personaRepo, $asientoRepo, $listarApuntes, $ambito);
+        $e37 = new ObtenerE37($configRepo, $personaRepo, $asientoRepo, $listarApuntes, $ambito, $medirSuperavit);
         $this->compararOActualizar('e37', $e37->detalle(null));
         $this->compararOActualizar('e37_resumen', $e37->resumen());
 
-        $saldos = new CalcularSaldos($asientoRepo, $configRepo, $personaRepo, $ambito, $listarApuntes, $resolverConceptos);
+        $saldos = new CalcularSaldos($asientoRepo, $configRepo, $personaRepo, $ambito, $listarApuntes, $resolverConceptos, $medirSuperavit);
         $this->compararOActualizar('saldos', $saldos->ejecutar(null));
 
         $this->compararOActualizar('arqueo', $this->dumpArqueos($arqueoRepo));

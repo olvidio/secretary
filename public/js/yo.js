@@ -1006,7 +1006,19 @@
     if (estado) {
       const env = r.enviada ? ('Enviada v' + r.enviada.version) : 'Sin envío pendiente';
       const ace = r.aceptada ? ('; aceptada v' + r.aceptada.version) : '';
-      estado.textContent = env + ace + (r.puede_enviar ? '' : (' · ' + (r.motivo || '')));
+      let rech = '';
+      if (!r.enviada) {
+        let ultRech = null;
+        (r.historial || []).forEach((h) => {
+          if (h.estado !== 'rechazada') return;
+          if (!ultRech || h.version > ultRech.version) ultRech = h;
+        });
+        if (ultRech) {
+          rech = '; rechazada v' + ultRech.version;
+          if (ultRech.nota) rech += ' · ' + ultRech.nota;
+        }
+      }
+      estado.textContent = env + ace + rech + (r.puede_enviar ? '' : (' · ' + (r.motivo || '')));
     }
     const inpTes = qs('#yo-remesa-tesoreria');
     const remTxt = qs('#yo-remesa-remanente');
@@ -1071,10 +1083,12 @@
       }).join('');
     }
     if (hist) {
-      hist.innerHTML = (r.historial || []).map((h) =>
-        '<li><span class="meta"><strong>v' + esc(String(h.version)) + ' · ' + esc(h.estado)
-        + '</strong><small>' + esc(h.saldo_tesoreria_es || '') + '</small></span></li>'
-      ).join('');
+      hist.innerHTML = (r.historial || []).map((h) => {
+        let det = h.saldo_tesoreria_es || '';
+        if (h.nota) det += (det ? ' · ' : '') + h.nota;
+        return '<li><span class="meta"><strong>v' + esc(String(h.version)) + ' · ' + esc(h.estado)
+          + '</strong>' + (det ? '<small>' + esc(det) + '</small>' : '') + '</span></li>';
+      }).join('');
     }
     const btn = qs('#yo-remesa-enviar');
     if (btn) {

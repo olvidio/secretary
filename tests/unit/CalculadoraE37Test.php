@@ -39,7 +39,7 @@ final class CalculadoraE37Test extends TestCase
         self::assertSame([
             'ingresos', 'gastos', 'vivienda', 'ordinarios', 'ropa', 'ca_crt',
             'medicos', 'coche', 'estudios', 'obl_econ', 'disponible', 'ay_fam',
-            'at_lab', 'nec_sede', 'lab_ap', 'saldo_final', 'saldo_cc',
+            'at_lab', 'nec_sede', 'lab_ap', 'saldo_final', 'saldo_cc', 'deuda_viv', 'superavit_viv',
         ], $claves);
     }
 
@@ -47,6 +47,16 @@ final class CalculadoraE37Test extends TestCase
     {
         $t = CalculadoraE37::avisoSaldoCcNegativo();
         self::assertStringContainsString('negativo', $t);
-        self::assertStringContainsString('mes siguiente', $t);
+        self::assertStringContainsString('deuda de vivienda', $t);
+    }
+
+    public function testAvisoSuperavitExplicaElSaldoF(): void
+    {
+        $t = CalculadoraE37::avisoSuperavitVivienda();
+        self::assertStringContainsString('Superávit de vivienda', $t);
+        self::assertStringContainsString('Disponible', $t);
+        self::assertStringContainsString('saldo F.', $t);
+        $tot = CalculadoraE37::totalesDesdeMovimientos([], 0, 0, 243388);
+        self::assertSame('2433.88', $tot['superavit_viv']->toString());
     }
 }

@@ -15,6 +15,6 @@ final class ReglasConceptoPlan
     /** @return list<string> */
     public static function naturalezasValidas(): array
     {
-        return ['ingreso', 'gasto', 'saldo', 'disponible', 'transferencia'];
+        return ['ingreso', 'gasto', 'saldo', 'disponible', 'transferencia', 'informacion'];
     }
 }

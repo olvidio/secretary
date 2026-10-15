@@ -23,6 +23,7 @@ use src\asientos\domain\services\ProyectorAsientoAFilaExcel;
 use src\asientos\infrastructure\persistence\PdoAsientoRepository;
 use Tests\support\ConceptosCentro;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
+use src\cierre\application\MedirSuperavitVivienda;
 use src\informes\application\CalcularSaldos;
 use src\personal\application\AsegurarPlanPersonal;
 use src\personal\application\CrearSubcuentaPersonal;
@@ -276,8 +277,9 @@ final class Nivel1Test extends TestCase
                 $config,
                 $personas,
                 $ambitoCentro,
-                new ListarApuntes($asientos, $cuentas, $personas, new ProyectorAsientoAFilaExcel(), $ambitoCentro),
+                $listarParaSaldos = new ListarApuntes($asientos, $cuentas, $personas, new ProyectorAsientoAFilaExcel(), $ambitoCentro),
                 ConceptosCentro::resolver($this->pdo),
+                new MedirSuperavitVivienda($config, $personas, $asientos, $listarParaSaldos, $ambitoCentro),
             ),
         ];
     }

@@ -25,7 +25,7 @@ La contabilidad del secretario: libro personal (P) y libro general (G).
 | Ver cuánto hay en caja y en banco | Saldos |
 | Buscar descuadres y meses sin anotar | Comprobaciones |
 | Sacar el resumen mensual que se envía | 613 P / 613 G |
-| Entender un saldo c/c negativo o el IX del 613 P | 613 P, Cierre de mes, Cuentas personales, Saldos |
+| Entender saldo contable, deuda de vivienda o el IX del 613 P | 613 P, Cierre de mes, Cuentas personales, Saldos |
 | Cuadrar el dinero contado con el contable | Arqueo Caja / Arqueo Banco |
 | Ver la cuenta de cada persona | Cuentas personales (E37) y Resumen E37 |
 | Ver todos los apuntes de un concepto | Por concepto |

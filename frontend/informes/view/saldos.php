@@ -1,6 +1,6 @@
 <h1><?= _("Saldos") ?></h1>
 <p class="muted saldos-ayuda">
-    <?= _("Por persona: cuadre de apuntes A, C y B (positivo = más ingresos que gastos; debería ser cero) y saldo de la cuenta corriente (concepto 9).") ?>
+    <?= _("Por persona: cuadre de apuntes A, C y B (positivo = más ingresos que gastos; debería ser cero), saldo contable (concepto 9, no es el banco), deuda de vivienda del cierre y superávit de vivienda (lo ingresado por encima de la cuota). Saldar usa primero ese superávit y, si no alcanza, el saldo contable.") ?>
 </p>
 <form id="form-saldos" class="filters">
     <label><?= _("Hasta") ?> <input type="date" name="hasta"></label>
@@ -23,7 +23,10 @@
         <th class="num"><?= _("A") ?></th>
         <th class="num"><?= _("C") ?></th>
         <th class="num"><?= _("B") ?></th>
-        <th class="num"><?= _("c/c") ?></th>
+        <th class="num"><?= _("Saldo cont.") ?></th>
+        <th class="num"><?= _("Deuda viv.") ?></th>
+        <th class="num"><?= _("Superávit") ?></th>
+        <th></th>
     </tr>
     </thead>
     <tbody></tbody>
@@ -47,11 +50,14 @@ const I18N_SALDOS = {
   verApuntesA: <?= json_encode(_("Ver apuntes A"), JSON_UNESCAPED_UNICODE) ?>,
   caja: <?= json_encode(_("Caja"), JSON_UNESCAPED_UNICODE) ?>,
   banco: <?= json_encode(_("Banco"), JSON_UNESCAPED_UNICODE) ?>,
-  saldoCcGlobal: <?= json_encode(_("Saldo c/c global"), JSON_UNESCAPED_UNICODE) ?>,
+  saldoCcGlobal: <?= json_encode(_("Saldo contable global (IX 613 P)"), JSON_UNESCAPED_UNICODE) ?>,
   colA: <?= json_encode(_("A"), JSON_UNESCAPED_UNICODE) ?>,
   colC: <?= json_encode(_("C"), JSON_UNESCAPED_UNICODE) ?>,
   colB: <?= json_encode(_("B"), JSON_UNESCAPED_UNICODE) ?>,
-  colCc: <?= json_encode(_("c/c"), JSON_UNESCAPED_UNICODE) ?>,
+  colCc: <?= json_encode(_("Saldo cont."), JSON_UNESCAPED_UNICODE) ?>,
+  saldar: <?= json_encode(_("Saldar"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmarSaldar: <?= json_encode(_("Saldar %s € de la deuda de vivienda de %s. Primero el superávit de vivienda; si no alcanza, el saldo contable. El resto sigue pendiente."), JSON_UNESCAPED_UNICODE) ?>,
+  saldada: <?= json_encode(_("Deuda saldada: %s €. Queda %s €."), JSON_UNESCAPED_UNICODE) ?>,
 };
 function parseSaldoNum(es) {
   if (!es) return 0;
@@ -135,17 +141,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     tb.innerHTML = '';
     (r.por_persona || []).forEach(p => {
       const tr = document.createElement('tr');
+      const deuda = p.deuda_es || '0,00';
       const celdas = [
         p.saldo_apuntes_a_es || '0,00',
         p.saldo_apuntes_c_es || '0,00',
         p.saldo_apuntes_b_es || '0,00',
         p.saldo_cc_es || p.saldo_a_es || '0,00',
+        deuda,
+        p.superavit_es || '0,00',
       ];
       if (celdas.some((v) => Math.abs(parseSaldoNum(v)) > 0.001)) {
         tr.className = 'saldos-alerta';
       }
+      const saldable = p.saldable_es || '0,00';
+      const accion = parseSaldoNum(saldable) > 0.001
+        ? `<button type="button" class="btn-saldar-deuda" data-iniciales="${esc(p.iniciales)}" data-saldable="${esc(saldable)}">${esc(I18N_SALDOS.saldar)} (${esc(saldable)})</button>`
+        : '';
       tr.innerHTML = `<td>${esc(p.nombre)} (${esc(p.iniciales)})</td>`
-        + celdas.map((v) => `<td class="num">${esc(v)}</td>`).join('');
+        + celdas.map((v) => `<td class="num">${esc(v)}</td>`).join('')
+        + `<td>${accion}</td>`;
       tb.appendChild(tr);
     });
     const tr = await api('/api/informes/tesoreria?hasta=' + hasta);
@@ -159,6 +173,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       tbt.appendChild(row);
     });
   }
+  document.getElementById('tabla-saldos').onclick = async (ev) => {
+    const btn = ev.target.closest('.btn-saldar-deuda');
+    if (!btn) return;
+    const iniciales = btn.getAttribute('data-iniciales') || '';
+    const saldable = btn.getAttribute('data-saldable') || '';
+    const pregunta = I18N_SALDOS.confirmarSaldar.replace('%s', saldable).replace('%s', iniciales);
+    if (!confirm(pregunta)) return;
+    const hasta = document.querySelector('[name=hasta]').value;
+    const r = await api('/api/cierre/saldar-deuda', { method: 'POST', body: { iniciales, hasta } });
+    if (!r.ok) return alert(r.error || 'Error');
+    alert(I18N_SALDOS.saldada.replace('%s', r.saldado_es).replace('%s', r.deuda_restante_es));
+    load();
+  };
   document.getElementById('form-saldos').onsubmit = (ev) => { ev.preventDefault(); load(); };
   document.getElementById('btn-comprobaciones').onclick = async () => {
     const hasta = document.querySelector('[name=hasta]').value;

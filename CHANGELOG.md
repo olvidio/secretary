@@ -10,6 +10,23 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.33] — 2026-10-15
+
+### Añadido
+- **Cierre de mes**: columnas de superávit de vivienda y saldo de deuda; al generar, el superávit salda deuda de meses anteriores sin otro P/211 ni tocar el saldo contable (migraciones 0086–0087).
+- **Saldos**: deuda de vivienda, superávit y botón **Saldar (importe)** (superávit primero, luego saldo contable positivo).
+- **Concepto 90** «Cuenta corriente (banco)»: informativo en remesa; el **9** pasa a llamarse saldo contable persona–centro (migración 0085).
+- **Previsión resumen E37**: totales por persona desde la previsión personal del año elegido (`/prevision-resumen-e37`).
+- **E37** y **613 P**: línea 90 con remesas aceptadas; saldo c/c alineado con la nueva distinción 9 / deuda / superávit.
+
+### Cambiado
+- **Cierre de mes**: el reparto descuenta aportaciones a G/11 del mes; mensajes y tabla más claros cuando no falta nada por imputar.
+- **Remesa (personal)**: en el historial y en el estado del mes se ve la nota del centro al rechazar.
+- **Manual**: cierre, saldos, conceptos, E37, remesas y procesos actualizados.
+
+### Corregido
+- **Apuntes A / importación / remesa**: contrapartida en concepto 9 donde corresponde; cuadre y traducción a asientos coherentes con deuda y superávit de vivienda.
+
 ## [0.1.32] — 2026-10-14
 
 ### Añadido

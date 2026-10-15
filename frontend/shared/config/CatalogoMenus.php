@@ -28,6 +28,7 @@ final class CatalogoMenus
             ['nav' => 'tesoreria', 'href' => '/tesoreria', 'label' => _("Tesorería")],
             ['nav' => 'prevision-personal', 'href' => '/prevision-personal', 'label' => _("Previsión personal")],
             ['nav' => 'prevision', 'href' => '/prevision', 'label' => _("Previsión")],
+            ['nav' => 'prevision-resumen-e37', 'href' => '/prevision-resumen-e37', 'label' => _("Previsión resumen E37")],
             ['nav' => 'presupuesto-p', 'href' => '/presupuesto-p', 'label' => _("Presupuesto P")],
             ['nav' => 'presupuesto-g', 'href' => '/presupuesto-g', 'label' => _("Presupuesto G")],
             ['nav' => 'entrada-g', 'href' => '/entrada-g', 'label' => _("Entrada G")],
@@ -410,7 +411,7 @@ final class CatalogoMenus
             [
                 'id' => 'presupuestos',
                 'label' => _("Presupuestos"),
-                'items' => ['prevision-personal', 'prevision', 'presupuesto-p', 'presupuesto-g'],
+                'items' => ['prevision-personal', 'prevision', 'prevision-resumen-e37', 'presupuesto-p', 'presupuesto-g'],
             ],
             [
                 'id' => 'personales-generales',
@@ -465,7 +466,7 @@ final class CatalogoMenus
             [
                 'id' => 'presupuestos',
                 'label' => _("Presupuestos"),
-                'items' => ['prevision-personal', 'prevision', 'presupuesto-p', 'presupuesto-g'],
+                'items' => ['prevision-personal', 'prevision', 'prevision-resumen-e37', 'presupuesto-p', 'presupuesto-g'],
             ],
             [
                 'id' => 'movimientos',

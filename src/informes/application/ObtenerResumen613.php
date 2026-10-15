@@ -15,6 +15,7 @@ use src\cierre\domain\services\RepartoCierre;
 use src\informes\domain\contracts\EstadisticasSg;
 use src\informes\domain\services\Calculadora613;
 use src\informes\domain\services\Estadistica613Sg;
+use src\informes\domain\services\SaldoCuentasCorrientes;
 use src\informes\domain\services\RealizadoPorConceptoCentroSg;
 use src\plan\domain\contracts\DestinoSgRepository;
 use src\plan\domain\contracts\PartidaLaboresRepository;
@@ -22,6 +23,7 @@ use src\plan\domain\services\CatalogoPlanesContables;
 use src\plan\domain\services\Estructura613P;
 use src\personas\domain\contracts\PersonaRepository;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
+use src\remesas\domain\contracts\RemesaRepository;
 use src\presupuestos\domain\contracts\PresupuestoSgRepository;
 use src\shared\domain\value_objects\Dinero;
 
@@ -42,6 +44,7 @@ final class ObtenerResumen613
         private readonly ?PresupuestoSgRepository $presupuestoSg = null,
         private readonly ?EstadisticasSg $estadisticasSg = null,
         private readonly ?RealizadoPorConceptoCentroSg $realizadoCentroSg = null,
+        private readonly ?RemesaRepository $remesas = null,
     ) {
     }
 
@@ -67,6 +70,7 @@ final class ObtenerResumen613
             );
 
         $saldoCodigo9 = 0;
+        $saldoCodigo90 = 0;
         if ($cuenta === 'P') {
             $saldos = $this->asientos->saldosPorCuenta(
                 $contexto->centroId,
@@ -80,6 +84,11 @@ final class ObtenerResumen613
                     $saldoCodigo9 += $row['saldo_cents'];
                 }
             }
+            $saldoCodigo90 = SaldoCuentasCorrientes::cents(
+                $this->saldosRemesaAceptada($contexto->centroId, $contexto->ejercicioId),
+                (int) $periodo->fechaCorte->format('Y'),
+                (int) $periodo->fechaCorte->format('n'),
+            );
         }
 
         $centroSg = $this->esCentroSg($contexto->centroId);
@@ -98,6 +107,18 @@ final class ObtenerResumen613
             $defs = Calculadora613::estructuraG();
         }
         $lineas = Calculadora613::lineas($realizado, $presu, $periodo, $defs, $saldoCodigo9);
+        if ($cuenta === 'P') {
+            $saldo90 = Dinero::fromCents($saldoCodigo90);
+            $lineas[] = [
+                'codigo' => '90',
+                'etiqueta' => 'Saldo en cuentas corrientes',
+                'previsto' => '0.00',
+                'previsto_es' => '0,00',
+                'realizado' => $saldo90->toString(),
+                'realizado_es' => $saldo90->formatEs(),
+                'pct' => null,
+            ];
+        }
 
         $index = [];
         foreach ($lineas as $l) {
@@ -293,6 +314,31 @@ final class ObtenerResumen613
         }
 
         return $payload;
+    }
+
+    /**
+     * @return list<array{persona_id:int,anio:int,mes:int,version:int,saldo_cents:?int}>
+     */
+    private function saldosRemesaAceptada(int $centroId, int $ejercicioId): array
+    {
+        if ($this->remesas === null) {
+            return [];
+        }
+        $out = [];
+        foreach ($this->remesas->listarDeCentro($centroId, 'aceptada') as $remesa) {
+            if ($remesa->ejercicioId !== $ejercicioId) {
+                continue;
+            }
+            $out[] = [
+                'persona_id' => $remesa->personaId,
+                'anio' => $remesa->anio,
+                'mes' => $remesa->mes,
+                'version' => $remesa->version,
+                'saldo_cents' => $remesa->saldoTesoreriaCents,
+            ];
+        }
+
+        return $out;
     }
 
     /** @param array<string, mixed> $payload */

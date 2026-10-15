@@ -46,6 +46,57 @@ final class TraductorApuntesAAsientosTest extends TestCase
         self::assertSame(10000, $movs[1]->haberCents);
     }
 
+    public function testCierre211VaADeudaYNoALaCc(): void
+    {
+        $this->cuentas['211.P'] = new Cuenta(
+            80,
+            self::CENTRO_ID,
+            null,
+            null,
+            null,
+            'P',
+            '211',
+            '211',
+            '',
+            'gasto',
+            'deudora',
+            '211',
+            true,
+        );
+        $deuda = new Cuenta(
+            81,
+            self::CENTRO_ID,
+            99,
+            null,
+            null,
+            'P',
+            'DEUDA.VIV.XX',
+            'DEUDA.VIV.XX',
+            '',
+            'personal',
+            'acreedora',
+            '91',
+            true,
+        );
+        $asientos = $this->traductor->traducir(
+            self::EJERCICIO_ID,
+            [$this->apunteCierre('211', '40.00')],
+            fn (string $ini) => $this->persona($ini),
+            fn (string $libro, string $codigo) => $this->cuentas["$codigo.$libro"],
+            fn (string $libro, string $maestro) => $this->cuentas["$maestro.$libro"],
+            fn (int $personaId) => $this->cuentas['CC.XX'],
+            fn () => $this->cuentas['DEUDORES.VIV'],
+            'cierre',
+            true,
+            fn (int $personaId) => $deuda,
+        )['asientos'];
+
+        self::assertSame('cierre', $asientos[0]->tipo);
+        self::assertSame($deuda->id, $asientos[0]->movimientos[1]->cuentaId);
+        self::assertSame(4000, $asientos[0]->movimientos[1]->haberCents);
+        self::assertNotSame($this->id('CC.XX'), $asientos[0]->movimientos[1]->cuentaId);
+    }
+
     public function testGastoP21OrigenA(): void
     {
         $asientos = $this->traducir([
@@ -242,6 +293,21 @@ final class TraductorApuntesAAsientosTest extends TestCase
             fn () => $this->cuentas['CC.XX'],
             fn () => $this->cuentas['DEUDORES.VIV'],
         )['asientos'];
+    }
+
+    private function apunteCierre(string $concepto, string $cantidad): Apunte
+    {
+        return new Apunte(
+            null,
+            new DateTimeImmutable('2026-03-15'),
+            'P',
+            'A',
+            'xx',
+            $concepto,
+            'automático',
+            new Dinero($cantidad),
+            true,
+        );
     }
 
     private function apunte(

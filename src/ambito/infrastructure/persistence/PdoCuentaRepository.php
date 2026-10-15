@@ -7,6 +7,7 @@ namespace src\ambito\infrastructure\persistence;
 use PDO;
 use RuntimeException;
 use src\ambito\domain\contracts\CuentaRepository;
+use src\cierre\domain\services\CuentasDeudaVivienda;
 use src\ambito\domain\entity\Cuenta;
 
 final class PdoCuentaRepository implements CuentaRepository
@@ -161,6 +162,54 @@ final class PdoCuentaRepository implements CuentaRepository
              AND libro = 'P' AND codigo_maestro = 'DISP' LIMIT 1"
         );
         $st->execute([':c' => $centroId, ':p' => $personaId]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
+    public function deudaViviendaDe(int $centroId, int $personaId): ?Cuenta
+    {
+        $st = $this->pdo->prepare(
+            "SELECT * FROM cuentas WHERE centro_id = :c AND persona_id = :p
+             AND libro = 'P' AND codigo_maestro = :m LIMIT 1"
+        );
+        $st->execute([':c' => $centroId, ':p' => $personaId, ':m' => CuentasDeudaVivienda::MAESTRO]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
+    public function regularizacionDeuda(int $centroId, string $libro): ?Cuenta
+    {
+        $st = $this->pdo->prepare(
+            "SELECT * FROM cuentas WHERE centro_id = :c AND libro = :l
+             AND codigo = :cod AND persona_id IS NULL LIMIT 1"
+        );
+        $st->execute([':c' => $centroId, ':l' => $libro, ':cod' => CuentasDeudaVivienda::REG]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
+    public function superavitViviendaDe(int $centroId, int $personaId): ?Cuenta
+    {
+        $st = $this->pdo->prepare(
+            "SELECT * FROM cuentas WHERE centro_id = :c AND persona_id = :p
+             AND libro = 'P' AND codigo_maestro = :m LIMIT 1"
+        );
+        $st->execute([':c' => $centroId, ':p' => $personaId, ':m' => CuentasDeudaVivienda::MAESTRO_SUPERAVIT]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
+    public function superavitVivienda(int $centroId): ?Cuenta
+    {
+        $st = $this->pdo->prepare(
+            "SELECT * FROM cuentas WHERE centro_id = :c AND libro = 'G'
+             AND codigo = :cod AND persona_id IS NULL LIMIT 1"
+        );
+        $st->execute([':c' => $centroId, ':cod' => CuentasDeudaVivienda::SUPERAVIT]);
         $row = $st->fetch();
 
         return is_array($row) ? $this->hydrate($row) : null;

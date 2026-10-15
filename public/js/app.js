@@ -74,9 +74,114 @@ async function api(url, opts = {}) {
   return data;
 }
 
+function fechaIsoAEs(iso) {
+  const m = String(iso ?? '').trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return String(iso ?? '');
+  return `${m[3]}/${m[2]}/${m[1]}`;
+}
+
+function fechaEsAIso(texto) {
+  const s = String(texto ?? '').trim();
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!m) return s;
+  return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+}
+
+function fechaIsoValida(iso) {
+  const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return false;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === mo - 1 && dt.getUTCDate() === d;
+}
+
+/** Muestra dd/mm/aaaa y deja el icono del calendario nativo al lado. value sigue en aaaa-mm-dd. */
+function presentarFechaEs(input) {
+  if (!(input instanceof HTMLInputElement) || input.dataset.fechaEs === '1' || input.dataset.fechaPicker === '1') return;
+  if (input.type !== 'date') return;
+  const proto = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+  const actual = proto.get.call(input);
+  input.dataset.fechaEs = '1';
+  input.type = 'text';
+  input.classList.add('fecha-es');
+  if (!input.placeholder) input.placeholder = 'dd/mm/aaaa';
+  input.autocomplete = 'off';
+  input.inputMode = 'numeric';
+  input.spellcheck = false;
+  if (input.maxLength > 0 && input.maxLength < 10) input.removeAttribute('maxlength');
+
+  const picker = document.createElement('input');
+  picker.type = 'date';
+  picker.className = 'fecha-picker';
+  picker.tabIndex = -1;
+  picker.dataset.fechaPicker = '1';
+  picker.setAttribute('aria-label', t('calendario'));
+  if (input.min) picker.min = input.min;
+  if (input.max) picker.max = input.max;
+
+  const campo = document.createElement('span');
+  campo.className = 'fecha-campo';
+  input.replaceWith(campo);
+  campo.append(input, picker);
+
+  function isoVisible() {
+    const iso = fechaEsAIso(proto.get.call(input));
+    return fechaIsoValida(iso) ? iso : '';
+  }
+  function syncPicker() {
+    picker.value = isoVisible();
+  }
+
+  Object.defineProperty(input, 'value', {
+    configurable: true,
+    get() {
+      return fechaEsAIso(proto.get.call(input));
+    },
+    set(v) {
+      proto.set.call(input, v == null || v === '' ? '' : fechaIsoAEs(v));
+      syncPicker();
+    },
+  });
+  input.value = actual;
+  picker.addEventListener('input', () => {
+    input.value = picker.value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  input.addEventListener('blur', () => {
+    const crudo = proto.get.call(input).trim();
+    if (crudo === '') {
+      input.setCustomValidity('');
+      syncPicker();
+      return;
+    }
+    const iso = fechaEsAIso(crudo);
+    if (!fechaIsoValida(iso)) {
+      input.setCustomValidity('Usa el formato dd/mm/aaaa');
+      return;
+    }
+    input.setCustomValidity('');
+    proto.set.call(input, fechaIsoAEs(iso));
+    syncPicker();
+  });
+}
+
+function presentarFechasEs(raiz) {
+  (raiz || document).querySelectorAll('input[type="date"]').forEach(presentarFechaEs);
+}
+
 function formObj(form) {
   const o = {};
   new FormData(form).forEach((v, k) => { o[k] = v; });
+  form.querySelectorAll('input[data-fecha-es]').forEach((el) => {
+    if (el.name && Object.prototype.hasOwnProperty.call(o, el.name)) {
+      o[el.name] = fechaEsAIso(o[el.name]);
+    }
+  });
   return o;
 }
 
@@ -185,6 +290,27 @@ async function pintarAvisosMensajes() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function vigilarFechasEs() {
+  presentarFechasEs(document);
+  if (!document.body || document.body.dataset.fechasEs === '1') return;
+  document.body.dataset.fechasEs = '1';
+  new MutationObserver((recs) => {
+    recs.forEach((rec) => {
+      rec.addedNodes.forEach((nodo) => {
+        if (!(nodo instanceof Element)) return;
+        if (nodo.matches?.('input[type="date"]')) presentarFechaEs(nodo);
+        presentarFechasEs(nodo);
+      });
+    });
+  }).observe(document.body, { childList: true, subtree: true });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    vigilarFechasEs();
+    pintarAvisosMensajes();
+  });
+} else {
+  vigilarFechasEs();
   pintarAvisosMensajes();
-});
+}

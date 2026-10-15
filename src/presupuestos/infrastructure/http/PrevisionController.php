@@ -9,6 +9,7 @@ use src\presupuestos\application\AplicarPrevisionAlPresupuesto;
 use src\presupuestos\application\GuardarPrevisionPersonal;
 use src\presupuestos\application\ObtenerPrevisionConsolidada;
 use src\presupuestos\application\ObtenerPrevisionPersonal;
+use src\presupuestos\application\ObtenerPrevisionResumenE37;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
@@ -19,6 +20,7 @@ final class PrevisionController
         private readonly ObtenerPrevisionPersonal $personal,
         private readonly GuardarPrevisionPersonal $guardarPersonal,
         private readonly ObtenerPrevisionConsolidada $consolidada,
+        private readonly ObtenerPrevisionResumenE37 $resumenE37,
         private readonly AplicarPrevisionAlPresupuesto $aplicar,
     ) {
     }
@@ -81,6 +83,17 @@ final class PrevisionController
     {
         try {
             return ContestarJson::ok($this->consolidada->ejecutar(
+                self::etiquetaDe($request, null),
+            ));
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage(), 404);
+        }
+    }
+
+    public function getResumenE37(Request $request, array $vars = []): Response
+    {
+        try {
+            return ContestarJson::ok($this->resumenE37->ejecutar(
                 self::etiquetaDe($request, null),
             ));
         } catch (InvalidArgumentException $e) {

@@ -64,6 +64,9 @@ final class CalcularCuadreApuntesA
         $hayApuntesFecha = false;
 
         foreach ($apuntes as $apunte) {
+            if (!empty($apunte['es_cierre'])) {
+                continue;
+            }
             $signed = SaldoCuadreApuntes::signedCents(
                 (string) $apunte['concepto_codigo'],
                 (string) $apunte['cantidad'],

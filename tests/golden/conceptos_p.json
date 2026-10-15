@@ -236,10 +236,19 @@
     {
         "codigo": "9",
         "cuenta": "P",
-        "descripcion": "9 Saldo en las c\/c personales (no afecta a caja\/banco)",
-        "etiqueta": "9 Saldo en las c\/c personales",
+        "descripcion": "9 Saldo de la cuenta CC en el libro P: contrapartida de apuntes A (no es el dinero en el banco). Agregado en 613 P y E37.",
+        "etiqueta": "9 Saldo contable (persona–centro)",
         "naturaleza": "saldo",
-        "nombre": "Saldo en las c\/c personales",
+        "nombre": "Saldo contable (persona–centro)",
         "orden": 260
+    },
+    {
+        "codigo": "90",
+        "cuenta": "P",
+        "descripcion": "90 Saldo informativo de caja+banco personal en la remesa; no genera apuntes. Sirve para calcular el disponible hacia partidas 7.",
+        "etiqueta": "90 Cuenta corriente (banco)",
+        "naturaleza": "informacion",
+        "nombre": "Cuenta corriente (banco)",
+        "orden": 270
     }
 ]

@@ -42,7 +42,7 @@ final class Estructura613P
                 'grupo' => 'VII',
             ];
         }
-        $fijas[] = ['codigo' => '9', 'etiqueta' => 'Saldo en las c/c personales', 'codigos' => ['9'], 'grupo' => 'IX'];
+        $fijas[] = ['codigo' => '9', 'etiqueta' => 'Saldo contable (persona–centro)', 'codigos' => ['9'], 'grupo' => 'IX'];
 
         return $fijas;
     }

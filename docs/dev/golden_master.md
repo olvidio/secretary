@@ -8,6 +8,20 @@ de ahora, ninguna fase puede cambiar esos ficheros sin documentar y justificar l
 diferencia (la única excepción prevista es la Fase 3, que debe listar explícitamente
 qué cambia y por qué).
 
+## Deuda de vivienda (2026-10-15)
+
+El cierre P/211 ya no abona la cuenta CC (concepto 9). Abona `DEUDA.VIV.<iniciales>`. Por eso, al regenerar el golden, cambian el saldo contable del E37, la columna nueva **Deuda viv.**, el IX del 613 P y `saldos.json`. Los apuntes importados (211, 11, 111) no cambian de importe. La liquidación no existe en el Excel: no entra en el golden.
+
+El comportamiento (E37, cierre, Saldar, superávit) es el del centro n (plan H16n, libros P y G). Club y centro sg no muestran esas pantallas, y el superávit no se aplica si falta `DEUDORES.VIV`. Al migrar en producción, `0086` mueve enseguida el haber del cierre automático desde la CC (maestro 9) a la deuda (maestro 91) en todos los centros que tengan esos asientos, y crea las cuentas de deuda. `0087` crea las de superávit. Los asientos de superávit y de Saldar no aparecen hasta **Generar apuntes** / regularizar o hasta pulsar **Saldar**.
+
+## Superávit de vivienda (2026-10-15)
+
+`saldos.json` añade por persona `superavit` y `superavit_es` (ingresado en G/11 sin cierre, menos la cuota). `saldable` puede subir cuando ese exceso cubre deuda y el saldo contable está a cero. `e37_resumen.json` añade `superavit_viv` y `superavit_viv_es` en cada fila. Al regenerar el cierre en un centro ya cargado también aparecen asientos `superavit_vivienda`, que el proyector no vuelca a apunte.
+
+## Línea 90 del 613 P (2026-10-15)
+
+`resumen_613_p.json` gana una línea `codigo` `90` («Saldo en cuentas corrientes»): suma del saldo de caja y banco de la última remesa aceptada de cada persona, hasta el mes de la fecha de cierre. En el Excel importado no hay remesas, así que el realizado sale a cero. No entra en los totales del VIII.
+
 ## Por qué existe
 
 La Fase 3 (partida doble) reescribe `apuntes`, `SignoTesoreria`, `CalcularSaldos`,

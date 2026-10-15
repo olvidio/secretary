@@ -87,6 +87,14 @@ interface AsientoRepository
      */
     public function reemplazarAperturas(int $ejercicioId, array $asientos): array;
 
+    /**
+     * Sustituye los asientos de superávit de vivienda del ejercicio.
+     * La cuota se recalcula, así que la aplicación anterior no se conserva.
+     *
+     * @param list<array{0: \src\asientos\domain\entity\Asiento, 1: \src\asientos\domain\entity\Asiento}> $pares
+     */
+    public function reemplazarSuperavitVivienda(int $ejercicioId, array $pares): int;
+
     public function contarApertura(int $ejercicioId): int;
 
     public function contarNoApertura(int $ejercicioId): int;

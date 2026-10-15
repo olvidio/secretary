@@ -6,6 +6,9 @@ namespace src\informes\application;
 
 use DateTimeImmutable;
 use src\ambito\application\ResolverAmbitoActual;
+use src\cierre\application\MedirSuperavitVivienda;
+use src\cierre\domain\services\CuentasDeudaVivienda;
+use src\cierre\domain\services\ImporteSaldableDeuda;
 use src\ambito\domain\contracts\CentroRepository;
 use src\plan\domain\services\CatalogoPlanesContables;
 use src\apuntes\application\ListarApuntes;
@@ -25,6 +28,7 @@ final class CalcularSaldos
         private readonly ResolverAmbitoActual $ambito,
         private readonly ListarApuntes $listarApuntes,
         private readonly ResolverConceptosCentro $conceptos,
+        private readonly MedirSuperavitVivienda $superavit,
         private readonly ?CentroRepository $centros = null,
     ) {
     }
@@ -62,6 +66,8 @@ final class CalcularSaldos
         }
         $saldoA = Dinero::zero();
         $porPersonaMap = [];
+        $deudaPorPersona = [];
+        $superavitCuenta = [];
         $personasPorId = [];
         foreach ($this->personas->listarDeCentro($contexto->centroId) as $p) {
             if ($p->id !== null) {
@@ -89,7 +95,31 @@ final class CalcularSaldos
                     $saldoA = $saldoA->add($saldo);
                 }
             }
+            if (
+                $row['tipo'] === 'personal'
+                && $row['libro'] === 'P'
+                && $row['persona_id'] !== null
+                && $row['codigo_maestro'] === CuentasDeudaVivienda::MAESTRO
+            ) {
+                $persona = $personasPorId[$row['persona_id']] ?? null;
+                if ($persona !== null) {
+                    $deudaPorPersona[$persona->iniciales] = $saldo;
+                }
+            }
+            if (
+                $row['libro'] === 'P'
+                && $row['persona_id'] !== null
+                && $row['codigo_maestro'] === CuentasDeudaVivienda::MAESTRO_SUPERAVIT
+            ) {
+                $persona = $personasPorId[$row['persona_id']] ?? null;
+                if ($persona !== null) {
+                    $centsSuper = $saldo->toCents();
+                    $superavitCuenta[$persona->iniciales] = $centsSuper < 0 ? -$centsSuper : 0;
+                }
+            }
         }
+
+        $medido = $this->superavit->ejecutar($fechaHasta);
 
         $naturalezas = [];
         foreach ($this->conceptos->listar($contexto->centroId, 'P') as $concepto) {
@@ -108,6 +138,16 @@ final class CalcularSaldos
         $porPersona = [];
         foreach ($this->personas->listarDeCentro($contexto->centroId) as $p) {
             $cc = $porPersonaMap[$p->iniciales] ?? Dinero::zero();
+            $deuda = $deudaPorPersona[$p->iniciales] ?? Dinero::zero();
+            $ini = strtolower($p->iniciales);
+            $bruto = $medido[$ini]['superavit'] ?? Dinero::zero();
+            $aplicado = $superavitCuenta[$p->iniciales] ?? 0;
+            $disponible = $bruto->toCents() - $aplicado;
+            if ($disponible < 0) {
+                $disponible = 0;
+            }
+            $superavit = Dinero::fromCents($disponible);
+            $saldable = Dinero::fromCents(ImporteSaldableDeuda::partes($deuda->toCents(), $disponible, $cc->toCents())['total']);
             if ($iniciales !== null && $p->iniciales !== $iniciales) {
                 continue;
             }
@@ -129,6 +169,12 @@ final class CalcularSaldos
                 'saldo_apuntes_c_es' => $saldoApuntesC->formatEs(),
                 'saldo_cc' => $cc->toString(),
                 'saldo_cc_es' => $cc->formatEs(),
+                'deuda' => $deuda->toString(),
+                'deuda_es' => $deuda->formatEs(),
+                'superavit' => $superavit->toString(),
+                'superavit_es' => $superavit->formatEs(),
+                'saldable' => $saldable->toString(),
+                'saldable_es' => $saldable->formatEs(),
             ];
         }
 

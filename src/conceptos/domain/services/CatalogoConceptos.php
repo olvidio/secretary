@@ -40,7 +40,8 @@ final class CatalogoConceptos
             ['77', 'Proico', '77 Proico', 'gasto', 230],
             ['78', 'Casa Escrivá', '78 Casa Escrivá', 'gasto', 240],
             ['79', '', '79', 'gasto', 250],
-            ['9', 'Saldo en las c/c personales', '9 Saldo en las c/c personales (no afecta a caja/banco)', 'saldo', 260],
+            ['9', 'Saldo contable (persona–centro)', '9 Saldo de la cuenta CC en el libro P: contrapartida de apuntes A (no es el dinero en el banco). Agregado en 613 P y E37.', 'saldo', 260],
+            ['90', 'Cuenta corriente (banco)', '90 Saldo informativo de caja+banco personal en la remesa; no genera apuntes. Sirve para calcular el disponible hacia partidas 7.', 'informacion', 270],
         ];
         $g = [
             ['11', 'Vivienda / local', '11 Vivienda / local: para n contribución a gastos generales; para agd vivienda propia', 'ingreso', 10],

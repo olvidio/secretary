@@ -1,5 +1,5 @@
 <h1><?= _("Apuntes de cierre de mes") ?></h1>
-<p><?= _("Reparte lo que falta por cubrir de los gastos G 201–215 del mes. Del total se resta lo ya pagado en G/11 ese mes (incluido quien no entra en el reparto y el cierre automático ya generado). Lo pendiente se reparte entre quienes aportan a generales. Quien en el ejercicio ya lleva cubierta su cuota acumulada no recibe cierre este mes; el hueco lo cubren quienes van más atrasados. El retraso de meses anteriores no se deshace. Si «A generar» es cero, el mes ya está cubierto; «Generar apuntes» borra los automáticos de este mes y los recrea. Observaciones: «automático».") ?></p>
+<p><?= _("Reparte lo que falta por cubrir de los gastos G 201–215 del mes. Del total se resta lo ya pagado en G/11 ese mes. Quien en el ejercicio ya lleva cubierta su cuota no recibe cierre este mes. Al generar, si lo ingresado en vivienda (sin el automático) supera la cuota acumulada, ese superávit salda la deuda de meses anteriores, sin otro 211 y sin tocar el saldo contable. Lo que falte de deuda se salda en Saldos con el saldo contable. Si «A generar» es cero, el mes ya está cubierto; «Generar apuntes» borra los automáticos de este mes, los recrea y vuelve a aplicar el superávit.") ?></p>
 <p id="resumen" class="muted"></p>
 <div id="aviso-faltantes" class="aviso-cierre" hidden>
   <p><strong><?= _("Faltan apuntes de vivienda en meses anteriores:") ?></strong> <span id="lista-faltantes"></span>.</p>
@@ -7,7 +7,7 @@
 </div>
 <p id="msg-faltantes" class="ok" hidden></p>
 <table id="prev">
-    <thead><tr><th><?= _("Iniciales") ?></th><th><?= _("Nombre") ?></th><th class="num"><?= _("Cuota") ?></th><th class="num"><?= _("Ya imputado (ejercicio)") ?></th><th class="num"><?= _("A generar") ?></th></tr></thead>
+    <thead><tr><th><?= _("Iniciales") ?></th><th><?= _("Nombre") ?></th><th class="num"><?= _("Cuota") ?></th><th class="num"><?= _("Ya imputado (ejercicio)") ?></th><th class="num"><?= _("A generar") ?></th><th class="num"><?= _("Superávit") ?></th><th class="num"><?= _("Salda deuda") ?></th></tr></thead>
     <tbody></tbody>
 </table>
 <button type="button" id="btn-gen"><?= _("Generar apuntes") ?></button>
@@ -19,6 +19,7 @@ const I18N_CIERRE = {
   regularizados: <?= json_encode(_("Regularizados %s apuntes: %s."), JSON_UNESCAPED_UNICODE) ?>,
   confirmGenerar: <?= json_encode(_("¿Borrar el cierre de este mes y generar de nuevo?"), JSON_UNESCAPED_UNICODE) ?>,
   creados: <?= json_encode(_("Creados %s apuntes"), JSON_UNESCAPED_UNICODE) ?>,
+  superavit: <?= json_encode(_(" El superávit de vivienda ha saldado deuda de %s persona(s)."), JSON_UNESCAPED_UNICODE) ?>,
   nadaImputar: <?= json_encode(_("No falta nada por imputar este mes (gastos ya cubiertos). «Generar apuntes» sustituye cualquier cierre automático previo."), JSON_UNESCAPED_UNICODE) ?>,
 };
 document.addEventListener('DOMContentLoaded', async () => {
@@ -45,7 +46,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     tr.innerHTML = `<td>${esc(l.iniciales)}</td><td>${esc(l.nombre)}</td>`
       + `<td class="num">${esc(l.importe_bruto_es)}</td>`
       + `<td class="num">${esc(l.ya_imputado_es)}</td>`
-      + `<td class="num">${esc(l.importe_es)}</td>`;
+      + `<td class="num">${esc(l.importe_es)}</td>`
+      + `<td class="num">${esc(l.superavit_es || '0,00')}</td>`
+      + `<td class="num">${esc(l.saldaria_deuda_es || '0,00')}</td>`;
     tb.appendChild(tr);
   });
   if (!pendiente && (r.lineas || []).length) {
@@ -72,7 +75,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const detalle = (s.meses || []).map(m => m.mes_es + ' (' + m.creados + ' apuntes)').join(', ');
     msg.textContent = I18N_CIERRE.regularizados
       .replace('%s', s.creados)
-      .replace('%s', detalle);
+      .replace('%s', detalle)
+      + (s.superavit_personas > 0 ? I18N_CIERRE.superavit.replace('%s', s.superavit_personas) : '');
     document.getElementById('aviso-faltantes').hidden = true;
   };
   document.getElementById('btn-gen').onclick = async () => {
@@ -81,6 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('msg').hidden = false;
     document.getElementById('msg').textContent = s.ok
       ? I18N_CIERRE.creados.replace('%s', s.creados)
+        + (s.superavit_personas > 0 ? I18N_CIERRE.superavit.replace('%s', s.superavit_personas) : '')
       : s.error;
   };
 });

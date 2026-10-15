@@ -36,6 +36,9 @@ final class SaldoCuadreApuntes
     ): array {
         $out = [];
         foreach ($apuntes as $apunte) {
+            if (!empty($apunte['es_cierre'])) {
+                continue;
+            }
             if (strtoupper((string) ($apunte['cuenta'] ?? '')) !== 'P') {
                 continue;
             }

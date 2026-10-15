@@ -173,6 +173,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/cierre', [CierreController::class, 'preview']);
     $r->addRoute('POST', '/api/cierre', [CierreController::class, 'run']);
     $r->addRoute('POST', '/api/cierre/regularizar', [CierreController::class, 'regularizar']);
+    $r->addRoute('POST', '/api/cierre/saldar-deuda', [CierreController::class, 'saldarDeuda']);
 
     $r->addRoute('GET', '/api/informes/613/{cuenta:P|G}', [InformeController::class, 'resumen613']);
     $r->addRoute('POST', '/api/informes/613/{cuenta:P|G}/manual', [InformeController::class, 'guardarManual613']);
@@ -191,6 +192,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/previsiones/personal/opciones', [PrevisionController::class, 'opcionesPersonal']);
     $r->addRoute('GET', '/api/previsiones/personal/{personaId:\d+}', [PrevisionController::class, 'getPersonal']);
     $r->addRoute('POST', '/api/previsiones/personal/{personaId:\d+}', [PrevisionController::class, 'savePersonal']);
+    $r->addRoute('GET', '/api/previsiones/resumen-e37', [PrevisionController::class, 'getResumenE37']);
     $r->addRoute('GET', '/api/previsiones', [PrevisionController::class, 'getConsolidada']);
     $r->addRoute('POST', '/api/previsiones/aplicar-presupuesto', [PrevisionController::class, 'aplicarPresupuesto']);
 

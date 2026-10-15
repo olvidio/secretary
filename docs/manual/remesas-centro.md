@@ -25,7 +25,7 @@ Es la bandeja donde llega lo que cada persona **comunica** al cerrar su mes: ing
 - Los gastos que la persona marque como generales generan además los apuntes del libro general.
 - Los apuntes que vienen de una remesa no se editan ni se borran a mano: se corrigen pidiendo a la persona que reenvíe el mes.
 - La caja y el banco propios de la persona no viajan como movimientos. Sí se **comunica** el disponible (saldo menos remanente): es una **notificación** para decidir al aceptar; el dinero real sigue en la cuenta personal hasta que el secretario y la persona lo gestionen fuera del programa si hace falta.
-- Lo aceptado sale en el 613 P y en Cuentas personales, cortado por la fecha de cierre.
+- Lo aceptado sale en el 613 P y en Cuentas personales, cortado por la fecha de cierre. El saldo de caja y banco de esa remesa es el concepto 90. La línea **90** del 613 P suma, por persona, el de la última remesa aceptada hasta el mes de la fecha de cierre.
 - Las 7 que la persona ya hizo viajan en la remesa. Las de la propuesta de Disponible se apuntaron al confirmar y no se vuelven a cargar.
 
 ## Problemas frecuentes

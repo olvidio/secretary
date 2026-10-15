@@ -6,6 +6,7 @@ namespace src\ambito\infrastructure\persistence;
 
 use PDO;
 use src\conceptos\domain\services\CatalogoConceptos;
+use src\cierre\domain\services\CuentasDeudaVivienda;
 use src\plan\domain\services\CatalogoPlanesContables;
 use src\plan\infrastructure\persistence\PdoPlanConceptoRepository;
 use src\configuracion\domain\entity\ConfiguracionCentro;
@@ -71,6 +72,8 @@ final class AmbitoSeeder
         self::sembrarResultadoEjerciciosAnteriores($pdo, $centroId);
         self::sembrarCuentasPersonales($pdo, $centroId);
         self::sembrarDeudoresPorVivienda($pdo, $centroId);
+        self::sembrarRegularizacionDeuda($pdo, $centroId);
+        self::sembrarSuperavitVivienda($pdo, $centroId);
     }
 
     private static function sembrarCentro(PDO $pdo, ConfiguracionCentro $cfg): int
@@ -208,6 +211,9 @@ final class AmbitoSeeder
 
         $conceptosPlan = self::conceptosPlanDeCentro($pdo, $centroId);
         foreach ($conceptosPlan as $c) {
+            if ($c['naturaleza'] === 'informacion') {
+                continue;
+            }
             if ($c['cuenta'] === 'P' && in_array($c['codigo'], $excluir, true)) {
                 continue;
             }
@@ -539,7 +545,77 @@ final class AmbitoSeeder
                 'imputable' => true,
                 'orden' => 1,
             ]);
+            self::upsertCuenta($pdo, [
+                'centro_id' => $centroId,
+                'persona_id' => (int) $p['id'],
+                'cuenta_fisica_id' => null,
+                'padre_id' => null,
+                'libro' => 'P',
+                'codigo' => CuentasDeudaVivienda::codigoSuperavit($iniciales),
+                'nombre' => 'Superávit de vivienda de ' . $nombreCompleto,
+                'descripcion' => 'Exceso de vivienda ya ingresado sobre la cuota. Sirve para saldar la deuda del cierre, sin el saldo contable ni un 211 nuevo.',
+                'tipo' => 'puente',
+                'naturaleza' => 'acreedora',
+                'codigo_maestro' => CuentasDeudaVivienda::MAESTRO_SUPERAVIT,
+                'imputable' => true,
+                'orden' => 3,
+            ]);
+            self::upsertCuenta($pdo, [
+                'centro_id' => $centroId,
+                'persona_id' => (int) $p['id'],
+                'cuenta_fisica_id' => null,
+                'padre_id' => null,
+                'libro' => 'P',
+                'codigo' => CuentasDeudaVivienda::codigoPersona($iniciales),
+                'nombre' => 'Deuda de vivienda de ' . $nombreCompleto,
+                'descripcion' => 'Vivienda imputada en el cierre, pendiente de liquidar. No es el saldo contable (CC) ni trabajo (111).',
+                'tipo' => 'personal',
+                'naturaleza' => 'acreedora',
+                'codigo_maestro' => CuentasDeudaVivienda::MAESTRO,
+                'imputable' => true,
+                'orden' => 2,
+            ]);
         }
+    }
+
+    private static function sembrarRegularizacionDeuda(PDO $pdo, int $centroId): void
+    {
+        foreach (['P', 'G'] as $libro) {
+            self::upsertCuenta($pdo, [
+                'centro_id' => $centroId,
+                'persona_id' => null,
+                'cuenta_fisica_id' => null,
+                'padre_id' => null,
+                'libro' => $libro,
+                'codigo' => CuentasDeudaVivienda::REG,
+                'nombre' => 'Regularización deuda de vivienda',
+                'descripcion' => 'Contrapartida al saldar deuda de vivienda. No es ingreso ni gasto del 613.',
+                'tipo' => 'puente',
+                'naturaleza' => 'deudora',
+                'codigo_maestro' => CuentasDeudaVivienda::MAESTRO_REG,
+                'imputable' => true,
+                'orden' => 997,
+            ]);
+        }
+    }
+
+    private static function sembrarSuperavitVivienda(PDO $pdo, int $centroId): void
+    {
+        self::upsertCuenta($pdo, [
+            'centro_id' => $centroId,
+            'persona_id' => null,
+            'cuenta_fisica_id' => null,
+            'padre_id' => null,
+            'libro' => 'G',
+            'codigo' => CuentasDeudaVivienda::SUPERAVIT,
+            'nombre' => 'Superávit de vivienda (personas)',
+            'descripcion' => 'Contrapartida en G al saldar deuda de vivienda con el exceso ya ingresado. No es ingreso del 613.',
+            'tipo' => 'puente',
+            'naturaleza' => 'deudora',
+            'codigo_maestro' => CuentasDeudaVivienda::MAESTRO_SUPERAVIT_G,
+            'imputable' => true,
+            'orden' => 998,
+        ]);
     }
 
     /**

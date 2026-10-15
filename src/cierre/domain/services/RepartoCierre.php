@@ -45,7 +45,9 @@ final class RepartoCierre
      *
      * Si se pasan aportaciones e objetivo del ejercicio, quien ya cubrió su
      * cuota acumulada no recibe cierre este mes; el hueco lo cubren quienes van
-     * atrasados. El retraso de meses anteriores no se deshace.
+     * atrasados. Este reparto no deshace el cargo automático de meses anteriores:
+     * ese cargo queda en la deuda, y el superávit (ingresado sin cierre menos
+     * la cuota) lo salda aparte.
      *
      * @param list<Persona> $personas
      * @param array<string, Dinero> $aportacionesGenerales iniciales => G/11 de este mes
