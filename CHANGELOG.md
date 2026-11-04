@@ -10,6 +10,11 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.35] — 2026-11-04
+
+### Añadido
+- **Importar extracto del banco**: **Arquia** (Excel `.xlsx` «movimientos»), detectado automáticamente.
+
 ## [0.1.34] — 2026-10-15
 
 ### Añadido

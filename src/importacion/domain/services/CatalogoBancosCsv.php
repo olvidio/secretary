@@ -21,6 +21,7 @@ final class CatalogoBancosCsv
             ['id' => 'bbva', 'nombre' => 'BBVA'],
             ['id' => 'sabadell', 'nombre' => 'Banco Sabadell'],
             ['id' => 'santander', 'nombre' => 'Banco Santander'],
+            ['id' => 'arquia', 'nombre' => 'Arquia'],
         ];
     }
 
@@ -33,6 +34,7 @@ final class CatalogoBancosCsv
             'bbva' => new LectorCsvBbva(),
             'sabadell' => new LectorCsvSabadell(),
             'santander' => new LectorCsvSantander(),
+            'arquia' => new LectorCsvArquia(),
             default => throw new InvalidArgumentException('Banco no soportado: elija uno de la lista'),
         };
     }

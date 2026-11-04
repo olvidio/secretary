@@ -12,6 +12,7 @@
             </p>
             <p class="muted"><?= _("BBVA: Cuentas → la cuenta → Movimientos → Descargar en Excel o CSV.") ?></p>
             <p class="muted"><?= _("Banco Sabadell: Operativa diaria → Cuentas → Saldos y movimientos → Descargar → Excel o CSV.") ?></p>
+            <p class="muted"><?= _("Arquia: descargar los movimientos de la cuenta en Excel (.xlsx).") ?></p>
             <p class="muted"><?= _("Banco Santander: movimientos de la cuenta → descargar extracto en Excel (.xls).") ?></p>
         </div>
     </details>

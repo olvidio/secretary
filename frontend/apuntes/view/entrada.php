@@ -11,6 +11,7 @@
         <p class="muted"><?= _("CaixaBank: CaixaBankNow → Cuentas → tu cuenta. Carga todo el periodo (pulsa «Ver más movimientos» si aparece) y elige Extraer movimientos / Descargar en Excel (.xls). También admite CSV si lo guardas así.") ?></p>
         <p class="muted"><?= _("BBVA: Cuentas → la cuenta → Movimientos → Descargar en Excel o CSV.") ?></p>
         <p class="muted"><?= _("Banco Sabadell: Operativa diaria → Cuentas → Saldos y movimientos → Descargar → Excel o CSV.") ?></p>
+        <p class="muted"><?= _("Arquia: descargar los movimientos de la cuenta en Excel (.xlsx).") ?></p>
         <p class="muted"><?= _("Banco Santander: movimientos de la cuenta → descargar extracto en Excel (.xls).") ?></p>
     </div>
     <form id="entrada-banco-form" class="yo-banco-form">
