@@ -377,6 +377,10 @@ ul.admin-vinculos li + li { border-top: 1px solid #edf2f7; }
 button.btn-quitar-vinculo { font-size: .75rem; padding: .15rem .4rem; }
 p.peligro { color: var(--err); }
 .error { color: var(--err); }
+.remesa-nota-persona { background: #fefcbf; border: 1px solid #ecc94b; border-left-width: 5px; border-radius: 4px; padding: .5rem .7rem; font-weight: 600; color: #5f370e; white-space: pre-line; margin: .5rem 0; }
+.remesa-estado-rechazada { background: #fed7d7; border: 1px solid #fc8181; border-radius: 4px; padding: .5rem .7rem; }
+.remesa-estado-rechazada a { color: #742a2a; font-weight: 600; text-decoration: none; display: block; }
+.remesa-estado-rechazada a:hover { text-decoration: underline; }
 .sugerencias-wrap { position: relative; min-width: 16rem; }
 .sugerencias {
   position: absolute;
@@ -2502,3 +2506,57 @@ table.listado-sg td.num { text-align: right; font-variant-numeric: tabular-nums;
 }
 
 
+
+/* Tablas ordenables (table.ordenable, ver prepararTablaOrdenable en app.js) */
+th.ordenable-th { cursor: pointer; user-select: none; white-space: nowrap; }
+th.ordenable-th:hover { background: #e2e8f0; }
+th.ordenable-th::after { content: ' ↕'; color: #a0aec0; font-size: .8em; }
+th.ordenable-th.orden-asc::after { content: ' ▲'; color: inherit; }
+th.ordenable-th.orden-desc::after { content: ' ▼'; color: inherit; }
+
+/* Resumen personal en móvil vertical: todo (incluidos Ingreso/Gasto) cabe sin scroll.
+   En horizontal no se compacta y se hace scroll como siempre. */
+@media (orientation: portrait) and (max-width: 600px) {
+  body.yo[data-nav="yo"] .yo-top { padding: .5rem 1rem; }
+  body.yo[data-nav="yo"] .yo-main { padding-top: .5rem; padding-bottom: 5rem; }
+  body.yo[data-nav="yo"] .yo-month { margin-bottom: .35rem; }
+  body.yo[data-nav="yo"] .yo-month button { min-height: 2.25rem; }
+  body.yo[data-nav="yo"] .yo-hero { padding: .7rem .85rem .6rem; }
+  body.yo[data-nav="yo"] .yo-chart-wrap {
+    width: clamp(110px, 26dvh, 240px);
+    height: clamp(110px, 26dvh, 240px);
+    margin-bottom: .5rem;
+  }
+  body.yo[data-nav="yo"] .yo-saldos div,
+  body.yo[data-nav="yo"] .yo-flujo div { padding: .35rem .6rem; }
+  body.yo[data-nav="yo"] .yo-saldos,
+  body.yo[data-nav="yo"] .yo-flujo { gap: .35rem; }
+  body.yo[data-nav="yo"] .yo-saldos { margin-bottom: .35rem; }
+  body.yo[data-nav="yo"] .yo-fabs { margin: .6rem 0 .3rem; }
+  body.yo[data-nav="yo"] .yo-fab { padding: .55rem .8rem; min-height: 2.6rem; }
+  body.yo[data-nav="yo"] .yo-traspaso-link { margin-bottom: .5rem; }
+}
+
+/* Hoja de movimiento: la columna del grid no puede crecer más que la pantalla
+   (fieldset/input/select tienen ancho mínimo propio y cortaban el borde derecho). */
+.yo-sheet { grid-template-columns: minmax(0, 1fr); box-sizing: border-box; }
+.yo-sheet > *, .yo-sheet fieldset { min-width: 0; max-width: 100%; }
+.yo-sheet input:not([type=radio]):not([type=checkbox]), .yo-sheet select { max-width: 100%; min-width: 0; }
+
+/* Importe: etiqueta e input en la misma línea. */
+.yo-sheet .yo-importe-grande {
+  flex-direction: row;
+  align-items: center;
+  gap: .75rem;
+  font-size: .95rem;
+}
+.yo-sheet .yo-importe-grande input { flex: 1 1 auto; min-width: 0; width: auto; }
+/* Conceptos: algo más de aire por debajo. */
+.yo-sheet .yo-cats-grid { padding-bottom: .6rem; margin-bottom: .4rem; }
+.yo-centro-destino { font-size: .8rem; opacity: .9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+
+/* Nombres: nombre, apellidos y botones en una sola línea. */
+#tabla-personas td:nth-child(3),
+#tabla-personas td:nth-child(4),
+#tabla-personas td:last-child { white-space: nowrap; }
+#tabla-personas td:last-child button + button { margin-left: .35rem; }

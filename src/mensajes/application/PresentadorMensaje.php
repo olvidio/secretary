@@ -11,7 +11,7 @@ final class PresentadorMensaje
 {
     /**
      * @param array{id:int, tipo:string, payload:string, leido_at:?string, creado_at:string} $row
-     * @return array{id:int, tipo:string, titulo:string, cuerpo:string, href:?string, accion:?string, leido:bool, fecha:string}
+     * @return array{id:int, tipo:string, titulo:string, cuerpo:string, href:?string, accion:?string, leido:bool, fecha:string, datos:array<string, mixed>}
      */
     public static function presentar(array $row): array
     {
@@ -22,6 +22,7 @@ final class PresentadorMensaje
         $vista = match ($row['tipo']) {
             'destinos_7' => self::destinos($payload),
             'remesa_detalle' => self::detalle($payload),
+            'remesa_rechazada' => self::rechazada($payload),
             default => [
                 'titulo' => _('Aviso'),
                 'cuerpo' => '',
@@ -40,6 +41,7 @@ final class PresentadorMensaje
             'accion' => $vista['accion'],
             'leido' => $row['leido_at'] !== null,
             'fecha' => $fecha,
+            'datos' => $payload,
         ];
     }
 
@@ -103,6 +105,35 @@ final class PresentadorMensaje
 
         return [
             'titulo' => _('El centro pide el detalle de una remesa'),
+            'cuerpo' => $cuerpo,
+            'href' => '/yo/remesas',
+            'accion' => _('Ir a la remesa'),
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array{titulo:string, cuerpo:string, href:?string, accion:?string}
+     */
+    private static function rechazada(array $payload): array
+    {
+        $cuerpo = sprintf(
+            _('Remesa de %02d/%d (v%d) rechazada por el centro.'),
+            (int) ($payload['mes'] ?? 0),
+            (int) ($payload['anio'] ?? 0),
+            (int) ($payload['version'] ?? 0),
+        );
+        $nota = trim((string) ($payload['nota'] ?? ''));
+        if ($nota !== '') {
+            $cuerpo .= ' ' . $nota;
+        }
+        $quien = trim((string) ($payload['quien'] ?? ''));
+        if ($quien !== '') {
+            $cuerpo = $quien . '. ' . $cuerpo;
+        }
+
+        return [
+            'titulo' => _('Remesa rechazada'),
             'cuerpo' => $cuerpo,
             'href' => '/yo/remesas',
             'accion' => _('Ir a la remesa'),

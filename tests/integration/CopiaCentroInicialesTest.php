@@ -219,6 +219,11 @@ final class CopiaCentroInicialesTest extends TestCase
              VALUES (:p, :c, :e, 2026, 3, 1, \'aceptada\', \'hash-copia\', \'marzo\')'
         )->execute([':p' => $persona->id, ':c' => $centroId, ':e' => $ejercicioId]);
         $this->pdo->prepare(
+            'INSERT INTO remesa_lineas (remesa_id, codigo_maestro, importe, detalle_json)
+             SELECT id, \'211\', 0, CAST(:d AS jsonb) FROM remesas WHERE hash_contenido = \'hash-copia\''
+        )->execute([':d' => json_encode([['codigo' => '211', 'nombre' => 'x', 'cents' => 0,
+            'plantillas' => [['plantilla_id' => $plantillaId, 'cents' => 100000]]]])]);
+        $this->pdo->prepare(
             'INSERT INTO arqueos (cuenta, fecha, desglose_json, total, ejercicio_id)
              VALUES (\'P\', :f, \'[]\', \'12.00\', :e)'
         )->execute([':f' => $inicio, ':e' => $ejercicioId]);
@@ -274,6 +279,14 @@ final class CopiaCentroInicialesTest extends TestCase
         $cierres = (int) $this->pdo->query(
             'SELECT COUNT(*) FROM personal_cierre_mes WHERE anio = 2026 AND mes = 3'
         )->fetchColumn();
+        $idNuevo = (int) $this->pdo->query(
+            'SELECT id FROM plantillas_apunte WHERE nombre = \'Club copia\''
+        )->fetchColumn();
+        $citada = (int) $this->pdo->query(
+            "SELECT (detalle_json->0->'plantillas'->0->>'plantilla_id')::int FROM remesa_lineas l
+             JOIN remesas r ON r.id = l.remesa_id WHERE r.hash_contenido = 'hash-copia'"
+        )->fetchColumn();
+        self::assertSame($idNuevo, $citada, 'la remesa debe citar el id nuevo de la plantilla');
         self::assertSame('jrm@ejemplo.test', (string) $email);
         self::assertSame(1, $plantillas);
         self::assertSame(1, $remesas);

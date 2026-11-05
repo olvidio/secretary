@@ -292,8 +292,111 @@ async function pintarAvisosMensajes() {
   });
 }
 
+/*
+ * Tablas ordenables: <table class="ordenable">. Clic en una cabecera con texto
+ * ordena las filas del tbody (otro clic invierte). Detecta fechas dd/mm/aaaa e
+ * importes; si no, orden alfabético con números naturales. Una celda puede fijar
+ * su valor con data-orden. Si el JS repinta el tbody, se reaplica el orden.
+ * Con filas agrupadas (celdas con colspan) no se ordena, para no romper grupos.
+ */
+function valorOrdenCelda(td) {
+  if (!td) return { tipo: 'vacio', v: '' };
+  if (td.dataset.orden !== undefined) {
+    const n = Number(td.dataset.orden);
+    return Number.isFinite(n) && td.dataset.orden !== '' ? { tipo: 'num', v: n } : { tipo: 'txt', v: td.dataset.orden };
+  }
+  const txt = td.textContent.trim();
+  if (txt === '') return { tipo: 'vacio', v: '' };
+  const f = txt.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (f) return { tipo: 'fecha', v: Number(f[3]) * 10000 + Number(f[2]) * 100 + Number(f[1]) };
+  if (/^-?[\d.]+(,\d+)?\s*\u20AC?$/.test(txt)) {
+    const n = parseImporteEs(txt.replace(/\s*\u20AC$/, ''));
+    if (Number.isFinite(n)) return { tipo: 'num', v: n };
+  }
+  return { tipo: 'txt', v: txt };
+}
+
+function compararOrden(a, b) {
+  if (a.tipo !== 'txt' && b.tipo !== 'txt') return a.v - b.v;
+  return String(a.v).localeCompare(String(b.v), 'es', { numeric: true, sensitivity: 'base' });
+}
+
+function aplicarOrdenTabla(table) {
+  const estado = table._orden;
+  const tb = table.tBodies[0];
+  if (!estado || !tb) return;
+  const filas = Array.from(tb.rows);
+  if (filas.some((tr) => Array.from(tr.cells).some((td) => td.colSpan > 1))) return;
+  const col = estado.col;
+  const decoradas = filas.map((tr, i) => ({ tr, i, val: valorOrdenCelda(tr.cells[col]) }));
+  decoradas.sort((x, y) => {
+    const vacioX = x.val.tipo === 'vacio';
+    const vacioY = y.val.tipo === 'vacio';
+    if (vacioX !== vacioY) return vacioX ? 1 : -1; // vacías siempre al final
+    const c = compararOrden(x.val, y.val);
+    return (estado.desc ? -c : c) || x.i - y.i;
+  });
+  if (decoradas.every((d, i) => d.tr === filas[i])) return;
+  // Los avisos del MutationObserver llegan después (asíncronos): se desconecta
+  // mientras se mueven las filas para no reordenar en bucle.
+  table._observadorOrden?.disconnect();
+  const frag = document.createDocumentFragment();
+  decoradas.forEach((d) => frag.appendChild(d.tr));
+  tb.appendChild(frag);
+  table._observadorOrden?.observe(tb, { childList: true });
+}
+
+function pintarIndicadoresOrden(table) {
+  const estado = table._orden;
+  Array.from(table.tHead?.rows[0]?.cells || []).forEach((th, i) => {
+    const activo = estado && estado.col === i;
+    th.setAttribute('aria-sort', activo ? (estado.desc ? 'descending' : 'ascending') : 'none');
+    th.classList.toggle('orden-asc', !!activo && !estado.desc);
+    th.classList.toggle('orden-desc', !!activo && estado.desc);
+  });
+}
+
+function prepararTablaOrdenable(table) {
+  if (!(table instanceof HTMLTableElement) || table.dataset.ordenableListo === '1') return;
+  const cabecera = table.tHead?.rows[0];
+  if (!cabecera) return;
+  table.dataset.ordenableListo = '1';
+  Array.from(cabecera.cells).forEach((th, i) => {
+    if (th.textContent.trim() === '') return;
+    th.classList.add('ordenable-th');
+    th.tabIndex = 0;
+    const ordenar = () => {
+      const previo = table._orden;
+      table._orden = { col: i, desc: previo && previo.col === i ? !previo.desc : false };
+      pintarIndicadoresOrden(table);
+      aplicarOrdenTabla(table);
+    };
+    th.addEventListener('click', ordenar);
+    th.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        ordenar();
+      }
+    });
+  });
+  const tb = table.tBodies[0];
+  if (tb) {
+    table._observadorOrden = new MutationObserver(() => {
+      if (table._orden) aplicarOrdenTabla(table);
+    });
+    table._observadorOrden.observe(tb, { childList: true });
+  }
+}
+
+function prepararTablasOrdenables(raiz) {
+  const r = raiz || document;
+  if (r instanceof HTMLTableElement && r.classList.contains('ordenable')) prepararTablaOrdenable(r);
+  r.querySelectorAll?.('table.ordenable').forEach(prepararTablaOrdenable);
+}
+
 function vigilarFechasEs() {
   presentarFechasEs(document);
+  prepararTablasOrdenables(document);
   if (!document.body || document.body.dataset.fechasEs === '1') return;
   document.body.dataset.fechasEs = '1';
   new MutationObserver((recs) => {
@@ -302,6 +405,7 @@ function vigilarFechasEs() {
         if (!(nodo instanceof Element)) return;
         if (nodo.matches?.('input[type="date"]')) presentarFechaEs(nodo);
         presentarFechasEs(nodo);
+        prepararTablasOrdenables(nodo);
       });
     });
   }).observe(document.body, { childList: true, subtree: true });

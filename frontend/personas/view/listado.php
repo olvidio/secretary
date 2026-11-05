@@ -146,6 +146,9 @@ async function loadPersonas() {
       if (!p.base_liquidable && p.base_liquidable_defecto) {
         bl.value = p.base_liquidable_defecto;
       }
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const nombre = form.querySelector('[name=nombre]');
+      if (nombre) nombre.focus({ preventScroll: true });
     };
     tr.querySelector('[data-del]').onclick = async () => {
       if (!confirm(I18N_PERSONAS.confirmQuitar.replace('%s', p.iniciales))) return;

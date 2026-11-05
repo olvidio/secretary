@@ -22,6 +22,7 @@ Es el listado de todo lo anotado en el centro, con filtros. Sirve para buscar un
 ## Reglas que conviene saber
 
 - El orden y los filtros de fecha van por la fecha en que el movimiento se cuenta. Si la operación se hizo otro día, ese otro día aparece entre paréntesis.
+- Pulsar una cabecera de la tabla (Fecha, P/G, Inic., Concepto, Cantidad…) ordena por esa columna; otro clic invierte el orden. La flecha ▲/▼ indica la columna activa. Al volver a filtrar se mantiene el orden elegido. En el modo de revisión (agrupado por fecha) no se reordena.
 - La ventana de edición está pensada para retocar observaciones. Si se cambia además otro campo, al guardar pide confirmación.
 - Los apuntes que llegan de una remesa no se editan ni se borran aquí: para corregirlos, la persona vuelve a enviar su remesa.
 - Filtrando por libro P, procedencia A y unas iniciales, la pantalla entra en modo de revisión: agrupa por fecha, calcula el saldo de cada día (los gastos suman y los ingresos restan), marca las fechas que no cuadran y muestra el saldo total de esa persona.
@@ -56,7 +57,7 @@ Si el aviso no encaja o no hay candidato en G, corregir a mano en Entrada P/G o 
 
 - Menú: Talonario → Listado de apuntes
 
-Es el talonario del único libro. Los filtros son nombre, concepto y fechas. La tabla muestra fecha, nombre, concepto, observaciones y cantidad. No hay libro P/G ni procedencia A/B/C. **Filtrar** ordena por fecha. **Editar** abre la fila; **Borrar** pide confirmación. No hay modo de cuadre entre libros ni apuntes llegados de una remesa.
+Es el talonario del único libro. Los filtros son nombre, concepto y fechas. La tabla muestra fecha, nombre, concepto, observaciones y cantidad. No hay libro P/G ni procedencia A/B/C. **Filtrar** ordena por fecha; pulsar una cabecera ordena por esa columna (otro clic invierte). **Editar** abre la fila; **Borrar** pide confirmación. No hay modo de cuadre entre libros ni apuntes llegados de una remesa.
 
 ## Asociación y fundación
 

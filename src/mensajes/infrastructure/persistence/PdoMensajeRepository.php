@@ -56,7 +56,7 @@ final class PdoMensajeRepository implements MensajeRepository
     {
         $sql = "UPDATE mensajes SET cerrado_at = now(), descartado_manual = FALSE
                 WHERE identidad_id = :i AND cerrado_at IS NULL
-                  AND tipo IN ('destinos_7', 'remesa_detalle')";
+                  AND tipo IN ('destinos_7', 'remesa_detalle', 'remesa_rechazada')";
         $params = [':i' => $identidadId];
         if ($clavesVivas !== []) {
             $marcas = [];

@@ -13,6 +13,7 @@ final class ListarPlantillasCentroPersonal
         private readonly ResolverPersonaActual $ambito,
         private readonly PlantillaApunteRepository $plantillas,
         private readonly ResolverCategoriaPlantillaPersonal $categoriaPlantilla,
+        private readonly ?ResolverCentroPlantillas $centroPlantillas = null,
     ) {
     }
 
@@ -24,7 +25,8 @@ final class ListarPlantillasCentroPersonal
         $ctx = $this->ambito->ejecutar();
         $vistas = [];
         $out = [];
-        foreach ($this->plantillas->listar($ctx->centroId, 'P') as $plantilla) {
+        $centroPlantillasId = $this->centroPlantillas?->ejecutar($ctx->personaId, $ctx->centroId) ?? $ctx->centroId;
+        foreach ($this->plantillas->listar($centroPlantillasId, 'P') as $plantilla) {
             if ($plantilla->id === null || !$plantilla->activa) {
                 continue;
             }

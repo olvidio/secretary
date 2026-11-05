@@ -278,6 +278,56 @@ final class RemesaTest extends TestCase
         self::assertSame(0, count(array_filter($codigos, static fn (string $c): bool => $c === 'P/22')));
     }
 
+    public function testAceptarRemesaConPlantillaClubExpandeCuatroMovimientos(): void
+    {
+        $d = $this->deps();
+        $anio = $d['anio'];
+        $fecha = sprintf('%04d-03-15', $anio);
+        $plantilla = null;
+        foreach ((new \src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository($this->pdo))->listar($d['centroId'], 'P') as $p) {
+            if (strtolower($p->nombre) === 'club') {
+                $plantilla = $p;
+            }
+        }
+        self::assertNotNull($plantilla);
+        $cat = $d['cuentas']->buscar($d['centroId'], $d['personaId'], 'X', '211');
+        self::assertNotNull($cat?->id);
+
+        $d['registrar']->ejecutar([
+            'sentido' => 'gasto',
+            'fecha' => $fecha,
+            'cantidad' => '1000.00',
+            'cuenta_id' => $cat->id,
+            'plantilla_id' => $plantilla->id,
+            'tesoreria' => 'CAJA',
+            'nota' => 'Club',
+        ]);
+
+        $prev = $d['preview']->ejecutar($anio, 3);
+        $l211 = null;
+        foreach ($prev['lineas'] as $l) {
+            if ($l['codigo_maestro'] === '211') {
+                $l211 = $l;
+            }
+        }
+        self::assertNotNull($l211);
+        self::assertSame(100000, $l211['plantillas_cents'] ?? null);
+        self::assertSame(100000, $l211['importe_total_cents'] ?? null);
+
+        $enviada = $d['enviar']->ejecutar(['anio' => $anio, 'mes' => 3]);
+        $d['aceptar']->ejecutar((int) $enviada->id);
+
+        $apuntes = $d['listar']->ejecutar(['iniciales' => 'aa']);
+        $porCuenta = [];
+        foreach ($apuntes as $a) {
+            $porCuenta[$a['cuenta'] . '/' . $a['concepto_codigo']] = $a['cantidad'] ?? null;
+        }
+        foreach (['P/211', 'P/111', 'G/11', 'G/211'] as $k) {
+            self::assertArrayHasKey($k, $porCuenta, 'falta ' . $k);
+        }
+        self::assertCount(4, $apuntes);
+    }
+
     private function contarAsientosRemesa(): int
     {
         return (int) $this->pdo->query(

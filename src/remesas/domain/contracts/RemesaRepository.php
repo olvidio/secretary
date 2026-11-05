@@ -42,6 +42,15 @@ interface RemesaRepository
     public function solicitudesPendientesDePersonas(array $personaIds): array;
 
     /**
+     * Remesas rechazadas que siguen siendo la última versión de su mes
+     * (sin otra enviada, aceptada o posterior).
+     *
+     * @param list<int> $personaIds
+     * @return list<Remesa>
+     */
+    public function rechazadasVigentesDePersonas(array $personaIds): array;
+
+    /**
      * @template T
      * @param callable(): T $trabajo
      * @return T

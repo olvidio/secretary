@@ -113,8 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
     detalle.hidden = false;
     document.getElementById('remesa-detalle-titulo').textContent =
       'Remesa ' + (m.iniciales || '') + ' · ' + MESES[(m.mes || 1) - 1] + ' ' + m.anio + ' v' + m.version;
-    document.getElementById('remesa-detalle-meta').textContent = 'Estado: ' + m.estado
-      + (m.nota ? ' · ' + m.nota : '');
+    document.getElementById('remesa-detalle-meta').textContent = 'Estado: ' + m.estado;
+    const notaEl = document.getElementById('remesa-detalle-nota');
+    notaEl.textContent = m.nota || '';
+    notaEl.hidden = !m.nota;
     const tes = document.getElementById('remesa-tesoreria');
     const wrapSust = document.getElementById('remesa-sustituir-wrap');
     if (m.saldo_tesoreria_es != null) {
@@ -143,7 +145,9 @@ document.addEventListener('DOMContentLoaded', () => {
         det = '<button type="button" data-sol="' + l.id + '">Solicitar detalle</button>';
       }
       tr.innerHTML = '<td>' + esc((l.codigo_maestro || '') + ' · ' + (l.nombre || '')) + '</td>'
-        + '<td class="num">' + esc(l.importe_es) + '</td><td>' + det + '</td>';
+        + '<td class="num">' + esc(l.importe_total_es || l.importe_es)
+        + (l.plantillas_cents ? '<br><small class="muted">' + esc(t('incluye_plantillas')) + '</small>' : '')
+        + '</td><td>' + det + '</td>';
       const btnSol = tr.querySelector('[data-sol]');
       if (btnSol) {
         btnSol.onclick = async () => {

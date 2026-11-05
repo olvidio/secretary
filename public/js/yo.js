@@ -552,6 +552,21 @@
     actualizarPillGenerales();
   }
 
+  const CLAVE_TESORERIA = 'yo_ultima_tesoreria';
+
+  function recordarTesoreria(valor) {
+    try { localStorage.setItem(CLAVE_TESORERIA, valor); } catch (e) { /* sin almacenamiento */ }
+  }
+
+  function aplicarUltimaTesoreria(form) {
+    let v = null;
+    try { v = localStorage.getItem(CLAVE_TESORERIA); } catch (e) { return; }
+    if (v !== 'CAJA' && v !== 'BANCO') return;
+    form.querySelectorAll('[name="tesoreria"]').forEach((el) => {
+      el.checked = el.value === v;
+    });
+  }
+
   function abrirModal(sentido) {
     const modal = qs('#yo-modal');
     const form = prepararModalBase();
@@ -570,6 +585,7 @@
       configurarFormulario('traspaso');
     } else {
       if (titulo) titulo.textContent = sentido === 'ingreso' ? 'Ingreso' : 'Gasto';
+      aplicarUltimaTesoreria(form);
       configurarFormulario(sentido);
       pintarGridCats(sentido);
       pintarGridPlantillas();
@@ -775,7 +791,10 @@
     if (traspasoCaja) traspasoCaja.onclick = convertirATraspasoCaja;
     if (form) {
       form.querySelectorAll('[name="tesoreria"]').forEach((el) => {
-        el.addEventListener('change', actualizarOpcionTraspasoCaja);
+        el.addEventListener('change', () => {
+          if (el.checked) recordarTesoreria(el.value);
+          actualizarOpcionTraspasoCaja();
+        });
       });
     }
     if (!form) return;
@@ -1004,8 +1023,11 @@
       return;
     }
     if (estado) {
-      const env = r.enviada ? ('Enviada v' + r.enviada.version) : 'Sin envío pendiente';
-      const ace = r.aceptada ? ('; aceptada v' + r.aceptada.version) : '';
+      const hayMovimientos = (r.lineas || []).length > 0;
+      let env = '';
+      if (r.enviada) env = 'Enviada v' + r.enviada.version;
+      else if (hayMovimientos && !r.aceptada) env = 'Envío pendiente';
+      const ace = r.aceptada ? ((env ? '; a' : 'A') + 'ceptada v' + r.aceptada.version) : '';
       let rech = '';
       if (!r.enviada) {
         let ultRech = null;
@@ -1013,12 +1035,28 @@
           if (h.estado !== 'rechazada') return;
           if (!ultRech || h.version > ultRech.version) ultRech = h;
         });
+        // Si el usuario quitó el aviso en Mensajes, deja de mostrarse aquí.
         if (ultRech) {
-          rech = '; rechazada v' + ultRech.version;
+          const av = await api('/api/mensajes');
+          const vigente = av.ok && (av.mensajes || []).some((m) => m.tipo === 'remesa_rechazada'
+            && m.datos && Number(m.datos.version) === ultRech.version
+            && Number(m.datos.mes) === Number(state.mes) && Number(m.datos.anio) === Number(state.anio));
+          if (!vigente) ultRech = null;
+        }
+        if (ultRech) {
+          rech = (env || ace ? '; r' : 'R') + 'echazada v' + ultRech.version;
           if (ultRech.nota) rech += ' · ' + ultRech.nota;
         }
       }
-      estado.textContent = env + ace + rech + (r.puede_enviar ? '' : (' · ' + (r.motivo || '')));
+      const motivo = r.puede_enviar || !r.motivo ? '' : r.motivo;
+      const textoEstado = env + ace + rech + (motivo ? ((env || ace || rech ? ' · ' : '') + motivo) : '');
+      estado.classList.toggle('remesa-estado-rechazada', rech !== '');
+      estado.hidden = textoEstado === '';
+      if (rech !== '') {
+        estado.innerHTML = '<a href="/mensajes" title="' + esc(t('mensajes_ir')) + '">' + esc(textoEstado) + '</a>';
+      } else {
+        estado.textContent = textoEstado;
+      }
     }
     const inpTes = qs('#yo-remesa-tesoreria');
     const remTxt = qs('#yo-remesa-remanente');
@@ -1079,7 +1117,7 @@
         });
         return '<li><span class="meta"><strong>' + esc(etiquetaMaestroRemesa(l.codigo_maestro, l.nombre))
           + '</strong>' + (gen ? '<small>' + gen + '</small>' : '')
-          + '</span><span class="imp">' + esc(l.importe_es) + '</span></li>';
+          + '</span><span class="imp">' + esc(l.importe_total_es || l.importe_es) + '</span></li>';
       }).join('');
     }
     if (hist) {

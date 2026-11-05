@@ -4,7 +4,7 @@
     <select name="concepto"></select>
     <button type="submit"><?= _("Ver") ?></button>
 </form>
-<table>
+<table class="ordenable">
     <thead><tr><th><?= _("Fecha") ?></th><th>P/G</th><th>A/B/C</th><th><?= _("Inic.") ?></th><th><?= _("Observaciones") ?></th><th class="num"><?= _("Cantidad") ?></th><th></th></tr></thead>
     <tbody id="tb"></tbody>
 </table>

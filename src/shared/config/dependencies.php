@@ -230,6 +230,7 @@ use src\legal\infrastructure\persistence\PdoAceptacionLegalRepository;
 use src\acceso\infrastructure\persistence\PdoAccesoRutaRepository;
 use src\acceso\infrastructure\persistence\PdoIdentidadRepository;
 use src\personal\application\AsegurarPlanPersonal;
+use src\personal\application\ResolverCentroPlantillas;
 use src\personal\application\BorrarLibroPersonalDePersona;
 use src\personal\application\BorrarMovimientoPersonal;
 use src\personal\application\CategorizarMovimientoBanco;
@@ -401,6 +402,19 @@ return [
 
         return new ResolverPersonaActual($identidades, $personas, $ejercicios, $asegurar, $identidadId, $personaId);
     }),
+    ResolverCentroPlantillas::class => factory(static function (
+        PersonaRepository $personas,
+        CentroRepository $centros,
+        IdentidadRepository $identidades,
+    ): ResolverCentroPlantillas {
+        $identidadId = !empty($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : null;
+
+        return new ResolverCentroPlantillas($personas, $centros, $identidades, $identidadId);
+    }),
+    \src\personal\domain\services\ResolverCategoriaPlantillaPersonal::class => autowire()
+        ->constructorParameter('centroPlantillas', \DI\get(ResolverCentroPlantillas::class)),
+    \src\personal\application\ListarPlantillasCentroPersonal::class => autowire()
+        ->constructorParameter('centroPlantillas', \DI\get(ResolverCentroPlantillas::class)),
     IdentidadRepository::class => autowire(PdoIdentidadRepository::class),
     BancoImportRepository::class => autowire(PdoBancoImportRepository::class),
     PersonalCierreRepository::class => autowire(PdoPersonalCierreRepository::class),
@@ -485,7 +499,8 @@ return [
     }),
     ObtenerConfiguracion::class => autowire(),
     GuardarConfiguracion::class => autowire(),
-    ListarPersonas::class => autowire(),
+    ListarPersonas::class => autowire()
+        ->constructorParameter('identidades', \DI\get(IdentidadRepository::class)),
     EstimarBasesLiquidables::class => autowire(),
     GuardarPersona::class => autowire(),
     GuardarNumSCentroSg::class => autowire(),

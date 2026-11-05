@@ -63,6 +63,25 @@ final class SincronizarBandeja
             );
             $claves[] = $clave;
         }
+        foreach ($this->remesas->rechazadasVigentesDePersonas($personaIds) as $rechazada) {
+            if ($rechazada->id === null) {
+                continue;
+            }
+            $clave = 'rechazo:' . $rechazada->id;
+            $this->mensajes->upsert(
+                $identidadId,
+                $clave,
+                'remesa_rechazada',
+                (string) json_encode([
+                    'quien' => $iniciales[$rechazada->personaId] ?? '',
+                    'mes' => $rechazada->mes,
+                    'anio' => $rechazada->anio,
+                    'version' => $rechazada->version,
+                    'nota' => (string) ($rechazada->nota ?? ''),
+                ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR),
+            );
+            $claves[] = $clave;
+        }
         $this->mensajes->cerrarSalvo($identidadId, $claves);
     }
 

@@ -9,6 +9,7 @@ use src\ambito\domain\contracts\CuentaRepository;
 use src\ambito\domain\entity\Cuenta;
 use src\apuntes\domain\contracts\PlantillaApunteRepository;
 use src\conceptos\domain\services\CatalogoConceptos;
+use src\personal\application\ResolverCentroPlantillas;
 
 /** Primera línea de gasto en P de la plantilla → categoría imputable del libro X. */
 final class ResolverCategoriaPlantillaPersonal
@@ -16,12 +17,14 @@ final class ResolverCategoriaPlantillaPersonal
     public function __construct(
         private readonly PlantillaApunteRepository $plantillas,
         private readonly CuentaRepository $cuentas,
+        private readonly ?ResolverCentroPlantillas $centroPlantillas = null,
     ) {
     }
 
     public function ejecutar(int $centroId, int $personaId, int $plantillaId): Cuenta
     {
-        $plantilla = $this->plantillas->porId($centroId, $plantillaId);
+        $centroPlantillaId = $this->centroPlantillas?->ejecutar($personaId, $centroId) ?? $centroId;
+        $plantilla = $this->plantillas->porId($centroPlantillaId, $plantillaId);
         if ($plantilla === null || !$plantilla->activa || $plantilla->id === null) {
             throw new InvalidArgumentException('Plantilla no encontrada');
         }

@@ -30,6 +30,7 @@
 <section id="remesa-detalle" hidden>
     <h2 id="remesa-detalle-titulo"><?= _("Detalle") ?></h2>
     <p id="remesa-detalle-meta" class="muted"></p>
+    <p id="remesa-detalle-nota" class="remesa-nota-persona" role="note" hidden></p>
     <p id="remesa-tesoreria" class="muted" hidden></p>
     <label id="remesa-sustituir-wrap" class="inline" hidden>
         <input type="checkbox" id="remesa-sustituir">

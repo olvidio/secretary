@@ -47,7 +47,10 @@ final class RegistrarPlantillasDeRemesa
                     }
                     $plantilla = $this->plantillas->porId($remesa->centroId, $plantillaId);
                     if ($plantilla === null) {
-                        throw new InvalidArgumentException(_("Plantilla de remesa no encontrada"));
+                        throw new InvalidArgumentException(sprintf(
+                            _("La plantilla n.º %d citada por la remesa ya no existe en el centro (¿se restauró una copia?). Rechace la remesa y que la persona la vuelva a enviar."),
+                            $plantillaId,
+                        ));
                     }
                     $cantidad = Dinero::fromCents(abs($cents))->toString();
                     foreach ($plantilla->lineas as $i => $lineaPl) {

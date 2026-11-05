@@ -10,6 +10,25 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.36] — 2026-11-05
+
+### Añadido
+- **Mensajes**: un aviso **«Remesa rechazada»** (con la nota del centro) en la bandeja del usuario; se puede quitar y desaparece solo al enviar una versión nueva.
+- **Tablas ordenables**: al pulsar la cabecera se ordenan (listados de apuntes y por concepto).
+- **Mis cuentas**: la cabecera indica el centro y la persona a los que van las remesas.
+- **Resumen personal / hoja de movimiento**: la última tesorería elegida (Caja o Banco) se recuerda en el navegador.
+
+### Cambiado
+- **Remesa (personal)**: el rechazo se resalta en rojo y enlaza a Mensajes; «Sin envío pendiente» desaparece y sale «Envío pendiente» solo si hay movimientos.
+- **Remesa (centro)**: la nota de la persona sale destacada; la línea con gasto de plantilla (p. ej. club) muestra su importe total.
+- **Resumen personal en móvil vertical**: cabe entero, con los botones Ingreso y Gasto a la vista; la hoja de movimiento ya no se corta por la derecha y «Importe» comparte línea con el campo.
+- **Plantillas del centro en Personal**: se ofrecen las del centro al que va la remesa (antes, las del centro del libro personal).
+- **Nombres**: se ve el correo de la cuenta vinculada cuando la ficha no lo tiene (evita desvincular al guardar); nombre, apellidos y botones caben en una fila.
+
+### Corregido
+- **Restaurar una copia de centro** ya no rompe las remesas con plantillas: citan los ids nuevos (las copias antiguas no lo traen).
+- **Aceptar remesa** con una plantilla inexistente da un mensaje que explica qué hacer.
+
 ## [0.1.35] — 2026-11-04
 
 ### Añadido

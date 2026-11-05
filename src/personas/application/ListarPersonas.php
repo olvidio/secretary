@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace src\personas\application;
 
+use src\acceso\domain\contracts\IdentidadRepository;
 use src\ambito\domain\contracts\CentroRepository;
 use src\personas\domain\contracts\PersonaRepository;
 use src\personas\domain\services\ResolverBaseLiquidable;
@@ -14,6 +15,7 @@ final class ListarPersonas
         private readonly PersonaRepository $repo,
         private readonly CentroRepository $centros,
         private readonly ?EstimarBasesLiquidables $bases = null,
+        private readonly ?IdentidadRepository $identidades = null,
     ) {
     }
 
@@ -50,7 +52,12 @@ final class ListarPersonas
         $out = [];
         foreach ($this->repo->listarDeCentro($centroId) as $p) {
             $fila = $p->toArray();
-            $fila['email'] = $p->email ?? '';
+            // Un nombre puede estar vinculado a una cuenta sin tener el correo copiado en la ficha.
+            $email = $p->email ?? '';
+            if ($email === '' && $p->id !== null && $this->identidades !== null) {
+                $email = $this->identidades->identidadDePersona($p->id)?->email ?? '';
+            }
+            $fila['email'] = $email;
             $fila['vivienda_aporta_generales'] = $p->viviendaAportaGenerales;
             $fila['puede_desgravar'] = $p->puedeDesgravar;
             $manual = $p->baseLiquidable?->toString() ?? '';

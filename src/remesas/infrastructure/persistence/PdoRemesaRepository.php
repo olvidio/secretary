@@ -242,6 +242,35 @@ final class PdoRemesaRepository implements RemesaRepository
         return $out;
     }
 
+    public function rechazadasVigentesDePersonas(array $personaIds): array
+    {
+        $personaIds = array_values(array_unique(array_filter(
+            $personaIds,
+            static fn (int $id): bool => $id > 0,
+        )));
+        if ($personaIds === []) {
+            return [];
+        }
+        $marcadores = implode(',', array_fill(0, count($personaIds), '?'));
+        $st = $this->pdo->prepare(
+            "SELECT r.* FROM remesas r
+             WHERE r.persona_id IN ($marcadores) AND r.estado = 'rechazada'
+               AND NOT EXISTS (
+                   SELECT 1 FROM remesas o
+                   WHERE o.persona_id = r.persona_id AND o.ejercicio_id = r.ejercicio_id
+                     AND o.anio = r.anio AND o.mes = r.mes AND o.version > r.version
+               )
+             ORDER BY r.resuelta_at DESC NULLS LAST, r.id DESC"
+        );
+        $st->execute($personaIds);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $out[] = $this->hydrateRemesa($row);
+        }
+
+        return $out;
+    }
+
     public function enTransaccion(callable $trabajo): mixed
     {
         $propia = !$this->pdo->inTransaction();

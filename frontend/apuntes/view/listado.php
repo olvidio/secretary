@@ -16,7 +16,7 @@
     <button type="submit"><?= _("Filtrar") ?></button>
 </form>
 <p id="msg-apuntes" class="muted" hidden></p>
-<table id="tabla-apuntes">
+<table id="tabla-apuntes" class="ordenable">
     <thead>
     <tr>
         <th><?= _("Fecha") ?></th>
@@ -370,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <?= _("Gasto suma, ingreso resta. El saldo de cada fecha debería ser 0; las fechas que no cuadran se marcan para localizar el desajuste.") ?>
 </p>
 <p id="apuntes-cuadre-total" class="apuntes-cuadre-total" hidden></p>
-<table id="tabla-apuntes">
+<table id="tabla-apuntes" class="ordenable">
     <thead>
     <tr>
         <th><?= _("Fecha") ?></th>

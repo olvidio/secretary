@@ -615,7 +615,23 @@ final class PageController
             'mostrarMenuAmbito' => $this->puedeCambiarTipoSesion(),
             'mostrarMenuPersonaActiva' => $this->puedeElegirPersonaActivaSesion(),
             'mostrarMenuBaja' => $this->puedeSolicitarBajaCuenta(),
+            'centroDestinoYo' => $this->centroDestinoYo(),
         ], $extra)));
+    }
+
+    /** Centro (y persona) al que van las remesas y de donde salen las plantillas: primer vínculo. */
+    private function centroDestinoYo(): string
+    {
+        $identidadId = isset($_SESSION['identidad_id']) ? (int) $_SESSION['identidad_id'] : 0;
+        if ($identidadId <= 0) {
+            return '';
+        }
+        $vinculos = $this->identidades->personasVinculoDe($identidadId);
+        if ($vinculos === []) {
+            return '';
+        }
+
+        return $vinculos[0]['centro_nombre'] . ' (' . $vinculos[0]['iniciales'] . ')';
     }
 
     private function paginaAdmin(string $view, string $nav): Response

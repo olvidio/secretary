@@ -43,6 +43,21 @@ final class RemesaLinea
         return max(0, $this->importeCents - $generales);
     }
 
+    /** Importe de gastos con plantilla (se contabilizan expandiendo la plantilla, no en el asiento P). */
+    public function plantillasCents(): int
+    {
+        $total = 0;
+        foreach ($this->detalle as $item) {
+            foreach ($item['plantillas'] ?? [] as $pl) {
+                if (is_array($pl)) {
+                    $total += abs((int) ($pl['cents'] ?? 0));
+                }
+            }
+        }
+
+        return $total;
+    }
+
     /** @return array<string, mixed> */
     public function toArray(): array
     {
@@ -123,6 +138,9 @@ final class RemesaLinea
             'importe_cents' => $this->importeCents,
             'importe' => Dinero::fromCents($this->importeCents)->toString(),
             'importe_es' => Dinero::fromCents($this->importeCents)->formatEs(),
+            'plantillas_cents' => $this->plantillasCents(),
+            'importe_total_cents' => $this->importeCents + $this->plantillasCents(),
+            'importe_total_es' => Dinero::fromCents($this->importeCents + $this->plantillasCents())->formatEs(),
             'detalle' => $detalle,
         ];
     }

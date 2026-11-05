@@ -38,5 +38,5 @@ Si el centro ya confirmó destinos 7, el texto («Deberías ingresar…») apare
 
 - **El botón «Cerrar y enviar mes» está desactivado**: el año contable de ese mes está cerrado en el centro. Aparece el aviso «El ejercicio de ese mes está cerrado».
 - **No aparece la pestaña «Remesa»**: la cuenta no está vinculada a ningún centro. Hay que pedir el vínculo en la pantalla de centros; el programa lleva allí directamente.
-- **El centro ha rechazado el envío**: se corrigen los movimientos del mes y se vuelve a enviar; nace una versión nueva.
+- **El centro ha rechazado el envío**: se corrigen los movimientos del mes y se vuelve a enviar; nace una versión nueva. Mientras no envíes otra versión, el rechazo aparece resaltado en rojo en la pantalla y como aviso en **Mensajes**; pulsando el resaltado se abre Mensajes, donde puedes **Quitar** el aviso.
 - **Faltan movimientos en el resumen**: están anotados después de la fecha de cierre, así que cuentan en el mes siguiente.

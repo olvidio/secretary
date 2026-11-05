@@ -53,4 +53,20 @@ final class PresentadorMensajeTest extends TestCase
         self::assertSame('Ir a la remesa', $fila['accion']);
         self::assertTrue($fila['leido']);
     }
+
+    public function testRechazadaIncluyeNotaYEnlazaALaRemesa(): void
+    {
+        $fila = PresentadorMensaje::presentar([
+            'id' => 6,
+            'tipo' => 'remesa_rechazada',
+            'payload' => (string) json_encode(['quien' => 'AB', 'mes' => 3, 'anio' => 2026, 'version' => 2, 'nota' => 'Falta un ticket']),
+            'leido_at' => null,
+            'creado_at' => '2026-10-09 18:00:00+02',
+        ]);
+
+        self::assertSame('Remesa rechazada', $fila['titulo']);
+        self::assertStringContainsString('03/2026 (v2)', $fila['cuerpo']);
+        self::assertStringContainsString('Falta un ticket', $fila['cuerpo']);
+        self::assertSame('/yo/remesas', $fila['href']);
+    }
 }

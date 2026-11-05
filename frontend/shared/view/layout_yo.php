@@ -10,6 +10,9 @@
 <body class="yo" data-nav="<?= htmlspecialchars((string) ($nav ?? 'yo'), ENT_QUOTES) ?>">
 <header class="yo-top">
     <strong><?= _("Mis cuentas") ?></strong>
+    <?php if (!empty($centroDestinoYo)): ?>
+        <small class="yo-centro-destino" title="<?= htmlspecialchars(_("Centro al que van las remesas y de donde salen las plantillas"), ENT_QUOTES) ?>">→ <?= htmlspecialchars((string) $centroDestinoYo, ENT_QUOTES) ?></small>
+    <?php endif; ?>
     <?php include __DIR__ . '/_menu_usuario.php'; ?>
 </header>
 <main class="yo-main">

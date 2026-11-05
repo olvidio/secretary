@@ -60,6 +60,8 @@ $i18nJs = [
     'rol_modificar' => _("Puede modificar"),
     'rol_consulta' => _("Solo consulta"),
     'quitar' => _("Quitar"),
+    'incluye_plantillas' => _("incluye gastos con plantilla (se aplican al aceptar)"),
+    'mensajes_ir' => _("Ver en Mensajes para quitar el aviso"),
     'mensajes_quitar_confirm' => _("¿Quitar este aviso de la lista?"),
     'quitar_usuario_centro_confirm' => _("¿Quitar el acceso de esta persona a este centro?"),
 ];

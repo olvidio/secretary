@@ -90,7 +90,7 @@ final class ComplementoCopiaCentro
             ? $this->restaurarPlantillas($centroId, $datos['plantillas'])
             : [];
         $remesas = array_key_exists('remesas', $datos)
-            ? $this->restaurarRemesas($centroId, $datos['remesas'])
+            ? $this->restaurarRemesas($centroId, $datos['remesas'], $plantillas)
             : [];
 
         return ['plantillas' => $plantillas, 'remesas' => $remesas];
@@ -752,6 +752,7 @@ final class ComplementoCopiaCentro
                 ];
             }
             $out[] = [
+                'ref' => (int) $row['id'],
                 'cuenta' => trim((string) $row['cuenta']),
                 'nombre' => trim((string) $row['nombre']),
                 'activa' => self::booleano($row['activa']),
@@ -794,6 +795,10 @@ final class ComplementoCopiaCentro
             ]);
             $id = (int) $ins->fetchColumn();
             $mapa[$cuenta . '|' . strtolower($nombre)] = $id;
+            $refAntiguo = (int) ($fila['ref'] ?? 0);
+            if ($refAntiguo > 0) {
+                $mapa['ref:' . $refAntiguo] = $id;
+            }
             foreach ($fila['lineas'] ?? [] as $mov) {
                 if (!is_array($mov)) {
                     continue;
@@ -860,8 +865,11 @@ final class ComplementoCopiaCentro
         return $out;
     }
 
-    /** @return array<int, int> */
-    private function restaurarRemesas(int $centroId, mixed $filas): array
+    /**
+     * @param array<string, int> $plantillas cuenta|nombre y ref:<id antiguo> => id nuevo
+     * @return array<int, int>
+     */
+    private function restaurarRemesas(int $centroId, mixed $filas, array $plantillas = []): array
     {
         $this->pdo->prepare('DELETE FROM remesas WHERE centro_id = :c')->execute([':c' => $centroId]);
         $mapa = [];
@@ -913,12 +921,43 @@ final class ComplementoCopiaCentro
                     ':r' => $id,
                     ':cod' => (string) ($mov['codigo'] ?? ''),
                     ':imp' => (int) ($mov['importe'] ?? 0),
-                    ':det' => json_encode($mov['detalle'] ?? [], JSON_UNESCAPED_UNICODE),
+                    ':det' => json_encode(
+                        self::remapearPlantillas($mov['detalle'] ?? [], $plantillas),
+                        JSON_UNESCAPED_UNICODE,
+                    ),
                 ]);
             }
         }
 
         return $mapa;
+    }
+
+    /**
+     * El detalle de una línea de remesa cita plantillas por id; al restaurar se recrean con ids nuevos.
+     *
+     * @param array<string, int> $plantillas
+     */
+    private static function remapearPlantillas(mixed $detalle, array $plantillas): mixed
+    {
+        if (!is_array($detalle)) {
+            return $detalle;
+        }
+        foreach ($detalle as $i => $item) {
+            if (!is_array($item) || !is_array($item['plantillas'] ?? null)) {
+                continue;
+            }
+            foreach ($item['plantillas'] as $j => $pl) {
+                if (!is_array($pl)) {
+                    continue;
+                }
+                $nuevo = $plantillas['ref:' . (int) ($pl['plantilla_id'] ?? 0)] ?? null;
+                if ($nuevo !== null) {
+                    $detalle[$i]['plantillas'][$j]['plantilla_id'] = $nuevo;
+                }
+            }
+        }
+
+        return $detalle;
     }
 
     /** @return list<array<string, mixed>> */

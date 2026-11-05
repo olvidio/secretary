@@ -23,7 +23,8 @@ Desde aquí también se puede corregir o borrar un apunte suelto sin salir de la
 
 - La columna **P/G** dice si el apunte es del libro personal o del general.
 - La columna **A/B/C** dice de dónde sale el dinero: **A** no toca la caja ni el banco del centro, **B** es banco y **C** es caja.
-- La cantidad siempre es positiva; el signo lo pone el concepto.
+- Pulsar una cabecera de la tabla ordena por esa columna (fecha, libro, procedencia, iniciales, observaciones o cantidad); otro clic invierte el orden.
+- La cantidad es normalmente positiva; el signo lo pone el concepto. Una cantidad negativa es una rectificación anotada a conciencia.
 - No hay filtro de fechas: se muestran todos los apuntes de ese concepto en el ejercicio abierto, sin cortar por la fecha de cierre. Por eso la suma puede no coincidir con la del resumen mensual, que sí corta.
 - Los apuntes que vienen de una remesa enviada por una persona no tienen botones de Editar ni Borrar: se corrigen pidiéndole que reenvíe el mes.
 - Al guardar una edición, si se ha cambiado algún campo además de observaciones, se pide confirmación antes de grabar.
