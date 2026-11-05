@@ -84,9 +84,11 @@ function fechaEsAIso(texto) {
   const s = String(texto ?? '').trim();
   let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (m) return `${m[1]}-${m[2]}-${m[3]}`;
-  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  // dd/mm/aaaa o dd/mm/aa (año corto = 20aa); también admite '-' o '.' como separador.
+  m = s.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})$/);
   if (!m) return s;
-  return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+  const anio = m[3].length === 2 ? `20${m[3]}` : m[3];
+  return `${anio}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
 }
 
 function fechaIsoValida(iso) {
