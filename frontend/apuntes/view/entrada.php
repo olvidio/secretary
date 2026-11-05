@@ -102,9 +102,13 @@
 
 <p id="msg" class="ok" hidden><?= _("Apunte guardado") ?></p>
 <p id="err" class="error" hidden></p>
+<p class="entrada-nueva"><button type="button" id="btn-nueva"><?= _("Nueva") ?></button></p>
 
 <script>
 const CUENTA = <?= json_encode($cuenta) ?>;
+document.getElementById('btn-nueva').addEventListener('click', () => {
+  location.href = '/entrada-' + CUENTA.toLowerCase();
+});
 const ES_CENTRO_SG = <?= $esCentroSg ? 'true' : 'false' ?>;
 const I18N_ENTRADA = {
   plantillas: <?= json_encode(_("Plantillas"), JSON_UNESCAPED_UNICODE) ?>,
