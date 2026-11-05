@@ -45,6 +45,7 @@ final class ComplementoCopiaCentro
             'envios_dl' => $this->exportarEnvios($centroId),
             'cierres_mes' => $this->exportarCierresMes($centroId),
             'banco_personal' => $this->exportarBancoPersonal($centroId),
+            'saldos_cc_manuales' => $this->exportarSaldosCcManuales($centroId),
         ];
     }
 
@@ -141,6 +142,9 @@ final class ComplementoCopiaCentro
         }
         if (array_key_exists('banco_personal', $datos)) {
             $this->restaurarBancoPersonal($centroId, $datos['banco_personal'], $asientos);
+        }
+        if (array_key_exists('saldos_cc_manuales', $datos)) {
+            $this->restaurarSaldosCcManuales($centroId, $datos['saldos_cc_manuales']);
         }
     }
 
@@ -1810,6 +1814,59 @@ final class ComplementoCopiaCentro
                 ':f' => (new ConverterDate('date', (string) ($fila['fecha'] ?? '')))->toPg(),
                 ':i' => (string) ($fila['importe'] ?? ''),
                 ':c' => (string) ($fila['concepto'] ?? ''),
+            ]);
+        }
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function exportarSaldosCcManuales(int $centroId): array
+    {
+        $st = $this->pdo->prepare(
+            'SELECT e.fecha_inicio, p.iniciales, s.anio, s.mes, s.saldo_cents, s.nota
+             FROM saldos_cc_manuales s
+             JOIN ejercicios e ON e.id = s.ejercicio_id
+             JOIN personas p ON p.id = s.persona_id
+             WHERE s.centro_id = :c
+             ORDER BY e.fecha_inicio, s.anio, s.mes, p.iniciales'
+        );
+        $st->execute([':c' => $centroId]);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $out[] = [
+                'ejercicio' => (string) $this->fecha($row['fecha_inicio']),
+                'iniciales' => (string) $row['iniciales'],
+                'anio' => (int) $row['anio'],
+                'mes' => (int) $row['mes'],
+                'saldo_cents' => (int) $row['saldo_cents'],
+                'nota' => $row['nota'] !== null ? (string) $row['nota'] : null,
+            ];
+        }
+
+        return $out;
+    }
+
+    private function restaurarSaldosCcManuales(int $centroId, mixed $filas): void
+    {
+        $this->pdo->prepare('DELETE FROM saldos_cc_manuales WHERE centro_id = :c')->execute([':c' => $centroId]);
+        if (!is_array($filas)) {
+            return;
+        }
+        $st = $this->pdo->prepare(
+            'INSERT INTO saldos_cc_manuales (centro_id, ejercicio_id, persona_id, anio, mes, saldo_cents, nota)
+             VALUES (:c, :e, :p, :a, :m, :s, :n)'
+        );
+        foreach ($filas as $fila) {
+            if (!is_array($fila)) {
+                continue;
+            }
+            $st->execute([
+                ':c' => $centroId,
+                ':e' => $this->exigirEjercicio($centroId, (string) ($fila['ejercicio'] ?? '')),
+                ':p' => $this->exigirPersona($centroId, (string) ($fila['iniciales'] ?? '')),
+                ':a' => (int) ($fila['anio'] ?? 0),
+                ':m' => (int) ($fila['mes'] ?? 0),
+                ':s' => (int) ($fila['saldo_cents'] ?? 0),
+                ':n' => $fila['nota'] ?? null,
             ]);
         }
     }

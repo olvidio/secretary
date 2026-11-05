@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace src\informes\domain\services;
 
 /**
- * Concepto 90: saldo de caja+banco que cada persona comunicó en la remesa.
- * No genera apuntes. En el 613 P es la suma de la última remesa aceptada
- * de cada persona, hasta el mes de la fecha de cierre.
+ * Concepto 90: saldo de caja+banco que cada persona comunicó en la remesa,
+ * o que el secretario anotó a mano (`manual`). No genera apuntes. En el 613 P
+ * es la suma del último dato de cada persona hasta el mes de la fecha de
+ * cierre; en un mismo mes, el manual prevalece sobre la remesa.
  */
 final class SaldoCuentasCorrientes
 {
     /**
-     * @param list<array{persona_id:int,anio:int,mes:int,version:int,saldo_cents:?int}> $aceptadas
+     * @param list<array{persona_id:int,anio:int,mes:int,version:int,saldo_cents:?int,manual?:bool}> $aceptadas
      */
     public static function cents(array $aceptadas, int $anioCorte, int $mesCorte): int
     {
@@ -24,7 +25,7 @@ final class SaldoCuentasCorrientes
                 continue;
             }
             $personaId = (int) $fila['persona_id'];
-            $orden = ($anio * 100 + $mes) * 1000 + (int) $fila['version'];
+            $orden = ($anio * 100 + $mes) * 1000 + (!empty($fila['manual']) ? 999 : (int) $fila['version']);
             if (!isset($mejor[$personaId]) || $orden > $mejor[$personaId]['orden']) {
                 $mejor[$personaId] = [
                     'orden' => $orden,

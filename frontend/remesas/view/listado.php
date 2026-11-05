@@ -63,3 +63,124 @@
     <label><?= _("Nota al rechazar") ?> <input id="remesa-nota" maxlength="200"></label>
 </section>
 <script src="/js/remesas.js"></script>
+
+<section id="saldos-cc-manual">
+    <h2><?= _("Cuenta corriente (banco) sin remesa") ?></h2>
+    <p class="muted"><?= _("Para quien no envía remesa: anote el saldo de caja y banco de la persona a fin de mes (concepto 90). Solo informa, no crea apuntes. En el 613 P cuenta igual que el de una remesa aceptada; si el mismo mes hay las dos cosas, manda lo anotado aquí.") ?></p>
+    <form id="form-saldo-cc" class="filters">
+        <label><?= _("Persona") ?>
+            <select name="persona_id" required><option value=""></option></select>
+        </label>
+        <label><?= _("Mes") ?>
+            <select name="mes" required>
+                <option value="1"><?= _("enero") ?></option>
+                <option value="2"><?= _("febrero") ?></option>
+                <option value="3"><?= _("marzo") ?></option>
+                <option value="4"><?= _("abril") ?></option>
+                <option value="5"><?= _("mayo") ?></option>
+                <option value="6"><?= _("junio") ?></option>
+                <option value="7"><?= _("julio") ?></option>
+                <option value="8"><?= _("agosto") ?></option>
+                <option value="9"><?= _("septiembre") ?></option>
+                <option value="10"><?= _("octubre") ?></option>
+                <option value="11"><?= _("noviembre") ?></option>
+                <option value="12"><?= _("diciembre") ?></option>
+            </select>
+        </label>
+        <label><?= _("Año") ?> <input name="anio" type="number" min="1900" max="2999" step="1" required></label>
+        <label><?= _("Saldo") ?> <input name="saldo" inputmode="decimal" required></label>
+        <label><?= _("Nota") ?> <input name="nota" maxlength="200"></label>
+        <button type="submit"><?= _("Guardar") ?></button>
+    </form>
+    <p id="saldo-cc-msg" class="ok" hidden></p>
+    <table id="tabla-saldos-cc">
+        <thead>
+        <tr>
+            <th><?= _("Mes") ?></th>
+            <th><?= _("Persona") ?></th>
+            <th class="num"><?= _("Saldo") ?></th>
+            <th><?= _("Nota") ?></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <p id="saldos-cc-vacio" class="muted" hidden><?= _("No hay saldos anotados a mano en este ejercicio.") ?></p>
+</section>
+<script>
+(() => {
+  const I18N_SALDO_CC = {
+    guardado: <?= json_encode(_("Saldo guardado"), JSON_UNESCAPED_UNICODE) ?>,
+    borrar: <?= json_encode(_("Borrar"), JSON_UNESCAPED_UNICODE) ?>,
+    borrarConfirm: <?= json_encode(_("¿Borrar este saldo anotado a mano?"), JSON_UNESCAPED_UNICODE) ?>,
+  };
+  const form = document.getElementById('form-saldo-cc');
+  const tb = document.querySelector('#tabla-saldos-cc tbody');
+  const vacio = document.getElementById('saldos-cc-vacio');
+  const msg = document.getElementById('saldo-cc-msg');
+  const nombresMes = Array.from(form.mes.options).map((o) => o.textContent);
+
+  async function cargarPersonas() {
+    const r = await api('/api/personas');
+    if (!r.ok) return;
+    (r.personas || []).filter((p) => p.activo !== false).forEach((p) => {
+      const o = document.createElement('option');
+      o.value = p.id;
+      o.textContent = (p.iniciales || '') + ' · ' + [p.nombre, p.apellidos].filter(Boolean).join(' ');
+      form.persona_id.appendChild(o);
+    });
+  }
+
+  async function cargarSaldos() {
+    const r = await api('/api/remesas/saldos-cc');
+    tb.innerHTML = '';
+    if (!r.ok) {
+      alert(r.error || t('no_se_pudo_cargar'));
+      return;
+    }
+    const filas = r.saldos || [];
+    vacio.hidden = filas.length > 0;
+    filas.forEach((s) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + esc(nombresMes[s.mes - 1] + ' ' + s.anio) + '</td>'
+        + '<td>' + esc((s.iniciales || '') + ' · ' + (s.persona || '')) + '</td>'
+        + '<td class="num">' + esc(s.saldo_es) + '</td>'
+        + '<td>' + esc(s.nota || '') + '</td>'
+        + '<td><button type="button" class="peligro">' + esc(I18N_SALDO_CC.borrar) + '</button></td>';
+      tr.querySelector('button').onclick = async () => {
+        if (!confirm(I18N_SALDO_CC.borrarConfirm)) return;
+        const b = await api('/api/remesas/saldos-cc/' + s.id + '/borrar', { method: 'POST', body: {} });
+        if (!b.ok) {
+          alert(b.error || t('no_se_pudo_borrar'));
+          return;
+        }
+        cargarSaldos();
+      };
+      tb.appendChild(tr);
+    });
+  }
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    msg.hidden = true;
+    const r = await api('/api/remesas/saldos-cc', { method: 'POST', body: formObj(form) });
+    if (!r.ok) {
+      alert(r.error || t('no_se_pudo_guardar'));
+      return;
+    }
+    msg.textContent = I18N_SALDO_CC.guardado;
+    msg.hidden = false;
+    form.saldo.value = '';
+    form.nota.value = '';
+    cargarSaldos();
+  });
+
+  const hoy = new Date();
+  form.mes.value = String(hoy.getMonth() + 1);
+  form.anio.value = String(hoy.getFullYear());
+  document.addEventListener('DOMContentLoaded', () => {
+    cargarPersonas();
+    cargarSaldos();
+  });
+})();
+</script>

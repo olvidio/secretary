@@ -42,6 +42,7 @@ use src\personal\infrastructure\http\BancoPersonalController;
 use src\personal\infrastructure\http\CopiaPersonalController;
 use src\personal\infrastructure\http\PersonalController;
 use src\remesas\infrastructure\http\RemesaController;
+use src\remesas\infrastructure\http\SaldoCcManualController;
 use src\disponible\infrastructure\http\DisponibleController;
 use src\envio_dl\infrastructure\http\EnvioDlController;
 use src\shared\infrastructure\http\CopiaSeguridadController;
@@ -253,6 +254,9 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/yo/remesas', [RemesaController::class, 'enviar']);
     $r->addRoute('GET', '/api/yo/remesas/{id:\d+}', [RemesaController::class, 'verPersonal']);
 
+    $r->addRoute('GET', '/api/remesas/saldos-cc', [SaldoCcManualController::class, 'listar']);
+    $r->addRoute('POST', '/api/remesas/saldos-cc', [SaldoCcManualController::class, 'guardar']);
+    $r->addRoute('POST', '/api/remesas/saldos-cc/{id:\d+}/borrar', [SaldoCcManualController::class, 'borrar']);
     $r->addRoute('GET', '/api/remesas', [RemesaController::class, 'listarCentro']);
     $r->addRoute('GET', '/api/remesas/{id:\d+}', [RemesaController::class, 'verCentro']);
     $r->addRoute('POST', '/api/remesas/{id:\d+}/aceptar', [RemesaController::class, 'aceptar']);

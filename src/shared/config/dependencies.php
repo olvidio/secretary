@@ -280,8 +280,10 @@ use src\remesas\application\ResolverMesRemesa;
 use src\remesas\application\ResolverSolicitudDetalle;
 use src\remesas\application\SolicitarDetalleRemesa;
 use src\remesas\domain\contracts\RemesaRepository;
+use src\remesas\domain\contracts\SaldoCcManualRepository;
 use src\remesas\infrastructure\http\RemesaController;
 use src\remesas\infrastructure\persistence\PdoRemesaRepository;
+use src\remesas\infrastructure\persistence\PdoSaldoCcManualRepository;
 use src\shared\application\BorrarCopiaSeguridad;
 use src\shared\application\CrearCopiaSeguridad;
 use src\shared\application\ListarCopiasSeguridad;
@@ -342,6 +344,7 @@ return [
     CuentaRepository::class => autowire(PdoCuentaRepository::class),
     AsientoRepository::class => autowire(PdoAsientoRepository::class),
     RemesaRepository::class => autowire(PdoRemesaRepository::class),
+    SaldoCcManualRepository::class => autowire(PdoSaldoCcManualRepository::class),
     src\disponible\domain\contracts\SaldoDisponibleRepository::class => autowire(src\disponible\infrastructure\persistence\PdoSaldoDisponibleRepository::class),
     src\disponible\domain\contracts\AsignacionLaboresRepository::class => autowire(src\disponible\infrastructure\persistence\PdoAsignacionLaboresRepository::class),
     src\mensajes\domain\contracts\MensajeRepository::class => autowire(src\mensajes\infrastructure\persistence\PdoMensajeRepository::class),
@@ -550,7 +553,8 @@ return [
         ->constructorParameter('presupuestoSg', get(PresupuestoSgRepository::class))
         ->constructorParameter('estadisticasSg', get(EstadisticasSg::class))
         ->constructorParameter('realizadoCentroSg', get(RealizadoPorConceptoCentroSg::class))
-        ->constructorParameter('remesas', get(RemesaRepository::class)),
+        ->constructorParameter('remesas', get(RemesaRepository::class))
+        ->constructorParameter('saldosCcManuales', get(SaldoCcManualRepository::class)),
     GuardarInforme613Mes::class => autowire(),
     ObtenerE37::class => autowire(),
     CalcularSaldos::class => autowire(),

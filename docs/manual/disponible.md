@@ -16,7 +16,7 @@ Palabras clave: **saldo contable**, **cuenta corriente (banco)**, **colocar en p
 En **Saldos** y **E37** la columna **Saldo cont.** (concepto **9**) es el saldo de la cuenta **CC** (persona–centro). **No** es el banco ni se reparte a mano entre 71, 72…
 
 - Lo normal es **cero** cuando los apuntes A cuadran. La vivienda del cierre no se cuadra con un 111: queda en **Deuda viv.** y se salda en Saldos.
-- En la **remesa**, la persona comunica **cuenta corriente (banco)** (concepto **90**, informativo: caja+banco a cierre). De ahí sale el **disponible** que puede ir a partidas 7; **no** crea apuntes en P del centro.
+- En la **remesa**, la persona comunica **cuenta corriente (banco)** (concepto **90**, informativo: caja+banco a cierre). De ahí sale el **disponible** que puede ir a partidas 7; **no** crea apuntes en P del centro. Para quien no envía remesa, el secretario puede anotar el 90 a mano en **Remesas**: solo cuenta en la línea 90 del 613 P y **no** cambia el disponible (si hace falta, ajustarlo aquí a mano).
 - Las **partidas 7** son gastos de labores apostólicas definidos en Centros → labores apostólicas. **Qué importe va a cada código 7** lo propone el programa, no el secretario mirando la c/c persona a persona.
 
 Orden habitual cuando hay dinero para labores (sobrante de trabajo, no un agujero de vivienda):

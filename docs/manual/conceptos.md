@@ -24,7 +24,7 @@ Sirve para recordar qué código toca antes de teclear un apunte, y para saber q
 
 - Es una pantalla de consulta: los conceptos no se editan ni se añaden desde aquí.
 - La columna «Naturaleza» dice cómo se comporta el concepto: «ingreso» suma al disponible, «gasto» lo resta, y «transferencia» son los movimientos entre banco y caja (41 y 42), que no son ni una cosa ni la otra.
-- Hay naturalezas especiales: «disponible» (G/32), «saldo» (P/9, saldo contable de la cuenta CC persona–centro; agregado en 613 y E37; **no** es el banco) e «informacion» (P/90, cuenta corriente banco en la remesa; **no** genera apuntes; solo calcula el disponible hacia partidas 7).
+- Hay naturalezas especiales: «disponible» (G/32), «saldo» (P/9, saldo contable de la cuenta CC persona–centro; agregado en 613 y E37; **no** es el banco) e «informacion» (P/90, cuenta corriente banco en la remesa o anotada a mano en Remesas; **no** genera apuntes; solo calcula el disponible hacia partidas 7).
 - Un mismo código puede significar cosas distintas en cada libro. El 11, por ejemplo, es un ingreso en el general y no existe en el personal.
 - Las partidas del capítulo VII del libro personal (las que empiezan por 7) son las únicas que se pueden cambiar, y se hace desde la pantalla de Centros.
 - Estos son los mismos códigos que aparecen en la entrada de apuntes, en el presupuesto y en el resumen mensual 613.

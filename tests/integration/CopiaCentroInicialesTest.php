@@ -226,6 +226,10 @@ final class CopiaCentroInicialesTest extends TestCase
             'INSERT INTO personal_cierre_mes (persona_id, anio, mes, fecha_cierre)
              VALUES (:p, 2026, 3, :f)'
         )->execute([':p' => $persona->id, ':f' => $inicio]);
+        $this->pdo->prepare(
+            'INSERT INTO saldos_cc_manuales (centro_id, ejercicio_id, persona_id, anio, mes, saldo_cents, nota)
+             VALUES (:c, :e, :p, 2026, 4, 98765, \'manual\')'
+        )->execute([':c' => $centroId, ':e' => $ejercicioId, ':p' => $persona->id]);
 
         $copias = new PdoCopiaCentro($this->pdo, $asientos);
         $datos = $copias->exportar($centroId);
@@ -243,12 +247,15 @@ final class CopiaCentroInicialesTest extends TestCase
         self::assertNotEmpty($datos['arqueos']);
         self::assertNotSame('', (string) ($datos['centro']['plan_contable'] ?? ''));
         self::assertSame($inicio, $datos['cierres_mes'][0]['fecha_cierre'] ?? null);
+        self::assertSame(98765, $datos['saldos_cc_manuales'][0]['saldo_cents'] ?? null);
+        self::assertSame('jrm', $datos['saldos_cc_manuales'][0]['iniciales'] ?? null);
 
         $this->pdo->prepare('UPDATE personas SET email = \'otro@ejemplo.test\' WHERE id = :id')
             ->execute([':id' => $persona->id]);
         $this->pdo->prepare('DELETE FROM plantillas_apunte WHERE centro_id = :c')->execute([':c' => $centroId]);
         $this->pdo->prepare('DELETE FROM remesas WHERE centro_id = :c')->execute([':c' => $centroId]);
         $this->pdo->prepare('DELETE FROM arqueos WHERE ejercicio_id = :e')->execute([':e' => $ejercicioId]);
+        $this->pdo->prepare('DELETE FROM saldos_cc_manuales WHERE centro_id = :c')->execute([':c' => $centroId]);
 
         $copias->restaurar($centroId, $datos);
 
@@ -272,5 +279,9 @@ final class CopiaCentroInicialesTest extends TestCase
         self::assertSame(1, $remesas);
         self::assertSame(1, $arqueos);
         self::assertSame(1, $cierres);
+        $manual = $this->pdo->query(
+            'SELECT saldo_cents FROM saldos_cc_manuales WHERE anio = 2026 AND mes = 4 AND nota = \'manual\''
+        )->fetchColumn();
+        self::assertSame(98765, (int) $manual);
     }
 }

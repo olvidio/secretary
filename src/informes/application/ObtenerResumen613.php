@@ -24,6 +24,7 @@ use src\plan\domain\services\Estructura613P;
 use src\personas\domain\contracts\PersonaRepository;
 use src\presupuestos\domain\contracts\PresupuestoRepository;
 use src\remesas\domain\contracts\RemesaRepository;
+use src\remesas\domain\contracts\SaldoCcManualRepository;
 use src\presupuestos\domain\contracts\PresupuestoSgRepository;
 use src\shared\domain\value_objects\Dinero;
 
@@ -45,6 +46,7 @@ final class ObtenerResumen613
         private readonly ?EstadisticasSg $estadisticasSg = null,
         private readonly ?RealizadoPorConceptoCentroSg $realizadoCentroSg = null,
         private readonly ?RemesaRepository $remesas = null,
+        private readonly ?SaldoCcManualRepository $saldosCcManuales = null,
     ) {
     }
 
@@ -317,14 +319,28 @@ final class ObtenerResumen613
     }
 
     /**
-     * @return list<array{persona_id:int,anio:int,mes:int,version:int,saldo_cents:?int}>
+     * Remesas aceptadas y saldos 90 anotados a mano.
+     *
+     * @return list<array{persona_id:int,anio:int,mes:int,version:int,saldo_cents:?int,manual?:bool}>
      */
     private function saldosRemesaAceptada(int $centroId, int $ejercicioId): array
     {
-        if ($this->remesas === null) {
-            return [];
-        }
         $out = [];
+        if ($this->saldosCcManuales !== null) {
+            foreach ($this->saldosCcManuales->listarDeEjercicio($centroId, $ejercicioId) as $manual) {
+                $out[] = [
+                    'persona_id' => $manual->personaId,
+                    'anio' => $manual->anio,
+                    'mes' => $manual->mes,
+                    'version' => 0,
+                    'saldo_cents' => $manual->saldoCents,
+                    'manual' => true,
+                ];
+            }
+        }
+        if ($this->remesas === null) {
+            return $out;
+        }
         foreach ($this->remesas->listarDeCentro($centroId, 'aceptada') as $remesa) {
             if ($remesa->ejercicioId !== $ejercicioId) {
                 continue;

@@ -1273,5 +1273,15 @@
   "← Volver": "← Tornar",
   "← Volver al resumen 613 %s": "← Tornar al resum 613 %s",
   "La cantidad no puede ser cero": "La quantitat no pot ser zero",
-  "La cantidad es NEGATIVA (%s): se anotará en sentido contrario al habitual del concepto. ¿Seguro que quieres guardarla así?": "La quantitat és NEGATIVA (%s): s'anotarà en sentit contrari a l'habitual del concepte. Segur que la vols desar així?"
+  "La cantidad es NEGATIVA (%s): se anotará en sentido contrario al habitual del concepto. ¿Seguro que quieres guardarla así?": "La quantitat és NEGATIVA (%s): s'anotarà en sentit contrari a l'habitual del concepte. Segur que la vols desar així?",
+  "Mes no válido": "Mes no vàlid",
+  "Año no válido": "Any no vàlid",
+  "El mes está fuera del ejercicio actual": "El mes és fora de l'exercici actual",
+  "Indique el saldo de caja y banco": "Indiqueu el saldo de caixa i banc",
+  "Saldo no encontrado": "Saldo no trobat",
+  "Cuenta corriente (banco) sin remesa": "Compte corrent (banc) sense remesa",
+  "Para quien no envía remesa: anote el saldo de caja y banco de la persona a fin de mes (concepto 90). Solo informa, no crea apuntes. En el 613 P cuenta igual que el de una remesa aceptada; si el mismo mes hay las dos cosas, manda lo anotado aquí.": "Per a qui no envia remesa: anoteu el saldo de caixa i banc de la persona a final de mes (concepte 90). Només informa, no crea apunts. Al 613 P compta igual que el d'una remesa acceptada; si el mateix mes hi ha totes dues coses, mana el que s'anota aquí.",
+  "No hay saldos anotados a mano en este ejercicio.": "No hi ha saldos anotats a mà en aquest exercici.",
+  "Saldo guardado": "Saldo desat",
+  "¿Borrar este saldo anotado a mano?": "Voleu esborrar aquest saldo anotat a mà?"
 }

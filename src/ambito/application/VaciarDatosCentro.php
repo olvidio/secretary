@@ -86,6 +86,8 @@ final class VaciarDatosCentro
     {
         $st = $this->pdo->prepare('DELETE FROM remesas WHERE ejercicio_id = :ej');
         $st->execute([':ej' => $ejercicioId]);
+        $st = $this->pdo->prepare('DELETE FROM saldos_cc_manuales WHERE ejercicio_id = :ej');
+        $st->execute([':ej' => $ejercicioId]);
     }
 
     private function borrarImportacion(int $ejercicioId): void

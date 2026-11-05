@@ -23,6 +23,18 @@ final class SaldoCuentasCorrientesTest extends TestCase
         self::assertSame(400000, $cents);
     }
 
+    public function testElManualPrevaleceSobreLaRemesaDelMismoMesYCuentaComoUltimo(): void
+    {
+        $cents = SaldoCuentasCorrientes::cents([
+            ['persona_id' => 1, 'anio' => 2026, 'mes' => 9, 'version' => 3, 'saldo_cents' => 300000],
+            ['persona_id' => 1, 'anio' => 2026, 'mes' => 9, 'version' => 0, 'saldo_cents' => 1000, 'manual' => true],
+            ['persona_id' => 2, 'anio' => 2026, 'mes' => 8, 'version' => 0, 'saldo_cents' => 500, 'manual' => true],
+            ['persona_id' => 2, 'anio' => 2026, 'mes' => 9, 'version' => 1, 'saldo_cents' => 700],
+        ], 2026, 9);
+
+        self::assertSame(1700, $cents);
+    }
+
     public function testSinRemesasEsCero(): void
     {
         self::assertSame(0, SaldoCuentasCorrientes::cents([], 2026, 9));

@@ -17,6 +17,15 @@ Es la bandeja donde llega lo que cada persona **comunica** al cerrar su mes: ing
 4. En el detalle: **Aceptar** o, escribiendo antes el motivo en «Nota al rechazar», **Rechazar**. Las dos piden confirmación. Si la persona indicó un disponible (saldo de su caja y banco menos el remanente), aparece la casilla **Sustituir el disponible por este importe**: sirve para **ajustar en el centro** el disponible operativo a esa cifra comunicada, en lugar de sumar solo el sobrante de la remesa. No transfiere dinero desde la cuenta personal.
 5. En cada línea del detalle, **Solicitar detalle** pide permiso a la persona para ver el desglose. Ella lo ve en **Mensajes** (menú de su nombre), con enlace a su remesa para autorizar o denegar. Cuando autoriza, el botón pasa a **Ver detalle** / **Ocultar detalle** (alterna el panel con subcuentas, importes y gastos marcados como generales).
 
+
+### Cuenta corriente (banco) sin remesa
+
+Para una persona que no envía remesa (no lleva libro personal), el secretario puede **anotar a mano** su saldo de caja y banco a fin de mes (concepto **90**), en el bloque **Cuenta corriente (banco) sin remesa**, al final de la pantalla:
+
+1. Elegir la persona, el mes y el año, y escribir el saldo (admite negativo). La nota es opcional.
+2. Pulsar **Guardar**. Si ya había un saldo de esa persona en ese mes, se sustituye.
+3. La tabla de debajo lista los saldos anotados en el ejercicio actual; **Borrar** quita uno (pide confirmación).
+
 ## Reglas que conviene saber
 
 - Aceptar anota los importes en el libro personal del centro, contra la cuenta personal de esa persona, con fecha del último día del mes. El sobrante (ingresos menos gastos) se aparca para dejar esa **c/c** a cero y suma al **disponible** (salvo si se sustituye por la tesorería enviada). El reparto entre partidas 7 concretas (71, 72…) se hace después en **Disponible**, no al aceptar la remesa.
@@ -25,7 +34,8 @@ Es la bandeja donde llega lo que cada persona **comunica** al cerrar su mes: ing
 - Los gastos que la persona marque como generales generan además los apuntes del libro general.
 - Los apuntes que vienen de una remesa no se editan ni se borran a mano: se corrigen pidiendo a la persona que reenvíe el mes.
 - La caja y el banco propios de la persona no viajan como movimientos. Sí se **comunica** el disponible (saldo menos remanente): es una **notificación** para decidir al aceptar; el dinero real sigue en la cuenta personal hasta que el secretario y la persona lo gestionen fuera del programa si hace falta.
-- Lo aceptado sale en el 613 P y en Cuentas personales, cortado por la fecha de cierre. El saldo de caja y banco de esa remesa es el concepto 90. La línea **90** del 613 P suma, por persona, el de la última remesa aceptada hasta el mes de la fecha de cierre.
+- Lo aceptado sale en el 613 P y en Cuentas personales, cortado por la fecha de cierre. El saldo de caja y banco de esa remesa es el concepto 90. La línea **90** del 613 P suma, por persona, el último dato hasta el mes de la fecha de cierre: el de la última remesa aceptada o el anotado a mano, el más reciente. Si en el mismo mes hay las dos cosas, manda lo anotado a mano.
+- El saldo anotado a mano solo informa: no crea apuntes, no mueve el disponible ni la c/c contable (concepto 9). Solo se pueden anotar meses del ejercicio actual.
 - Las 7 que la persona ya hizo viajan en la remesa. Las de la propuesta de Disponible se apuntaron al confirmar y no se vuelven a cargar.
 
 ## Problemas frecuentes
@@ -35,3 +45,4 @@ Es la bandeja donde llega lo que cada persona **comunica** al cerrar su mes: ing
 - **«Falta la cuenta personal del centro para esa persona»**: darla de alta en Nombres.
 - **«No existe en el plan P del centro el concepto…»**: la persona ha usado un concepto que el centro no tiene; añadirlo en Conceptos P.
 - **«El detalle no está autorizado»**: la persona aún no ha dado permiso para ese desglose.
+- **«El mes está fuera del ejercicio actual»**: el saldo manual solo se anota en meses del ejercicio en el que se está trabajando; cambiar de ejercicio en Ámbito si hace falta.
