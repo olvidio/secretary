@@ -118,6 +118,7 @@ const I18N_ENTRADA = {
   apunteGuardado: <?= json_encode(_("Apunte guardado"), JSON_UNESCAPED_UNICODE) ?>,
   apuntesGuardados: <?= json_encode(_("%s apuntes guardados"), JSON_UNESCAPED_UNICODE) ?>,
   indiqueCantidad: <?= json_encode(_("Indique la cantidad en la cabecera de la fila"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmarNegativa: <?= json_encode(_("La cantidad es NEGATIVA (%s): se anotará en sentido contrario al habitual del concepto. ¿Seguro que quieres guardarla así?"), JSON_UNESCAPED_UNICODE) ?>,
   noCuadre: <?= json_encode(_("No se pudo comprobar el cuadre"), JSON_UNESCAPED_UNICODE) ?>,
   noSugerencia: <?= json_encode(_("No hay sugerencia de cuadre disponible"), JSON_UNESCAPED_UNICODE) ?>,
   conIniciales: <?= json_encode(_("Con iniciales: "), JSON_UNESCAPED_UNICODE) ?>,
@@ -589,6 +590,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function anadirApunte() {
     document.getElementById('err').hidden = true;
     document.getElementById('msg').hidden = true;
+
+    const cantNeg = parseImporteEs(inpCant.value);
+    if (cantNeg < 0 && !confirm(I18N_ENTRADA.confirmarNegativa.replace('%s', inpCant.value.trim()))) {
+      inpCant.focus();
+      return;
+    }
 
     if (plantillaActiva) {
       const cantidad = inpCant.value.trim();

@@ -36,7 +36,8 @@ tabla; lo que no existía en el Excel va marcado como nuevo.
 
 - Los apuntes P y G siguen en una sola lista, distinguidos con P o G, igual que
   en el Excel.
-- La cantidad sigue siendo siempre positiva: el signo lo pone el concepto.
+- La cantidad se escribe en positivo: el signo lo pone el concepto. En las
+  entradas P y G se admite una negativa, previa confirmación.
 - En Configuración se sigue escribiendo **Curso** en lugar de Año, y **2024**
   para el curso 2024-2025, si la contabilidad va de septiembre a agosto.
 - Al crear un centro (o después, en **Centro**) se puede subir el `.xlsm` para

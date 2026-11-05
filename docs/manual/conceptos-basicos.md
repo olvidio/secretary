@@ -28,7 +28,9 @@ se anota su contrapartida.
 
 ## Conceptos y signo
 
-La cantidad se escribe **siempre en positivo**: el signo lo pone el concepto.
+La cantidad se escribe **en positivo**: el signo lo pone el concepto. En las
+entradas P y G se admite, a conciencia, una cantidad negativa (la pantalla pide
+confirmación) para devoluciones o rectificaciones.
 Cada concepto tiene un número; los que más se citan son el **41** (traspaso de
 banco a caja), el **42** (traspaso de caja a banco), el **21** (vivienda), el
 **11** y el **14** (ingresos de generales), el **111** (trabajo) y el **6**

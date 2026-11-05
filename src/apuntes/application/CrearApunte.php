@@ -82,8 +82,9 @@ final class CrearApunte
         $obsRaw = (string) ($datos['observaciones'] ?? '');
         $obs = $obsRaw === '' ? null : $obsRaw;
         $cantidad = Dinero::fromInput((string) ($datos['cantidad'] ?? ''));
-        if ($cantidad->isNegative() || $cantidad->isZero()) {
-            throw new InvalidArgumentException(_("La cantidad debe ser positiva"));
+        // Se admiten negativos (rectificaciones): el traductor invierte debe y haber.
+        if ($cantidad->isZero()) {
+            throw new InvalidArgumentException(_("La cantidad no puede ser cero"));
         }
         $esCierre = !empty($datos['es_cierre']);
         $fechasDistintas = $fechaImputacion->format('Y-m-d') !== $fechaOperacion->format('Y-m-d');

@@ -72,6 +72,62 @@ final class PeriodificacionTest extends TestCase
         self::assertSame(1, $this->contarAsientos());
     }
 
+    public function testCantidadNegativaInvierteElAsiento(): void
+    {
+        $deps = $this->deps();
+        $y = $this->anioAbierto($deps);
+        $filas = $deps['crear']->ejecutar([
+            'fecha' => $y . '-03-15',
+            'cuenta' => 'G',
+            'origen' => 'C',
+            'concepto_codigo' => '201',
+            'cantidad' => '-10.00',
+        ]);
+        self::assertCount(1, $filas);
+        $contexto = $deps['ambito']->ejecutar();
+        $realizado = $deps['asientos']->realizadoPorConcepto(
+            $contexto->centroId,
+            $contexto->ejercicioId,
+            'G',
+            $y . '-03-01',
+            $y . '-03-31',
+        );
+        self::assertSame(-1000, $realizado['201'] ?? 0);
+        self::assertSame(1000, $this->saldoCajaG($deps, $y . '-03-15'));
+    }
+
+    public function testCantidadNegativaConImputacionDistinta(): void
+    {
+        $deps = $this->deps();
+        $y = $this->anioAbierto($deps);
+        $deps['crear']->ejecutar([
+            'fecha' => $y . '-02-08',
+            'fecha_imputacion' => $y . '-01-31',
+            'cuenta' => 'G',
+            'origen' => 'C',
+            'concepto_codigo' => '201',
+            'cantidad' => '-25.00',
+        ]);
+        self::assertSame(2, $this->contarAsientos());
+        self::assertSame(0, $this->saldoCajaG($deps, $y . '-01-31'));
+        self::assertSame(2500, $this->saldoCajaG($deps, $y . '-02-08'));
+        self::assertSame(0, $this->saldoPuentePeriodificacionG($deps, $y . '-02-08'));
+    }
+
+    public function testCantidadCeroSeRechaza(): void
+    {
+        $deps = $this->deps();
+        $y = $this->anioAbierto($deps);
+        $this->expectException(\InvalidArgumentException::class);
+        $deps['crear']->ejecutar([
+            'fecha' => $y . '-03-15',
+            'cuenta' => 'G',
+            'origen' => 'C',
+            'concepto_codigo' => '201',
+            'cantidad' => '0',
+        ]);
+    }
+
     public function testFechasDistintasMismoEjercicioDosAsientosEnlazados(): void
     {
         $deps = $this->deps();

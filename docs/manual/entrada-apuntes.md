@@ -32,7 +32,7 @@ En **Entrada G** hay un bloque **Importar extracto del banco** (mismo criterio q
 
 ## Reglas que conviene saber
 
-- La cantidad se escribe siempre en positivo: el signo lo pone el concepto.
+- La cantidad se escribe normalmente en positivo: el signo lo pone el concepto. Se admite una cantidad **negativa** (p. ej. una devolución o una rectificación): se anota en sentido contrario al habitual del concepto y, al añadirla, la pantalla pide confirmación. La cantidad no puede ser cero.
 - En el libro personal las iniciales son obligatorias.
 - La **fecha de imputación** solo se rellena si el movimiento hay que contarlo otro día: operación el 8 de enero, gasto el 31 de diciembre. Vacía, se usa la de cabecera.
 - Los conceptos 41 (banco a caja) y 42 (caja a banco) generan el movimiento completo de una vez, sin fecha de imputación distinta.
@@ -44,7 +44,8 @@ En **Entrada G** hay un bloque **Importar extracto del banco** (mismo criterio q
 
 - **«Las iniciales son obligatorias en P»**: elegir la persona en la cabecera.
 - **«Iniciales no reconocidas en este centro»**: ese nombre no está dado de alta aquí.
-- **«La cantidad debe ser positiva»**: no se teclea el signo menos.
+- **«La cantidad no puede ser cero»**: falta el importe o es 0.
+- **Aviso de cantidad negativa**: se ha tecleado el signo menos. Aceptar solo si de verdad se quiere el sentido contrario; si no, Cancelar y corregir.
 - **«No hay ejercicio que cubra la fecha …»**: cae fuera de los ejercicios dados de alta.
 - **«… en un ejercicio cerrado»**: reabrirlo, o cambiar la fecha.
 
