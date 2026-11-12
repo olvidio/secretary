@@ -156,6 +156,7 @@ final class PdoListadoRepository
         $sql .= ' ORDER BY a.fecha, a.numero, m.orden';
         $st = $this->pdo->prepare($sql);
         $st->execute($params);
+        $grupos = $this->gruposDe($centroId);
         $filas = [];
         foreach ($st->fetchAll() as $row) {
             if ($categorias !== [] && !$this->coincideCodigo((string) $row['codigo'], $categorias)) {
@@ -181,7 +182,7 @@ final class PdoListadoRepository
                 'debe' => $debe,
                 'haber' => $haber,
                 'tipo' => (string) $row['tipo'],
-                'signo' => $haber > $debe ? 'ingreso' : 'gasto',
+                'signo' => $this->signoDe((string) $row['codigo'], (string) $row['tipo'], $grupos),
                 'periodo_grupo' => $this->etiquetaGrupo((string) $row['fecha'], $listado['separar_periodo']),
                 'periodo_orden' => $this->ordenGrupo((string) $row['fecha'], $listado['separar_periodo']),
             ];
@@ -203,7 +204,46 @@ final class PdoListadoRepository
             'periodo' => $this->etiquetaPeriodo($centroId, $listado),
             'movimientos' => $listado['mostrar_movimientos'] ? $filas : [],
             'totales' => $listado['mostrar_totales'] ? array_values($totales) : [],
+            'grupos' => array_map(static fn (array $g): string => $g['nombre'], $grupos),
         ];
+    }
+
+    /**
+     * Ingresos o gastos según la naturaleza de la categoría, no el importe del movimiento.
+     * Una hija sigue a su madre: 90.1 Ingressos va en Gastos porque 90 Aiguafreda es de gasto.
+     *
+     * @param array<string, array{nombre:string,tipo:string}> $grupos
+     */
+    private function signoDe(string $codigo, string $tipo, array $grupos): string
+    {
+        $punto = strpos($codigo, '.');
+        $madre = $punto !== false ? substr($codigo, 0, $punto) : '';
+        if ($madre !== '' && isset($grupos[$madre])) {
+            $tipo = $grupos[$madre]['tipo'];
+        }
+
+        return $tipo === 'ingreso' ? 'ingreso' : 'gasto';
+    }
+
+    /**
+     * Categorías madre (60, 61…): titulan a sus hijas y les dan la naturaleza.
+     *
+     * @return array<string, array{nombre:string,tipo:string}> por código
+     */
+    private function gruposDe(int $centroId): array
+    {
+        $st = $this->pdo->prepare(
+            "SELECT codigo, nombre, tipo FROM cuentas
+             WHERE centro_id = :c AND libro = 'G' AND persona_id IS NULL
+               AND tipo IN ('ingreso', 'gasto') AND imputable = FALSE AND activo = TRUE"
+        );
+        $st->execute([':c' => $centroId]);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $out[(string) $row['codigo']] = ['nombre' => (string) $row['nombre'], 'tipo' => (string) $row['tipo']];
+        }
+
+        return $out;
     }
 
     /** @return list<array{codigo:string,nombre:string,grupo:bool}> */
@@ -427,7 +467,7 @@ final class PdoListadoRepository
     /** @param mixed $valor @return list<string> */
     private function columnas(mixed $valor): array
     {
-        $permitidas = ['fecha', 'tesoreria', 'categoria', 'glosa', 'debe', 'haber'];
+        $permitidas = ['fecha', 'tesoreria', 'categoria', 'glosa', 'debe', 'haber', 'importe'];
         $lista = $valor === null ? ['fecha', 'categoria', 'glosa', 'debe', 'haber'] : $this->jsonLista($valor);
         $out = [];
         foreach ($permitidas as $columna) {

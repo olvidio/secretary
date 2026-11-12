@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     html += '</tbody></table>';
   }
+  GRUPOS = r.grupos || {};
   if (r.movimientos && r.movimientos.length) {
     html += pintarMovimientos(r.listado, r.movimientos);
   }
@@ -36,16 +37,27 @@ const COLS = {
   glosa: <?= json_encode(_("Glosa"), JSON_UNESCAPED_UNICODE) ?>,
   debe: <?= json_encode(_("Debe"), JSON_UNESCAPED_UNICODE) ?>,
   haber: <?= json_encode(_("Haber"), JSON_UNESCAPED_UNICODE) ?>,
+  importe: <?= json_encode(_("Importe"), JSON_UNESCAPED_UNICODE) ?>,
 };
-const ORDEN_COLS = ['fecha', 'tesoreria', 'categoria', 'glosa', 'debe', 'haber'];
+const ORDEN_COLS = ['fecha', 'tesoreria', 'categoria', 'glosa', 'debe', 'haber', 'importe'];
+const COLS_NUM = ['debe', 'haber', 'importe'];
+const esNum = (c) => COLS_NUM.includes(c);
+
+/** Importe = haber − debe: los ingresos salen en positivo y los gastos en negativo. */
+function celdaNum(c, debe, haber) {
+  const v = c === 'debe' ? debe : (c === 'haber' ? haber : haber - debe);
+  return '<td class="num">' + esc(fmtImporteEs(v / 100)) + '</td>';
+}
 const TXT = {
   ingreso: <?= json_encode(_("Ingresos"), JSON_UNESCAPED_UNICODE) ?>,
   gasto: <?= json_encode(_("Gastos"), JSON_UNESCAPED_UNICODE) ?>,
   total: <?= json_encode(_("Total"), JSON_UNESCAPED_UNICODE) ?>,
 };
 
+let GRUPOS = {};
+
 function columnasDe(listado) {
-  const pedidas = listado.columnas && listado.columnas.length ? listado.columnas : ORDEN_COLS.filter(c => c !== 'tesoreria');
+  const pedidas = listado.columnas && listado.columnas.length ? listado.columnas : ['fecha', 'categoria', 'glosa', 'debe', 'haber'];
   return ORDEN_COLS.filter(c => pedidas.includes(c));
 }
 
@@ -55,6 +67,7 @@ function celda(col, m) {
   if (col === 'categoria') return esc(m.codigo + ' ' + m.nombre);
   if (col === 'glosa') return esc(m.glosa);
   if (col === 'debe') return esc(fmtImporteEs(m.debe / 100));
+  if (col === 'importe') return esc(fmtImporteEs((m.haber - m.debe) / 100));
   return esc(fmtImporteEs(m.haber / 100));
 }
 
@@ -73,44 +86,102 @@ function claveGrupo(nivel, m) {
 }
 
 function pintarMovimientos(listado, filas) {
-  const cols = columnasDe(listado);
   const niveles = [];
   if (listado.separar_periodo) niveles.push('periodo');
   if (listado.separar_signo) niveles.push('signo');
-  (listado.agrupar || []).forEach(n => niveles.push(n));
+  const agrupar = listado.agrupar || [];
+  agrupar.forEach(n => niveles.push(n));
+  // Al agrupar sale una línea por grupo con su total, no el detalle de movimientos.
+  const resumen = agrupar.length > 0;
+  let cols = columnasDe(listado);
+  let cabecera = COLS;
+  if (resumen) {
+    const importes = cols.filter(esNum);
+    cols = ['grupo', ...(importes.length ? importes : ['debe', 'haber'])];
+    cabecera = Object.assign({}, COLS, { grupo: COLS[agrupar[agrupar.length - 1]] });
+  }
   let html = '<table class="informe"><thead><tr>';
-  cols.forEach(c => { html += '<th' + (c === 'debe' || c === 'haber' ? ' class="num"' : '') + '>' + esc(COLS[c]) + '</th>'; });
+  cols.forEach(c => { html += '<th' + (esNum(c) ? ' class="num"' : '') + '>' + esc(cabecera[c]) + '</th>'; });
   html += '</tr></thead><tbody>';
-  html += filasNivel(filas, niveles, cols);
+  html += filasNivel(filas, niveles, cols, resumen);
   html += '</tbody></table>';
   return html;
 }
 
-function filasNivel(filas, niveles, cols) {
+function filaTotal(cols, titulo, debe, haber, clase, sangria) {
+  let tr = clase ? '<tr class="' + clase + '">' : '<tr>';
+  cols.forEach((c, i) => {
+    if (esNum(c)) tr += celdaNum(c, debe, haber);
+    else tr += '<td' + (sangria ? ' style="padding-left:1.5rem"' : '') + '>' + (i === 0 ? esc(titulo) : '') + '</td>';
+  });
+  return tr + '</tr>';
+}
+
+function madreDe(codigo) {
+  const i = codigo.indexOf('.');
+  const madre = i > 0 ? codigo.slice(0, i) : '';
+  return madre && GRUPOS[madre] ? madre : '';
+}
+
+/** Una línea por categoría; cada categoría madre (61…) abre con su título y el total de sus hijas. */
+function filasCategorias(filas, cols) {
+  const hojas = [];
+  filas.forEach(m => {
+    let h = hojas[hojas.length - 1];
+    if (!h || h.codigo !== m.codigo) {
+      h = { codigo: m.codigo, titulo: m.codigo + ' ' + m.nombre, madre: madreDe(m.codigo), debe: 0, haber: 0 };
+      hojas.push(h);
+    }
+    h.debe += m.debe;
+    h.haber += m.haber;
+  });
+  let html = '';
+  for (let i = 0; i < hojas.length;) {
+    const madre = hojas[i].madre;
+    let j = i;
+    while (j < hojas.length && hojas[j].madre === madre) j++;
+    const hijas = hojas.slice(i, j);
+    if (madre) {
+      let debe = 0, haber = 0;
+      hijas.forEach(h => { debe += h.debe; haber += h.haber; });
+      html += filaTotal(cols, madre + ' ' + GRUPOS[madre], debe, haber, 'grupo', false);
+    }
+    hijas.forEach(h => { html += filaTotal(cols, h.titulo, h.debe, h.haber, '', !!madre); });
+    i = j;
+  }
+  return html;
+}
+
+function filasNivel(filas, niveles, cols, resumen) {
   if (!niveles.length) {
     return filas.map(m => {
       let tr = '<tr>';
-      cols.forEach(c => { tr += '<td' + (c === 'debe' || c === 'haber' ? ' class="num"' : '') + '>' + celda(c, m) + '</td>'; });
+      cols.forEach(c => { tr += '<td' + (esNum(c) ? ' class="num"' : '') + '>' + celda(c, m) + '</td>'; });
       return tr + '</tr>';
     }).join('');
   }
   const nivel = niveles[0];
   const resto = niveles.slice(1);
+  if (resumen && !resto.length && nivel === 'categoria') return filasCategorias(filas, cols);
   let html = '';
   let actual = null;
   let grupo = [];
   const volcar = () => {
     if (!grupo.length) return;
     const titulo = tituloGrupo(nivel, grupo[0]);
-    html += '<tr class="grupo"><td colspan="' + cols.length + '">' + esc(titulo) + '</td></tr>';
-    html += filasNivel(grupo, resto, cols);
+    const hoja = resumen && !resto.length;
+    // Periodo e ingresos/gastos son secciones: cabecera y total más marcados que los de un grupo.
+    const seccion = nivel === 'periodo' || nivel === 'signo' ? ' seccion seccion-' + nivel : '';
+    if (!hoja) {
+      html += '<tr class="grupo' + seccion + '"><td colspan="' + cols.length + '">' + esc(titulo) + '</td></tr>';
+      html += filasNivel(grupo, resto, cols, resumen);
+    }
     let debe = 0, haber = 0;
     grupo.forEach(m => { debe += m.debe; haber += m.haber; });
-    html += '<tr class="subtotal">';
+    html += hoja ? '<tr>' : '<tr class="subtotal' + seccion + '">';
     cols.forEach((c, i) => {
-      if (c === 'debe') html += '<td class="num">' + esc(fmtImporteEs(debe / 100)) + '</td>';
-      else if (c === 'haber') html += '<td class="num">' + esc(fmtImporteEs(haber / 100)) + '</td>';
-      else html += '<td>' + (i === 0 ? esc(TXT.total + ' ' + titulo) : '') + '</td>';
+      if (esNum(c)) html += celdaNum(c, debe, haber);
+      else html += '<td>' + (i === 0 ? esc(hoja ? titulo : TXT.total + ' ' + titulo) : '') + '</td>';
     });
     html += '</tr>';
     grupo = [];
@@ -195,7 +266,7 @@ function filasNivel(filas, niveles, cols) {
         </fieldset>
         <fieldset class="listado-seccion">
             <legend><?= _("Organización") ?></legend>
-            <p class="muted"><?= _("Agrupar. El primero es el grupo más general. Subir y bajar cambian el orden.") ?></p>
+            <p class="muted"><?= _("Agrupar. Sale una línea por grupo con su total, sin el detalle de movimientos. El primero es el grupo más general. Subir y bajar cambian el orden.") ?></p>
             <ul id="niveles-agrupar" class="niveles-agrupar">
                 <li data-nivel="categoria">
                     <button type="button" data-mover="-1"><?= _("Subir") ?></button>
@@ -244,6 +315,7 @@ function filasNivel(filas, niveles, cols) {
                 <label class="cuenta-fila"><input type="checkbox" name="col_glosa" checked> <?= _("Glosa") ?></label>
                 <label class="cuenta-fila"><input type="checkbox" name="col_debe" checked> <?= _("Debe") ?></label>
                 <label class="cuenta-fila"><input type="checkbox" name="col_haber" checked> <?= _("Haber") ?></label>
+                <label class="cuenta-fila"><input type="checkbox" name="col_importe"> <?= _("Importe (haber − debe)") ?></label>
             </div>
         </fieldset>
         <button type="submit"><?= _("Guardar") ?></button>
@@ -251,6 +323,7 @@ function filasNivel(filas, niveles, cols) {
     </form>
 </section>
 <script>
+const ORDEN_COLS = ['fecha', 'tesoreria', 'categoria', 'glosa', 'debe', 'haber', 'importe'];
 const I18N_LIST = {
   ver: <?= json_encode(_("Ver"), JSON_UNESCAPED_UNICODE) ?>,
   editar: <?= json_encode(_("Editar"), JSON_UNESCAPED_UNICODE) ?>,
@@ -369,7 +442,7 @@ function rellenarFormulario(l) {
   pintarTesoreria(l.cuentas_tesoreria || []);
   pintarCuentas(l.categorias || []);
   const cols = l.columnas && l.columnas.length ? l.columnas : ['fecha', 'categoria', 'glosa', 'debe', 'haber'];
-  ['fecha', 'tesoreria', 'categoria', 'glosa', 'debe', 'haber'].forEach(c => {
+  ORDEN_COLS.forEach(c => {
     f['col_' + c].checked = cols.includes(c);
   });
   ordenarNiveles(l.agrupar || []);
@@ -456,7 +529,7 @@ document.getElementById('form-listado').addEventListener('submit', async (ev) =>
       incluir_traspasos: f.incluir_traspasos.checked,
       excluir_nulos: f.excluir_nulos.checked,
       texto: f.texto.value,
-      columnas: ['fecha', 'tesoreria', 'categoria', 'glosa', 'debe', 'haber'].filter(c => f['col_' + c].checked),
+      columnas: ORDEN_COLS.filter(c => f['col_' + c].checked),
       agrupar: [...document.querySelectorAll('#niveles-agrupar li')].filter(li => li.querySelector('input').checked).map(li => li.dataset.nivel),
       separar_signo: f.separar_signo.checked,
       separar_periodo: f.separar_periodo.value,
