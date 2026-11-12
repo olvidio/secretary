@@ -1,0 +1,56 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\unit;
+
+use PHPUnit\Framework\TestCase;
+use src\ambito\domain\entity\Cuenta;
+use src\conceptos\domain\entity\Concepto;
+use src\plan\domain\services\CuentasPropiasClub;
+
+final class CuentasPropiasClubTest extends TestCase
+{
+    public function testAnadeLaCuentaPropiaQueNoEstaEnLaPlantilla(): void
+    {
+        $plan = [
+            (new Concepto('61', 'G', 'Despeses generals', '', 'grupo-gasto', 20))->toArray(),
+            (new Concepto('61.6', 'G', 'Taxes', '', 'gasto', 26))->toArray(),
+            (new Concepto('70', 'G', 'Ingressos del club', '', 'grupo-ingreso', 30))->toArray(),
+        ];
+        $cuentas = [
+            $this->cuenta('61.6', 'Taxes', 'gasto'),
+            $this->cuenta('61.10', 'Varis', 'gasto'),
+            $this->cuenta('61.7', 'Alimentació', 'gasto'),
+            $this->cuenta('BANCO.1/G', 'Banc', 'tesoreria'),
+            $this->cuenta('BANCO.PEND.gasto', 'Por categorizar (gasto)', 'gasto'),
+            $this->cuenta('OTRA.ingreso', 'Otra contabilidad', 'ingreso'),
+            $this->cuenta('61.8', 'Baixa', 'gasto', activo: false),
+            $this->cuenta('61.9', 'De persona', 'gasto', personaId: 4),
+        ];
+
+        $out = CuentasPropiasClub::fusionar($plan, $cuentas);
+
+        self::assertSame(['61', '61.6', '61.7', '61.10', '70'], array_column($out, 'codigo'));
+        self::assertSame('gasto', $out[2]['naturaleza']);
+        self::assertSame('61.7 Alimentació', $out[2]['etiqueta']);
+    }
+
+    public function testElGrupoPropioNoEsImputable(): void
+    {
+        $out = CuentasPropiasClub::fusionar([], [$this->cuenta('95', 'Nou grup', 'ingreso', imputable: false)]);
+
+        self::assertSame('grupo-ingreso', $out[0]['naturaleza']);
+    }
+
+    private function cuenta(
+        string $codigo,
+        string $nombre,
+        string $tipo,
+        bool $imputable = true,
+        bool $activo = true,
+        ?int $personaId = null,
+    ): Cuenta {
+        return new Cuenta(null, 5, $personaId, null, null, 'G', $codigo, $nombre, $nombre, $tipo, 'deudora', $codigo, $imputable, 100, $activo);
+    }
+}

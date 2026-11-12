@@ -13,6 +13,7 @@ use src\ambito\infrastructure\persistence\AmbitoSeeder;
 use src\plan\domain\contracts\PlanConceptoRepository;
 use src\plan\domain\contracts\PlanContableRepository;
 use src\plan\domain\services\CatalogoPlanesContables;
+use src\plan\domain\services\CuentasPropiasClub;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
@@ -187,31 +188,9 @@ final class ClubCuentasController
                 'naturaleza_plan' => $tipo === 'ingreso' ? 'ingreso' : ($tipo === 'patrimonio' ? 'disponible' : 'gasto'),
             ];
         }
-        usort($out, static fn (array $a, array $b): int => self::cmpCodigo($a['codigo'], $b['codigo']));
+        usort($out, static fn (array $a, array $b): int => CuentasPropiasClub::cmpCodigo($a['codigo'], $b['codigo']));
 
         return $out;
-    }
-
-    /** 61.6, 61.7, 61.10: cada tramo numérico, y el grupo antes que sus hijas. */
-    private static function cmpCodigo(string $a, string $b): int
-    {
-        $pa = explode('.', $a);
-        $pb = explode('.', $b);
-        $n = max(count($pa), count($pb));
-        for ($i = 0; $i < $n; $i++) {
-            $xa = $pa[$i] ?? '';
-            $xb = $pb[$i] ?? '';
-            if ($xa === $xb) {
-                continue;
-            }
-            if (ctype_digit($xa) && ctype_digit($xb)) {
-                return (int) $xa <=> (int) $xb;
-            }
-
-            return strnatcasecmp($xa, $xb);
-        }
-
-        return 0;
     }
 
     private function upsert(int $centroId, string $codigo, string $nombre, string $naturaleza, bool $imputable): void

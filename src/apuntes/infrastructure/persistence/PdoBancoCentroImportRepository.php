@@ -137,11 +137,15 @@ final class PdoBancoCentroImportRepository implements BancoCentroImportRepositor
     public function historialCategorizado(int $centroId): array
     {
         $st = $this->pdo->prepare(
-            'SELECT f.concepto, f.concepto_asignado, pc.naturaleza AS tipo
+            // Las cuentas propias del centro (club) no están en plan_conceptos: su tipo sale de `cuentas`.
+            'SELECT f.concepto, f.concepto_asignado, COALESCE(pc.naturaleza, cu.tipo) AS tipo
              FROM banco_centro_import_filas f
              JOIN centros ce ON ce.id = f.centro_id
-             JOIN plan_conceptos pc ON pc.plan_contable_id = ce.plan_contable_id
+             LEFT JOIN plan_conceptos pc ON pc.plan_contable_id = ce.plan_contable_id
                 AND pc.cuenta = \'G\' AND pc.codigo = f.concepto_asignado
+             LEFT JOIN cuentas cu ON cu.centro_id = f.centro_id AND cu.libro = \'G\'
+                AND cu.persona_id IS NULL AND cu.codigo = f.concepto_asignado
+                AND cu.imputable = TRUE AND cu.activo = TRUE
              WHERE f.centro_id = :c
                AND f.concepto_asignado IS NOT NULL
                AND f.concepto_asignado NOT IN (:g, :i, :og, :oi)

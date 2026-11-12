@@ -4,20 +4,29 @@ declare(strict_types=1);
 
 namespace src\conceptos\application;
 
+use src\ambito\domain\contracts\CentroRepository;
+use src\ambito\domain\contracts\CuentaRepository;
 use src\conceptos\domain\entity\Concepto;
 use src\conceptos\domain\services\ReglasConceptoPlan;
 use src\plan\domain\contracts\DestinoSgRepository;
 use src\plan\domain\contracts\PartidaLaboresRepository;
 use src\plan\domain\contracts\PlanConceptoRepository;
+use src\plan\domain\services\CatalogoPlanesContables;
+use src\plan\domain\services\CuentasPropiasClub;
 use src\plan\domain\services\DestinosCentroSg;
 
-/** Catálogo efectivo de un centro: plan (sin 7x) + partidas VII del centro. */
+/**
+ * Catálogo efectivo de un centro: plan (sin 7x) + partidas VII del centro.
+ * En una associació se suman sus cuentas propias, que no están en la plantilla.
+ */
 final class ResolverConceptosCentro
 {
     public function __construct(
         private readonly PlanConceptoRepository $planConceptos,
         private readonly PartidaLaboresRepository $partidasLabores,
         private readonly ?DestinoSgRepository $destinos = null,
+        private readonly ?CentroRepository $centros = null,
+        private readonly ?CuentaRepository $cuentas = null,
     ) {
     }
 
@@ -59,8 +68,21 @@ final class ResolverConceptosCentro
         }
         usort($out, static fn (array $a, array $b): int => [$a['cuenta'], $a['orden'], $a['codigo']]
             <=> [$b['cuenta'], $b['orden'], $b['codigo']]);
+        if (($cuenta === null || $cuenta === 'G') && $this->esClub($centroId)) {
+            $out = CuentasPropiasClub::fusionar($out, $this->cuentas->listarDeCentro($centroId));
+        }
 
         return DestinosCentroSg::aplicar($out, $this->destinos?->nombrados($centroId));
+    }
+
+    private function esClub(int $centroId): bool
+    {
+        if ($this->centros === null || $this->cuentas === null) {
+            return false;
+        }
+        $centro = $this->centros->porId($centroId);
+
+        return $centro !== null && CatalogoPlanesContables::esClub($centro->planContableCodigo);
     }
 
     public function buscar(int $centroId, string $cuenta, string $codigo): ?Concepto

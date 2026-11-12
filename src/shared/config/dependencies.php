@@ -326,7 +326,9 @@ return [
     PlanContableRepository::class => autowire(PdoPlanContableRepository::class),
     PlanConceptoRepository::class => autowire(PdoPlanConceptoRepository::class),
     ResolverConceptosCentro::class => autowire()
-        ->constructorParameter('destinos', get(DestinoSgRepository::class)),
+        ->constructorParameter('destinos', get(DestinoSgRepository::class))
+        ->constructorParameter('centros', get(CentroRepository::class))
+        ->constructorParameter('cuentas', get(CuentaRepository::class)),
     ObtenerConceptosPlan::class => autowire(),
     ExportarConceptosPlan::class => autowire(),
     ImportarConceptosPlan::class => autowire(),
