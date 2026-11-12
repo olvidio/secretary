@@ -101,7 +101,7 @@ final class PdoCopiaCentro
         $stL = $this->pdo->prepare(
             'SELECT nombre, mostrar_movimientos, mostrar_totales, fecha_desde, fecha_hasta, categorias, terceros,
                     periodo, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto, columnas, agrupar,
-                    separar_signo, separar_periodo, orden, orden_desc
+                    separar_signo, separar_periodo, orden, orden_desc, incluir_saldos
              FROM listados WHERE centro_id = :c ORDER BY nombre'
         );
         $stL->execute([':c' => $centroId]);
@@ -125,6 +125,7 @@ final class PdoCopiaCentro
                 'separar_periodo' => (string) $row['separar_periodo'],
                 'orden' => (string) $row['orden'],
                 'orden_desc' => self::booleano($row['orden_desc']),
+                'incluir_saldos' => self::booleano($row['incluir_saldos']),
             ];
         }
 
@@ -370,11 +371,11 @@ final class PdoCopiaCentro
             'INSERT INTO listados (
                 centro_id, nombre, mostrar_movimientos, mostrar_totales, fecha_desde, fecha_hasta, categorias, terceros,
                 periodo, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto, columnas, agrupar,
-                separar_signo, separar_periodo, orden, orden_desc
+                separar_signo, separar_periodo, orden, orden_desc, incluir_saldos
              ) VALUES (
                 :c, :n, :m, :t, :d, :h, :cat, :ter,
                 :periodo, :tes, :tras, :nulos, :texto, :cols, :agr,
-                :signo, :sper, :orden, :odesc
+                :signo, :sper, :orden, :odesc, :saldos
              )
              ON CONFLICT (centro_id, nombre) DO NOTHING'
         );
@@ -407,6 +408,7 @@ final class PdoCopiaCentro
                 ':sper' => (string) ($fila['separar_periodo'] ?? ''),
                 ':orden' => (string) ($fila['orden'] ?? 'fecha'),
                 ':odesc' => self::booleano($fila['orden_desc'] ?? false) ? 1 : 0,
+                ':saldos' => self::booleano($fila['incluir_saldos'] ?? false) ? 1 : 0,
             ]);
         }
     }

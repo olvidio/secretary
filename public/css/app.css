@@ -486,6 +486,7 @@ table.informe tr.grupo.seccion td { padding-top: 1.6rem; font-size: 1.08rem; fon
 table.informe tr.grupo.seccion-periodo td { font-size: 1.2rem; }
 table.informe tr.subtotal.seccion td { border-top: 2px solid #334155; border-bottom: 2px solid #334155; background: #f1f5f9; font-weight: 700; padding-top: .45rem; padding-bottom: .45rem; }
 table.informe tr.subtotal.seccion-periodo td { border-top: 3px double #0f172a; border-bottom: 3px double #0f172a; background: #e2e8f0; font-size: 1.08rem; }
+table.informe tr.subtotal.seccion-saldo td { border-top: 3px double #0f172a; border-bottom: 3px double #0f172a; background: #dbeafe; font-size: 1.08rem; }
 table.informe tr.subtotal.seccion + tr.subtotal.seccion td { border-top: 0; }
 table.informe tr.subtotal.seccion + tr.subtotal.seccion-periodo td { border-top: 3px double #0f172a; }
 .cuenta-fila { flex-direction: row; align-items: center; gap: .45rem; }

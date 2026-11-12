@@ -19,6 +19,7 @@ $esCentroSg = !empty($esCentroSg);
                 <option value="ingreso"><?= _("Ingreso") ?></option>
             </select>
         </label>
+        <label><?= _("Código oficial") ?> <input name="codigo_oficial" maxlength="4" inputmode="numeric" placeholder="640"></label>
         <button type="submit"><?= _("Añadir") ?></button>
     </form>
 </section>
@@ -35,8 +36,9 @@ $esCentroSg = !empty($esCentroSg);
         <button type="submit"><?= _("Guardar como plantilla") ?></button>
     </form>
 </section>
+<p class="muted"><?= _("El código oficial es la cuenta del Pla de comptabilitat de les associacions de Catalunya (por ejemplo 640 sueldos, 642 Seguridad Social, 628 suministros) a la que corresponde cada cuenta propia. Se puede cambiar aquí; los grupos no llevan.") ?></p>
 <table id="tabla-cuentas">
-    <thead><tr><th><?= _("Código") ?></th><th><?= _("Nombre") ?></th><th><?= _("Naturaleza") ?></th></tr></thead>
+    <thead><tr><th><?= _("Código") ?></th><th><?= _("Nombre") ?></th><th><?= _("Naturaleza") ?></th><th><?= _("Código oficial") ?></th></tr></thead>
     <tbody></tbody>
 </table>
 <script>
@@ -47,7 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
     tb.replaceChildren();
     (cuentas || []).forEach(c => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${esc(c.codigo)}</td><td>${esc(c.nombre)}</td><td>${esc(c.naturaleza_plan)}</td>`;
+      tr.innerHTML = `<td>${esc(c.codigo)}</td><td>${esc(c.nombre)}</td><td>${esc(c.naturaleza_plan)}</td>`
+        + (c.imputable
+          ? `<td><input class="inp-oficial" data-codigo="${esc(c.codigo)}" value="${esc(c.codigo_oficial || '')}" maxlength="4" inputmode="numeric" size="5"></td>`
+          : '<td></td>');
+      if (!c.imputable) tr.className = 'grupo';
       tb.appendChild(tr);
     });
   }
@@ -61,6 +67,16 @@ document.addEventListener('DOMContentLoaded', () => {
       sel.appendChild(o);
     });
   }
+  tb.addEventListener('change', async (ev) => {
+    const inp = ev.target.closest('.inp-oficial');
+    if (!inp) return;
+    const r = await api('/api/club/cuentas/oficial', { method: 'POST', body: {
+      codigo: inp.dataset.codigo, codigo_oficial: inp.value.trim(),
+    }});
+    if (!r.ok) { alert(r.error || 'Error'); }
+    const rr = r.ok ? r : await api('/api/club/cuentas');
+    if (rr.ok) pintar(rr.cuentas);
+  });
   api('/api/club/cuentas').then(r => {
     if (!r.ok) { alert(r.error || 'Error'); return; }
     pintar(r.cuentas);
@@ -71,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const f = new FormData(ev.target);
     const r = await api('/api/club/cuentas', { method: 'POST', body: {
       codigo: f.get('codigo'), nombre: f.get('nombre'), naturaleza: f.get('naturaleza'),
+      codigo_oficial: f.get('codigo_oficial'),
     }});
     if (!r.ok) { alert(r.error || 'Error'); return; }
     pintar(r.cuentas);

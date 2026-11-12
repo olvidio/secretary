@@ -268,6 +268,7 @@ final class CatalogoRutas
             ['src\\grisbi\\infrastructure\\http\\GrisbiController', 'borrar', 'centro'],
             ['src\\plan\\infrastructure\\http\\ClubCuentasController', 'list', 'centro'],
             ['src\\plan\\infrastructure\\http\\ClubCuentasController', 'crear', 'centro'],
+            ['src\\plan\\infrastructure\\http\\ClubCuentasController', 'oficial', 'centro'],
             ['src\\plan\\infrastructure\\http\\ClubCuentasController', 'guardarPlantilla', 'centro'],
             ['src\\plan\\infrastructure\\http\\ClubCuentasController', 'aplicar', 'centro'],
             ['src\\listados\\infrastructure\\http\\AportacionesSgController', 'list', 'centro'],

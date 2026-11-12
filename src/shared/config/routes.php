@@ -146,6 +146,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/conceptos', [ConceptoController::class, 'list']);
     $r->addRoute('GET', '/api/club/cuentas', [ClubCuentasController::class, 'list']);
     $r->addRoute('POST', '/api/club/cuentas', [ClubCuentasController::class, 'crear']);
+    $r->addRoute('POST', '/api/club/cuentas/oficial', [ClubCuentasController::class, 'oficial']);
     $r->addRoute('POST', '/api/club/plantillas', [ClubCuentasController::class, 'guardarPlantilla']);
     $r->addRoute('POST', '/api/club/plantillas/aplicar', [ClubCuentasController::class, 'aplicar']);
 

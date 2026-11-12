@@ -25,6 +25,10 @@ final class CatalogoConceptosClub
             ['61.4', 'Assegurances', 'gasto', 24],
             ['61.5', 'Despeses bancàries', 'gasto', 25],
             ['61.6', 'Taxes', 'gasto', 26],
+            ['62', 'Neteja', 'grupo-gasto', 27],
+            ['62.1', 'Sous', 'gasto', 28],
+            ['62.2', 'Seguretat Social', 'gasto', 28],
+            ['62.3', 'Gestoria', 'gasto', 29],
             ['70', 'Ingressos del club', 'grupo-ingreso', 30],
             ['70.1', 'Socis', 'ingreso', 31],
             ['70.2', 'Donatius', 'ingreso', 32],
@@ -56,5 +60,24 @@ final class CatalogoConceptosClub
         }
 
         return $out;
+    }
+
+    /**
+     * Cuenta del plan oficial de asociaciones de Catalunya (Decret 259/2008) que se
+     * propone para cada hoja de la plantilla. La numeración del club es propia, por
+     * finalidad; el centro puede cambiar esta correspondencia en la pantalla de Cuentas.
+     */
+    public static function codigoOficial(string $codigo): ?string
+    {
+        return [
+            '60.1' => '600', '60.2' => '623',
+            '61.1' => '628', '61.2' => '622', '61.3' => '629', '61.4' => '625', '61.5' => '626', '61.6' => '631',
+            '62.1' => '640', '62.2' => '642', '62.3' => '623',
+            '70.1' => '721', '70.2' => '728',
+            '80.1' => '629', '80.2' => '629', '80.3' => '629', '80.4' => '629', '80.5' => '629', '80.6' => '629',
+            '90.1' => '759', '90.2' => '628', '90.3' => '622', '90.4' => '625', '90.5' => '629',
+            // Saldo inicial: excedentes acumulados de ejercicios anteriores (120 Romanent).
+            'APERTURA' => '120',
+        ][$codigo] ?? null;
     }
 }

@@ -12,6 +12,7 @@ use src\ambito\domain\entity\Centro;
 use src\ambito\infrastructure\persistence\AmbitoSeeder;
 use src\plan\domain\contracts\PlanConceptoRepository;
 use src\plan\domain\contracts\PlanContableRepository;
+use src\plan\domain\services\CatalogoConceptosClub;
 use src\plan\domain\services\CatalogoPlanesContables;
 use src\plan\domain\services\CuentasPropiasClub;
 use src\shared\infrastructure\http\ContestarJson;
@@ -62,7 +63,29 @@ final class ClubCuentasController
             if (!in_array($naturaleza, ['ingreso', 'gasto'], true)) {
                 throw new InvalidArgumentException(_('La naturaleza es ingreso o gasto'));
             }
+            $oficial = $this->oficialValido($datos['codigo_oficial'] ?? null);
             $this->upsert((int) $centro->id, $codigo, $nombre, $naturaleza, true);
+            if ($oficial !== null) {
+                $this->ponerOficial((int) $centro->id, $codigo, $oficial);
+            }
+
+            return ContestarJson::ok(['cuentas' => $this->cuentasDe((int) $centro->id)]);
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+    }
+
+    /** Cambia el código del plan oficial de una cuenta que ya existe. */
+    public function oficial(Request $request, array $vars = []): Response
+    {
+        try {
+            $centro = $this->exigirClub();
+            $datos = $request->json();
+            $codigo = trim((string) ($datos['codigo'] ?? ''));
+            $oficial = $this->oficialValido($datos['codigo_oficial'] ?? null);
+            if (!$this->ponerOficial((int) $centro->id, $codigo, $oficial)) {
+                throw new InvalidArgumentException(_('La cuenta no existe'));
+            }
 
             return ContestarJson::ok(['cuentas' => $this->cuentasDe((int) $centro->id)]);
         } catch (InvalidArgumentException $e) {
@@ -132,6 +155,7 @@ final class ClubCuentasController
                     default => 'gasto',
                 };
                 $this->upsert((int) $centro->id, $c->codigo, $c->nombre, $nat, $imputable);
+                $this->proponerOficial((int) $centro->id, $c->codigo);
             }
 
             return ContestarJson::ok([
@@ -171,7 +195,7 @@ final class ClubCuentasController
     private function cuentasDe(int $centroId): array
     {
         $st = $this->pdo->prepare(
-            "SELECT codigo, nombre, tipo, imputable, orden FROM cuentas
+            "SELECT codigo, nombre, tipo, imputable, orden, codigo_oficial FROM cuentas
              WHERE centro_id = :c AND libro = 'G' AND persona_id IS NULL
                AND tipo IN ('ingreso', 'gasto', 'patrimonio') AND activo = TRUE
              ORDER BY orden, codigo"
@@ -185,6 +209,7 @@ final class ClubCuentasController
                 'nombre' => (string) $row['nombre'],
                 'tipo' => $tipo,
                 'imputable' => (bool) $row['imputable'],
+                'codigo_oficial' => (string) ($row['codigo_oficial'] ?? ''),
                 'naturaleza_plan' => $tipo === 'ingreso' ? 'ingreso' : ($tipo === 'patrimonio' ? 'disponible' : 'gasto'),
             ];
         }
@@ -215,6 +240,47 @@ final class ClubCuentasController
             'imputable' => $imputable,
             'orden' => 200,
         ]);
+    }
+
+    /** Cuenta del plan oficial: de dos a cuatro cifras, o vacío para quitarla. */
+    private function oficialValido(mixed $valor): ?string
+    {
+        $oficial = trim((string) ($valor ?? ''));
+        if ($oficial === '') {
+            return null;
+        }
+        if (preg_match('/^[0-9]{2,4}$/', $oficial) !== 1) {
+            throw new InvalidArgumentException(_('El código oficial son de dos a cuatro cifras, por ejemplo 640'));
+        }
+
+        return $oficial;
+    }
+
+    private function ponerOficial(int $centroId, string $codigo, ?string $oficial): bool
+    {
+        $st = $this->pdo->prepare(
+            "UPDATE cuentas SET codigo_oficial = :o
+             WHERE centro_id = :c AND libro = 'G' AND persona_id IS NULL AND codigo = :cod
+               AND tipo IN ('ingreso', 'gasto', 'patrimonio')"
+        );
+        $st->execute([':o' => $oficial, ':c' => $centroId, ':cod' => $codigo]);
+
+        return $st->rowCount() > 0;
+    }
+
+    /** Al aplicar una plantilla: propone el código oficial conocido sin pisar el que haya. */
+    private function proponerOficial(int $centroId, string $codigo): void
+    {
+        $oficial = CatalogoConceptosClub::codigoOficial($codigo);
+        if ($oficial === null) {
+            return;
+        }
+        $st = $this->pdo->prepare(
+            "UPDATE cuentas SET codigo_oficial = :o
+             WHERE centro_id = :c AND libro = 'G' AND persona_id IS NULL AND codigo = :cod
+               AND codigo_oficial IS NULL"
+        );
+        $st->execute([':o' => $oficial, ':c' => $centroId, ':cod' => $codigo]);
     }
 
     private function codigoLibre(string $nombre): string

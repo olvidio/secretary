@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     html += '</tbody></table>';
   }
   GRUPOS = r.grupos || {};
+  SALDOS = r.saldos || null;
   if (r.movimientos && r.movimientos.length) {
     html += pintarMovimientos(r.listado, r.movimientos);
   }
@@ -52,9 +53,13 @@ const TXT = {
   ingreso: <?= json_encode(_("Ingresos"), JSON_UNESCAPED_UNICODE) ?>,
   gasto: <?= json_encode(_("Gastos"), JSON_UNESCAPED_UNICODE) ?>,
   total: <?= json_encode(_("Total"), JSON_UNESCAPED_UNICODE) ?>,
+  resultado: <?= json_encode(_("Resultado"), JSON_UNESCAPED_UNICODE) ?>,
+  saldoInicial: <?= json_encode(_("Saldo inicial"), JSON_UNESCAPED_UNICODE) ?>,
+  saldoFinal: <?= json_encode(_("Saldo final"), JSON_UNESCAPED_UNICODE) ?>,
 };
 
 let GRUPOS = {};
+let SALDOS = null;
 
 function columnasDe(listado) {
   const pedidas = listado.columnas && listado.columnas.length ? listado.columnas : ['fecha', 'categoria', 'glosa', 'debe', 'haber'];
@@ -103,7 +108,18 @@ function pintarMovimientos(listado, filas) {
   let html = '<table class="informe"><thead><tr>';
   cols.forEach(c => { html += '<th' + (esNum(c) ? ' class="num"' : '') + '>' + esc(cabecera[c]) + '</th>'; });
   html += '</tr></thead><tbody>';
+  if (SALDOS) html += filaSaldo(cols, TXT.saldoInicial, SALDOS.inicial);
   html += filasNivel(filas, niveles, cols, resumen);
+  if (SALDOS) {
+    // Con un solo periodo, su total ya es el resultado; si no, se añade aquí.
+    const periodos = new Set(filas.map(m => claveGrupo('periodo', m)));
+    if (niveles[0] !== 'periodo' || periodos.size !== 1) {
+      let debe = 0, haber = 0;
+      filas.forEach(m => { debe += m.debe; haber += m.haber; });
+      html += filaTotal(cols, TXT.resultado, debe, haber, 'subtotal seccion', false);
+    }
+    html += filaSaldo(cols, TXT.saldoFinal, SALDOS.final);
+  }
   html += '</tbody></table>';
   return html;
 }
@@ -113,6 +129,23 @@ function filaTotal(cols, titulo, debe, haber, clase, sangria) {
   cols.forEach((c, i) => {
     if (esNum(c)) tr += celdaNum(c, debe, haber);
     else tr += '<td' + (sangria ? ' style="padding-left:1.5rem"' : '') + '>' + (i === 0 ? esc(titulo) : '') + '</td>';
+  });
+  return tr + '</tr>';
+}
+
+/** Saldo de caja y banco: en Importe con su signo; en Debe/Haber, al haber si es positivo (como la apertura). */
+function filaSaldo(cols, titulo, saldo) {
+  if (!cols.some(esNum)) {
+    return '<tr class="subtotal seccion seccion-saldo"><td colspan="' + cols.length + '">'
+      + esc(titulo + ': ' + fmtImporteEs(saldo / 100)) + '</td></tr>';
+  }
+  const etiqueta = cols.findIndex(c => !esNum(c));
+  let tr = '<tr class="subtotal seccion seccion-saldo">';
+  cols.forEach((c, i) => {
+    if (c === 'importe') tr += '<td class="num">' + esc(fmtImporteEs(saldo / 100)) + '</td>';
+    else if (c === 'haber') tr += '<td class="num">' + (saldo >= 0 || !cols.includes('debe') ? esc(fmtImporteEs(saldo / 100)) : '') + '</td>';
+    else if (c === 'debe') tr += '<td class="num">' + (saldo < 0 || !cols.includes('haber') ? esc(fmtImporteEs(-saldo / 100)) : '') + '</td>';
+    else tr += '<td>' + (i === etiqueta ? esc(titulo) : '') + '</td>';
   });
   return tr + '</tr>';
 }
@@ -181,7 +214,7 @@ function filasNivel(filas, niveles, cols, resumen) {
     html += hoja ? '<tr>' : '<tr class="subtotal' + seccion + '">';
     cols.forEach((c, i) => {
       if (esNum(c)) html += celdaNum(c, debe, haber);
-      else html += '<td>' + (i === 0 ? esc(hoja ? titulo : TXT.total + ' ' + titulo) : '') + '</td>';
+      else html += '<td>' + (i === 0 ? esc(hoja ? titulo : (SALDOS && nivel === 'periodo' ? TXT.resultado : TXT.total) + ' ' + titulo) : '') + '</td>';
     });
     html += '</tr>';
     grupo = [];
@@ -221,7 +254,9 @@ function filasNivel(filas, niveles, cols, resumen) {
                 <label><?= _("Nombre") ?> <input name="nombre" required></label>
                 <label class="cuenta-fila"><input type="checkbox" name="mostrar_movimientos" checked> <?= _("Movimientos") ?></label>
                 <label class="cuenta-fila"><input type="checkbox" name="mostrar_totales" checked> <?= _("Totales por cuenta") ?></label>
+                <label class="cuenta-fila"><input type="checkbox" name="incluir_saldos"> <?= _("Saldo inicial y final") ?></label>
             </div>
+            <p class="muted"><?= _("Saldo inicial y final: lo que hay en caja y banco al empezar y al acabar el periodo (el inicial es la apertura). No sale si el listado filtra por categorías, terceros o texto.") ?></p>
         </fieldset>
         <fieldset class="listado-seccion">
             <legend><?= _("Fechas") ?></legend>
@@ -439,6 +474,7 @@ function rellenarFormulario(l) {
   f.texto.value = l.texto || '';
   f.incluir_traspasos.checked = l.incluir_traspasos !== false;
   f.excluir_nulos.checked = !!l.excluir_nulos;
+  f.incluir_saldos.checked = !!l.incluir_saldos;
   pintarTesoreria(l.cuentas_tesoreria || []);
   pintarCuentas(l.categorias || []);
   const cols = l.columnas && l.columnas.length ? l.columnas : ['fecha', 'categoria', 'glosa', 'debe', 'haber'];
@@ -528,6 +564,7 @@ document.getElementById('form-listado').addEventListener('submit', async (ev) =>
       cuentas_tesoreria: cuentasTesoreria,
       incluir_traspasos: f.incluir_traspasos.checked,
       excluir_nulos: f.excluir_nulos.checked,
+      incluir_saldos: f.incluir_saldos.checked,
       texto: f.texto.value,
       columnas: ORDEN_COLS.filter(c => f['col_' + c].checked),
       agrupar: [...document.querySelectorAll('#niveles-agrupar li')].filter(li => li.querySelector('input').checked).map(li => li.dataset.nivel),

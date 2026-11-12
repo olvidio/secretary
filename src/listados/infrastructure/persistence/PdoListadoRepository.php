@@ -21,7 +21,7 @@ final class PdoListadoRepository
         $st = $this->pdo->prepare(
             'SELECT id, nombre, mostrar_movimientos, mostrar_totales, periodo, fecha_desde, fecha_hasta,
                     categorias, terceros, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto,
-                    columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc
+                    columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos
              FROM listados WHERE centro_id = :c ORDER BY nombre'
         );
         $st->execute([':c' => $centroId]);
@@ -69,6 +69,7 @@ final class PdoListadoRepository
             ':sp' => $this->separarPeriodo($datos['separar_periodo'] ?? ''),
             ':ord' => $this->orden($datos['orden'] ?? 'fecha'),
             ':od' => !empty($datos['orden_desc']) ? 1 : 0,
+            ':sal' => !empty($datos['incluir_saldos']) ? 1 : 0,
         ];
         if ($id > 0) {
             $params[':id'] = $id;
@@ -78,15 +79,15 @@ final class PdoListadoRepository
                     periodo = :p, fecha_desde = :d, fecha_hasta = :h, categorias = :cat, terceros = :ter,
                     cuentas_tesoreria = :tes, incluir_traspasos = :tr, excluir_nulos = :en, texto = :tx,
                     columnas = :col, agrupar = :ag, separar_signo = :ss, separar_periodo = :sp,
-                    orden = :ord, orden_desc = :od
+                    orden = :ord, orden_desc = :od, incluir_saldos = :sal
                  WHERE id = :id AND centro_id = :c'
             );
             $st->execute($params);
         } else {
             $params[':c'] = $centroId;
             $st = $this->pdo->prepare(
-                'INSERT INTO listados (centro_id, nombre, mostrar_movimientos, mostrar_totales, periodo, fecha_desde, fecha_hasta, categorias, terceros, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto, columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc)
-                 VALUES (:c, :n, :m, :t, :p, :d, :h, :cat, :ter, :tes, :tr, :en, :tx, :col, :ag, :ss, :sp, :ord, :od)
+                'INSERT INTO listados (centro_id, nombre, mostrar_movimientos, mostrar_totales, periodo, fecha_desde, fecha_hasta, categorias, terceros, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto, columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos)
+                 VALUES (:c, :n, :m, :t, :p, :d, :h, :cat, :ter, :tes, :tr, :en, :tx, :col, :ag, :ss, :sp, :ord, :od, :sal)
                  RETURNING id'
             );
             $st->execute($params);
@@ -205,7 +206,76 @@ final class PdoListadoRepository
             'movimientos' => $listado['mostrar_movimientos'] ? $filas : [],
             'totales' => $listado['mostrar_totales'] ? array_values($totales) : [],
             'grupos' => array_map(static fn (array $g): string => $g['nombre'], $grupos),
+            'saldos' => $listado['incluir_saldos'] ? $this->saldos($centroId, $listado) : null,
         ];
+    }
+
+    /**
+     * Saldo de caja y banco al empezar y al acabar el periodo del listado, en céntimos.
+     * El inicial es la apertura del ejercicio (más lo movido antes de la fecha «desde»);
+     * el final sale de las cuentas de tesorería, no de sumar el listado, así que sigue
+     * siendo el dinero real aunque haya traspasos. Null si el listado filtra por
+     * categorías, terceros o texto (el saldo no sería el de esas líneas) o si el
+     * periodo no cae dentro de un solo ejercicio.
+     *
+     * @param array<string, mixed> $listado
+     * @return array{inicial:int,final:int}|null
+     */
+    private function saldos(int $centroId, array $listado): ?array
+    {
+        if ($listado['categorias'] !== [] || $listado['terceros'] !== [] || $listado['texto'] !== '') {
+            return null;
+        }
+        $desde = null;
+        $hasta = null;
+        if ($listado['periodo'] === 'otro') {
+            $desde = $listado['fecha_desde'];
+            $hasta = $listado['fecha_hasta'];
+            if ($desde === null) {
+                return null;
+            }
+            $st = $this->pdo->prepare(
+                'SELECT id FROM ejercicios
+                 WHERE centro_id = :c AND fecha_inicio <= :d AND fecha_fin >= :d
+                   AND (CAST(:h AS date) IS NULL OR fecha_fin >= CAST(:h AS date))
+                 ORDER BY fecha_inicio DESC LIMIT 1'
+            );
+            $st->execute([':c' => $centroId, ':d' => $desde, ':h' => $hasta]);
+            $id = $st->fetchColumn();
+            $ejercicioId = $id !== false ? (int) $id : null;
+        } else {
+            $ejercicioId = $this->ejercicioDePeriodo($centroId, $listado['periodo']);
+        }
+        if ($ejercicioId === null) {
+            return null;
+        }
+        $params = [':ej' => $ejercicioId, ':d' => $desde, ':h' => $hasta];
+        $filtro = '';
+        if ($listado['cuentas_tesoreria'] !== []) {
+            $marcas = [];
+            foreach (array_values($listado['cuentas_tesoreria']) as $i => $codigo) {
+                $marcas[] = ':t' . $i;
+                $params[':t' . $i] = $codigo;
+            }
+            $filtro = ' AND c.codigo IN (' . implode(',', $marcas) . ')';
+        }
+        $st = $this->pdo->prepare(
+            "SELECT
+                COALESCE(SUM(CASE WHEN a.tipo = 'apertura'
+                        OR (CAST(:d AS date) IS NOT NULL AND a.fecha < CAST(:d AS date))
+                    THEN m.debe - m.haber ELSE 0 END), 0) AS inicial,
+                COALESCE(SUM(CASE WHEN CAST(:h AS date) IS NULL OR a.fecha <= CAST(:h AS date)
+                    THEN m.debe - m.haber ELSE 0 END), 0) AS final
+             FROM movimientos m
+             JOIN asientos a ON a.id = m.asiento_id
+             JOIN cuentas c ON c.id = m.cuenta_id
+             WHERE a.ejercicio_id = :ej AND a.libro = 'G' AND a.anulado_at IS NULL
+               AND c.tipo = 'tesoreria'" . $filtro
+        );
+        $st->execute($params);
+        $row = $st->fetch();
+
+        return ['inicial' => (int) $row['inicial'], 'final' => (int) $row['final']];
     }
 
     /**
@@ -254,7 +324,7 @@ final class PdoListadoRepository
             "SELECT codigo, nombre, imputable FROM cuentas
              WHERE centro_id = :c AND libro = 'G' AND persona_id IS NULL
                AND tipo IN ('ingreso', 'gasto') AND activo = TRUE
-               AND codigo ~ '^(60|61|70|80|90)(\\.[0-9]+)?$'
+               AND codigo ~ '^[0-9]{2}(\\.[0-9]+)?$'
              ORDER BY codigo"
         );
         $st->execute([':c' => $centroId]);
@@ -295,7 +365,7 @@ final class PdoListadoRepository
         $st = $this->pdo->prepare(
             'SELECT id, nombre, mostrar_movimientos, mostrar_totales, periodo, fecha_desde, fecha_hasta,
                     categorias, terceros, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto,
-                    columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc
+                    columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos
              FROM listados WHERE id = :id AND centro_id = :c'
         );
         $st->execute([':id' => $id, ':c' => $centroId]);
@@ -330,6 +400,7 @@ final class PdoListadoRepository
             'separar_periodo' => $this->separarPeriodo($row['separar_periodo'] ?? ''),
             'orden' => $this->orden($row['orden'] ?? 'fecha'),
             'orden_desc' => (bool) ($row['orden_desc'] ?? false),
+            'incluir_saldos' => (bool) ($row['incluir_saldos'] ?? false),
         ];
     }
 
