@@ -10,6 +10,23 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.37] — 2026-11-12
+
+### Añadido
+- **Club · plan de cuentas**: categoría **62 Neteja** con 62.1 Sous, 62.2 Seguretat Social y 62.3 Gestoria.
+- **Club · Cuentas**: cada cuenta lleva su **código oficial** del Pla de comptabilitat de les associacions de Catalunya (640 sueldos, 642 Seguridad Social, 628 suministros…; 120 para el saldo inicial). Viene propuesto y se cambia en la misma pantalla.
+- **Listados**: columna **Importe** (haber menos debe: ingresos en positivo, gastos en negativo).
+- **Listados**: casilla **«Saldo inicial y final»**: el listado abre con lo que había en caja y banco, y cierra con el resultado y el saldo final.
+
+### Cambiado
+- **Listados agrupados**: sale una línea por grupo con su total, sin el detalle de movimientos; cada categoría madre (60, 61…) abre con su título y el total de sus hijas.
+- **Listados · separar ingresos y gastos**: va por la naturaleza de la categoría, no por el signo del movimiento, y una categoría hija sigue a su madre.
+- **Listados**: las secciones de ingresos, gastos y sus totales se distinguen mejor; el filtro de categorías admite cualquier grupo.
+
+### Corregido
+- **Entrada (club)**: las cuentas propias del centro que no están en la plantilla (p. ej. 61.7) ya se pueden elegir.
+- **Importar banco (club)**: las categorizaciones hechas con cuentas propias cuentan al proponer concepto.
+
 ## [0.1.36] — 2026-11-05
 
 ### Añadido
