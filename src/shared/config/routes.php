@@ -146,9 +146,10 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/conceptos', [ConceptoController::class, 'list']);
     $r->addRoute('GET', '/api/club/cuentas', [ClubCuentasController::class, 'list']);
     $r->addRoute('POST', '/api/club/cuentas', [ClubCuentasController::class, 'crear']);
-    $r->addRoute('POST', '/api/club/cuentas/oficial', [ClubCuentasController::class, 'oficial']);
-    $r->addRoute('POST', '/api/club/plantillas', [ClubCuentasController::class, 'guardarPlantilla']);
-    $r->addRoute('POST', '/api/club/plantillas/aplicar', [ClubCuentasController::class, 'aplicar']);
+    $r->addRoute('POST', '/api/club/cuentas/modificar', [ClubCuentasController::class, 'modificar']);
+    $r->addRoute('POST', '/api/club/modelos', [ClubCuentasController::class, 'guardarModelo']);
+    $r->addRoute('POST', '/api/club/modelos/aplicar', [ClubCuentasController::class, 'aplicarModelo']);
+    $r->addRoute('POST', '/api/club/modelos/borrar', [ClubCuentasController::class, 'borrarModelo']);
 
     $r->addRoute('GET', '/api/apuntes', [ApunteController::class, 'list']);
     $r->addRoute('GET', '/api/apuntes/sugerencias', [ApunteController::class, 'sugerencias']);
@@ -206,6 +207,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/arqueos/fisica/{id:\d+}', [ArqueoController::class, 'saveFisica']);
     $r->addRoute('GET', '/api/arqueo-club', [ClubArqueoController::class, 'estado']);
     $r->addRoute('POST', '/api/arqueo-club/cuadrar', [ClubArqueoController::class, 'cuadrar']);
+    $r->addRoute('POST', '/api/arqueo-club/recuento', [ClubArqueoController::class, 'recuento']);
 
     $r->addRoute('GET', '/api/tesoreria', [TesoreriaController::class, 'list']);
     $r->addRoute('POST', '/api/tesoreria', [TesoreriaController::class, 'create']);

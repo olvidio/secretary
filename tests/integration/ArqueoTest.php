@@ -98,6 +98,41 @@ final class ArqueoTest extends TestCase
         self::assertSame('250.00', $payload['arqueo_total']);
     }
 
+    public function testRecuentoPorFechaEHistorial(): void
+    {
+        $ambito = new ResolverAmbitoActual(
+            new PdoConfiguracionRepository($this->pdo),
+            new PdoCentroRepository($this->pdo),
+            new PdoEjercicioRepository($this->pdo),
+        );
+        $caja = (new PdoCuentaFisicaRepository($this->pdo))
+            ->listarActivasDeCentro($ambito->ejecutar()->centroId, 'caja')[0] ?? null;
+        self::assertNotNull($caja?->id);
+        $repo = new PdoArqueoRepository($this->pdo);
+        $guardar = new GuardarArqueo($repo, $ambito);
+        $cuenta = static fn (int $de50): array => [
+            'billetes' => [0, 0, 0, $de50, 0, 0, 0],
+            'monedas' => [0, 0, 0, 0, 0, 0, 0, 0],
+            'vales' => [],
+            'cheques' => [],
+        ];
+        $guardar->ejecutar('C', '2026-03-31', $cuenta(1), $caja->id);
+        $guardar->ejecutar('C', '2026-04-30', $cuenta(2), $caja->id);
+        // El mismo día se vuelve a contar: vale el último.
+        $guardar->ejecutar('C', '2026-04-30', $cuenta(3), $caja->id);
+
+        $abril = $repo->deFisicaEnFecha($caja->id, new \DateTimeImmutable('2026-04-30'));
+        self::assertSame('150.00', $abril?->total->toString());
+        self::assertSame(3, $abril->desglose['billetes'][3]);
+        self::assertNull($repo->deFisicaEnFecha($caja->id, new \DateTimeImmutable('2026-05-01')));
+
+        $historial = $repo->historialDeFisica($caja->id);
+        self::assertSame(
+            [['2026-04-30', '150.00'], ['2026-03-31', '50.00']],
+            array_map(static fn ($a): array => [$a->fecha->format('Y-m-d'), $a->total->toString()], $historial),
+        );
+    }
+
     public function testArqueoPAlimenta613G(): void
     {
         $configRepo = new PdoConfiguracionRepository($this->pdo);

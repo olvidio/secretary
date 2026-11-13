@@ -48,4 +48,11 @@ Recuento de la caja del único libro. Se entra también desde el enlace **Arqueo
 - Ruta: `/arqueo`
 - Menú: Arqueo
 
-Recuento de caja y banco hasta una fecha. La tabla muestra tesorería, saldo contable, contado y diferencia. Si cuadra, **Dar por cuadrado**: un cambio posterior de apuntes que mueva ese saldo avisa del descuadre. Debajo queda la lista de periodos cuadrados.
+Recuento de caja y banco hasta una fecha. La tabla muestra tesorería, saldo contable, contado y diferencia.
+
+- **Caja**: debajo de la tabla hay un bloque **Recuento de** la caja, igual que en los centros: cuántos billetes y monedas hay de cada valor, y el importe de vales y cheques. El contado y la diferencia se calculan solos.
+- **Banco**: se escribe el saldo del extracto en la casilla Contado.
+- **Guardar recuento** guarda el conteo de la caja con la fecha de la pantalla, cuadre o no. Si ese día se vuelve a contar, vale el último. Al elegir una fecha que ya tiene recuento, aparece relleno.
+- **Dar por cuadrado** solo se activa si caja y banco cuadran; guarda también el recuento. Un cambio posterior de apuntes que mueva ese saldo avisa del descuadre.
+- **Recuentos anteriores**: una fila por día y caja con lo contado, el saldo contable de ese día y la diferencia («cuadra» si no hay). **Ver** lleva a esa fecha con su conteo de billetes y monedas.
+- Debajo queda la lista de periodos cuadrados.

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace src\plan\domain\services;
 
 /**
- * Plantilla inicial del plan Club. Un fichero Grisbi nuevo puede añadir hojas.
+ * Modelo inicial del plan Club: las cuentas con las que nace una associació. Un fichero Grisbi nuevo puede añadir hojas.
  *
  * @phpstan-type Fila array{codigo:string,cuenta:string,nombre:string,descripcion:string,naturaleza:string,orden:int}
  */
@@ -64,7 +64,7 @@ final class CatalogoConceptosClub
 
     /**
      * Cuenta del plan oficial de asociaciones de Catalunya (Decret 259/2008) que se
-     * propone para cada hoja de la plantilla. La numeración del club es propia, por
+     * propone para cada hoja del modelo. La numeración del club es propia, por
      * finalidad; el centro puede cambiar esta correspondencia en la pantalla de Cuentas.
      */
     public static function codigoOficial(string $codigo): ?string

@@ -7,6 +7,7 @@ namespace src\ambito\infrastructure\persistence;
 use PDO;
 use src\conceptos\domain\services\CatalogoConceptos;
 use src\cierre\domain\services\CuentasDeudaVivienda;
+use src\plan\domain\services\CatalogoConceptosClub;
 use src\plan\domain\services\CatalogoPlanesContables;
 use src\plan\infrastructure\persistence\PdoPlanConceptoRepository;
 use src\configuracion\domain\entity\ConfiguracionCentro;
@@ -206,6 +207,13 @@ final class AmbitoSeeder
      */
     private static function sembrarPlanMaestro(PDO $pdo, int $centroId): void
     {
+        // Associació: el modelo de plan solo sirve para crear las cuentas. En cuanto el centro tiene
+        // cuentas son suyas (las renombra y les cambia el código); volver a sembrar
+        // desharía esos cambios y resucitaría los códigos antiguos.
+        if (self::codigoPlanCentro($pdo, $centroId) === CatalogoPlanesContables::CLUB
+            && self::tieneCuentasDeResultado($pdo, $centroId)) {
+            return;
+        }
         $excluir = CatalogoPlanesContables::codigosCapituloVIIReservados();
         $partidasLabores = self::partidasLaboresDeCentro($pdo, $centroId);
 
@@ -251,6 +259,19 @@ final class AmbitoSeeder
             return;
         }
         if ($plan === CatalogoPlanesContables::CLUB) {
+            // Alta de una associació: cada cuenta del modelo con su código del plan oficial.
+            $oficial = $pdo->prepare(
+                "UPDATE cuentas SET codigo_oficial = :o
+                 WHERE centro_id = :c AND libro = 'G' AND persona_id IS NULL AND codigo = :cod
+                   AND codigo_oficial IS NULL"
+            );
+            foreach ($conceptosPlan as $c) {
+                $codigoOficial = CatalogoConceptosClub::codigoOficial($c['codigo']);
+                if ($codigoOficial !== null) {
+                    $oficial->execute([':o' => $codigoOficial, ':c' => $centroId, ':cod' => $c['codigo']]);
+                }
+            }
+
             return;
         }
 
@@ -271,6 +292,19 @@ final class AmbitoSeeder
                 'orden' => $p['orden'],
             ]);
         }
+    }
+
+    private static function tieneCuentasDeResultado(PDO $pdo, int $centroId): bool
+    {
+        $st = $pdo->prepare(
+            "SELECT 1 FROM cuentas
+             WHERE centro_id = :c AND libro = 'G' AND persona_id IS NULL AND tipo IN ('ingreso', 'gasto')
+               AND codigo NOT LIKE 'BANCO.PEND.%' AND codigo NOT LIKE 'OTRA.%'
+             LIMIT 1"
+        );
+        $st->execute([':c' => $centroId]);
+
+        return $st->fetchColumn() !== false;
     }
 
     private static function aplicarDestinosSg(PDO $pdo, int $centroId): void

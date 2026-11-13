@@ -21,5 +21,16 @@ interface ArqueoRepository
         ?int $cuentaFisicaId = null,
     ): ?Arqueo;
 
+    /** Último recuento guardado de esa caja o banco para ese día. */
+    public function deFisicaEnFecha(int $cuentaFisicaId, DateTimeImmutable $fecha): ?Arqueo;
+
+    /**
+     * Recuentos guardados de esa caja o banco, uno por día (el último de cada día),
+     * del más reciente al más antiguo.
+     *
+     * @return list<Arqueo>
+     */
+    public function historialDeFisica(int $cuentaFisicaId, int $limite = 24): array;
+
     public function guardar(Arqueo $arqueo): Arqueo;
 }

@@ -83,6 +83,34 @@ final class PdoArqueoRepository implements ArqueoRepository
         return is_array($row) ? $this->hydrate($row) : null;
     }
 
+    public function deFisicaEnFecha(int $cuentaFisicaId, DateTimeImmutable $fecha): ?Arqueo
+    {
+        $st = $this->pdo->prepare(
+            'SELECT * FROM arqueos WHERE cuenta_fisica_id = :f AND fecha = :d ORDER BY id DESC LIMIT 1'
+        );
+        $st->execute([':f' => $cuentaFisicaId, ':d' => (new ConverterDate('date', $fecha))->toPg()]);
+        $row = $st->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
+    public function historialDeFisica(int $cuentaFisicaId, int $limite = 24): array
+    {
+        $limite = max(1, min(200, $limite));
+        $st = $this->pdo->prepare(
+            "SELECT * FROM (
+                SELECT DISTINCT ON (fecha) * FROM arqueos
+                WHERE cuenta_fisica_id = :f
+                ORDER BY fecha DESC, id DESC
+             ) ultimos
+             ORDER BY fecha DESC
+             LIMIT {$limite}"
+        );
+        $st->execute([':f' => $cuentaFisicaId]);
+
+        return array_map($this->hydrate(...), $st->fetchAll());
+    }
+
     public function guardar(Arqueo $arqueo): Arqueo
     {
         $sql = 'INSERT INTO arqueos (cuenta, fecha, desglose_json, total_dinero, total_vales, total,

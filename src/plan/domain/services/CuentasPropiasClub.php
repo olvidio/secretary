@@ -8,9 +8,9 @@ use src\ambito\domain\entity\Cuenta;
 use src\conceptos\domain\entity\Concepto;
 
 /**
- * Una associació añade cuentas propias (a mano o al importar Grisbi) que viven
- * en `cuentas` y no en la plantilla del plan. El catálogo de conceptos del
- * centro es la plantilla más esas cuentas.
+ * En una associació las cuentas son suyas: las crea, las renombra y les cambia el
+ * código (a mano o al importar Grisbi), y viven en `cuentas`. El modelo de plan solo
+ * sirve para crearlas; el catálogo de conceptos del centro son sus cuentas y nada más.
  */
 final class CuentasPropiasClub
 {
@@ -18,6 +18,9 @@ final class CuentasPropiasClub
     private const PREFIJOS_DE_SERVICIO = ['BANCO.PEND.', 'OTRA.'];
 
     /**
+     * Sustituye la parte G del catálogo del plan por las cuentas del centro: el modelo
+     * del plan no pinta nada una vez creado el centro (se puede vaciar o borrar).
+     *
      * @param list<array<string, mixed>> $conceptos catálogo del plan (ya filtrado por libro)
      * @param list<Cuenta> $cuentas cuentas del centro
      * @return list<array<string, mixed>>
@@ -25,11 +28,7 @@ final class CuentasPropiasClub
     public static function fusionar(array $conceptos, array $cuentas): array
     {
         $vistos = [];
-        foreach ($conceptos as $c) {
-            if ($c['cuenta'] === 'G') {
-                $vistos[(string) $c['codigo']] = true;
-            }
-        }
+        $conceptos = array_values(array_filter($conceptos, static fn (array $c): bool => $c['cuenta'] !== 'G'));
         foreach ($cuentas as $cuenta) {
             if (
                 $cuenta->libro !== 'G' || $cuenta->personaId !== null || !$cuenta->activo

@@ -57,7 +57,8 @@ final class PdoPlanContableRepository implements PlanContableRepository
     public function listar(): array
     {
         $rows = $this->pdo->query(
-            'SELECT id, codigo, nombre FROM planes_contables ORDER BY codigo'
+            // Los modelos de cuentas de las associacions no son planes asignables a un centro.
+            'SELECT id, codigo, nombre FROM planes_contables WHERE modelo_de IS NULL ORDER BY codigo'
         )->fetchAll();
         $out = [];
         foreach ($rows as $row) {

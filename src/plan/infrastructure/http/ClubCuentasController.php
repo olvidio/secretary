@@ -15,11 +15,12 @@ use src\plan\domain\contracts\PlanContableRepository;
 use src\plan\domain\services\CatalogoConceptosClub;
 use src\plan\domain\services\CatalogoPlanesContables;
 use src\plan\domain\services\CuentasPropiasClub;
+use src\plan\infrastructure\persistence\PdoCuentasClub;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
 use src\shared\infrastructure\http\Response;
 
-/** Cuentas propias de una associació y plantillas de plan (ámbito club). */
+/** Cuentas propias de una associació y modelos de plan de cuentas (ámbito club). */
 final class ClubCuentasController
 {
     public function __construct(
@@ -28,6 +29,7 @@ final class ClubCuentasController
         private readonly CentroRepository $centros,
         private readonly PlanContableRepository $planes,
         private readonly PlanConceptoRepository $conceptos,
+        private readonly PdoCuentasClub $cuentasClub,
     ) {
     }
 
@@ -38,8 +40,7 @@ final class ClubCuentasController
 
             return ContestarJson::ok([
                 'cuentas' => $this->cuentasDe((int) $centro->id),
-                'plantillas' => $this->plantillas(),
-                'plan' => $centro->planContableCodigo,
+                'modelos' => $this->modelos(),
             ]);
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
@@ -64,8 +65,14 @@ final class ClubCuentasController
                 throw new InvalidArgumentException(_('La naturaleza es ingreso o gasto'));
             }
             $oficial = $this->oficialValido($datos['codigo_oficial'] ?? null);
-            $this->upsert((int) $centro->id, $codigo, $nombre, $naturaleza, true);
-            if ($oficial !== null) {
+            foreach ($this->cuentasDe((int) $centro->id) as $existente) {
+                if ($existente['codigo'] === $codigo) {
+                    throw new InvalidArgumentException(sprintf(_('Ya existe una cuenta con el código %s'), $codigo));
+                }
+            }
+            $grupo = !empty($datos['grupo']);
+            $this->upsert((int) $centro->id, $codigo, $nombre, $naturaleza, !$grupo);
+            if ($oficial !== null && !$grupo) {
                 $this->ponerOficial((int) $centro->id, $codigo, $oficial);
             }
 
@@ -75,37 +82,52 @@ final class ClubCuentasController
         }
     }
 
-    /** Cambia el código del plan oficial de una cuenta que ya existe. */
-    public function oficial(Request $request, array $vars = []): Response
+    /**
+     * Modifica una cuenta: código, nombre, naturaleza y código oficial. Si cambia el
+     * código y no viene confirmado, no hace nada y devuelve el aviso para preguntar.
+     */
+    public function modificar(Request $request, array $vars = []): Response
     {
         try {
             $centro = $this->exigirClub();
             $datos = $request->json();
-            $codigo = trim((string) ($datos['codigo'] ?? ''));
-            $oficial = $this->oficialValido($datos['codigo_oficial'] ?? null);
-            if (!$this->ponerOficial((int) $centro->id, $codigo, $oficial)) {
-                throw new InvalidArgumentException(_('La cuenta no existe'));
+            $actual = trim((string) ($datos['codigo'] ?? ''));
+            $naturaleza = isset($datos['naturaleza']) ? (string) $datos['naturaleza'] : null;
+            if ($naturaleza !== null && !in_array($naturaleza, ['ingreso', 'gasto'], true)) {
+                $naturaleza = null;
             }
+            $resultado = $this->cuentasClub->modificar((int) $centro->id, $actual, [
+                'codigo' => trim((string) ($datos['nuevo_codigo'] ?? $actual)),
+                'nombre' => trim((string) ($datos['nombre'] ?? '')),
+                'naturaleza' => $naturaleza,
+                'codigo_oficial' => $this->oficialValido($datos['codigo_oficial'] ?? null),
+            ], !empty($datos['confirmado']));
 
-            return ContestarJson::ok(['cuentas' => $this->cuentasDe((int) $centro->id)]);
+            return ContestarJson::ok([
+                'pendiente' => $resultado['pendiente'],
+                'aviso' => $resultado['aviso'],
+                'cuentas' => $this->cuentasDe((int) $centro->id),
+            ]);
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
         }
     }
 
-    public function guardarPlantilla(Request $request, array $vars = []): Response
+    /** Guarda las cuentas del centro como modelo, para copiarlas a otra associació. */
+    public function guardarModelo(Request $request, array $vars = []): Response
     {
         try {
             $centro = $this->exigirClub();
             $nombre = trim((string) ($request->json()['nombre'] ?? ''));
             if ($nombre === '') {
-                throw new InvalidArgumentException(_('La plantilla necesita un nombre'));
+                throw new InvalidArgumentException(_('El modelo necesita un nombre'));
             }
-            $codigo = $this->codigoLibre($nombre);
-            $plan = $this->planes->guardar(null, $codigo, $nombre);
             $filas = [];
             $orden = 10;
             foreach ($this->cuentasDe((int) $centro->id) as $cuenta) {
+                if ($cuenta['fija'] && $cuenta['codigo'] !== 'APERTURA') {
+                    continue;
+                }
                 $filas[] = [
                     'codigo' => $cuenta['codigo'],
                     'cuenta' => 'G',
@@ -121,48 +143,68 @@ final class ClubCuentasController
             if ($filas === []) {
                 throw new InvalidArgumentException(_('No hay cuentas que guardar'));
             }
+            $plan = $this->planes->guardar(null, $this->codigoLibre($nombre), $nombre);
+            $this->pdo->prepare('UPDATE planes_contables SET modelo_de = :b WHERE id = :id')
+                ->execute([':b' => CatalogoPlanesContables::CLUB, ':id' => $plan['id']]);
             $this->conceptos->reemplazar($plan['id'], $filas);
 
-            return ContestarJson::ok(['plantillas' => $this->plantillas(), 'plan' => $plan]);
+            return ContestarJson::ok(['modelos' => $this->modelos()]);
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
         }
     }
 
-    public function aplicar(Request $request, array $vars = []): Response
+    /**
+     * Copia al centro las cuentas del modelo que le falten. Las que ya tiene no se tocan,
+     * y el centro no queda ligado al modelo: después se puede borrar.
+     */
+    public function aplicarModelo(Request $request, array $vars = []): Response
     {
         try {
             $centro = $this->exigirClub();
             $codigo = trim((string) ($request->json()['codigo'] ?? ''));
-            $planId = $this->planes->idPorCodigo($codigo);
-            if ($planId === null || !CatalogoPlanesContables::esClub($codigo)) {
-                throw new InvalidArgumentException(_('Elija una plantilla de associació'));
+            $modelo = $this->modelo($codigo);
+            if ($modelo === null) {
+                throw new InvalidArgumentException(_('Elija un modelo de cuentas'));
             }
-            $this->centros->guardar(new Centro(
-                $centro->id,
-                $centro->codigo,
-                $centro->nombre,
-                $centro->tipo,
-                $centro->tipoCierre,
-                $codigo,
-                $centro->activo,
-            ));
-            foreach ($this->conceptos->listar($planId, 'G') as $c) {
-                $imputable = !str_starts_with($c->naturaleza, 'grupo');
+            $existentes = array_column($this->cuentasDe((int) $centro->id), 'codigo');
+            $anadidas = 0;
+            foreach ($this->conceptos->listar($modelo['id'], 'G') as $c) {
+                if (in_array($c->codigo, $existentes, true)) {
+                    continue;
+                }
                 $nat = match ($c->naturaleza) {
                     'ingreso', 'grupo-ingreso' => 'ingreso',
                     'disponible' => 'disponible',
                     default => 'gasto',
                 };
-                $this->upsert((int) $centro->id, $c->codigo, $c->nombre, $nat, $imputable);
+                $this->upsert((int) $centro->id, $c->codigo, $c->nombre, $nat, !str_starts_with($c->naturaleza, 'grupo'));
                 $this->proponerOficial((int) $centro->id, $c->codigo);
+                $anadidas++;
             }
 
             return ContestarJson::ok([
                 'cuentas' => $this->cuentasDe((int) $centro->id),
-                'plan' => $codigo,
-                'plantillas' => $this->plantillas(),
+                'modelos' => $this->modelos(),
+                'anadidas' => $anadidas,
             ]);
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+    }
+
+    /** Borra un modelo guardado. El modelo de base (el plan Club) no: es el plan del centro. */
+    public function borrarModelo(Request $request, array $vars = []): Response
+    {
+        try {
+            $this->exigirClub();
+            $modelo = $this->modelo(trim((string) ($request->json()['codigo'] ?? '')));
+            if ($modelo === null || !$modelo['borrable']) {
+                throw new InvalidArgumentException(_('Ese modelo no se puede eliminar'));
+            }
+            $this->planes->borrar($modelo['id']);
+
+            return ContestarJson::ok(['modelos' => $this->modelos()]);
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
         }
@@ -178,17 +220,42 @@ final class ClubCuentasController
         return $centro;
     }
 
-    /** @return list<array{codigo:string,nombre:string}> */
-    private function plantillas(): array
+    /**
+     * Modelos de cuentas para una associació: el de base (el plan Club) y los guardados.
+     *
+     * @return list<array{id:int,codigo:string,nombre:string,borrable:bool}>
+     */
+    private function modelos(): array
     {
+        $st = $this->pdo->prepare(
+            'SELECT id, codigo, nombre, modelo_de FROM planes_contables
+             WHERE codigo = :club OR modelo_de = :club
+             ORDER BY (modelo_de IS NOT NULL), nombre'
+        );
+        $st->execute([':club' => CatalogoPlanesContables::CLUB]);
         $out = [];
-        foreach ($this->planes->listar() as $plan) {
-            if (CatalogoPlanesContables::esClub($plan['codigo'])) {
-                $out[] = ['codigo' => $plan['codigo'], 'nombre' => $plan['nombre']];
-            }
+        foreach ($st->fetchAll() as $row) {
+            $out[] = [
+                'id' => (int) $row['id'],
+                'codigo' => (string) $row['codigo'],
+                'nombre' => (string) $row['nombre'],
+                'borrable' => $row['modelo_de'] !== null,
+            ];
         }
 
         return $out;
+    }
+
+    /** @return array{id:int,codigo:string,nombre:string,borrable:bool}|null */
+    private function modelo(string $codigo): ?array
+    {
+        foreach ($this->modelos() as $modelo) {
+            if ($modelo['codigo'] === $codigo) {
+                return $modelo;
+            }
+        }
+
+        return null;
     }
 
     /** @return list<array<string, mixed>> */
@@ -210,6 +277,7 @@ final class ClubCuentasController
                 'tipo' => $tipo,
                 'imputable' => (bool) $row['imputable'],
                 'codigo_oficial' => (string) ($row['codigo_oficial'] ?? ''),
+                'fija' => PdoCuentasClub::esFija((string) $row['codigo']),
                 'naturaleza_plan' => $tipo === 'ingreso' ? 'ingreso' : ($tipo === 'patrimonio' ? 'disponible' : 'gasto'),
             ];
         }
@@ -268,7 +336,7 @@ final class ClubCuentasController
         return $st->rowCount() > 0;
     }
 
-    /** Al aplicar una plantilla: propone el código oficial conocido sin pisar el que haya. */
+    /** Al copiar un modelo: propone el código oficial conocido sin pisar el que haya. */
     private function proponerOficial(int $centroId, string $codigo): void
     {
         $oficial = CatalogoConceptosClub::codigoOficial($codigo);

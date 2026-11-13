@@ -11,17 +11,21 @@ use src\plan\domain\services\CuentasPropiasClub;
 
 final class CuentasPropiasClubTest extends TestCase
 {
-    public function testAnadeLaCuentaPropiaQueNoEstaEnLaPlantilla(): void
+    public function testElCatalogoSonLasCuentasDelCentroYNoElModelo(): void
     {
         $plan = [
             (new Concepto('61', 'G', 'Despeses generals', '', 'grupo-gasto', 20))->toArray(),
+            (new Concepto('61.3', 'G', 'Neteja', '', 'gasto', 23))->toArray(),
             (new Concepto('61.6', 'G', 'Taxes', '', 'gasto', 26))->toArray(),
             (new Concepto('70', 'G', 'Ingressos del club', '', 'grupo-ingreso', 30))->toArray(),
         ];
         $cuentas = [
-            $this->cuenta('61.6', 'Taxes', 'gasto'),
+            $this->cuenta('61', 'Despeses generals', 'gasto', imputable: false),
+            // Renombrada en el centro: manda su nombre, no el del modelo.
+            $this->cuenta('61.6', 'Taxes i impostos', 'gasto'),
             $this->cuenta('61.10', 'Varis', 'gasto'),
             $this->cuenta('61.7', 'Alimentació', 'gasto'),
+            $this->cuenta('70', 'Ingressos del club', 'ingreso', imputable: false),
             $this->cuenta('BANCO.1/G', 'Banc', 'tesoreria'),
             $this->cuenta('BANCO.PEND.gasto', 'Por categorizar (gasto)', 'gasto'),
             $this->cuenta('OTRA.ingreso', 'Otra contabilidad', 'ingreso'),
@@ -31,9 +35,20 @@ final class CuentasPropiasClubTest extends TestCase
 
         $out = CuentasPropiasClub::fusionar($plan, $cuentas);
 
+        // 61.3 solo está en el modelo (el centro le cambió el código): ya no sale.
         self::assertSame(['61', '61.6', '61.7', '61.10', '70'], array_column($out, 'codigo'));
+        self::assertSame('grupo-gasto', $out[0]['naturaleza']);
+        self::assertSame('61.6 Taxes i impostos', $out[1]['etiqueta']);
         self::assertSame('gasto', $out[2]['naturaleza']);
-        self::assertSame('61.7 Alimentació', $out[2]['etiqueta']);
+    }
+
+    public function testElModeloDelPlanNoIntervieneAunqueElCentroNoTengaCuentas(): void
+    {
+        $plan = [(new Concepto('61.6', 'G', 'Taxes', '', 'gasto', 26))->toArray()];
+
+        $out = CuentasPropiasClub::fusionar($plan, [$this->cuenta('BANCO.1/G', 'Banc', 'tesoreria')]);
+
+        self::assertSame([], $out);
     }
 
     public function testElGrupoPropioNoEsImputable(): void
