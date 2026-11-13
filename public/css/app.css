@@ -172,6 +172,8 @@ h2.listado-donativos-cab {
   font-variant-numeric: tabular-nums;
 }
 hr.separa-apunte { border: 0; border-top: 1px solid var(--line, #ccc); margin: 0 0 1rem; }
+/* .grid-form fija display y anula el atributo hidden: el formulario de modificar solo sale al pulsar «Modificar». */
+#form-apunte[hidden] { display: none; }
 .solicitudes-vinculo {
   margin: 1.25rem 0 0;
   padding-bottom: 1.25rem;

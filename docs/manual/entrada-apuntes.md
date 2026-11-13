@@ -34,6 +34,7 @@ En **Entrada G** hay un bloque **Importar extracto del banco** (mismo criterio q
 
 - La cantidad se escribe normalmente en positivo: el signo lo pone el concepto. Se admite una cantidad **negativa** (p. ej. una devolución o una rectificación): se anota en sentido contrario al habitual del concepto y, al añadirla, la pantalla pide confirmación. La cantidad no puede ser cero.
 - En el libro personal las iniciales son obligatorias.
+- Al cambiar la cabecera (fecha, persona o procedencia) se vacía la lista de lo ya añadido con la cabecera anterior, pero lo que se esté escribiendo en la línea (observaciones, concepto, cantidad) se conserva hasta pulsar **Añadir**.
 - La **fecha de imputación** solo se rellena si el movimiento hay que contarlo otro día: operación el 8 de enero, gasto el 31 de diciembre. Vacía, se usa la de cabecera.
 - Los conceptos 41 (banco a caja) y 42 (caja a banco) generan el movimiento completo de una vez, sin fecha de imputación distinta.
 - En Entrada G, un gasto con iniciales anota cuatro líneas: ingreso 111 y gasto 21 en el personal, ingreso 11 en el general, y el gasto. Si no aporta vivienda a generales, solo el gasto.
@@ -63,4 +64,4 @@ Para movimientos que se repiten cada mes, trimestre o año: menú Talonario → 
 - Ruta: `/entrada-g`
 - Menú: Movimientos → Entrada
 
-Sirve para anotar a mano un movimiento del libro único. Lo que ya viene en el fichero Grisbi entra por Configuración → Importar Grisbi, no por esta pantalla.
+Sirve para anotar a mano un movimiento del libro único. La cabecera no pide iniciales (no hay personas ni libro P). La procedencia A/B/C viene en **Caja** la primera vez y después se queda en la última que se eligió, igual que la caja o el banco concretos si hay varios; se recuerda en ese navegador. En **Por categorizar** tampoco se piden iniciales. Al escribir en observaciones se proponen las ya usadas en cualquier apunte de la asociación, de cualquier año (las más frecuentes primero); al elegir una se copian las observaciones y su concepto. Lo que ya viene en el fichero Grisbi entra por Configuración → Importar Grisbi, no por esta pantalla.

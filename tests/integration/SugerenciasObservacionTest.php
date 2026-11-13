@@ -112,6 +112,16 @@ final class SugerenciasObservacionTest extends TestCase
         self::assertCount(1, $buscar->ejecutar('iberdrola', 'P', 'bb'));
         self::assertSame([], $buscar->ejecutar('iberdrola', 'P', ''));
         self::assertSame([], $buscar->ejecutar('a', 'P', 'aa'));
+
+        // Búsqueda en todo el centro (associació): sin mirar persona, las más usadas primero.
+        $todo = $asientos->sugerirPorGlosaDeCentro($centroId, 'P', 'iberdrola');
+        self::assertSame(
+            [['Iberdrola', '111'], ['Iberdrola cocina', '112']],
+            array_map(static fn (array $h): array => [$h['observaciones'], $h['concepto_codigo']], $todo),
+        );
+        // Un centro que no es associació sigue sin sugerir nada si faltan las iniciales.
+        $conCentros = new BuscarSugerenciasObservacion($asientos, $ambito, new PdoCentroRepository($this->pdo));
+        self::assertSame([], $conCentros->ejecutar('iberdrola', 'P', ''));
     }
 
     public function testCuentaInvalida(): void

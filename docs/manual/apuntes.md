@@ -63,4 +63,4 @@ Es el talonario del único libro. Los filtros son nombre, concepto y fechas. La 
 
 - Menú: Movimientos → Apuntes
 
-Filtros: ejercicio, fechas, cuenta, tesorería y observaciones. La tabla es fecha, cuenta, nombre, observaciones y cantidad. Editar cambia fecha, cuenta, observaciones y cantidad.
+Filtros: ejercicio, fechas, cuenta, tesorería y observaciones. La tabla es fecha, cuenta, nombre, observaciones y cantidad. La pantalla muestra solo los filtros y la lista; no sirve para dar de alta apuntes (eso se hace en Movimientos → Entrada). **Modificar**, en cada fila, abre encima de la lista un formulario para cambiar fecha, cuenta, observaciones y cantidad de ese apunte; desaparece al guardar o cancelar.

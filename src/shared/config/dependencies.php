@@ -516,7 +516,8 @@ return [
     CrearCentro::class => autowire(),
     VaciarDatosCentro::class => autowire(),
     ListarConceptos::class => autowire(),
-    BuscarSugerenciasObservacion::class => autowire(),
+    BuscarSugerenciasObservacion::class => autowire()
+        ->constructorParameter('centros', get(CentroRepository::class)),
     CrearApunte::class => autowire(),
     ActualizarApunte::class => autowire(),
     CrearApuntesDeEntrada::class => autowire(),

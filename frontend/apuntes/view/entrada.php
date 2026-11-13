@@ -1,6 +1,6 @@
-<?php $cuenta = $cuentaEntrada ?? 'P'; $esCentroSg = !empty($esCentroSg); ?>
+<?php $cuenta = $cuentaEntrada ?? 'P'; $esCentroSg = !empty($esCentroSg); $esClub = !empty($esClub); ?>
 <h1><?= sprintf(_("Entrada apuntes %s"), htmlspecialchars($cuenta, ENT_QUOTES)) ?></h1>
-<p class="muted"><?php if ($esCentroSg): ?><?= _("Se anota el apunte del talonario: nombre, concepto, observaciones, cantidad y fecha. La contrapartida es la caja.") ?><?php elseif ($cuenta === 'G'): ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber. Un gasto de G con iniciales anota también P/111, P/211 y G/11.") ?><?php else: ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.") ?><?php endif; ?></p>
+<p class="muted"><?php if ($esClub): ?><?= _("Se anota el movimiento: si se paga por caja o por banco, fecha, observaciones, concepto y cantidad. Al escribir en observaciones aparecen las ya usadas (las más frecuentes primero); al elegir una se copian observaciones y concepto. La pantalla recuerda la última procedencia elegida.") ?><?php elseif ($esCentroSg): ?><?= _("Se anota el apunte del talonario: nombre, concepto, observaciones, cantidad y fecha. La contrapartida es la caja.") ?><?php elseif ($cuenta === 'G'): ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber. Un gasto de G con iniciales anota también P/111, P/211 y G/11.") ?><?php else: ?><?= _("Con iniciales elegidas, al escribir en observaciones aparecen las de esa persona (las más usadas primero); al elegir una se copian observaciones y concepto. 41 y 42 generan un solo asiento caja/banco. La fecha de imputación solo si hay que contarlo en otro día (p. ej. operación el 8/01 y gasto el 31/12): entonces se crean dos asientos enlazados, sin que haya que pensar en debe y haber.") ?><?php endif; ?></p>
 
 <?php if ($cuenta === 'G'): ?>
 <details class="yo-ayuda-bloque" id="entrada-banco-bloque">
@@ -39,14 +39,14 @@
 
 <div id="entrada-apuntes">
     <div class="entrada-cabecera">
-        <label><?= _("Iniciales") ?>
+        <label<?= $esClub ? ' hidden' : '' ?>><?= _("Iniciales") ?>
             <select id="hdr-iniciales"><option value=""></option></select>
         </label>
         <label<?= $esCentroSg ? ' hidden' : '' ?>>A/B/C
             <select id="hdr-origen" required>
-                <option value="A"<?= $esCentroSg ? '' : ' selected' ?>><?= _("Apunte") ?></option>
+                <option value="A"<?= $esCentroSg || $esClub ? '' : ' selected' ?>><?= _("Apunte") ?></option>
                 <option value="B"><?= _("Banco") ?></option>
-                <option value="C"<?= $esCentroSg ? ' selected' : '' ?>><?= _("Caja") ?></option>
+                <option value="C"<?= $esCentroSg || $esClub ? ' selected' : '' ?>><?= _("Caja") ?></option>
             </select>
         </label>
         <label><?= _("Fecha") ?> <input id="hdr-fecha" type="date" required></label>
@@ -110,6 +110,18 @@ document.getElementById('btn-nueva').addEventListener('click', () => {
   location.href = '/entrada-' + CUENTA.toLowerCase();
 });
 const ES_CENTRO_SG = <?= $esCentroSg ? 'true' : 'false' ?>;
+const ES_CLUB = <?= $esClub ? 'true' : 'false' ?>;
+/** Associació: la cabecera recuerda en este navegador la última procedencia (A/B/C) y su caja o banco. */
+const CLAVE_ORIGEN_CLUB = 'secretario.entrada.club.origen';
+const CLAVE_FISICA_CLUB = 'secretario.entrada.club.fisica';
+function recordarClub(clave, valor) {
+  if (!ES_CLUB) return;
+  try { localStorage.setItem(clave, valor); } catch (e) { /* sin almacenamiento */ }
+}
+function recordadoClub(clave) {
+  if (!ES_CLUB) return null;
+  try { return localStorage.getItem(clave); } catch (e) { return null; }
+}
 const I18N_ENTRADA = {
   plantillas: <?= json_encode(_("Plantillas"), JSON_UNESCAPED_UNICODE) ?>,
   conceptos: <?= json_encode(_("Conceptos"), JSON_UNESCAPED_UNICODE) ?>,
@@ -232,6 +244,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       `<option value="${f.id}">${esc(f.nombre)}</option>`).join('');
     selFisica.disabled = false;
     wrapFisica.hidden = false;
+    const fisicaGuardada = recordadoClub(CLAVE_FISICA_CLUB + '.' + origen);
+    if (fisicaGuardada && opts.some(f => String(f.id) === fisicaGuardada)) selFisica.value = fisicaGuardada;
+  }
+  const origenGuardado = recordadoClub(CLAVE_ORIGEN_CLUB);
+  if (origenGuardado && Array.from(selOrigen.options).some(o => o.value === origenGuardado)) {
+    selOrigen.value = origenGuardado;
   }
   syncFisica();
 
@@ -287,7 +305,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function buscarSug() {
     const q = inpObs.value;
     const ini = selI.value;
-    if (!ini || q.length < 2) {
+    // En la associació no hay iniciales: se busca en todos los apuntes del centro.
+    if ((!ini && !ES_CLUB) || q.length < 2) {
       ocultarSug();
       return;
     }
@@ -418,10 +437,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     inpObs.focus();
   }
 
+  /**
+   * Al cambiar la cabecera (fecha, iniciales, procedencia) se vacía la lista de lo ya
+   * guardado con la cabecera anterior, pero la fila que se está escribiendo se conserva
+   * hasta pulsar «Añadir».
+   */
   function resetFormulario() {
     filasPantalla.length = 0;
     cuerpoLineas.querySelectorAll('tr.fila-guardada').forEach(tr => tr.remove());
-    limpiarFilaActiva();
+    ocultarSug();
     document.getElementById('msg').hidden = true;
     document.getElementById('err').hidden = true;
   }
@@ -714,10 +738,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   selI.addEventListener('change', onCabeceraChange);
   document.getElementById('hdr-fecha').addEventListener('change', onCabeceraChange);
   selOrigen.addEventListener('change', () => {
+    recordarClub(CLAVE_ORIGEN_CLUB, selOrigen.value);
     syncFisica();
     onCabeceraChange();
   });
-  selFisica.addEventListener('change', onCabeceraChange);
+  selFisica.addEventListener('change', () => {
+    recordarClub(CLAVE_FISICA_CLUB + '.' + selOrigen.value, selFisica.value);
+    onCabeceraChange();
+  });
 
   actualizarCuadre();
   actualizarPreviewContrapartidas();
@@ -933,7 +961,7 @@ async function pintarImportBancoCentro() {
       document.getElementById('entrada-banco-pend'),
       document.getElementById('entrada-banco-vacio'),
       r.pendientes || [],
-      true,
+      !ES_CLUB,
       pintarPendientesBanco,
     );
     const otras = r.otras || [];

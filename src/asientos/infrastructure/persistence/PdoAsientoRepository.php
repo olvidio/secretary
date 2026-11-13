@@ -529,6 +529,48 @@ final class PdoAsientoRepository implements AsientoRepository
         return $out;
     }
 
+    public function sugerirPorGlosaDeCentro(int $centroId, string $libro, string $texto, int $limite = 12): array
+    {
+        $libro = strtoupper($libro);
+        $q = trim($texto);
+        if (!in_array($libro, ['P', 'G'], true) || $q === '') {
+            return [];
+        }
+        $limite = max(1, min(50, $limite));
+        // Fuera las cuentas de servicio del extracto (por categorizar, otra contabilidad).
+        $sql = "SELECT a.glosa AS observaciones, c.codigo AS concepto_codigo
+            FROM asientos a
+            INNER JOIN ejercicios e ON e.id = a.ejercicio_id
+            INNER JOIN movimientos m ON m.asiento_id = a.id
+            INNER JOIN cuentas c ON c.id = m.cuenta_id
+            WHERE e.centro_id = :centro
+              AND a.libro = :lib
+              AND a.anulado_at IS NULL
+              AND a.tipo IN ('normal', 'periodificacion')
+              AND a.glosa IS NOT NULL
+              AND btrim(a.glosa) <> ''
+              AND c.tipo IN ('ingreso', 'gasto')
+              AND c.imputable = TRUE
+              AND c.codigo NOT LIKE 'BANCO.PEND.%'
+              AND c.codigo NOT LIKE 'OTRA.%'
+              AND strpos(lower(a.glosa), lower(:q)) > 0
+            GROUP BY a.glosa, c.codigo
+            ORDER BY COUNT(*) DESC, MAX(a.fecha) DESC, a.glosa
+            LIMIT {$limite}";
+        $st = $this->pdo->prepare($sql);
+        $st->execute([':centro' => $centroId, ':lib' => $libro, ':q' => $q]);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $obs = trim((string) $row['observaciones']);
+            $codigo = trim((string) $row['concepto_codigo']);
+            if ($obs !== '' && $codigo !== '') {
+                $out[] = ['observaciones' => $obs, 'concepto_codigo' => $codigo];
+            }
+        }
+
+        return $out;
+    }
+
     public function borrarPorEjercicio(int $ejercicioId): void
     {
         $st = $this->pdo->prepare('DELETE FROM asientos WHERE ejercicio_id = :ej');

@@ -59,6 +59,14 @@ interface AsientoRepository
     public function listarPorEjercicio(int $ejercicioId, ?string $libro = null): array;
 
     /**
+     * Observaciones previas del centro, de cualquier ejercicio y sin mirar persona, que
+     * contienen `$texto` (associació: no hay iniciales). Las más usadas primero.
+     *
+     * @return list<array{observaciones: string, concepto_codigo: string}>
+     */
+    public function sugerirPorGlosaDeCentro(int $centroId, string $libro, string $texto, int $limite = 12): array;
+
+    /**
      * Observaciones previas de `$iniciales` en el libro que contienen `$texto`.
      * Ordenadas por frecuencia (más usadas primero).
      *
