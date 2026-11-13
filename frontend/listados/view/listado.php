@@ -265,11 +265,17 @@ function filasNivel(filas, niveles, cols, resumen) {
         <fieldset class="listado-seccion">
             <legend><?= _("Fechas") ?></legend>
             <div class="fechas-linea">
-                <label><?= _("Ejercicio") ?>
+                <label><?= _("Periodo") ?>
                     <select name="periodo" id="sel-periodo">
-                        <option value="actual"><?= _("Actual") ?></option>
-                        <option value="anterior"><?= _("Anterior") ?></option>
-                        <option value="otro"><?= _("Otro") ?></option>
+                        <optgroup label="<?= htmlspecialchars(_("Ejercicio"), ENT_QUOTES) ?>">
+                            <option value="actual"><?= _("Ejercicio actual") ?></option>
+                            <option value="anterior"><?= _("Ejercicio anterior") ?></option>
+                        </optgroup>
+                        <optgroup label="<?= htmlspecialchars(_("Mes"), ENT_QUOTES) ?>">
+                            <option value="mes_actual"><?= _("Mes actual") ?></option>
+                            <option value="mes_anterior"><?= _("Mes anterior") ?></option>
+                        </optgroup>
+                        <option value="otro"><?= _("Otras fechas") ?></option>
                     </select>
                 </label>
                 <div id="fechas-periodo" hidden>

@@ -386,7 +386,7 @@ final class PdoCopiaCentro
                 continue;
             }
             $periodo = (string) ($fila['periodo'] ?? 'actual');
-            if (!in_array($periodo, ['actual', 'anterior', 'otro'], true)) {
+            if (!in_array($periodo, \src\listados\domain\services\PeriodoListado::VALIDOS, true)) {
                 $periodo = 'actual';
             }
             $st->execute([

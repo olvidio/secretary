@@ -7,6 +7,7 @@ namespace src\listados\infrastructure\persistence;
 use InvalidArgumentException;
 use PDO;
 use src\listados\domain\services\GruposGlosa;
+use src\listados\domain\services\PeriodoListado;
 use src\plan\domain\services\CatalogoPlanesContables;
 
 final class PdoListadoRepository
@@ -46,7 +47,7 @@ final class PdoListadoRepository
         $categorias = $this->textos($datos['categorias'] ?? []);
         $terceros = $this->textos($datos['terceros'] ?? []);
         $periodo = (string) ($datos['periodo'] ?? 'actual');
-        if (!in_array($periodo, ['actual', 'anterior', 'otro'], true)) {
+        if (!in_array($periodo, PeriodoListado::VALIDOS, true)) {
             throw new InvalidArgumentException(_('El periodo no es válido'));
         }
         $desde = $periodo === 'otro' ? $this->fecha($datos['fecha_desde'] ?? null) : null;
@@ -110,7 +111,15 @@ final class PdoListadoRepository
     /** @return array<string, mixed> */
     public function ejecutar(int $centroId, int $id): array
     {
-        $listado = $this->porId($centroId, $id);
+        $guardado = $this->porId($centroId, $id);
+        // Mes actual o anterior: se resuelve hoy a sus fechas y sigue como «otras fechas».
+        $listado = $guardado;
+        if (PeriodoListado::esMes($guardado['periodo'])) {
+            $mes = PeriodoListado::fechasDelMes($guardado['periodo'], new \DateTimeImmutable('today'));
+            $listado['periodo'] = 'otro';
+            $listado['fecha_desde'] = $mes['desde'];
+            $listado['fecha_hasta'] = $mes['hasta'];
+        }
         $categorias = $listado['categorias'];
         $terceros = $listado['terceros'];
         $sql = "SELECT a.fecha::text AS fecha, COALESCE(a.glosa, '') AS glosa, c.codigo, c.nombre, c.tipo,
@@ -209,7 +218,7 @@ final class PdoListadoRepository
         }
 
         return [
-            'listado' => $listado,
+            'listado' => $guardado,
             'periodo' => $this->etiquetaPeriodo($centroId, $listado),
             'movimientos' => $listado['mostrar_movimientos'] ? $filas : [],
             'totales' => $listado['mostrar_totales'] ? array_values($totales) : [],
@@ -393,7 +402,7 @@ final class PdoListadoRepository
             'nombre' => (string) $row['nombre'],
             'mostrar_movimientos' => (bool) $row['mostrar_movimientos'],
             'mostrar_totales' => (bool) $row['mostrar_totales'],
-            'periodo' => in_array($row['periodo'] ?? '', ['actual', 'anterior', 'otro'], true) ? $row['periodo'] : 'actual',
+            'periodo' => in_array($row['periodo'] ?? '', PeriodoListado::VALIDOS, true) ? $row['periodo'] : 'actual',
             'fecha_desde' => $row['fecha_desde'] !== null ? (string) $row['fecha_desde'] : null,
             'fecha_hasta' => $row['fecha_hasta'] !== null ? (string) $row['fecha_hasta'] : null,
             'categorias' => $this->jsonLista($row['categorias']),

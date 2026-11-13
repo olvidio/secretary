@@ -1837,5 +1837,10 @@
   "Solo se usan si se marca «Texto de la glosa». Cada texto es una expresión regular y no distingue mayúsculas. El movimiento va al primer grupo en que aparece alguno de sus textos; los que no entran en ninguno salen en «Otros».": "Només s'utilitzen si es marca «Text de la glossa». Cada text és una expressió regular i no distingeix majúscules. El moviment va al primer grup en què apareix algun dels seus textos; els que no entren en cap surten a «Altres».",
   "Texto de la glosa": "Text de la glossa",
   "Mostrar los movimientos de cada grupo": "Mostra els moviments de cada grup",
-  "Agrupar. Sale una línea por grupo con su total, sin el detalle de movimientos, salvo que se marque «Mostrar los movimientos de cada grupo». El primero es el grupo más general. Subir y bajar cambian el orden.": "Agrupar. Surt una línia per grup amb el seu total, sense el detall de moviments, tret que es marqui «Mostra els moviments de cada grup». El primer és el grup més general. Pujar i baixar canvien l'ordre."
+  "Agrupar. Sale una línea por grupo con su total, sin el detalle de movimientos, salvo que se marque «Mostrar los movimientos de cada grupo». El primero es el grupo más general. Subir y bajar cambian el orden.": "Agrupar. Surt una línia per grup amb el seu total, sense el detall de moviments, tret que es marqui «Mostra els moviments de cada grup». El primer és el grup més general. Pujar i baixar canvien l'ordre.",
+  "Periodo": "Període",
+  "Ejercicio actual": "Exercici actual",
+  "Ejercicio anterior": "Exercici anterior",
+  "Mes actual": "Mes actual",
+  "Otras fechas": "Altres dates"
 }
