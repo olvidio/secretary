@@ -10,6 +10,11 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.41] — 2026-11-13
+
+### Añadido
+- **Listados · mes actual y mes anterior**: en Fechas, además del ejercicio actual o anterior y de otras fechas, se puede elegir el mes natural actual o el anterior; se recalcula cada vez que se abre el listado.
+
 ## [0.1.40] — 2026-11-13
 
 ### Añadido
