@@ -10,6 +10,20 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.38] — 2026-11-13
+
+### Añadido
+- **Ámbito · Nueva entidad**: quien ya tiene cuenta crea otro centro, asociación o fundación desde el menú del nombre → **Ámbito**, sin registrar otro alias ni otro correo, y queda como quien la lleva.
+- **Ámbito · Eliminar entidad**: quien administra una entidad puede eliminarla con todos sus datos escribiendo su sigla para confirmar.
+- **Copias · asociación y fundación**: la copia lleva el plan de cuentas tal como está, con el código oficial de cada cuenta; al restaurar, el plan queda como en la copia. Sirve para llevar la entidad a otro servidor.
+
+### Cambiado
+- **Menú del nombre**: **Ámbito** sale siempre y sustituye a **Centro**; reúne el cambio de libro o de entidad, el alta de una entidad nueva y su eliminación.
+- **Catalán**: todos los textos del programa están traducidos.
+
+### Corregido
+- **Catalán**: dos mensajes salían con marcas extrañas en lugar de los datos (el aviso al anotar un gasto P/A en Apuntes y el error de conexión con el servidor de correo).
+
 ## [0.1.37] — 2026-11-12
 
 ### Añadido
