@@ -99,8 +99,9 @@ function pintarMovimientos(listado, filas) {
   if (listado.separar_signo) niveles.push('signo');
   const agrupar = listado.agrupar || [];
   agrupar.forEach(n => niveles.push(n));
-  // Al agrupar sale una línea por grupo con su total, no el detalle de movimientos.
-  const resumen = agrupar.length > 0;
+  // Al agrupar sale una línea por grupo con su total; con el detalle pedido, cada grupo
+  // lleva su título, sus movimientos y el total.
+  const resumen = agrupar.length > 0 && !listado.detalle_grupos;
   let cols = columnasDe(listado);
   let cabecera = COLS;
   if (resumen) {
@@ -304,7 +305,8 @@ function filasNivel(filas, niveles, cols, resumen) {
         </fieldset>
         <fieldset class="listado-seccion">
             <legend><?= _("Organización") ?></legend>
-            <p class="muted"><?= _("Agrupar. Sale una línea por grupo con su total, sin el detalle de movimientos. El primero es el grupo más general. Subir y bajar cambian el orden.") ?></p>
+            <p class="muted"><?= _("Agrupar. Sale una línea por grupo con su total, sin el detalle de movimientos, salvo que se marque «Mostrar los movimientos de cada grupo». El primero es el grupo más general. Subir y bajar cambian el orden.") ?></p>
+            <label class="cuenta-fila"><input type="checkbox" name="detalle_grupos"> <?= _("Mostrar los movimientos de cada grupo") ?></label>
             <ul id="niveles-agrupar" class="niveles-agrupar">
                 <li data-nivel="categoria">
                     <button type="button" data-mover="-1"><?= _("Subir") ?></button>
@@ -496,6 +498,7 @@ function rellenarFormulario(l) {
   });
   ordenarNiveles(l.agrupar || []);
   f.separar_signo.checked = !!l.separar_signo;
+  f.detalle_grupos.checked = !!l.detalle_grupos;
   f.separar_periodo.value = l.separar_periodo || '';
   f.orden.value = l.orden || 'fecha';
   f.orden_dir.value = l.orden_desc ? 'desc' : 'asc';
@@ -588,6 +591,7 @@ document.getElementById('form-listado').addEventListener('submit', async (ev) =>
       columnas: ORDEN_COLS.filter(c => f['col_' + c].checked),
       agrupar: [...document.querySelectorAll('#niveles-agrupar li')].filter(li => li.querySelector('input').checked).map(li => li.dataset.nivel),
       separar_signo: f.separar_signo.checked,
+      detalle_grupos: f.detalle_grupos.checked,
       separar_periodo: f.separar_periodo.value,
       orden: f.orden.value,
       orden_desc: f.orden_dir.value === 'desc',

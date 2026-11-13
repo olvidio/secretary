@@ -101,7 +101,7 @@ final class PdoCopiaCentro
         $stL = $this->pdo->prepare(
             'SELECT nombre, mostrar_movimientos, mostrar_totales, fecha_desde, fecha_hasta, categorias, terceros,
                     periodo, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto, columnas, agrupar,
-                    separar_signo, separar_periodo, orden, orden_desc, incluir_saldos, grupos_glosa
+                    separar_signo, separar_periodo, orden, orden_desc, incluir_saldos, grupos_glosa, detalle_grupos
              FROM listados WHERE centro_id = :c ORDER BY nombre'
         );
         $stL->execute([':c' => $centroId]);
@@ -127,6 +127,7 @@ final class PdoCopiaCentro
                 'orden_desc' => self::booleano($row['orden_desc']),
                 'incluir_saldos' => self::booleano($row['incluir_saldos']),
                 'grupos_glosa' => $this->json($row['grupos_glosa']),
+                'detalle_grupos' => self::booleano($row['detalle_grupos']),
             ];
         }
 
@@ -372,11 +373,11 @@ final class PdoCopiaCentro
             'INSERT INTO listados (
                 centro_id, nombre, mostrar_movimientos, mostrar_totales, fecha_desde, fecha_hasta, categorias, terceros,
                 periodo, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto, columnas, agrupar,
-                separar_signo, separar_periodo, orden, orden_desc, incluir_saldos, grupos_glosa
+                separar_signo, separar_periodo, orden, orden_desc, incluir_saldos, grupos_glosa, detalle_grupos
              ) VALUES (
                 :c, :n, :m, :t, :d, :h, :cat, :ter,
                 :periodo, :tes, :tras, :nulos, :texto, :cols, :agr,
-                :signo, :sper, :orden, :odesc, :saldos, :gglosa
+                :signo, :sper, :orden, :odesc, :saldos, :gglosa, :detalle
              )
              ON CONFLICT (centro_id, nombre) DO NOTHING'
         );
@@ -410,6 +411,7 @@ final class PdoCopiaCentro
                 ':orden' => (string) ($fila['orden'] ?? 'fecha'),
                 ':odesc' => self::booleano($fila['orden_desc'] ?? false) ? 1 : 0,
                 ':saldos' => self::booleano($fila['incluir_saldos'] ?? false) ? 1 : 0,
+                ':detalle' => self::booleano($fila['detalle_grupos'] ?? false) ? 1 : 0,
                 ':gglosa' => json_encode(is_array($fila['grupos_glosa'] ?? null) ? $fila['grupos_glosa'] : [], JSON_UNESCAPED_UNICODE),
             ]);
         }

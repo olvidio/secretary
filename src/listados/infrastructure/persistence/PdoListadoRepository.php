@@ -22,7 +22,7 @@ final class PdoListadoRepository
         $st = $this->pdo->prepare(
             'SELECT id, nombre, mostrar_movimientos, mostrar_totales, periodo, fecha_desde, fecha_hasta,
                     categorias, terceros, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto,
-                    columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos, grupos_glosa
+                    columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos, grupos_glosa, detalle_grupos
              FROM listados WHERE centro_id = :c ORDER BY nombre'
         );
         $st->execute([':c' => $centroId]);
@@ -71,6 +71,7 @@ final class PdoListadoRepository
             ':ord' => $this->orden($datos['orden'] ?? 'fecha'),
             ':od' => !empty($datos['orden_desc']) ? 1 : 0,
             ':sal' => !empty($datos['incluir_saldos']) ? 1 : 0,
+            ':dg' => !empty($datos['detalle_grupos']) ? 1 : 0,
             ':gg' => json_encode(GruposGlosa::normalizar($datos['grupos_glosa'] ?? []), JSON_UNESCAPED_UNICODE),
         ];
         if ($id > 0) {
@@ -81,15 +82,15 @@ final class PdoListadoRepository
                     periodo = :p, fecha_desde = :d, fecha_hasta = :h, categorias = :cat, terceros = :ter,
                     cuentas_tesoreria = :tes, incluir_traspasos = :tr, excluir_nulos = :en, texto = :tx,
                     columnas = :col, agrupar = :ag, separar_signo = :ss, separar_periodo = :sp,
-                    orden = :ord, orden_desc = :od, incluir_saldos = :sal, grupos_glosa = :gg
+                    orden = :ord, orden_desc = :od, incluir_saldos = :sal, grupos_glosa = :gg, detalle_grupos = :dg
                  WHERE id = :id AND centro_id = :c'
             );
             $st->execute($params);
         } else {
             $params[':c'] = $centroId;
             $st = $this->pdo->prepare(
-                'INSERT INTO listados (centro_id, nombre, mostrar_movimientos, mostrar_totales, periodo, fecha_desde, fecha_hasta, categorias, terceros, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto, columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos, grupos_glosa)
-                 VALUES (:c, :n, :m, :t, :p, :d, :h, :cat, :ter, :tes, :tr, :en, :tx, :col, :ag, :ss, :sp, :ord, :od, :sal, :gg)
+                'INSERT INTO listados (centro_id, nombre, mostrar_movimientos, mostrar_totales, periodo, fecha_desde, fecha_hasta, categorias, terceros, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto, columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos, grupos_glosa, detalle_grupos)
+                 VALUES (:c, :n, :m, :t, :p, :d, :h, :cat, :ter, :tes, :tr, :en, :tx, :col, :ag, :ss, :sp, :ord, :od, :sal, :gg, :dg)
                  RETURNING id'
             );
             $st->execute($params);
@@ -372,7 +373,7 @@ final class PdoListadoRepository
         $st = $this->pdo->prepare(
             'SELECT id, nombre, mostrar_movimientos, mostrar_totales, periodo, fecha_desde, fecha_hasta,
                     categorias, terceros, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto,
-                    columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos, grupos_glosa
+                    columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos, grupos_glosa, detalle_grupos
              FROM listados WHERE id = :id AND centro_id = :c'
         );
         $st->execute([':id' => $id, ':c' => $centroId]);
@@ -408,6 +409,7 @@ final class PdoListadoRepository
             'orden' => $this->orden($row['orden'] ?? 'fecha'),
             'orden_desc' => (bool) ($row['orden_desc'] ?? false),
             'incluir_saldos' => (bool) ($row['incluir_saldos'] ?? false),
+            'detalle_grupos' => (bool) ($row['detalle_grupos'] ?? false),
             'grupos_glosa' => $this->gruposGlosaGuardados($row['grupos_glosa'] ?? '[]'),
         ];
     }
