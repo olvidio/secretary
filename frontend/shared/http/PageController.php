@@ -451,7 +451,6 @@ final class PageController
             'menuGrupos' => CatalogoMenus::gruposPara($layout, $club, $centroSg),
             'menuGrupoActivo' => $grupoActivo,
             'mostrarMenuTipo' => $this->puedeCambiarTipoSesion(),
-            'mostrarMenuAmbito' => $this->puedeCambiarTipoSesion(),
             'mostrarMenuPersonaActiva' => $this->puedeElegirPersonaActivaSesion(),
             'mostrarMenuBaja' => $this->puedeSolicitarBajaCuenta(),
             'cuentaEntrada' => $vars['cuenta'] ?? null,
@@ -469,13 +468,11 @@ final class PageController
     public function cuenta(Request $request, array $vars): Response
     {
         $nav = (string) ($vars['nav'] ?? 'cuenta-mail');
-        if (($nav === 'cuenta-tipo' || $nav === 'cuenta-centro') && $this->puedeCambiarTipoSesion()) {
+        // Ámbito reúne el cambio de centro, el de libro personal y el alta de otra entidad.
+        if ($nav === 'cuenta-tipo' || $nav === 'cuenta-centro') {
             return Response::redirect('/cuenta/ambito');
         }
-        if ($nav === 'cuenta-ambito' && !$this->puedeCambiarTipoSesion()) {
-            return Response::redirect($this->siguienteHome());
-        }
-        if ($nav === 'cuenta-tipo' && !$this->puedeCambiarTipoSesion()) {
+        if ($nav === 'cuenta-ambito' && ($_SESSION['nivel'] ?? '') === 'admin') {
             return Response::redirect($this->siguienteHome());
         }
         if ($nav === 'cuenta-persona' && !$this->puedeElegirPersonaActivaSesion()) {
@@ -612,7 +609,6 @@ final class PageController
             'idioma' => $this->idiomaUsuario(),
             'mostrarRemesas' => $this->mostrarRemesasPersona(),
             'mostrarMenuTipo' => $this->puedeCambiarTipoSesion(),
-            'mostrarMenuAmbito' => $this->puedeCambiarTipoSesion(),
             'mostrarMenuPersonaActiva' => $this->puedeElegirPersonaActivaSesion(),
             'mostrarMenuBaja' => $this->puedeSolicitarBajaCuenta(),
             'centroDestinoYo' => $this->centroDestinoYo(),

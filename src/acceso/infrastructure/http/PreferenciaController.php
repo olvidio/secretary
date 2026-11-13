@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace src\acceso\infrastructure\http;
 
 use InvalidArgumentException;
+use RuntimeException;
 use src\acceso\application\CambiarAmbitoUsuario;
 use src\acceso\application\CambiarCentroUsuario;
 use src\acceso\application\CambiarPersonaUsuario;
@@ -12,6 +13,8 @@ use src\acceso\application\ListarAmbitosIdentidad;
 use src\acceso\application\CambiarPasswordUsuario;
 use src\acceso\application\CambiarTipoUsuario;
 use src\acceso\application\ConfirmarTotp;
+use src\acceso\application\CrearEntidadPropia;
+use src\acceso\application\EliminarEntidadPropia;
 use src\acceso\application\GuardarEmailUsuario;
 use src\acceso\application\GuardarIdiomaUsuario;
 use src\acceso\application\GuardarLayoutUsuario;
@@ -40,6 +43,8 @@ final class PreferenciaController
         private readonly SolicitarBajaCuentaPersonal $solicitarBajaCuenta,
         private readonly ListarAmbitosIdentidad $listarAmbitos,
         private readonly CambiarAmbitoUsuario $cambiarAmbito,
+        private readonly CrearEntidadPropia $crearEntidad,
+        private readonly EliminarEntidadPropia $eliminarEntidad,
     ) {
     }
 
@@ -249,15 +254,98 @@ final class PreferenciaController
             return ContestarJson::error(_("Sesión caducada"), 401);
         }
         try {
-            $prefs = $this->obtener->ejecutar($id);
-            $ambitos = $this->listarAmbitos->ejecutar($id);
-            if (!$ambitos['puede_elegir_ambito']) {
-                return ContestarJson::error(_("Esta cuenta no puede cambiar de ámbito."), 403);
-            }
             $cambio = $this->cambiarAmbito->ejecutar($id, (string) $request->input('ambito', ''));
+            $this->aplicarAmbitoEnSesion($id, $cambio);
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
         }
+
+        return ContestarJson::ok([
+            'nivel' => $cambio['nivel'],
+            'centro_id' => $cambio['centro_id'],
+            'siguiente' => $cambio['siguiente'],
+        ]);
+    }
+
+    /** Alta de otra entidad a nombre de la cuenta que ha entrado; si puede, la sesión pasa a ella. */
+    public function crearEntidad(Request $request, array $vars = []): Response
+    {
+        $id = $this->identidadId();
+        if ($id === null) {
+            return ContestarJson::error(_("Sesión caducada"), 401);
+        }
+        try {
+            $alta = $this->crearEntidad->ejecutar(
+                $id,
+                (string) $request->input('tipo_cuenta', ''),
+                (string) $request->input('codigo', ''),
+                (string) $request->input('nombre', ''),
+            );
+        } catch (InvalidArgumentException | RuntimeException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+        $centro = $alta['centro'];
+        $siguiente = null;
+        if ($alta['totp_confirmado']) {
+            try {
+                $cambio = $this->cambiarAmbito->ejecutar($id, 'centro:' . $centro->id);
+                $this->aplicarAmbitoEnSesion($id, $cambio);
+                $siguiente = $cambio['siguiente'];
+            } catch (InvalidArgumentException) {
+                // La entidad ya existe: se entra en ella desde el desplegable.
+            }
+        }
+
+        return ContestarJson::ok([
+            'centro_id' => $centro->id,
+            'nombre' => $centro->nombre,
+            'falta_totp' => !$alta['totp_confirmado'],
+            'siguiente' => $siguiente,
+        ]);
+    }
+
+    /** Quien administra una entidad la elimina; si era la de la sesión, la sesión pasa a otro ámbito. */
+    public function eliminarEntidad(Request $request, array $vars = []): Response
+    {
+        $id = $this->identidadId();
+        if ($id === null) {
+            return ContestarJson::error(_("Sesión caducada"), 401);
+        }
+        $centroId = (int) $request->input('centro_id', 0);
+        try {
+            $this->eliminarEntidad->ejecutar($id, $centroId, (string) $request->input('sigla', ''));
+        } catch (InvalidArgumentException | RuntimeException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+
+        $opciones = $this->listarAmbitos->ejecutar($id)['opciones'];
+        $_SESSION['centros'] = $this->obtener->ejecutar($id)['centros'];
+        $eraLaActual = ($_SESSION['nivel'] ?? '') === 'centro' && (int) ($_SESSION['centro_id'] ?? 0) === $centroId;
+        if (!$eraLaActual) {
+            return ContestarJson::ok(['siguiente' => null]);
+        }
+        // La sesión estaba dentro de la entidad borrada: pasa al primer ámbito que quede.
+        foreach ($opciones as $opcion) {
+            try {
+                $cambio = $this->cambiarAmbito->ejecutar($id, $opcion['valor']);
+                $this->aplicarAmbitoEnSesion($id, $cambio);
+
+                return ContestarJson::ok(['siguiente' => $cambio['siguiente']]);
+            } catch (InvalidArgumentException) {
+                continue;
+            }
+        }
+        // No queda libro ni entidad con la que trabajar.
+        unset($_SESSION['centro_id']);
+
+        return ContestarJson::ok(['siguiente' => '/logout']);
+    }
+
+    /**
+     * @param array{nivel: string, centros: list<array<string, mixed>>, persona_id: ?int, centro_id: ?int, siguiente: string} $cambio
+     */
+    private function aplicarAmbitoEnSesion(int $identidadId, array $cambio): void
+    {
         $_SESSION['nivel'] = $cambio['nivel'];
         $_SESSION['centros'] = $cambio['centros'];
         if ($cambio['nivel'] === 'centro') {
@@ -267,21 +355,16 @@ final class PreferenciaController
                 unset($_SESSION['centro_id']);
             }
             unset($_SESSION['persona_id'], $_SESSION['personas_vinculo']);
-        } else {
-            $_SESSION['personas_vinculo'] = $prefs['personas'];
-            if ($cambio['persona_id'] !== null) {
-                $_SESSION['persona_id'] = $cambio['persona_id'];
-            } else {
-                unset($_SESSION['persona_id']);
-            }
-            unset($_SESSION['centro_id']);
-        }
 
-        return ContestarJson::ok([
-            'nivel' => $cambio['nivel'],
-            'centro_id' => $cambio['centro_id'],
-            'siguiente' => $cambio['siguiente'],
-        ]);
+            return;
+        }
+        $_SESSION['personas_vinculo'] = $this->obtener->ejecutar($identidadId)['personas'];
+        if ($cambio['persona_id'] !== null) {
+            $_SESSION['persona_id'] = $cambio['persona_id'];
+        } else {
+            unset($_SESSION['persona_id']);
+        }
+        unset($_SESSION['centro_id']);
     }
 
     public function guardarTipo(Request $request, array $vars = []): Response

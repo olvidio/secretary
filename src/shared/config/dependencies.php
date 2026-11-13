@@ -210,6 +210,8 @@ use src\acceso\application\ResolverPersonaActiva;
 use src\acceso\application\ObtenerPreferenciasUsuario;
 use src\acceso\application\PrepararTotp;
 use src\acceso\application\RegistrarCentro;
+use src\acceso\application\CrearEntidadPropia;
+use src\acceso\application\EliminarEntidadPropia;
 use src\acceso\application\RegistrarUsuario;
 use src\acceso\application\VerificarSegundoFactor;
 use src\acceso\application\VincularEmailPersona;
@@ -442,6 +444,8 @@ return [
     src\acceso\domain\contracts\LibroPersonalIdentidadPort::class => autowire(AsegurarLibroPersonalIdentidad::class),
     RegistrarUsuario::class => autowire(),
     RegistrarCentro::class => autowire(),
+    CrearEntidadPropia::class => autowire(),
+    EliminarEntidadPropia::class => autowire(),
     NotificarRegistroUsuario::class => autowire(),
     NotificarRestablecerPassword::class => autowire(),
     SolicitarRestablecerPassword::class => autowire(),

@@ -52,7 +52,7 @@ Gestiona la plataforma sin entrar en la contabilidad de ningún centro: planes c
 ## Reglas que conviene saber
 
 - El admin no ve menús de contabilidad ni puede operar en un centro concreto.
-- Los secretarios crean usuarios de su centro en Parámetros → Centros, pero no pueden crear entidades nuevas ni borrar usuarios globales. Una asociación o una fundación no tiene esa pantalla de Centros: los usuarios se gestionan en Configuración.
+- Los secretarios crean usuarios de su centro en Parámetros → Centros y pueden crear entidades nuevas o eliminar las que administran desde el menú del nombre → Ámbito, pero no pueden borrar usuarios globales ni entidades ajenas. Una asociación o una fundación no tiene esa pantalla de Centros: los usuarios se gestionan en Configuración.
 - En el centro, solo el secretario puede cambiar las partidas **7x** (cap. VII); el resto de conceptos vienen del plan asignado al centro.
 - La contraseña del admin se sincroniza desde `.env` al ejecutar `db:migrate`.
 

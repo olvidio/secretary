@@ -32,7 +32,7 @@ Tras registrarse, el programa envía un correo con enlace de confirmación (48 h
 - Cada correo puede tener una sola cuenta.
 - Hay que aceptar las condiciones: el servicio es gratuito y no se garantiza la ausencia de fallos ni la conservación de los datos; hay que hacer copias.
 - Los tipos de entidad son centro n, centro sg, asociación y fundación. Las cuentas personales solo pueden solicitar acceso a un **centro n**.
-- Un secretario ya existente no se da de alta aquí como entidad adicional: otro secretario lo **invita por correo** desde **Centros** (centro n) o **Configuración** (centro sg, asociación, fundación); no hace falta crear un alias nuevo si la persona ya tiene cuenta.
+- Quien ya tiene cuenta no se registra otra vez para llevar una entidad más: la crea desde el menú del nombre → **Ámbito** → **Nueva entidad**, con su misma cuenta. Para llevar una entidad que ya existe, otro secretario lo **invita por correo** desde **Centros** (centro n) o **Configuración** (centro sg, asociación, fundación); tampoco hace falta un alias nuevo.
 
 ## Problemas frecuentes
 

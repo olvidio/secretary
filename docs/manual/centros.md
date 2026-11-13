@@ -7,7 +7,7 @@
 
 ## Para qué sirve
 
-Reúne lo que afecta al centro como entidad: quién puede entrar a llevar sus cuentas, la carga del libro de Excel del que se viene y las partidas del capítulo VII. El alta de centros nuevos la hace el administrador de plataforma.
+Reúne lo que afecta al centro como entidad: quién puede entrar a llevar sus cuentas, la carga del libro de Excel del que se viene y las partidas del capítulo VII. Un centro nuevo se crea al registrarse, desde el menú del nombre → **Ámbito** → **Nueva entidad** (quien ya tiene cuenta) o lo da de alta el administrador de plataforma.
 
 Cada centro tiene sus propias cuentas, sus propios nombres y su propio secretario. Un secretario de otro centro no ve nada de este.
 

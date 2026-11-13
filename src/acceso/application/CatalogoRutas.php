@@ -55,6 +55,8 @@ final class CatalogoRutas
             ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'guardarPersona', 'autenticado'],
             ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'guardarTipo', 'autenticado'],
             ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'guardarAmbito', 'autenticado'],
+            ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'crearEntidad', 'autenticado'],
+            ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'eliminarEntidad', 'autenticado'],
             ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'resumenBaja', 'autenticado'],
             ['src\\acceso\\infrastructure\\http\\PreferenciaController', 'solicitarBaja', 'autenticado'],
             [$p, 'cuenta', 'autenticado'],

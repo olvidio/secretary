@@ -5,11 +5,8 @@ $esLibroPersonal = (($_SESSION['nivel'] ?? '') === 'persona');
 $itemsCuenta = [
     ['mensajes', '/mensajes', _('Mensajes')],
 ];
-if (!empty($mostrarMenuAmbito)) {
-    $itemsCuenta[] = ['cuenta-ambito', '/cuenta/ambito', _('Ámbito')];
-} elseif (!$esLibroPersonal) {
-    $itemsCuenta[] = ['cuenta-centro', '/cuenta/centro', _('Centro')];
-}
+// Ámbito sale siempre: además de cambiar de libro, es donde se crea otra entidad.
+$itemsCuenta[] = ['cuenta-ambito', '/cuenta/ambito', _('Ámbito')];
 $itemsCuenta[] = ['cuenta-personal', '/cuenta/personal', _('Personal')];
 if ($esLibroPersonal) {
     $itemsCuenta[] = ['yo-remanente', '/yo/remanente', _('Remanente')];

@@ -85,6 +85,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/mensajes/leidos', [MensajeController::class, 'leidos']);
     $r->addRoute('POST', '/api/mensajes/{id:\d+}/descartar', [MensajeController::class, 'descartarMensaje']);
     $r->addRoute('POST', '/api/preferencias/ambito', [PreferenciaController::class, 'guardarAmbito']);
+    $r->addRoute('POST', '/api/preferencias/entidad', [PreferenciaController::class, 'crearEntidad']);
+    $r->addRoute('POST', '/api/preferencias/entidad/eliminar', [PreferenciaController::class, 'eliminarEntidad']);
     $r->addRoute('GET', '/api/preferencias/baja', [PreferenciaController::class, 'resumenBaja']);
     $r->addRoute('POST', '/api/preferencias/baja/solicitar', [PreferenciaController::class, 'solicitarBaja']);
 
