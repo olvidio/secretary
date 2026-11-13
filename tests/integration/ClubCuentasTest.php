@@ -12,7 +12,9 @@ use src\ambito\domain\entity\Centro;
 use src\ambito\infrastructure\persistence\AmbitoSeeder;
 use src\ambito\infrastructure\persistence\PdoCentroRepository;
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\infrastructure\persistence\PdoCopiaCentro;
 use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
+use src\asientos\infrastructure\persistence\PdoAsientoRepository;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\plan\infrastructure\http\ClubCuentasController;
 use src\plan\infrastructure\persistence\PdoCuentasClub;
@@ -193,6 +195,32 @@ final class ClubCuentasTest extends TestCase
         $this->pdo->exec("DELETE FROM plan_conceptos WHERE plan_contable_id = {$base['id']}");
         AmbitoSeeder::poblarLibros($this->pdo, $this->centroId);
         self::assertSame($despues, $catalogo());
+    }
+
+    public function testLaCopiaDelCentroLlevaElPlanTalComoEsta(): void
+    {
+        $this->pdo->prepare(
+            "INSERT INTO ejercicios (centro_id, etiqueta, fecha_inicio, fecha_fin, fecha_corte, estado)
+             VALUES (:c, '2026', '2026-01-01', '2026-12-31', '2026-01-01', 'abierto')"
+        )->execute([':c' => $this->centroId]);
+        $copias = new PdoCopiaCentro($this->pdo, new PdoAsientoRepository($this->pdo));
+        // El plan del centro: una cuenta con el código cambiado y otro código oficial.
+        $this->cuentas->modificar($this->centroId, '61.3', [
+            'codigo' => '63.1', 'nombre' => 'Neteja local', 'naturaleza' => 'gasto', 'codigo_oficial' => '622',
+        ], true);
+        $copia = json_decode((string) json_encode($copias->exportar($this->centroId)), true);
+
+        // Como en otro servidor: el centro recién creado tiene las cuentas del modelo (61.3, no 63.1).
+        $this->cuentas->modificar($this->centroId, '63.1', [
+            'codigo' => '61.3', 'nombre' => 'Neteja', 'naturaleza' => 'gasto', 'codigo_oficial' => '629',
+        ], true);
+        self::assertSame([], $this->fila('63.1', 'id'));
+
+        $copias->restaurar($this->centroId, $copia);
+
+        self::assertSame(['Neteja local', '622'], $this->fila('63.1', 'nombre, codigo_oficial'));
+        self::assertSame([], $this->fila('61.3', 'id'), 'la cuenta que la copia no trae se quita');
+        self::assertSame(['Sous', '640'], $this->fila('62.1', 'nombre, codigo_oficial'));
     }
 
     /** @return list<mixed> */

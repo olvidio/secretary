@@ -48,3 +48,7 @@ Permite guardar una copia de **este** centro o associació y volver a ella si al
 ## Asociación y fundación
 
 - Menú: Parámetros → Copias
+
+La copia lleva el plan de cuentas tal como está (códigos, nombres, naturaleza y código oficial), los apuntes, los listados, las cajas y bancos, los arqueos y recuentos, el historial del extracto del banco, las plantillas de movimientos, las entradas periódicas y los ejercicios. Al restaurar, el plan queda como en la copia: las cuentas de ingreso y gasto que el centro tenga y la copia no traiga se quitan.
+
+Para llevar la asociación a otro servidor: darla de alta allí con la **misma sigla**, entrar con su usuario y restaurar el fichero `.json` descargado. No viajan los usuarios ni sus contraseñas, ni los modelos de plan de cuentas guardados (no hacen falta: el plan va en la copia).

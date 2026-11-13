@@ -7,6 +7,7 @@ namespace src\ambito\infrastructure\persistence;
 use InvalidArgumentException;
 use PDO;
 use src\shared\infrastructure\persistence\ConverterDate;
+use src\plan\domain\services\CatalogoPlanesContables;
 
 /**
  * Resto del volcado de un centro, aparte de los asientos.
@@ -86,6 +87,9 @@ final class ComplementoCopiaCentro
      */
     public function trasBorrarAsientos(int $centroId, array $datos): array
     {
+        if (is_array($datos['cuentas'] ?? null)) {
+            $this->quitarCuentasClubQueNoVienen($centroId, $datos['cuentas']);
+        }
         $plantillas = array_key_exists('plantillas', $datos)
             ? $this->restaurarPlantillas($centroId, $datos['plantillas'])
             : [];
@@ -519,12 +523,54 @@ final class ComplementoCopiaCentro
         $st->execute(array_merge([$centroId], $presentes));
     }
 
+    /**
+     * En una associació el plan son sus cuentas: las de ingreso y gasto que el centro
+     * tenga y la copia no traiga (p. ej. las del modelo con el que se creó, o las de un
+     * código cambiado después) se quitan, para que el plan quede como en la copia.
+     * Se llama con los asientos ya borrados; aun así no toca una cuenta con movimientos.
+     *
+     * @param array<mixed> $filas
+     */
+    private function quitarCuentasClubQueNoVienen(int $centroId, array $filas): void
+    {
+        $st = $this->pdo->prepare(
+            'SELECT p.codigo FROM centros c JOIN planes_contables p ON p.id = c.plan_contable_id WHERE c.id = :c'
+        );
+        $st->execute([':c' => $centroId]);
+        if ($st->fetchColumn() !== CatalogoPlanesContables::CLUB) {
+            return;
+        }
+        $enCopia = [];
+        foreach ($filas as $fila) {
+            if (is_array($fila) && ($fila['libro'] ?? '') === 'G' && trim((string) ($fila['iniciales'] ?? '')) === '') {
+                $enCopia[(string) ($fila['codigo'] ?? '')] = true;
+            }
+        }
+        if ($enCopia === []) {
+            return;
+        }
+        $st = $this->pdo->prepare(
+            "SELECT id, codigo FROM cuentas c
+             WHERE centro_id = :c AND libro = 'G' AND persona_id IS NULL
+               AND tipo IN ('ingreso', 'gasto', 'patrimonio')
+               AND NOT EXISTS (SELECT 1 FROM movimientos m WHERE m.cuenta_id = c.id)
+               AND NOT EXISTS (SELECT 1 FROM cuentas h WHERE h.padre_id = c.id)"
+        );
+        $st->execute([':c' => $centroId]);
+        $borrar = $this->pdo->prepare('DELETE FROM cuentas WHERE id = :id');
+        foreach ($st->fetchAll() as $row) {
+            if (!isset($enCopia[(string) $row['codigo']])) {
+                $borrar->execute([':id' => $row['id']]);
+            }
+        }
+    }
+
     /** @return list<array<string, mixed>> */
     private function exportarCuentas(int $centroId): array
     {
         $st = $this->pdo->prepare(
             'SELECT c.libro, c.codigo, c.nombre, c.descripcion, c.tipo, c.naturaleza, c.codigo_maestro,
-                    c.imputable, c.orden, c.activo, p.iniciales, f.nombre AS fisica,
+                    c.imputable, c.orden, c.activo, c.codigo_oficial, p.iniciales, f.nombre AS fisica,
                     cp.libro AS padre_libro, cp.codigo AS padre_codigo, pp.iniciales AS padre_iniciales
              FROM cuentas c
              LEFT JOIN personas p ON p.id = c.persona_id
@@ -549,6 +595,7 @@ final class ComplementoCopiaCentro
                 'imputable' => self::booleano($row['imputable']),
                 'orden' => (int) $row['orden'],
                 'activo' => self::booleano($row['activo']),
+                'codigo_oficial' => $row['codigo_oficial'] !== null ? (string) $row['codigo_oficial'] : null,
                 'fisica' => $row['fisica'] !== null ? (string) $row['fisica'] : null,
                 'padre_libro' => $row['padre_libro'] !== null ? (string) $row['padre_libro'] : null,
                 'padre_codigo' => $row['padre_codigo'] !== null ? (string) $row['padre_codigo'] : null,
@@ -567,15 +614,15 @@ final class ComplementoCopiaCentro
         $upd = $this->pdo->prepare(
             'UPDATE cuentas SET nombre = :nom, descripcion = :des, tipo = :tipo, naturaleza = :nat,
                     codigo_maestro = :mae, imputable = :imp, orden = :ord, activo = :act,
-                    cuenta_fisica_id = :fis, persona_id = :per
+                    codigo_oficial = :ofi, cuenta_fisica_id = :fis, persona_id = :per
              WHERE id = :id'
         );
         $ins = $this->pdo->prepare(
             'INSERT INTO cuentas (
                 centro_id, persona_id, cuenta_fisica_id, padre_id, libro, codigo, nombre, descripcion,
-                tipo, naturaleza, codigo_maestro, imputable, orden, activo
+                tipo, naturaleza, codigo_maestro, imputable, orden, activo, codigo_oficial
              ) VALUES (
-                :c, :per, :fis, NULL, :lib, :cod, :nom, :des, :tipo, :nat, :mae, :imp, :ord, :act
+                :c, :per, :fis, NULL, :lib, :cod, :nom, :des, :tipo, :nat, :mae, :imp, :ord, :act, :ofi
              )'
         );
         foreach ($filas as $fila) {
@@ -600,6 +647,8 @@ final class ComplementoCopiaCentro
                 ':imp' => self::booleano($fila['imputable'] ?? true) ? 1 : 0,
                 ':ord' => (int) ($fila['orden'] ?? 0),
                 ':act' => self::booleano($fila['activo'] ?? true) ? 1 : 0,
+                ':ofi' => isset($fila['codigo_oficial']) && $fila['codigo_oficial'] !== ''
+                    ? (string) $fila['codigo_oficial'] : null,
                 ':fis' => $fisicaId,
                 ':per' => $personaId,
             ];
