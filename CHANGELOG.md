@@ -10,6 +10,11 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.40] — 2026-11-13
+
+### Añadido
+- **Listados · movimientos de cada grupo**: al agrupar (por categoría, cuenta o texto de la glosa), la casilla **Mostrar los movimientos de cada grupo** hace que cada grupo salga con su título, sus movimientos y su total, en vez de una sola línea.
+
 ## [0.1.39] — 2026-11-13
 
 ### Añadido
