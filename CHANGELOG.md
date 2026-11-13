@@ -10,6 +10,14 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.39] — 2026-11-13
+
+### Añadido
+- **Listados · agrupar por texto de la glosa**: en Organización hay un grupo nuevo, **Texto de la glosa**, con sus grupos escritos uno por línea (`gas = Gas Natural | NATURGY`, `telf = Telefono | YOIGO`). Cada movimiento va al primer grupo en cuya glosa aparece alguno de sus textos, sin distinguir mayúsculas; los textos pueden ser expresiones regulares y lo que no entra en ningún grupo sale en «Otros».
+
+### Cambiado
+- **Listados · Ver**: el informe se abre en la misma ventana, no en una nueva.
+
 ## [0.1.38] — 2026-11-13
 
 ### Añadido
