@@ -6,6 +6,7 @@ namespace src\listados\infrastructure\persistence;
 
 use InvalidArgumentException;
 use PDO;
+use src\listados\domain\services\GruposGlosa;
 use src\plan\domain\services\CatalogoPlanesContables;
 
 final class PdoListadoRepository
@@ -21,7 +22,7 @@ final class PdoListadoRepository
         $st = $this->pdo->prepare(
             'SELECT id, nombre, mostrar_movimientos, mostrar_totales, periodo, fecha_desde, fecha_hasta,
                     categorias, terceros, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto,
-                    columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos
+                    columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos, grupos_glosa
              FROM listados WHERE centro_id = :c ORDER BY nombre'
         );
         $st->execute([':c' => $centroId]);
@@ -70,6 +71,7 @@ final class PdoListadoRepository
             ':ord' => $this->orden($datos['orden'] ?? 'fecha'),
             ':od' => !empty($datos['orden_desc']) ? 1 : 0,
             ':sal' => !empty($datos['incluir_saldos']) ? 1 : 0,
+            ':gg' => json_encode(GruposGlosa::normalizar($datos['grupos_glosa'] ?? []), JSON_UNESCAPED_UNICODE),
         ];
         if ($id > 0) {
             $params[':id'] = $id;
@@ -79,15 +81,15 @@ final class PdoListadoRepository
                     periodo = :p, fecha_desde = :d, fecha_hasta = :h, categorias = :cat, terceros = :ter,
                     cuentas_tesoreria = :tes, incluir_traspasos = :tr, excluir_nulos = :en, texto = :tx,
                     columnas = :col, agrupar = :ag, separar_signo = :ss, separar_periodo = :sp,
-                    orden = :ord, orden_desc = :od, incluir_saldos = :sal
+                    orden = :ord, orden_desc = :od, incluir_saldos = :sal, grupos_glosa = :gg
                  WHERE id = :id AND centro_id = :c'
             );
             $st->execute($params);
         } else {
             $params[':c'] = $centroId;
             $st = $this->pdo->prepare(
-                'INSERT INTO listados (centro_id, nombre, mostrar_movimientos, mostrar_totales, periodo, fecha_desde, fecha_hasta, categorias, terceros, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto, columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos)
-                 VALUES (:c, :n, :m, :t, :p, :d, :h, :cat, :ter, :tes, :tr, :en, :tx, :col, :ag, :ss, :sp, :ord, :od, :sal)
+                'INSERT INTO listados (centro_id, nombre, mostrar_movimientos, mostrar_totales, periodo, fecha_desde, fecha_hasta, categorias, terceros, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto, columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos, grupos_glosa)
+                 VALUES (:c, :n, :m, :t, :p, :d, :h, :cat, :ter, :tes, :tr, :en, :tx, :col, :ag, :ss, :sp, :ord, :od, :sal, :gg)
                  RETURNING id'
             );
             $st->execute($params);
@@ -158,6 +160,7 @@ final class PdoListadoRepository
         $st = $this->pdo->prepare($sql);
         $st->execute($params);
         $grupos = $this->gruposDe($centroId);
+        $porGlosa = in_array('glosa', $listado['agrupar'], true);
         $filas = [];
         foreach ($st->fetchAll() as $row) {
             if ($categorias !== [] && !$this->coincideCodigo((string) $row['codigo'], $categorias)) {
@@ -174,6 +177,8 @@ final class PdoListadoRepository
             }
             $debe = (int) $row['debe'];
             $haber = (int) $row['haber'];
+            // Sin grupo que case, el movimiento va al final, en «Otros» (nombre vacío).
+            $indiceGlosa = $porGlosa ? GruposGlosa::indiceDe((string) $row['glosa'], $listado['grupos_glosa']) : null;
             $filas[] = [
                 'fecha' => (string) $row['fecha'],
                 'glosa' => (string) $row['glosa'],
@@ -186,6 +191,8 @@ final class PdoListadoRepository
                 'signo' => $this->signoDe((string) $row['codigo'], (string) $row['tipo'], $grupos),
                 'periodo_grupo' => $this->etiquetaGrupo((string) $row['fecha'], $listado['separar_periodo']),
                 'periodo_orden' => $this->ordenGrupo((string) $row['fecha'], $listado['separar_periodo']),
+                'grupo_glosa' => $indiceGlosa !== null ? $listado['grupos_glosa'][$indiceGlosa]['nombre'] : '',
+                'grupo_glosa_orden' => sprintf('%04d', $indiceGlosa ?? 9999),
             ];
         }
         $this->ordenar($filas, $listado);
@@ -365,7 +372,7 @@ final class PdoListadoRepository
         $st = $this->pdo->prepare(
             'SELECT id, nombre, mostrar_movimientos, mostrar_totales, periodo, fecha_desde, fecha_hasta,
                     categorias, terceros, cuentas_tesoreria, incluir_traspasos, excluir_nulos, texto,
-                    columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos
+                    columnas, agrupar, separar_signo, separar_periodo, orden, orden_desc, incluir_saldos, grupos_glosa
              FROM listados WHERE id = :id AND centro_id = :c'
         );
         $st->execute([':id' => $id, ':c' => $centroId]);
@@ -401,7 +408,22 @@ final class PdoListadoRepository
             'orden' => $this->orden($row['orden'] ?? 'fecha'),
             'orden_desc' => (bool) ($row['orden_desc'] ?? false),
             'incluir_saldos' => (bool) ($row['incluir_saldos'] ?? false),
+            'grupos_glosa' => $this->gruposGlosaGuardados($row['grupos_glosa'] ?? '[]'),
         ];
+    }
+
+    /**
+     * Los grupos ya se validaron al guardar; si aun así el dato no sirve, el listado sale sin ellos.
+     *
+     * @return list<array{nombre:string,patron:string}>
+     */
+    private function gruposGlosaGuardados(mixed $valor): array
+    {
+        try {
+            return GruposGlosa::normalizar($valor);
+        } catch (InvalidArgumentException) {
+            return [];
+        }
     }
 
     /** @param mixed $valor @return list<string> */
@@ -556,7 +578,7 @@ final class PdoListadoRepository
         $lista = is_array($valor) ? $this->textos($valor) : $this->jsonLista($valor);
         $out = [];
         foreach ($lista as $nivel) {
-            if (in_array($nivel, ['categoria', 'tesoreria'], true) && !in_array($nivel, $out, true)) {
+            if (in_array($nivel, ['categoria', 'tesoreria', 'glosa'], true) && !in_array($nivel, $out, true)) {
                 $out[] = $nivel;
             }
         }
@@ -638,7 +660,11 @@ final class PdoListadoRepository
             $niveles[] = 'signo';
         }
         foreach ($listado['agrupar'] as $nivel) {
-            $niveles[] = $nivel === 'categoria' ? 'codigo' : 'tesoreria';
+            $niveles[] = match ($nivel) {
+                'categoria' => 'codigo',
+                'glosa' => 'grupo_glosa_orden',
+                default => 'tesoreria',
+            };
         }
         usort($filas, function (array $a, array $b) use ($niveles, $orden, $desc): int {
             foreach ($niveles as $nivel) {

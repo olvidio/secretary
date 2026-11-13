@@ -56,6 +56,7 @@ const TXT = {
   resultado: <?= json_encode(_("Resultado"), JSON_UNESCAPED_UNICODE) ?>,
   saldoInicial: <?= json_encode(_("Saldo inicial"), JSON_UNESCAPED_UNICODE) ?>,
   saldoFinal: <?= json_encode(_("Saldo final"), JSON_UNESCAPED_UNICODE) ?>,
+  otros: <?= json_encode(_("Otros"), JSON_UNESCAPED_UNICODE) ?>,
 };
 
 let GRUPOS = {};
@@ -80,6 +81,7 @@ function tituloGrupo(nivel, m) {
   if (nivel === 'signo') return m.signo === 'ingreso' ? TXT.ingreso : TXT.gasto;
   if (nivel === 'periodo') return m.periodo_grupo || '';
   if (nivel === 'categoria') return m.codigo + ' ' + m.nombre;
+  if (nivel === 'glosa') return m.grupo_glosa || TXT.otros;
   return m.tesoreria || '';
 }
 
@@ -87,6 +89,7 @@ function claveGrupo(nivel, m) {
   if (nivel === 'signo') return m.signo;
   if (nivel === 'periodo') return m.periodo_orden || m.periodo_grupo;
   if (nivel === 'categoria') return m.codigo;
+  if (nivel === 'glosa') return m.grupo_glosa_orden;
   return m.tesoreria || '';
 }
 
@@ -313,7 +316,16 @@ function filasNivel(filas, niveles, cols, resumen) {
                     <button type="button" data-mover="1"><?= _("Bajar") ?></button>
                     <label class="cuenta-fila"><input type="checkbox"> <?= _("Cuenta") ?></label>
                 </li>
+                <li data-nivel="glosa">
+                    <button type="button" data-mover="-1"><?= _("Subir") ?></button>
+                    <button type="button" data-mover="1"><?= _("Bajar") ?></button>
+                    <label class="cuenta-fila"><input type="checkbox"> <?= _("Texto de la glosa") ?></label>
+                </li>
             </ul>
+            <label><?= _("Grupos por texto de la glosa: uno por línea, nombre = textos separados con |") ?>
+                <textarea name="grupos_glosa" rows="4" placeholder="gas = Gas Natural | NATURGY&#10;telf = Telefono | YOIGO"></textarea>
+            </label>
+            <p class="muted"><?= _("Solo se usan si se marca «Texto de la glosa». Cada texto es una expresión regular y no distingue mayúsculas. El movimiento va al primer grupo en que aparece alguno de sus textos; los que no entran en ninguno salen en «Otros».") ?></p>
             <label class="cuenta-fila"><input type="checkbox" name="separar_signo"> <?= _("Separar ingresos y gastos") ?></label>
             <div class="fechas-linea">
                 <label><?= _("Separar por periodo") ?>
@@ -472,6 +484,7 @@ function rellenarFormulario(l) {
   f.mostrar_totales.checked = !!l.mostrar_totales;
   f.terceros.value = (l.terceros || []).join('\n');
   f.texto.value = l.texto || '';
+  f.grupos_glosa.value = (l.grupos_glosa || []).map(g => g.nombre === g.patron ? g.nombre : g.nombre + ' = ' + g.patron).join('\n');
   f.incluir_traspasos.checked = l.incluir_traspasos !== false;
   f.excluir_nulos.checked = !!l.excluir_nulos;
   f.incluir_saldos.checked = !!l.incluir_saldos;
@@ -548,6 +561,11 @@ document.getElementById('form-listado').addEventListener('submit', async (ev) =>
   const categorias = [...f.querySelectorAll('#cuentas-listado input:checked')].map(i => i.value);
   const cuentasTesoreria = [...f.querySelectorAll('#tesoreria-listado input:checked')].map(i => i.value);
   const terceros = f.terceros.value.split('\n').map(s => s.trim()).filter(Boolean);
+  // «nombre = patrón»; una línea sin «=» es un grupo que se llama como su texto.
+  const gruposGlosa = f.grupos_glosa.value.split('\n').map(s => s.trim()).filter(Boolean).map(linea => {
+    const i = linea.indexOf('=');
+    return i < 0 ? { nombre: linea, patron: linea } : { nombre: linea.slice(0, i).trim(), patron: linea.slice(i + 1).trim() };
+  });
   const id = f.id.value ? Number(f.id.value) : undefined;
   const r = await api('/api/listados', {
     method: 'POST',
@@ -566,6 +584,7 @@ document.getElementById('form-listado').addEventListener('submit', async (ev) =>
       excluir_nulos: f.excluir_nulos.checked,
       incluir_saldos: f.incluir_saldos.checked,
       texto: f.texto.value,
+      grupos_glosa: gruposGlosa,
       columnas: ORDEN_COLS.filter(c => f['col_' + c].checked),
       agrupar: [...document.querySelectorAll('#niveles-agrupar li')].filter(li => li.querySelector('input').checked).map(li => li.dataset.nivel),
       separar_signo: f.separar_signo.checked,
@@ -600,7 +619,7 @@ document.querySelector('#tabla-listados').addEventListener('click', async (ev) =
     pintarTabla();
   }
   if (btn.dataset.act === 'abrir') {
-    window.open('/listados?ver=' + id, '_blank');
+    window.location.href = '/listados?ver=' + id;
   }
 });
 

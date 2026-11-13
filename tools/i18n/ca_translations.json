@@ -1830,5 +1830,10 @@
   "Entidad eliminada.": "Entitat eliminada.",
   "Se va a eliminar la entidad con todos sus datos y no se puede deshacer:": "S'eliminarà l'entitat amb totes les seves dades i no es pot desfer:",
   "Solo quien administra la entidad puede eliminarla": "Només qui administra l'entitat la pot eliminar",
-  "La sigla escrita no coincide con la de la entidad": "La sigla escrita no coincideix amb la de l'entitat"
+  "La sigla escrita no coincide con la de la entidad": "La sigla escrita no coincideix amb la de l'entitat",
+  "El patrón del grupo «%s» no es una expresión regular válida": "El patró del grup «%s» no és una expressió regular vàlida",
+  "Grupos por texto de la glosa: uno por línea, nombre = textos separados con |": "Grups per text de la glossa: un per línia, nom = textos separats amb |",
+  "Otros": "Altres",
+  "Solo se usan si se marca «Texto de la glosa». Cada texto es una expresión regular y no distingue mayúsculas. El movimiento va al primer grupo en que aparece alguno de sus textos; los que no entran en ninguno salen en «Otros».": "Només s'utilitzen si es marca «Text de la glossa». Cada text és una expressió regular i no distingeix majúscules. El moviment va al primer grup en què apareix algun dels seus textos; els que no entren en cap surten a «Altres».",
+  "Texto de la glosa": "Text de la glossa"
 }
