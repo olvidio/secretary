@@ -95,6 +95,7 @@ use src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository;
 use src\arqueo\application\BuscarCapuchinos;
 use src\ayuda\application\ListarPreguntasAyudaPendientes;
 use src\ayuda\application\ListarTemasAyuda;
+use src\ayuda\application\ReintentarPreguntasAyudaPendientes;
 use src\ayuda\application\RepasarPreguntasAyuda;
 use src\ayuda\application\ResponderPreguntaAyuda;
 use src\ayuda\application\ValorarRespuestaAyuda;
@@ -740,6 +741,18 @@ return [
             new BuscadorDocumentacion(),
             ClienteChatCompatibleOpenAI::desdeEntorno(),
             ClienteChatCompatibleOpenAI::limiteDiario(),
+        );
+    }),
+    ReintentarPreguntasAyudaPendientes::class => factory(static function (
+        RepositorioDocumentacion $documentacion,
+        RegistroConsultasAyuda $registro,
+    ): ReintentarPreguntasAyudaPendientes {
+        return new ReintentarPreguntasAyudaPendientes(
+            $documentacion,
+            $registro,
+            new ConstructorPromptAyuda(),
+            new InterpreteRespuestaIA(),
+            ClienteChatCompatibleOpenAI::desdeEntorno(),
         );
     }),
     ListarTemasAyuda::class => autowire(),

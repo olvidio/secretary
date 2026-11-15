@@ -42,7 +42,7 @@ Gestiona la plataforma sin entrar en la contabilidad de ningún centro: planes c
 
 8. Lista las preguntas por repasar, con **quién** las formuló (alias y correo): las que la ayuda con IA no pudo contestar (motivo **Sin respuesta**) y las que contestó pero alguien marcó **No** en «¿Le ha servido?» (motivo **No sirvió**, con la respuesta dada y lo que el usuario esperaba encontrar).
 9. **Descargar Markdown** o **JSON** para ampliar el manual en local o para responder al usuario. Detalle en `docs/dev/ayuda_pendientes_manual.md`.
-10. Una vez ampliado y desplegado el manual, cerrar cada pregunta con **Cubierta** (el manual ya lo explica) o **Descartada** (no procede). **Marcar todas como cubiertas** cierra la lista entera. Las cerradas dejan de salir aquí y en la exportación; si alguien vuelve a preguntarlo sin respuesta, o marca otro «No», la pregunta reaparece.
+10. Al desplegar, el programa vuelve a hacer a la IA las preguntas **Sin respuesta** y cierra solas las que el manual nuevo ya contesta; las que sigan en la lista es que aún no están cubiertas. Las de **No sirvió** no se cierran solas. A mano se puede cerrar cada pregunta con **Cubierta** (el manual ya lo explica) o **Descartada** (no procede). **Marcar todas como cubiertas** cierra la lista entera. Las cerradas dejan de salir aquí y en la exportación; si alguien vuelve a preguntarlo sin respuesta, o marca otro «No», la pregunta reaparece.
 
 ### Legal (`/admin/legal`)
 

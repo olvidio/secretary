@@ -375,6 +375,28 @@ if ($cmd === 'ayuda:pendientes-export') {
     exit(0);
 }
 
+if ($cmd === 'ayuda:pendientes-reintentar') {
+    $caso = $kernel->container()->get(\src\ayuda\application\ReintentarPreguntasAyudaPendientes::class);
+    $r = $caso->ejecutar();
+    if ($r['sin_proveedor']) {
+        fwrite(STDOUT, "Sin AYUDA_IA_CLAVE: no se puede reintentar. Pendientes sin probar: {$r['sin_probar']}\n");
+        exit(0);
+    }
+    foreach ($r['cubiertas'] as $p) {
+        fwrite(STDOUT, "  cubierta: {$p}\n");
+    }
+    foreach ($r['siguen'] as $p) {
+        fwrite(STDOUT, "  sigue pendiente: {$p}\n");
+    }
+    fwrite(STDOUT, 'Cubiertas: ' . count($r['cubiertas']) . ' · siguen pendientes: ' . count($r['siguen'])
+        . " · «no sirvió» (repaso manual): {$r['no_sirvio']} · sin probar: {$r['sin_probar']}\n");
+    if ($r['error'] !== null) {
+        fwrite(STDERR, "La IA dejó de responder: {$r['error']}\n");
+        exit(1);
+    }
+    exit(0);
+}
+
 if ($cmd === 'ayuda:pendientes-cerrar') {
     $estado = 'cubierta';
     foreach (array_slice($argv, 2) as $arg) {
@@ -407,5 +429,6 @@ fwrite(STDOUT, "Uso:\n"
     . "  php bin/console.php cuentas:purga-bajas-centro\n"
     . "  php bin/console.php sg:reparar-traspasos [--centro=CODIGO] [--execute]\n"
     . "  php bin/console.php ayuda:pendientes-export [--formato=md|json]\n"
+    . "  php bin/console.php ayuda:pendientes-reintentar\n"
     . "  php bin/console.php ayuda:pendientes-cerrar [--estado=cubierta|descartada]\n");
 exit(1);

@@ -107,7 +107,9 @@ Todo en `ayuda_consultas` (migración `0029_ayuda_ia.sql`):
   reutilización. La valoración localiza la consulta por la huella (pregunta +
   versión del manual + ámbito), no por id.
 - **Repaso:** `ayuda_consultas.repaso` (`nueva`, `cubierta`, `descartada`). Las
-  cerradas desde `/admin/ayuda` dejan de listarse y exportarse.
+  cerradas desde `/admin/ayuda` dejan de listarse y exportarse. En cada
+  despliegue, `ayuda:pendientes-reintentar` (`ReintentarPreguntasAyudaPendientes`)
+  vuelve a preguntar las «sin respuesta» y cierra las que el manual nuevo contesta.
 
 Solo se guardan las consultas que han llegado al modelo. Las respuestas
 reutilizadas no cuentan para el límite. Cada fila guarda también `ambito`

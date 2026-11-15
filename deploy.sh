@@ -171,4 +171,11 @@ log "Reinicio $PHP_SERVICE (opcache)"
 compose restart "$PHP_SERVICE"
 
 trap - ERR
+
+# Con el manual nuevo, la ayuda vuelve a probar las preguntas que se quedaron sin
+# respuesta y cierra las que ahora contesta. Si falla (sin clave, IA caida) no
+# afecta al despliegue: las preguntas siguen pendientes.
+log "ayuda:pendientes-reintentar"
+en_php php bin/console.php ayuda:pendientes-reintentar || log "Aviso: no se pudieron reintentar las preguntas pendientes de la ayuda"
+
 log "Listo: $DESTINO"

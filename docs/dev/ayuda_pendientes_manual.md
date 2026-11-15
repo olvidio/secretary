@@ -28,7 +28,8 @@ Cada export incluye la pregunta literal, el motivo, **quién la hizo** (alias, c
 2. **Dejarlo en local** en `var/ayuda/` (p. ej. `var/ayuda/ayuda-pendientes-20261115-101500.md`). La carpeta está en `.gitignore`: el fichero lleva correos de usuarios y **no debe subirse al repositorio**.
 3. **Repasar:** para cada pregunta, editar o crear ficheros en `docs/manual/` con lenguaje de usuario final. Si hay rutas nuevas, `ManualCubrePantallasTest`.
 4. **Desplegar.** Al cambiar el manual, `DocumentacionEnDisco::version()` cambia y las respuestas guardadas dejan de reutilizarse.
-5. **Cerrar en producción:** en `/admin/ayuda`, **Cubierta** (el manual ya lo explica) o **Descartada** (no procede) en cada fila, o **Marcar todas como cubiertas**. Las cerradas no vuelven a exportarse.
+5. **El despliegue cierra solo lo que ya está cubierto.** `deploy.sh`, después de `db:migrate` y del reinicio, ejecuta `ayuda:pendientes-reintentar`: vuelve a hacer a la IA cada pregunta «sin respuesta» con el manual recién desplegado, en los ámbitos desde los que se preguntó. Si ahora la contesta (o ya sabe pedir que se concrete), la cierra como **cubierta**; si no, sigue pendiente. Esas consultas no se registran ni cuentan para el límite diario. Si no hay clave o la IA falla, el despliegue sigue y no se cierra nada.
+6. **Lo que queda a mano** en `/admin/ayuda`: las de motivo **No sirvió** (solo una persona puede juzgar si la respuesta nueva es mejor) y las que se quieran **descartar**. Botones **Cubierta** / **Descartada** en cada fila, o **Marcar todas como cubiertas**. Las cerradas no vuelven a exportarse.
 
 Una pregunta cerrada reaparece sola si alguien vuelve a hacerla y sigue sin respuesta, o si recibe otro «No»: es la señal de que el manual todavía no la cubre.
 
@@ -37,7 +38,8 @@ Una pregunta cerrada reaparece sola si alguien vuelve a hacerla y sigue sin resp
 ```bash
 php bin/console.php ayuda:pendientes-export --formato=md > var/ayuda/pendientes.md
 php bin/console.php ayuda:pendientes-export --formato=json > var/ayuda/pendientes.json
-php bin/console.php ayuda:pendientes-cerrar --estado=cubierta   # o descartada; cierra todas las pendientes
+php bin/console.php ayuda:pendientes-reintentar                # vuelve a preguntar a la IA y cierra las que ya contesta
+php bin/console.php ayuda:pendientes-cerrar --estado=cubierta   # o descartada; cierra todas las pendientes sin comprobar
 ```
 
 ## 3. Documentación relacionada
