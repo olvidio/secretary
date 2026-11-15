@@ -30,11 +30,12 @@ En el libro P, las cifras se pueden generar primero en **Previsión personal** (
 - Una casilla vacía cuenta como cero.
 - Lo que se teclea es el importe anual, en euros enteros: si se escribe con decimales, se redondea al euro más cercano. Se admite coma o punto.
 - P y G son independientes: guardar uno no toca el otro.
+- **Llevarse el presupuesto a una hoja de cálculo**: seleccionar la tabla con el ratón (o parte de ella), copiar (Ctrl+C) y pegar en la hoja de cálculo. Se copian también las cifras de las celdas azules, tal como están en pantalla aunque no se hayan guardado.
 - En P, «Aplicar al presupuesto P» desde Previsión solo actualiza las líneas del 613 P; el resto de conceptos de esta lista se deja como está.
 
 ## Problemas frecuentes
 
-- **No deja copiar y pegar el presupuesto desde otra hoja de cálculo**: no se puede pegar un bloque de celdas; cada casilla se teclea. En el libro P se evita teclear generando las cifras en Previsión y pulsando «Aplicar al presupuesto P».
+- **No deja pegar el presupuesto desde otra hoja de cálculo**: no se puede pegar un bloque de celdas; cada casilla se teclea. En el libro P se evita teclear generando las cifras en Previsión y pulsando «Aplicar al presupuesto P».
 - **«La cantidad debe ser numérica»**: alguna casilla lleva texto o un símbolo que no se entiende. Dejarla vacía o escribir solo el número.
 - **El 613 no cuadra con lo presupuestado**: recordar que el previsto se prorratea por los meses transcurridos, así que a mitad de ejercicio no aparece la cifra anual completa.
 

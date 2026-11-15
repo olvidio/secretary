@@ -411,6 +411,63 @@ function vigilarFechasEs() {
   }).observe(document.body, { childList: true, subtree: true });
 }
 
+/**
+ * Lo seleccionado, listo para el portapapeles, con el valor de las casillas
+ * editables de las tablas (las celdas azules del presupuesto). El navegador, al
+ * copiar, se salta el contenido de los <input>: sin esto la hoja pegada en una
+ * hoja de cálculo sale con esas celdas vacías. Devuelve null si en la selección
+ * no hay ninguna casilla de tabla (se deja copiar al navegador).
+ */
+function seleccionConCasillas(sel) {
+  if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+  const caja = document.createElement('div');
+  for (let i = 0; i < sel.rangeCount; i++) {
+    const trozo = sel.getRangeAt(i).cloneContents();
+    // Una selección dentro de una tabla llega como filas o celdas sueltas: se les devuelve la tabla.
+    const primero = trozo.firstElementChild;
+    if (primero && /^(TR|TBODY|THEAD|TFOOT)$/.test(primero.tagName)) {
+      const tabla = document.createElement('table');
+      tabla.appendChild(trozo);
+      caja.appendChild(tabla);
+    } else if (primero && /^(TD|TH)$/.test(primero.tagName)) {
+      const tabla = document.createElement('table');
+      tabla.appendChild(document.createElement('tr')).appendChild(trozo);
+      caja.appendChild(tabla);
+    } else {
+      caja.appendChild(trozo);
+    }
+  }
+  const casillas = caja.querySelectorAll('td input, th input, td select, td textarea');
+  if (!casillas.length) return null;
+  casillas.forEach((c) => {
+    if (c.type === 'hidden' || c.type === 'checkbox' || c.type === 'radio' || c.type === 'file') return;
+    const texto = c.tagName === 'SELECT' ? (c.selectedOptions[0]?.textContent ?? '') : c.value;
+    c.replaceWith(document.createTextNode(texto));
+  });
+  // Columnas que solo separan (sin contenido): al pegar serían columnas vacías.
+  caja.querySelectorAll('td[aria-hidden="true"], th[aria-hidden="true"]').forEach((c) => c.remove());
+  caja.querySelectorAll('script, style, button').forEach((c) => c.remove());
+  // innerText necesita que el nodo esté en la página para dar tabuladores y saltos de línea de tabla.
+  caja.style.cssText = 'position:fixed;left:-99999px;top:0;white-space:pre;';
+  document.body.appendChild(caja);
+  const texto = caja.innerText;
+  caja.removeAttribute('style');
+  const html = caja.innerHTML;
+  caja.remove();
+  return { texto, html };
+}
+
+document.addEventListener('copy', (ev) => {
+  // Texto seleccionado dentro de una casilla: copia normal del navegador.
+  const activo = document.activeElement;
+  if (activo && /^(INPUT|TEXTAREA)$/.test(activo.tagName) && activo.selectionStart !== activo.selectionEnd) return;
+  const datos = seleccionConCasillas(window.getSelection());
+  if (!datos || !ev.clipboardData) return;
+  ev.clipboardData.setData('text/plain', datos.texto);
+  ev.clipboardData.setData('text/html', datos.html);
+  ev.preventDefault();
+});
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     vigilarFechasEs();
