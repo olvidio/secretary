@@ -10,6 +10,8 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.42] — 2026-11-15
+
 ### Añadido
 - **Ayuda · pide que se concrete**: si la pregunta es demasiado general o solo describe un problema, la ayuda pregunta lo que necesita saber en lugar de contestar «eso no está en el manual», y responde con lo que se le diga a continuación.
 - **Importar extracto · formato propio**: además de los bancos admitidos, se puede subir un CSV o Excel preparado a mano con tres columnas (Fecha, Concepto e Importe). Sirve para bancos que el programa no reconoce. Hay una plantilla para descargar en las instrucciones de importar.
@@ -18,6 +20,7 @@ falta en cada push.
 - **Ver la contraseña**: en el login, el registro y al restablecer la contraseña, cada campo de contraseña lleva un ojo para mostrarla u ocultarla mientras se escribe.
 
 ### Corregido
+- **Copiar tablas con celdas editables**: al seleccionar y copiar una tabla (por ejemplo el presupuesto) para pegarla en una hoja de cálculo, ahora se copian también las cifras de las celdas azules; antes salían vacías.
 - **Configuración · sigla**: en los centros n, guardar la sigla cambiaba la de todos los centros. Ahora cada centro guarda la suya, y el presupuesto 613 muestra la del centro en el que se trabaja.
 
 ## [0.1.41] — 2026-11-13
