@@ -24,7 +24,7 @@
     <a href="/yo/remanente"><?= _("Cambiar") ?></a></p>
 <p><?= _("Neto del mes") ?>: <strong id="yo-remesa-neto">0,00</strong>
     <span class="muted" id="yo-remesa-periodo"></span></p>
-<p><?= _("Disponible que se envía") ?>: <strong id="yo-remesa-disponible">0,00</strong></p>
+<p><?= _("Me queda para enviar") ?>: <strong id="yo-remesa-disponible">0,00</strong></p>
 <p>
     <button type="button" id="yo-remesa-enviar"><?= _("Cerrar y enviar mes") ?></button>
 </p>
