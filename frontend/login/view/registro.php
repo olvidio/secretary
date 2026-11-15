@@ -62,8 +62,18 @@ $esOrganizacion = $esCentro || $esClub || $esCentroSg || $esFundacion;
     <label><?= _("Alias") ?> <input name="usuario" required autofocus autocomplete="username" pattern="[a-zA-Z][a-zA-Z0-9._-]{1,31}" title="<?= htmlspecialchars(_("Letra inicial y 2-32 caracteres"), ENT_QUOTES) ?>" value="<?= htmlspecialchars((string) ($usuario ?? ''), ENT_QUOTES) ?>"></label>
     <label><?= _("Correo") ?> <input type="email" name="email" required autocomplete="email" value="<?= htmlspecialchars((string) ($email ?? ''), ENT_QUOTES) ?>"></label>
     <label><?= _("Nombre") ?> <input name="nombre" autocomplete="name" value="<?= htmlspecialchars((string) ($nombre ?? ''), ENT_QUOTES) ?>"></label>
-    <label><?= _("Contraseña") ?> <input type="password" name="password" required minlength="6" autocomplete="new-password"></label>
-    <label><?= _("Repetir contraseña") ?> <input type="password" name="password_confirm" required minlength="6" autocomplete="new-password"></label>
+    <label><?= _("Contraseña") ?>
+        <span class="campo-clave">
+            <input type="password" name="password" required minlength="6" autocomplete="new-password">
+            <?php include dirname(__DIR__, 2) . '/shared/view/_ver_clave.php'; ?>
+        </span>
+    </label>
+    <label><?= _("Repetir contraseña") ?>
+        <span class="campo-clave">
+            <input type="password" name="password_confirm" required minlength="6" autocomplete="new-password">
+            <?php include dirname(__DIR__, 2) . '/shared/view/_ver_clave.php'; ?>
+        </span>
+    </label>
     <label class="inline casilla-legal">
         <input type="checkbox" name="acepto_condiciones" value="1" required>
         <span>
@@ -79,6 +89,7 @@ $esOrganizacion = $esCentro || $esClub || $esCentroSg || $esFundacion;
     <p class="login-alt"><a href="/login"><?= _("Volver a entrar") ?></a></p>
     <?php include dirname(__DIR__, 2) . '/shared/view/_pie_legal.php'; ?>
 </form>
+<script src="/js/ver_clave.js"></script>
 <script>
 document.querySelectorAll('[name=tipo_cuenta]').forEach((r) => {
   r.addEventListener('change', () => {

@@ -16,12 +16,23 @@
     <p class="muted"><?= htmlspecialchars(sprintf(_("Va a cambiar la contraseña de %s."), (string) ($etiqueta ?? '')), ENT_QUOTES) ?></p>
     <input type="hidden" name="_csrf" value="<?= htmlspecialchars((string) ($csrf ?? ''), ENT_QUOTES) ?>">
     <input type="hidden" name="token" value="<?= htmlspecialchars((string) ($token ?? ''), ENT_QUOTES) ?>">
-    <label><?= _("Contraseña nueva") ?> <input type="password" name="password" required minlength="6" autofocus autocomplete="new-password"></label>
-    <label><?= _("Repetir contraseña") ?> <input type="password" name="password_confirm" required minlength="6" autocomplete="new-password"></label>
+    <label><?= _("Contraseña nueva") ?>
+        <span class="campo-clave">
+            <input type="password" name="password" required minlength="6" autofocus autocomplete="new-password">
+            <?php include dirname(__DIR__, 2) . '/shared/view/_ver_clave.php'; ?>
+        </span>
+    </label>
+    <label><?= _("Repetir contraseña") ?>
+        <span class="campo-clave">
+            <input type="password" name="password_confirm" required minlength="6" autocomplete="new-password">
+            <?php include dirname(__DIR__, 2) . '/shared/view/_ver_clave.php'; ?>
+        </span>
+    </label>
     <button type="submit"><?= _("Guardar contraseña") ?></button>
     <p class="login-alt"><a href="/login"><?= _("Volver a entrar") ?></a></p>
     <?php include dirname(__DIR__, 2) . '/shared/view/_pie_legal.php'; ?>
 </form>
+<script src="/js/ver_clave.js"></script>
 <?php else: ?>
 <div class="login-box">
     <h1><?= _("Enlace no válido") ?></h1>

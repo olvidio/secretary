@@ -10,6 +10,9 @@ falta en cada push.
 
 ## [Unreleased]
 
+### Añadido
+- **Ver la contraseña**: en el login, el registro y al restablecer la contraseña, cada campo de contraseña lleva un ojo para mostrarla u ocultarla mientras se escribe.
+
 ### Corregido
 - **Configuración · sigla**: en los centros n, guardar la sigla cambiaba la de todos los centros. Ahora cada centro guarda la suya, y el presupuesto 613 muestra la del centro en el que se trabaja.
 

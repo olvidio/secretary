@@ -418,6 +418,15 @@ p.peligro { color: var(--err); }
 .login { display: grid; place-items: center; min-height: 100vh; padding: 1rem; }
 .login-box { background: #fff; padding: 2rem; border: 1px solid var(--line); width: min(28rem, calc(100vw - 2rem)); display: grid; gap: .8rem; }
 .login-box input, .login-box select, .login-box button { width: 100%; }
+.campo-clave { position: relative; display: block; }
+.campo-clave input { width: 100%; padding-right: 2.4rem; }
+.login-box .campo-clave .ver-clave {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 2.4rem; padding: 0;
+  display: grid; place-items: center; background: transparent; color: #4a5568; border-radius: 0 4px 4px 0;
+}
+.login-box .campo-clave .ver-clave:hover { color: var(--navy); }
+.campo-clave .ver-clave .ojo-tachado, .campo-clave .ver-clave[aria-pressed="true"] .ojo-abierto { display: none; }
+.campo-clave .ver-clave[aria-pressed="true"] .ojo-tachado { display: block; }
 .login-box fieldset.registro-tipo { border: 0; padding: 0; margin: 0; display: grid; gap: .4rem; }
 .login-box fieldset.registro-tipo legend { font-weight: 600; margin-bottom: .2rem; }
 .login-box label.inline { display: flex; flex-direction: row; align-items: flex-start; gap: .4rem; }

@@ -17,7 +17,12 @@
     <?php endif; ?>
     <input type="hidden" name="_csrf" value="<?= htmlspecialchars((string) ($csrf ?? ''), ENT_QUOTES) ?>">
     <label><?= _("Alias o correo") ?> <input name="usuario" required autofocus autocomplete="username" value="<?= htmlspecialchars((string) ($usuario ?? ''), ENT_QUOTES) ?>"></label>
-    <label><?= _("Contraseña") ?> <input type="password" name="password" required autocomplete="current-password"></label>
+    <label><?= _("Contraseña") ?>
+        <span class="campo-clave">
+            <input type="password" name="password" required autocomplete="current-password">
+            <?php include dirname(__DIR__, 2) . '/shared/view/_ver_clave.php'; ?>
+        </span>
+    </label>
     <button type="submit"><?= _("Entrar") ?></button>
     <p class="login-alt">
         <a href="/olvide-contrasena" id="ir-olvide"><?= _("Olvidé la contraseña") ?></a>
@@ -26,6 +31,7 @@
     </p>
     <?php include dirname(__DIR__, 2) . '/shared/view/_pie_legal.php'; ?>
 </form>
+<script src="/js/ver_clave.js"></script>
 <script>
 function irConUsuario(base, ev) {
   const u = document.querySelector('input[name="usuario"]')?.value?.trim();
