@@ -670,12 +670,23 @@ td.superavit-viv { font-weight: 600; }
 #tabla-apuntes .apuntes-dia-sug { display: block; margin-top: .25rem; font-weight: normal; }
 #tabla-apuntes .apuntes-dia-sug button { margin-left: .35rem; padding: .15rem .45rem; font-size: .85rem; }
 /* Ayuda: ventana de preguntas contestadas con el manual */
+.ayuda-flotante {
+  position: fixed; right: 1rem; bottom: 1rem; z-index: 800;
+  width: 2.5rem; height: 2.5rem; border-radius: 50%;
+  display: grid; place-items: center;
+  background: #fff; color: var(--navy); border: 1px solid var(--navy);
+  font: 700 1.25rem/1 system-ui, sans-serif; text-decoration: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .3);
+}
+.ayuda-flotante:hover, .ayuda-flotante:focus-visible { background: var(--navy); color: #fff; }
+@media print { .ayuda-flotante { display: none; } }
 .ayuda-intro { max-width: 70ch; }
 .ayuda-preguntar { display: flex; gap: .75rem; align-items: flex-end; max-width: 70ch; margin-bottom: 1rem; }
 .ayuda-campo { flex: 1; }
 .ayuda-campo textarea { width: 100%; resize: vertical; font: inherit; padding: .4rem; }
 .ayuda-hilo { max-width: 70ch; display: grid; gap: .75rem; }
 .ayuda-turno { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: .75rem 1rem; }
+.ayuda-turno.ayuda-aclaracion { border-color: var(--navy-2); background: #f5f9ff; }
 .ayuda-turno.ayuda-sin-respuesta { border-color: #f6c9c9; background: #fffafa; }
 .ayuda-pregunta { margin: 0 0 .5rem; font-weight: 600; }
 .ayuda-respuesta p { margin: 0 0 .5rem; }
@@ -683,6 +694,15 @@ td.superavit-viv { font-weight: 600; }
 .ayuda-fuentes { font-size: .82rem; color: #4a5568; }
 .ayuda-fuente { display: inline-block; background: #edf2f7; border-radius: 3px; padding: .1rem .4rem; margin-left: .25rem; }
 .ayuda-nota { font-size: .8rem; }
+.ayuda-valorar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .5rem; margin-top: .6rem; padding-top: .5rem; border-top: 1px solid var(--line); font-size: .85rem; }
+.ayuda-valorar button { background: #fff; color: var(--navy); border: 1px solid var(--navy); padding: .15rem .7rem; }
+.ayuda-valorar button:hover { background: var(--navy); color: #fff; }
+.ayuda-valorar-comentario { flex: 1 1 16rem; }
+.ayuda-valorar-comentario textarea { width: 100%; resize: vertical; }
+.admin-ayuda-detalle { margin-top: .3rem; font-size: .85rem; color: #4a5568; }
+.admin-ayuda-comentario { margin: .3rem 0 0; font-size: .85rem; font-style: italic; }
+.admin-ayuda-cerrar { white-space: nowrap; }
+.admin-ayuda-cerrar button { font-size: .8rem; padding: .15rem .45rem; }
 .ayuda-indice { max-width: 70ch; margin-top: 1.25rem; }
 .ayuda-temas { list-style: none; padding: 0; margin: .5rem 0 0; display: flex; flex-wrap: wrap; gap: .35rem; }
 .ayuda-tema { background: #fff; border: 1px solid var(--line); border-radius: 3px; padding: .2rem .5rem; cursor: pointer; font: inherit; }

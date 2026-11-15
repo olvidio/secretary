@@ -134,6 +134,17 @@ final class FusionarIdentidadesLegacy
         $this->pdo->prepare(
             'UPDATE ayuda_consultas SET identidad_id = :p WHERE identidad_id = :s'
         )->execute([':p' => $principalId, ':s' => $secundariaId]);
+
+        // Una valoración por persona y respuesta: si las dos votaron, queda la de la principal.
+        $this->pdo->prepare(
+            'DELETE FROM ayuda_valoraciones s
+              WHERE s.identidad_id = :s
+                AND EXISTS (SELECT 1 FROM ayuda_valoraciones p
+                             WHERE p.consulta_id = s.consulta_id AND p.identidad_id = :p)'
+        )->execute([':p' => $principalId, ':s' => $secundariaId]);
+        $this->pdo->prepare(
+            'UPDATE ayuda_valoraciones SET identidad_id = :p WHERE identidad_id = :s'
+        )->execute([':p' => $principalId, ':s' => $secundariaId]);
     }
 
     private function fusionarTotp(int $principalId, int $secundariaId): void

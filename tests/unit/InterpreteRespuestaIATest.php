@@ -78,4 +78,32 @@ final class InterpreteRespuestaIATest extends TestCase
 
         self::assertSame(['apuntes'], $respuesta->fuentes);
     }
+
+    public function testAclararEsUnaPeticionDeMasDatosConFuentes(): void
+    {
+        $r = (new InterpreteRespuestaIA())->interpretar(
+            "**ACLARAR:** ¿Es en la caja o en el banco?\nFUENTES: arqueo",
+            ['arqueo'],
+        );
+
+        self::assertTrue($r->aclaracion);
+        self::assertTrue($r->resuelta);
+        self::assertSame('¿Es en la caja o en el banco?', $r->texto);
+        self::assertSame(['arqueo'], $r->fuentes);
+    }
+
+    public function testAclararSinFuentesValidasSigueSiendoSinRespuesta(): void
+    {
+        $r = (new InterpreteRespuestaIA())->interpretar("ACLARAR: ¿Qué quiere decir?\nFUENTES: inventada", ['arqueo']);
+
+        self::assertFalse($r->resuelta);
+        self::assertFalse($r->aclaracion);
+    }
+
+    public function testUnaRespuestaNormalNoEsAclaracion(): void
+    {
+        $r = (new InterpreteRespuestaIA())->interpretar("Para aclarar el saldo, vaya a Arqueo.\nFUENTES: arqueo", ['arqueo']);
+
+        self::assertFalse($r->aclaracion);
+    }
 }

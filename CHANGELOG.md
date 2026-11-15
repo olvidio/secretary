@@ -11,6 +11,10 @@ falta en cada push.
 ## [Unreleased]
 
 ### Añadido
+- **Ayuda · pide que se concrete**: si la pregunta es demasiado general o solo describe un problema, la ayuda pregunta lo que necesita saber en lugar de contestar «eso no está en el manual», y responde con lo que se le diga a continuación.
+- **Importar extracto · formato propio**: además de los bancos admitidos, se puede subir un CSV o Excel preparado a mano con tres columnas (Fecha, Concepto e Importe). Sirve para bancos que el programa no reconoce. Hay una plantilla para descargar en las instrucciones de importar.
+- **Ayuda · «¿Le ha servido?»**: bajo cada respuesta de la ayuda se puede marcar Sí o No; con No se puede escribir qué se esperaba encontrar. Sirve para ampliar el manual donde se queda corto.
+- **Ayuda · botón «?»**: en las pantallas del centro hay un interrogante en un círculo, abajo a la derecha, que lleva a la ayuda. En Mis cuentas no aparece, para no estorbar en el móvil.
 - **Ver la contraseña**: en el login, el registro y al restablecer la contraseña, cada campo de contraseña lleva un ojo para mostrarla u ocultarla mientras se escribe.
 
 ### Corregido

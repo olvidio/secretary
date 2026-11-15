@@ -18,3 +18,4 @@
 /build/
 .phpunit.cache
 /tools/i18n/.venv/
+/var/ayuda/

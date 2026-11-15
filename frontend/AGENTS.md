@@ -14,6 +14,7 @@ frontend/shared/
   view/layout_burger.php         # menú hamburguesa (categorías a la izquierda)
   view/layout_yo.php             # nivel 1 (persona)
   view/_menu_usuario.php         # desplegable del nombre (preferencias de cuenta)
+  view/_ayuda_flotante.php       # «?» fijo abajo a la derecha → /ayuda (solo layouts del centro, no /yo)
 frontend/acceso/view/cuenta_*.php  # Mail, Contraseña, 2FA, Layout, Idioma, Centro, Tipo
 public/
   css/app.css

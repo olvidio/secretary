@@ -375,6 +375,24 @@ if ($cmd === 'ayuda:pendientes-export') {
     exit(0);
 }
 
+if ($cmd === 'ayuda:pendientes-cerrar') {
+    $estado = 'cubierta';
+    foreach (array_slice($argv, 2) as $arg) {
+        if (is_string($arg) && str_starts_with($arg, '--estado=')) {
+            $estado = substr($arg, strlen('--estado='));
+        }
+    }
+    $caso = $kernel->container()->get(\src\ayuda\application\RepasarPreguntasAyuda::class);
+    try {
+        $n = $caso->todas($estado);
+    } catch (\InvalidArgumentException $e) {
+        fwrite(STDERR, $e->getMessage() . "\n");
+        exit(1);
+    }
+    fwrite(STDOUT, "Consultas cerradas como {$estado}: {$n}\n");
+    exit(0);
+}
+
 fwrite(STDOUT, "Uso:\n"
     . "  php bin/console.php db:migrate\n"
     . "  php bin/console.php db:status\n"
@@ -388,5 +406,6 @@ fwrite(STDOUT, "Uso:\n"
     . "  php bin/console.php cuentas:fusionar-correo --email=... --principal=ID [--confirmar]\n"
     . "  php bin/console.php cuentas:purga-bajas-centro\n"
     . "  php bin/console.php sg:reparar-traspasos [--centro=CODIGO] [--execute]\n"
-    . "  php bin/console.php ayuda:pendientes-export [--formato=md|json]\n");
+    . "  php bin/console.php ayuda:pendientes-export [--formato=md|json]\n"
+    . "  php bin/console.php ayuda:pendientes-cerrar [--estado=cubierta|descartada]\n");
 exit(1);

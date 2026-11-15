@@ -34,6 +34,7 @@ En el libro P, las cifras se pueden generar primero en **Previsión personal** (
 
 ## Problemas frecuentes
 
+- **No deja copiar y pegar el presupuesto desde otra hoja de cálculo**: no se puede pegar un bloque de celdas; cada casilla se teclea. En el libro P se evita teclear generando las cifras en Previsión y pulsando «Aplicar al presupuesto P».
 - **«La cantidad debe ser numérica»**: alguna casilla lleva texto o un símbolo que no se entiende. Dejarla vacía o escribir solo el número.
 - **El 613 no cuadra con lo presupuestado**: recordar que el previsto se prorratea por los meses transcurridos, así que a mitad de ejercicio no aparece la cifra anual completa.
 

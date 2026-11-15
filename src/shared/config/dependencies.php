@@ -95,7 +95,9 @@ use src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository;
 use src\arqueo\application\BuscarCapuchinos;
 use src\ayuda\application\ListarPreguntasAyudaPendientes;
 use src\ayuda\application\ListarTemasAyuda;
+use src\ayuda\application\RepasarPreguntasAyuda;
 use src\ayuda\application\ResponderPreguntaAyuda;
+use src\ayuda\application\ValorarRespuestaAyuda;
 use src\ayuda\domain\contracts\RegistroConsultasAyuda;
 use src\ayuda\domain\contracts\RepositorioDocumentacion;
 use src\ayuda\domain\services\BuscadorDocumentacion;
@@ -566,6 +568,8 @@ return [
     AdminLegalController::class => autowire(),
     AdminAyudaController::class => autowire(),
     ListarPreguntasAyudaPendientes::class => autowire(),
+    RepasarPreguntasAyuda::class => autowire(),
+    ValorarRespuestaAyuda::class => autowire(),
     FormateadorPreguntasAyudaPendientes::class => autowire(),
     EstadisticasSg::class => autowire(PdoEstadisticasSg::class),
     RealizadoPorConceptoCentroSg::class => autowire(),

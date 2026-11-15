@@ -33,6 +33,7 @@ En **Arqueo Caja** se cuenta el efectivo y se compara con la contabilidad (bille
 ## Problemas frecuentes
 
 - **La diferencia no es cero**: volver a contar y revisar los apuntes de caja del mes.
+- **Sale una diferencia grande** (cientos o miles de euros): no suele ser un error de recuento, sino de apuntes. Repasar, por este orden: que la **Caja física** (o la cuenta de banco) elegida sea la que se ha contado; que la **Fecha** sea la del recuento, porque el saldo contable solo cuenta los apuntes hasta ese día; que los apuntes lleven la procedencia correcta (**B** si el dinero pasó por el banco, **C** si pasó por la caja, **A** si no tocó ninguno de los dos): un apunte de banco anotado como caja descuadra los dos; que los movimientos entre banco y caja estén anotados como traspaso (conceptos 41 y 42) y no falte ninguno; y, en **Saldo banco**, que no queden movimientos del extracto sin importar o sin asignar. Guardar el arqueo no corrige nada: la diferencia desaparece al corregir los apuntes.
 - **No aparece Buscar capuchinos**: solo sale si la diferencia no es cero y es múltiplo de nueve.
 - **«Ningún apunte de caja encaja»**: no hay ninguno cuyas cifras invertidas cuadren. Puede haber dos errores a la vez, o ser un apunte posterior a la fecha indicada.
 

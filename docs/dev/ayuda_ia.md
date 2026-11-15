@@ -52,6 +52,21 @@ válida**. Una respuesta inventada no suele poder citar un documento existente,
 así que acaba en «eso no está en el manual». No es una garantía absoluta —
 ningún prompt lo es— pero nada llega al usuario sin respaldo declarado.
 
+## Preguntas vagas: pedir aclaración
+
+Si el usuario cuenta un problema sin decir qué quiere saber («en arqueo sale una
+diferencia de 8000») y el manual trata el tema, el modelo no contesta
+`SIN_RESPUESTA`: empieza por `ACLARAR:` y hace una o dos preguntas. El
+intérprete quita la marca y devuelve `RespuestaAyuda::aclaracion = true`
+(columna `ayuda_consultas.aclaracion`, migración `0097`); sigue exigiendo
+fuentes válidas, así que no puede pedir aclaraciones sobre temas que no están.
+
+La pantalla guarda esa pregunta y la aclaración, y con el siguiente envío manda
+`pregunta_anterior` y `aclaracion_pedida`. El modelo no tiene memoria: la
+conversación viaja entera en el mensaje (`mensajeDeSeguimiento`). La consulta
+se registra y se huella como «pregunta anterior ⟶ respuesta». En un seguimiento
+ya no se admite otra aclaración: lo que conteste el modelo es la respuesta.
+
 ## Proveedor
 
 `ClienteChatCompatibleOpenAI` habla el formato *chat completions* de OpenAI,
@@ -85,6 +100,14 @@ Todo en `ayuda_consultas` (migración `0029_ayuda_ia.sql`):
   de tareas del manual. Se exportan desde **Administración → Manual / ayuda**
   (`/admin/ayuda`) en Markdown o JSON. Flujo completo:
   `docs/dev/ayuda_pendientes_manual.md`.
+- **Valoración:** bajo cada respuesta de la IA, «¿Le ha servido? Sí / No»
+  (`POST /api/ayuda/valorar`, tabla `ayuda_valoraciones`, migración
+  `0096_ayuda_valoracion_repaso.sql`). Un «No», con comentario opcional, mete
+  la pregunta en la misma lista de tareas y saca la respuesta de la
+  reutilización. La valoración localiza la consulta por la huella (pregunta +
+  versión del manual + ámbito), no por id.
+- **Repaso:** `ayuda_consultas.repaso` (`nueva`, `cubierta`, `descartada`). Las
+  cerradas desde `/admin/ayuda` dejan de listarse y exportarse.
 
 Solo se guardan las consultas que han llegado al modelo. Las respuestas
 reutilizadas no cuentan para el límite. Cada fila guarda también `ambito`

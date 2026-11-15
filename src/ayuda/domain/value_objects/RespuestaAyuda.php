@@ -15,6 +15,8 @@ final class RespuestaAyuda
         public readonly array $fuentes,
         public readonly OrigenRespuesta $origen,
         public readonly bool $resuelta = true,
+        /** La ayuda no contesta todavía: pide al usuario que concrete. */
+        public readonly bool $aclaracion = false,
     ) {
     }
 
@@ -23,8 +25,14 @@ final class RespuestaAyuda
         return new self(self::NO_ESTA_EN_EL_MANUAL, [], $origen, false);
     }
 
+    /** La misma respuesta, ya no como petición de aclaración (solo se pregunta una vez). */
+    public function sinAclaracion(): self
+    {
+        return new self($this->texto, $this->fuentes, $this->origen, $this->resuelta, false);
+    }
+
     public function comoCache(): self
     {
-        return new self($this->texto, $this->fuentes, OrigenRespuesta::Cache, $this->resuelta);
+        return new self($this->texto, $this->fuentes, OrigenRespuesta::Cache, $this->resuelta, $this->aclaracion);
     }
 }

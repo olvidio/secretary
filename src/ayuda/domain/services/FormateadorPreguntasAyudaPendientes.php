@@ -37,14 +37,17 @@ final class FormateadorPreguntasAyudaPendientes
             'Exportado: ' . gmdate('Y-m-d H:i:s') . ' UTC',
             'Versión del manual (hash): `' . $versionManual . '`',
             '',
-            'La ayuda con IA solo usa `docs/manual/`. Estas preguntas recibieron la respuesta',
-            '«no está en el manual» (origen `ia`, `resuelta = false`).',
+            'La ayuda con IA solo usa `docs/manual/`. Aquí están las preguntas por repasar:',
             '',
-            '## Cómo procesarlas en local (Cursor)',
+            '- **Sin respuesta:** la ayuda contestó «no está en el manual».',
+            '- **No sirvió:** la ayuda contestó, pero alguien marcó «No» en «¿Le ha servido?».',
             '',
-            '1. Ampliar o crear ficheros en `docs/manual/` (esqueleto: para qué sirve, cómo se usa, reglas, problemas frecuentes).',
-            '2. Añadir línea `- Ruta:` si es una pantalla nueva (`tests/unit/ManualCubrePantallasTest.php`).',
-            '3. Volver a exportar tras desplegar: las preguntas antiguas dejan de coincidir cuando cambia el hash del manual.',
+            '## Cómo procesarlas en local',
+            '',
+            '1. Dejar este fichero en `var/ayuda/` (no se sube al repositorio: lleva correos de usuarios).',
+            '2. Ampliar o crear ficheros en `docs/manual/` (esqueleto: para qué sirve, cómo se usa, reglas, problemas frecuentes).',
+            '3. Añadir línea `- Ruta:` si es una pantalla nueva (`tests/unit/ManualCubrePantallasTest.php`).',
+            '4. Tras desplegar, cerrar las repasadas en Administración → Manual / ayuda (Cubierta o Descartada).',
             '',
         ];
         if ($pendientes === []) {
@@ -60,6 +63,9 @@ final class FormateadorPreguntasAyudaPendientes
             $amb = $p->ambitos !== [] ? implode(', ', $p->ambitos) : '—';
             $lineas[] = '### ' . $n . '. ' . $this->tituloPregunta($p->pregunta);
             $lineas[] = '';
+            $lineas[] = '- **Motivo:** ' . ($p->motivo === PreguntaAyudaPendiente::NO_SIRVIO
+                ? 'no sirvió (' . $p->votosNegativos . ' «No»)'
+                : 'sin respuesta');
             $lineas[] = '- **Consultas:** ' . $p->veces;
             $lineas[] = '- **Primera:** ' . $p->primeraEn;
             $lineas[] = '- **Última:** ' . $p->ultimaEn;
@@ -72,6 +78,21 @@ final class FormateadorPreguntasAyudaPendientes
             $lineas[] = $p->pregunta;
             $lineas[] = '```';
             $lineas[] = '';
+            if ($p->motivo === PreguntaAyudaPendiente::NO_SIRVIO) {
+                $lineas[] = '**Respuesta que no sirvió:**';
+                $lineas[] = '';
+                $lineas[] = '```';
+                $lineas[] = $p->ultimaRespuesta;
+                $lineas[] = '```';
+                $lineas[] = '';
+                $lineas[] = '**Qué esperaban encontrar:**';
+                $lineas[] = '';
+                foreach ($p->comentarios as $c) {
+                    $texto = $c->texto !== '' ? $c->texto : '_(sin comentario)_';
+                    $lineas[] = '- ' . $texto . ' — ' . $c->quien . ', ' . $c->fecha;
+                }
+                $lineas[] = '';
+            }
             $lineas[] = '**Ficheros manual sugeridos:** _(completar al editar)_';
             $lineas[] = '';
             $lineas[] = '- [ ] `docs/manual/....md`';

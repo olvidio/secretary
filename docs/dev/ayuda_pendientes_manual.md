@@ -13,33 +13,32 @@ Al añadir una pantalla (`frontend/shared/config/routes.php`), crear o ampliar e
 
 Tras cambios grandes de producto, repasar manualmente las fichas de las pantallas tocadas: la ayuda **no** lee `docs/dev/`.
 
-## 2. Preguntas que la IA no pudo contestar
+## 2. Preguntas por repasar
 
-Cuando el modelo responde `SIN_RESPUESTA` o no cita fuentes válidas, la consulta se guarda en `ayuda_consultas` con `resuelta = false` y `origen = 'ia'`.
+Hay dos formas de que una pregunta entre en la lista (`ayuda_consultas`, `origen = 'ia'`, `repaso = 'nueva'`):
 
-Cada export incluye la pregunta literal, **quién la hizo** (alias, correo e identificador), cuántas veces la repitió cada persona, fechas, ámbitos (`centro-n`, `persona`, …) y plantilla para indicar qué `docs/manual/*.md` tocar. Sirve también para contestar al usuario mientras el manual no cubre el tema.
+- **Sin respuesta:** el modelo responde `SIN_RESPUESTA` o no cita fuentes válidas (`resuelta = false`).
+- **No sirvió:** el modelo contestó, pero un usuario pulsó **No** en «¿Le ha servido?» (fila en `ayuda_valoraciones` con `util = false`, con comentario opcional). Esa respuesta deja además de reutilizarse: la siguiente persona vuelve a consultar al modelo.
 
-### Exportar desde admin
+Cada export incluye la pregunta literal, el motivo, **quién la hizo** (alias, correo e identificador), cuántas veces la repitió cada persona, fechas, ámbitos (`centro-n`, `persona`, …) y, en las de «no sirvió», la respuesta que se dio y lo que cada usuario esperaba encontrar. Sirve también para contestar al usuario mientras el manual no cubre el tema.
 
-1. Entrar como admin de plataforma.
-2. **Administración → Manual / ayuda** (`/admin/ayuda`).
-3. **Descargar Markdown** (para trabajar en Cursor) o **JSON** (para otras herramientas).
+### Ciclo completo
 
-### Exportar en local (sin navegador)
+1. **Descargar de producción:** entrar como admin de plataforma, **Administración → Manual / ayuda** (`/admin/ayuda`), **Descargar Markdown** (o **JSON**).
+2. **Dejarlo en local** en `var/ayuda/` (p. ej. `var/ayuda/ayuda-pendientes-20261115-101500.md`). La carpeta está en `.gitignore`: el fichero lleva correos de usuarios y **no debe subirse al repositorio**.
+3. **Repasar:** para cada pregunta, editar o crear ficheros en `docs/manual/` con lenguaje de usuario final. Si hay rutas nuevas, `ManualCubrePantallasTest`.
+4. **Desplegar.** Al cambiar el manual, `DocumentacionEnDisco::version()` cambia y las respuestas guardadas dejan de reutilizarse.
+5. **Cerrar en producción:** en `/admin/ayuda`, **Cubierta** (el manual ya lo explica) o **Descartada** (no procede) en cada fila, o **Marcar todas como cubiertas**. Las cerradas no vuelven a exportarse.
+
+Una pregunta cerrada reaparece sola si alguien vuelve a hacerla y sigue sin respuesta, o si recibe otro «No»: es la señal de que el manual todavía no la cubre.
+
+### Sin navegador (en la máquina donde está la base)
 
 ```bash
-php bin/console.php ayuda:pendientes-export --formato=md > docs/dev/ayuda-pendientes-export.md
-php bin/console.php ayuda:pendientes-export --formato=json > /tmp/ayuda-pendientes.json
+php bin/console.php ayuda:pendientes-export --formato=md > var/ayuda/pendientes.md
+php bin/console.php ayuda:pendientes-export --formato=json > var/ayuda/pendientes.json
+php bin/console.php ayuda:pendientes-cerrar --estado=cubierta   # o descartada; cierra todas las pendientes
 ```
-
-### Procesar el Markdown en Cursor
-
-1. Abrir el `.md` exportado en el repo (o pegarlo en el chat).
-2. Para cada pregunta, editar o crear ficheros en `docs/manual/` con lenguaje de usuario final.
-3. Ejecutar de nuevo `ManualCubrePantallasTest` si añadiste rutas.
-4. Desplegar; al cambiar el manual, `DocumentacionEnDisco::version()` cambia y las huellas antiguas dejan de reutilizarse.
-
-Las entradas históricas en la base siguen siendo útiles como registro; nuevas preguntas iguales volverán a pasar por el modelo hasta que el manual las cubra.
 
 ## 3. Documentación relacionada
 

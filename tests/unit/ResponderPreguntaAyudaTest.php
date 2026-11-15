@@ -133,6 +133,38 @@ final class ResponderPreguntaAyudaTest extends TestCase
         self::assertSame(OrigenRespuesta::Ia, $respuesta->origen);
     }
 
+    public function testUnaPreguntaVagaRecibeUnaPeticionDeAclaracion(): void
+    {
+        $proveedor = new ProveedorDeAyudaFalso("ACLARAR: ¿De banco a caja o al revés?\nFUENTES: traspasos");
+
+        $respuesta = $this->caso($proveedor)->ejecutar('me sale mal el traspaso');
+
+        self::assertTrue($respuesta->aclaracion);
+        self::assertSame('¿De banco a caja o al revés?', $respuesta->texto);
+        self::assertStringContainsString('ACLARAR', $proveedor->ultimaInstruccion);
+    }
+
+    public function testLaRespuestaALaAclaracionViajaConLaConversacionYNoVuelveAPreguntar(): void
+    {
+        $registro = new RegistroDeAyudaEnMemoria();
+        $proveedor = new ProveedorDeAyudaFalso("ACLARAR: ¿Y qué importe?\nFUENTES: traspasos");
+
+        $respuesta = $this->caso($proveedor, $registro)->ejecutar(
+            'de banco a caja',
+            null,
+            'es',
+            null,
+            'me sale mal el traspaso',
+            '¿De banco a caja o al revés?',
+        );
+
+        self::assertFalse($respuesta->aclaracion);
+        self::assertStringContainsString('me sale mal el traspaso', $proveedor->ultimaPregunta);
+        self::assertStringContainsString('¿De banco a caja o al revés?', $proveedor->ultimaPregunta);
+        self::assertStringContainsString('de banco a caja', $proveedor->ultimaPregunta);
+        self::assertSame(['me sale mal el traspaso ⟶ de banco a caja'], $registro->preguntasGuardadas);
+    }
+
     public function testLaRespuestaSinRespaldoLlegaComoNoResuelta(): void
     {
         $proveedor = new ProveedorDeAyudaFalso('Pulse el botón Recalcular todo.');
@@ -217,12 +249,23 @@ final class RegistroDeAyudaEnMemoria implements RegistroConsultasAyuda
     {
         return [];
     }
+
+    public function valorar(string $huella, ?int $identidadId, bool $util, string $comentario): bool
+    {
+        return true;
+    }
+
+    public function marcarRepasada(string $pregunta, \src\ayuda\domain\value_objects\EstadoRepasoAyuda $estado): int
+    {
+        return 0;
+    }
 }
 
 final class ProveedorDeAyudaFalso implements ProveedorRespuestaIA
 {
     public int $llamadas = 0;
     public string $ultimaInstruccion = '';
+    public string $ultimaPregunta = '';
 
     public function __construct(
         private readonly string $respuesta = '',
@@ -234,6 +277,7 @@ final class ProveedorDeAyudaFalso implements ProveedorRespuestaIA
     {
         $this->llamadas++;
         $this->ultimaInstruccion = $instruccion;
+        $this->ultimaPregunta = $pregunta;
         if ($this->falla) {
             throw new RuntimeException('proveedor caído');
         }

@@ -10,6 +10,7 @@ use src\ambito\domain\contracts\CentroRepository;
 use src\ambito\domain\services\TipoEntidad;
 use src\ayuda\application\ListarTemasAyuda;
 use src\ayuda\application\ResponderPreguntaAyuda;
+use src\ayuda\application\ValorarRespuestaAyuda;
 use src\ayuda\domain\value_objects\AmbitoManual;
 use src\plan\domain\services\CatalogoPlanesContables;
 use src\shared\infrastructure\http\ContestarJson;
@@ -22,6 +23,7 @@ final class AyudaController
         private readonly ResponderPreguntaAyuda $responder,
         private readonly ListarTemasAyuda $temas,
         private readonly CentroRepository $centros,
+        private readonly ValorarRespuestaAyuda $valorar,
     ) {
     }
 
@@ -43,6 +45,8 @@ final class AyudaController
                 $identidadId,
                 $idioma,
                 $ambito,
+                (string) $request->input('pregunta_anterior', ''),
+                (string) $request->input('aclaracion_pedida', ''),
             );
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
@@ -60,7 +64,30 @@ final class AyudaController
             'fuentes' => $fuentes,
             'origen' => $respuesta->origen->value,
             'resuelta' => $respuesta->resuelta,
+            'aclaracion' => $respuesta->aclaracion,
         ]);
+    }
+
+    /** «¿Le ha servido?»: un «no» (con comentario opcional) apunta la pregunta para repasar el manual. */
+    public function valorar(Request $request, array $vars = []): Response
+    {
+        $identidadId = isset($request->session['identidad_id'])
+            ? (int) $request->session['identidad_id']
+            : null;
+        try {
+            $this->valorar->ejecutar(
+                (string) $request->input('pregunta', ''),
+                filter_var($request->input('util', false), FILTER_VALIDATE_BOOLEAN),
+                (string) $request->input('comentario', ''),
+                $identidadId,
+                $this->ambito($request),
+                (string) $request->input('pregunta_anterior', ''),
+            );
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+
+        return ContestarJson::ok([]);
     }
 
     private function ambito(Request $request): AmbitoManual

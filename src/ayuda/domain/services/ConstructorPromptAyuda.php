@@ -17,6 +17,7 @@ final class ConstructorPromptAyuda
 {
     public const MARCA_SIN_RESPUESTA = 'SIN_RESPUESTA';
     public const MARCA_FUENTES = 'FUENTES';
+    public const MARCA_ACLARAR = 'ACLARAR';
 
     /** @param list<DocumentoAyuda> $documentos */
     public function instruccion(array $documentos, string $idioma = 'es', ?AmbitoManual $ambito = null): string
@@ -34,6 +35,15 @@ final class ConstructorPromptAyuda
             'Reglas:',
             '- Si la respuesta no está en los documentos, responde exactamente '
                 . self::MARCA_SIN_RESPUESTA . ' y nada más.',
+            '- Si el usuario cuenta un problema o nombra un tema sin decir qué quiere saber, o con',
+            '  tan pocos datos que los documentos no permiten decidir la causa (por ejemplo «en arqueo',
+            '  sale una diferencia de 8000»), y los documentos tratan ese tema, NO respondas '
+                . self::MARCA_SIN_RESPUESTA . ':',
+            '  empieza la respuesta con «' . self::MARCA_ACLARAR . ':» y hazle una o dos preguntas concretas, sacadas',
+            '  de lo que los documentos distinguen (qué pantalla, qué caja o banco, qué ha hecho ya…),',
+            '  para poder orientarle. No des todavía la solución. Cita igualmente las ' . self::MARCA_FUENTES . '.',
+            '- Pide aclaración una sola vez: si el mensaje ya trae la conversación previa, contesta',
+            '  con lo que digan los documentos, o ' . self::MARCA_SIN_RESPUESTA . ' si no dicen nada.',
             '- No inventes pantallas, botones, rutas ni campos que no aparezcan en los documentos.',
             '- Responde en ' . self::nombreIdioma($idioma) . ', en tres o cuatro frases como máximo,',
             '  o con una lista corta de pasos. Trata al usuario de usted.',
@@ -50,6 +60,19 @@ final class ConstructorPromptAyuda
         }
 
         return implode("\n", $lineas);
+    }
+
+    /**
+     * Mensaje del usuario cuando responde a una petición de aclaración: el
+     * modelo no guarda memoria, así que la conversación viaja entera.
+     */
+    public function mensajeDeSeguimiento(string $preguntaAnterior, string $aclaracionPedida, string $respuesta): string
+    {
+        return "Conversación previa:\n"
+            . 'El usuario dijo: «' . $preguntaAnterior . "»\n"
+            . 'Usted le pidió que concretase: «' . $aclaracionPedida . "»\n\n"
+            . 'El usuario responde ahora: «' . $respuesta . "»\n\n"
+            . 'Conteste a la consulta completa.';
     }
 
     private static function nombreIdioma(string $idioma): string

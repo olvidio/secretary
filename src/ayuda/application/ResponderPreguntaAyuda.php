@@ -43,8 +43,22 @@ final class ResponderPreguntaAyuda
         ?int $identidadId = null,
         string $idioma = 'es',
         ?AmbitoManual $ambito = null,
+        string $preguntaAnterior = '',
+        string $aclaracionPedida = '',
     ): RespuestaAyuda {
         $pregunta = new PreguntaAyuda($texto);
+        $mensaje = $pregunta->texto;
+        // Respuesta a una petición de aclaración: la consulta es la pregunta de antes más esto.
+        $esSeguimiento = trim($preguntaAnterior) !== '';
+        if ($esSeguimiento) {
+            $anterior = new PreguntaAyuda($preguntaAnterior);
+            $mensaje = $this->constructor->mensajeDeSeguimiento(
+                $anterior->texto,
+                mb_substr(trim($aclaracionPedida), 0, InterpreteRespuestaIA::MAXIMO_TEXTO),
+                $pregunta->texto,
+            );
+            $pregunta = $pregunta->comoSeguimientoDe($anterior);
+        }
         $ambito ??= AmbitoManual::centroN();
         $documentos = (new ManualPorAmbito())->aplicar($this->documentacion->todos(), $ambito);
         if ($documentos === []) {
@@ -62,7 +76,7 @@ final class ResponderPreguntaAyuda
         try {
             $crudo = $this->proveedor->responder(
                 $this->constructor->instruccion($documentos, $idioma, $ambito),
-                $pregunta->texto,
+                $mensaje,
             );
         } catch (RuntimeException $e) {
             $fallback = $this->desdeElManual($documentos, $pregunta);
@@ -73,6 +87,10 @@ final class ResponderPreguntaAyuda
             );
         }
         $respuesta = $this->interprete->interpretar($crudo, $this->claves($documentos));
+        if ($esSeguimiento) {
+            // Solo se pide aclaración una vez: lo que venga ahora es la respuesta.
+            $respuesta = $respuesta->sinAclaracion();
+        }
         $this->registro->guardar(
             $identidadId,
             $pregunta,

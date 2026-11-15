@@ -122,6 +122,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/admin/legal/expediente/{id:\d+}/export', [AdminLegalController::class, 'exportar']);
     $r->addRoute('GET', '/api/admin/ayuda/pendientes', [AdminAyudaController::class, 'listar']);
     $r->addRoute('GET', '/api/admin/ayuda/pendientes/export', [AdminAyudaController::class, 'exportar']);
+    $r->addRoute('POST', '/api/admin/ayuda/pendientes/repasar', [AdminAyudaController::class, 'repasar']);
     $r->addRoute('POST', '/api/centros/vaciar', [CentroController::class, 'vaciar']);
     $r->addRoute('POST', '/api/centros/usuarios', [CentroController::class, 'addUsuario']);
     $r->addRoute('POST', '/api/centros/usuarios/rol', [CentroController::class, 'cambiarRol']);
@@ -284,6 +285,7 @@ return static function (RouteCollector $r): void {
 
     $r->addRoute('GET', '/api/ayuda/temas', [AyudaController::class, 'listarTemas']);
     $r->addRoute('POST', '/api/ayuda/preguntar', [AyudaController::class, 'preguntar']);
+    $r->addRoute('POST', '/api/ayuda/valorar', [AyudaController::class, 'valorar']);
 
     $r->addRoute('GET', '/api/centros/copias', [CopiaCentroController::class, 'list']);
     $r->addRoute('POST', '/api/centros/copias/backup', [CopiaCentroController::class, 'backup']);

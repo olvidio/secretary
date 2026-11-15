@@ -33,7 +33,31 @@ final class InterpreteRespuestaIA
             return RespuestaAyuda::sinRespuesta(OrigenRespuesta::Ia);
         }
 
-        return new RespuestaAyuda(mb_substr($cuerpo, 0, self::MAXIMO_TEXTO), $fuentes, OrigenRespuesta::Ia);
+        [$cuerpo, $aclaracion] = $this->separarAclaracion($cuerpo);
+        if ($cuerpo === '') {
+            return RespuestaAyuda::sinRespuesta(OrigenRespuesta::Ia);
+        }
+
+        return new RespuestaAyuda(
+            mb_substr($cuerpo, 0, self::MAXIMO_TEXTO),
+            $fuentes,
+            OrigenRespuesta::Ia,
+            true,
+            $aclaracion,
+        );
+    }
+
+    /**
+     * «ACLARAR: …» es la ayuda pidiendo más datos en lugar de contestar.
+     *
+     * @return array{0: string, 1: bool}
+     */
+    private function separarAclaracion(string $cuerpo): array
+    {
+        $patron = '/^[\s*_]*' . ConstructorPromptAyuda::MARCA_ACLARAR . '[\s*_]*:[\s*_]*/iu';
+        $sin = preg_replace($patron, '', $cuerpo, 1, $n);
+
+        return $n === 1 && is_string($sin) ? [trim($sin), true] : [$cuerpo, false];
     }
 
     /**
