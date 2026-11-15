@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace src\presupuestos\application;
 
 use src\ambito\application\ResolverAmbitoActual;
+use src\ambito\domain\contracts\CentroRepository;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\informes\domain\services\Calculadora613;
 use src\plan\domain\contracts\PartidaLaboresRepository;
@@ -19,6 +20,7 @@ final class PresentarPresupuesto613P
         private readonly ResolverAmbitoActual $ambito,
         private readonly PartidaLaboresRepository $partidasLabores,
         private readonly ConfiguracionRepository $config,
+        private readonly CentroRepository $centros,
     ) {
     }
 
@@ -91,7 +93,7 @@ final class PresentarPresupuesto613P
         $cfg = $this->config->get();
 
         return [
-            'centro' => $cfg->centro,
+            'centro' => $this->centros->porId($contexto->centroId)?->codigo ?? $cfg->centro,
             'etiqueta_ejercicio' => $etiquetaEjercicio,
             'lineas' => $lineas,
             'partidas_labores' => $codigosLabores,

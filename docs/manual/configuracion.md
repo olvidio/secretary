@@ -6,7 +6,9 @@
 
 ## Común
 
-Guarda la **sigla** del centro (identificador corto, p. ej. sgMontagut o Montagut). **Guardar** muestra «Guardado».
+Guarda la **sigla** del centro (identificador corto, p. ej. sgMontagut o Montagut). **Guardar** muestra «Guardado». Cada centro tiene su propia sigla: cambiarla aquí solo afecta al centro en el que se está trabajando, y no puede coincidir con la de otro centro.
+
+- **«Ya existe un centro con esa sigla»**: otro centro la usa; hay que elegir otra.
 
 El **ejercicio contable** (altas, fechas de inicio y fin, cierre y reapertura) se gestiona en **Plan y ejercicio → Ejercicios**. La **fecha de corte** del mes (hasta dónde hay datos metidos) se cambia en **Cierre y arqueo → Fecha cierre**; no es el fin del ejercicio.
 

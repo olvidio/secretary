@@ -30,9 +30,8 @@ final class ObtenerConfiguracion
                 $out['plan_contable'] = $centro->planContableCodigo;
                 $out['es_club'] = CatalogoPlanesContables::esClub($centro->planContableCodigo);
                 $out['es_centro_sg'] = CatalogoPlanesContables::esCentroSg($centro->planContableCodigo);
-                if ($out['es_club'] || $out['es_centro_sg']) {
-                    $out['centro'] = $centro->codigo;
-                }
+                // La sigla es la del centro activo, no la del singleton legado.
+                $out['centro'] = $centro->codigo;
             }
         } catch (\Throwable) {
             $out['tipo'] = 'n';

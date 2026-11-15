@@ -84,7 +84,7 @@ final class PresentarPresupuesto613G
         };
 
         $cfg = $this->config->get();
-        $centroEtiqueta = $esCentroSg && $centro !== null ? $centro->codigo : $cfg->centro;
+        $centroEtiqueta = $centro !== null ? $centro->codigo : $cfg->centro;
 
         if ($esCentroSg) {
             $ingresos = $sum(['11', '12', '13', '14']);

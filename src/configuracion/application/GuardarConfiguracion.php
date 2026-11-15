@@ -95,20 +95,26 @@ final class GuardarConfiguracion
         if ($this->planes->idPorCodigo($planContable) === null) {
             throw new InvalidArgumentException(_("Plan contable no válido"));
         }
+        // La sigla es de cada centro (`centros.codigo`). El singleton legado
+        // `configuracion.centro` es común a todos: solo sigue al centro que ya
+        // nombraba, para no perder el centro por defecto sin sesión.
+        $siglaLegada = $actual->centro;
         $sigla = trim((string) ($datos['centro'] ?? ''));
-        if ($planFijo) {
-            if (array_key_exists('centro', $datos)) {
-                if ($sigla === '') {
-                    throw new InvalidArgumentException(_("La sigla es obligatoria"));
+        if ($centroActivo !== null) {
+            if (array_key_exists('centro', $datos) && $sigla === '' && $planFijo) {
+                throw new InvalidArgumentException(_("La sigla es obligatoria"));
+            }
+            if ($sigla !== '') {
+                if (trim($actual->centro) === $centroActivo->codigo) {
+                    $siglaLegada = $sigla;
                 }
                 $this->guardarSigla($centroActivo, $sigla);
             }
-            $sigla = $actual->centro;
-        } elseif ($sigla === '') {
-            $sigla = $actual->centro;
+        } elseif ($sigla !== '') {
+            $siglaLegada = $sigla;
         }
         $cfg = new ConfiguracionCentro(
-            $sigla,
+            $siglaLegada,
             $anio,
             $modo,
             $ini,

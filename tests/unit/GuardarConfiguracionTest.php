@@ -49,4 +49,38 @@ final class GuardarConfiguracionTest extends TestCase
         $uc = new GuardarConfiguracion($repo, $ambito, $centros, $planes, $ejercicios);
         $uc->ejecutar(['fecha_cierre' => '2026-07-31']);
     }
+
+    public function testSiglaEnCentroNSeGuardaEnElCentroYNoEnElSingletonComun(): void
+    {
+        $ini = new DateTimeImmutable('2026-01-01');
+        $corte = new DateTimeImmutable('2026-06-30');
+        $actual = new ConfiguracionCentro('Montagut', 2026, 'Año', $ini, $corte, 'vivienda', null, null);
+        $centro = new Centro(2, 'Otro', 'Otro centro', 'n', 'vivienda', CatalogoPlanesContables::H16N, true);
+        $ejercicio = new Ejercicio(20, 2, '2026', $ini, new DateTimeImmutable('2026-12-31'), $corte, 'abierto', null);
+
+        $repo = $this->createMock(ConfiguracionRepository::class);
+        $repo->method('get')->willReturn($actual);
+        $repo->expects(self::once())->method('guardar')->with(self::callback(
+            static fn (ConfiguracionCentro $c): bool => $c->centro === 'Montagut',
+        ));
+
+        $centros = $this->createMock(CentroRepository::class);
+        $centros->method('porId')->willReturn($centro);
+        $centros->method('porCodigo')->willReturn(null);
+        $centros->expects(self::once())->method('guardar')->with(self::callback(
+            static fn (Centro $c): bool => $c->id === 2 && $c->codigo === 'NuevaSigla',
+        ))->willReturnArgument(0);
+
+        $planes = $this->createMock(PlanContableRepository::class);
+        $planes->method('idPorCodigo')->willReturn(1);
+
+        $ejercicios = $this->createMock(EjercicioRepository::class);
+        $ejercicios->method('abiertoDe')->willReturn($ejercicio);
+        $ejercicios->method('porId')->willReturn($ejercicio);
+
+        $ambito = new ResolverAmbitoActual($repo, $centros, $ejercicios, 2);
+
+        $uc = new GuardarConfiguracion($repo, $ambito, $centros, $planes, $ejercicios);
+        $uc->ejecutar(['centro' => 'NuevaSigla']);
+    }
 }

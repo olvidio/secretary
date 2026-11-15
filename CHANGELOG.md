@@ -10,6 +10,9 @@ falta en cada push.
 
 ## [Unreleased]
 
+### Corregido
+- **Configuración · sigla**: en los centros n, guardar la sigla cambiaba la de todos los centros. Ahora cada centro guarda la suya, y el presupuesto 613 muestra la del centro en el que se trabaja.
+
 ## [0.1.41] — 2026-11-13
 
 ### Añadido
