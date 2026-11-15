@@ -13,6 +13,7 @@
         <p class="muted"><?= _("Banco Sabadell: Operativa diaria → Cuentas → Saldos y movimientos → Descargar → Excel o CSV.") ?></p>
         <p class="muted"><?= _("Arquia: descargar los movimientos de la cuenta en Excel (.xlsx).") ?></p>
         <p class="muted"><?= _("Banco Santander: movimientos de la cuenta → descargar extracto en Excel (.xls).") ?></p>
+        <p class="muted"><?= _("Otro banco: prepara un CSV o Excel con una primera fila de cabecera «Fecha», «Concepto» e «Importe» y un movimiento por fila (por ejemplo 15/01/2026 · Compra de papelería · -23,50). El importe va en negativo si sale dinero.") ?> <a href="/plantillas/extracto-propio.csv" download><?= _("Descargar plantilla") ?></a></p>
     </div>
     <form id="entrada-banco-form" class="yo-banco-form">
         <label id="wrap-banco-fisica" hidden><?= _("Cuenta de tesorería") ?>

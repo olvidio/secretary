@@ -63,7 +63,7 @@ CSV;
     public function testCatalogoRechazaBancoDesconocido(): void
     {
         self::assertSame(
-            ['n26', 'caixabank', 'bbva', 'sabadell', 'santander', 'arquia'],
+            ['n26', 'caixabank', 'bbva', 'sabadell', 'santander', 'arquia', 'secretario'],
             array_column(CatalogoBancosCsv::todos(), 'id'),
         );
         $this->expectException(InvalidArgumentException::class);

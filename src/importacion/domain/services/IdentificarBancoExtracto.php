@@ -13,7 +13,7 @@ final class IdentificarBancoExtracto
     use TablaExtractoCsv;
 
     /** @var list<string> */
-    private const ORDEN = ['arquia', 'santander', 'n26', 'bbva', 'sabadell', 'caixabank'];
+    private const ORDEN = ['arquia', 'santander', 'n26', 'bbva', 'sabadell', LectorCsvPropio::ID, 'caixabank'];
 
     public function desdeCsv(string $contenido): string
     {
@@ -45,7 +45,7 @@ final class IdentificarBancoExtracto
         }
 
         throw new InvalidArgumentException(
-            _('No se reconoce el formato del extracto. Use un CSV o Excel de N26, CaixaBank, BBVA, Banco Santander, Banco Sabadell o Arquia.')
+            _('No se reconoce el formato del extracto. Use un CSV o Excel de N26, CaixaBank, BBVA, Banco Santander, Banco Sabadell o Arquia, o un fichero propio con las columnas Fecha, Concepto e Importe.')
         );
     }
 }

@@ -22,6 +22,7 @@ final class CatalogoBancosCsv
             ['id' => 'sabadell', 'nombre' => 'Banco Sabadell'],
             ['id' => 'santander', 'nombre' => 'Banco Santander'],
             ['id' => 'arquia', 'nombre' => 'Arquia'],
+            ['id' => LectorCsvPropio::ID, 'nombre' => 'Formato propio (Fecha, Concepto, Importe)'],
         ];
     }
 
@@ -35,6 +36,7 @@ final class CatalogoBancosCsv
             'sabadell' => new LectorCsvSabadell(),
             'santander' => new LectorCsvSantander(),
             'arquia' => new LectorCsvArquia(),
+            LectorCsvPropio::ID => new LectorCsvPropio(),
             default => throw new InvalidArgumentException('Banco no soportado: elija uno de la lista'),
         };
     }
