@@ -26,8 +26,10 @@ final class SchemaInstallerTest extends TestCase
 
         $n = (int) $pdo->query('SELECT COUNT(*) FROM conceptos')->fetchColumn();
         self::assertGreaterThan(40, $n);
-        $cfg = $pdo->query('SELECT centro FROM configuracion WHERE id = 1')->fetchColumn();
+        $cfg = $pdo->query('SELECT anio FROM configuracion WHERE id = 1')->fetchColumn();
         self::assertNotFalse($cfg);
+        // Instalación desde cero: se da de alta un centro (la sigla ya no vive en `configuracion`).
+        self::assertSame('Centro', $pdo->query('SELECT codigo FROM centros ORDER BY id LIMIT 1')->fetchColumn());
         $rutas = (int) $pdo->query('SELECT COUNT(*) FROM rutas_acceso')->fetchColumn();
         self::assertGreaterThan(20, $rutas);
         $ids = (int) $pdo->query('SELECT COUNT(*) FROM identidades')->fetchColumn();

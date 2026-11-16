@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use src\ambito\application\ResolverAmbitoActual;
 use src\apuntes\application\CalcularCuadreApuntesA;
 use src\asientos\domain\contracts\AsientoRepository;
+use src\informes\domain\services\EstadoCuentaPersonal;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\shared\domain\value_objects\Dinero;
 
@@ -34,13 +35,15 @@ final class ComprobarSaldos
         $hayDescuadrados = $this->asientos->hayDescuadrados($contexto->ejercicioId);
 
         $saldoGlobal = Dinero::fromInput($saldosData['saldo_a']);
-        $personas = $this->personasConProblemas($saldosData['por_persona'], $hastaStr);
+        $porDestinar = [];
+        $personas = $this->personasConProblemas($saldosData['por_persona'], $hastaStr, $porDestinar);
 
         $comprobaciones = [
             $this->checkPartidaDoble($hayDescuadrados),
-            $this->checkSaldoGlobal($saldoGlobal, $saldosData['saldo_a_es']),
+            $this->checkSaldoGlobal($saldoGlobal, $saldosData['saldo_a_es'], $porDestinar),
             $this->checkDeuda($saldosData['por_persona']),
             $this->checkApuntesA($personas),
+            $this->checkPorDestinar($porDestinar),
         ];
 
         $ok = array_reduce(
@@ -58,9 +61,11 @@ final class ComprobarSaldos
 
     /**
      * @param list<array<string, mixed>> $porPersona
+     * @param list<array{iniciales: string, nombre: string, saldo_cents: int, saldo_es: string}> $porDestinar
+     *        salida: c/c positiva con los apuntes A cuadrados (sobrante de remesas sin destinar)
      * @return list<array<string, mixed>>
      */
-    private function personasConProblemas(array $porPersona, string $fecha): array
+    private function personasConProblemas(array $porPersona, string $fecha, array &$porDestinar = []): array
     {
         $out = [];
 
@@ -69,7 +74,17 @@ final class ComprobarSaldos
             $cuadre = $this->cuadreApuntesA->ejecutar('P', (string) $p['iniciales'], $fecha);
             $cuadrado = !$cuadre['aplica'] || ($cuadre['cuadrado'] ?? false);
 
-            if (abs($saldoCuenta->toCents()) === 0 && $cuadrado) {
+            $estado = EstadoCuentaPersonal::de($cuadrado, $saldoCuenta->toCents());
+            if ($estado === EstadoCuentaPersonal::OK) {
+                continue;
+            }
+            if ($estado === EstadoCuentaPersonal::POR_DESTINAR) {
+                $porDestinar[] = [
+                    'iniciales' => (string) $p['iniciales'],
+                    'nombre' => (string) $p['nombre'],
+                    'saldo_cents' => $saldoCuenta->toCents(),
+                    'saldo_es' => $saldoCuenta->formatEs(),
+                ];
                 continue;
             }
 
@@ -119,19 +134,69 @@ final class ComprobarSaldos
         ];
     }
 
-    /** @return array<string, mixed> */
-    private function checkSaldoGlobal(Dinero $saldoGlobal, string $saldoEs): array
+    /**
+     * @param list<array{iniciales: string, nombre: string, saldo_cents: int, saldo_es: string}> $porDestinar
+     * @return array<string, mixed>
+     */
+    private function checkSaldoGlobal(Dinero $saldoGlobal, string $saldoEs, array $porDestinar = []): array
     {
-        $ok = abs($saldoGlobal->toCents()) === 0;
+        $sobrante = array_sum(array_column($porDestinar, 'saldo_cents'));
+        $resto = Dinero::fromCents($saldoGlobal->toCents() - $sobrante);
+        $ok = $resto->isZero();
+        if ($saldoGlobal->isZero()) {
+            $mensaje = 'La suma de todas las cuentas personales (libro P) es cero.';
+        } elseif ($ok) {
+            $mensaje = sprintf(
+                _('La suma de cuentas personales es %s €: es el sobrante de remesas pendiente de destinar a partidas 7 (ver «Sobrante de remesas por destinar»).'),
+                $saldoEs,
+            );
+        } else {
+            $mensaje = 'La suma de cuentas personales es ' . $saldoEs . ' €; debería ser 0'
+                . ($sobrante !== 0
+                    ? sprintf(_(' (descontado el sobrante de remesas por destinar, quedan %s €).'), $resto->formatEs())
+                    : '.');
+        }
 
         return [
             'id' => 'saldo_a_global',
             'titulo' => 'Saldo global cuentas personales',
             'ok' => $ok,
             'valor_es' => $saldoEs,
-            'mensaje' => $ok
-                ? 'La suma de todas las cuentas personales (libro P) es cero.'
-                : 'La suma de cuentas personales es ' . $saldoEs . ' €; debería ser 0.',
+            'mensaje' => $mensaje,
+        ];
+    }
+
+    /**
+     * Informativo: c/c positiva con los apuntes A cuadrados es lo que le queda a
+     * la persona de sus remesas, hasta destinarlo a partidas 7.
+     *
+     * @param list<array{iniciales: string, nombre: string, saldo_cents: int, saldo_es: string}> $porDestinar
+     * @return array<string, mixed>
+     */
+    private function checkPorDestinar(array $porDestinar): array
+    {
+        $n = count($porDestinar);
+        $personas = [];
+        foreach ($porDestinar as $p) {
+            $personas[] = [
+                'iniciales' => $p['iniciales'],
+                'nombre' => $p['nombre'],
+                'saldo_cuenta_es' => $p['saldo_es'],
+                'coherente' => true,
+                'nota' => _('Sobrante de sus remesas, pendiente de destinar a partidas 7 (Disponible).'),
+            ];
+        }
+
+        return [
+            'id' => 'sobrante_por_destinar',
+            'titulo' => _('Sobrante de remesas por destinar'),
+            'ok' => true,
+            'informativo' => true,
+            'mensaje' => $n === 0
+                ? _('Nadie tiene sobrante de remesas pendiente en su cuenta personal.')
+                : sprintf(_('%d persona(s) con sobrante de remesas en su cuenta personal, pendiente de destinar a partidas 7. No es un error.'), $n),
+            'ayuda' => _('Al aceptar una remesa, lo que sobra de ingresos menos gastos se queda en la cuenta personal (saldo contable) y en el disponible. Se destina en Disponible → Proponer destinos 7; cuando llega la remesa con esas partidas 7, la cuenta personal baja en ese importe.'),
+            'personas' => $personas,
         ];
     }
 
@@ -148,7 +213,7 @@ final class ComprobarSaldos
             'titulo' => 'Apuntes A por persona',
             'ok' => $n === 0,
             'mensaje' => $n === 0
-                ? 'Cada persona tiene saldo cero y sus apuntes A cuadran (ingresos = gastos).'
+                ? _('Cada persona tiene sus apuntes A cuadrados (ingresos = gastos) y la cuenta personal a cero o solo con sobrante de remesas por destinar.')
                 : $n . ' persona(s) con saldo distinto de cero o apuntes A sin cuadrar.',
             'personas' => $personas,
             'ayuda' => 'Los apuntes A (sin caja/banco) deben cuadrar por persona: cada gasto '

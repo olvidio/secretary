@@ -50,8 +50,10 @@ final class CrearApuntesDeEntrada
             if (!empty($datos['es_cierre'])) {
                 $payload['es_cierre'] = $datos['es_cierre'];
             }
+            // Toda la cadena es la misma operación: si se cuenta otro día, se cuenta
+            // ese día en todas sus líneas (si no, P/211 y G/11 caen en meses distintos).
+            $payload['fecha_imputacion'] = $datos['fecha_imputacion'] ?? '';
             if ($i === $ultima) {
-                $payload['fecha_imputacion'] = $datos['fecha_imputacion'] ?? '';
                 if (isset($datos['cuenta_fisica_id']) && $datos['cuenta_fisica_id'] !== '') {
                     $payload['cuenta_fisica_id'] = $datos['cuenta_fisica_id'];
                 }

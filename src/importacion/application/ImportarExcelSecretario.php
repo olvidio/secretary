@@ -83,7 +83,7 @@ final class ImportarExcelSecretario
         if ($dryRun) {
             $nApuntes = count($filasExcel);
             if (!$aislado) {
-                AmbitoSeeder::sembrar($this->pdo);
+                AmbitoSeeder::sembrar($this->pdo, true, $cfgLeida->centro);
             }
             $destino = $this->resolverDestino($centroCodigo, $ejercicioEtiqueta, $cfgLeida);
             $stats = $this->sincronizador()->ejecutar(
@@ -131,7 +131,7 @@ final class ImportarExcelSecretario
                     $this->presupuesto->vaciarCuenta('P');
                     $this->presupuesto->vaciarCuenta('G');
                 }
-                AmbitoSeeder::sembrar($this->pdo);
+                AmbitoSeeder::sembrar($this->pdo, true, $cfgLeida->centro);
             }
             $destino = $this->resolverDestino($centroCodigo, $ejercicioEtiqueta, $cfgLeida);
             if ($aislado) {
@@ -287,8 +287,6 @@ final class ImportarExcelSecretario
             ?? new DateTimeImmutable(sprintf('%d-01-01', $anio));
         $cie = ExcelDate::parseCell($conceptos[3]['H'] ?? null)
             ?? new DateTimeImmutable(sprintf('%d-01-31', $anio));
-        $num = isset($conceptos[21]['H']) && is_numeric($conceptos[21]['H'])
-            ? (int) $conceptos[21]['H'] : null;
         $ver = isset($conceptos[3]['O']) ? (string) $conceptos[3]['O'] : '8';
         $tipo = ConfiguracionCentro::tipoCierreDesdeCentro($centro);
         $cfg = new ConfiguracionCentro(
@@ -298,7 +296,6 @@ final class ImportarExcelSecretario
             $ini,
             $cie,
             $tipo,
-            $num,
             $ver,
         );
 

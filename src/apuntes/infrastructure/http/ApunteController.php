@@ -10,6 +10,7 @@ use src\apuntes\application\BorrarApunte;
 use src\apuntes\application\BuscarSugerenciasObservacion;
 use src\apuntes\application\CalcularCuadreApuntesA;
 use src\apuntes\application\CrearApuntesDeEntrada;
+use src\apuntes\domain\services\AvisoImputacionVivienda;
 use src\apuntes\application\ListarApuntes;
 use src\shared\infrastructure\http\ContestarJson;
 use src\shared\infrastructure\http\Request;
@@ -70,12 +71,21 @@ final class ApunteController
     public function create(Request $request, array $vars = []): Response
     {
         try {
-            $creados = $this->crear->ejecutar($request->json());
+            $datos = $request->json();
+            $creados = $this->crear->ejecutar($datos);
             $arr = [];
             foreach ($creados as $a) {
                 $arr[] = $a->toArray();
             }
-            return ContestarJson::ok(['apuntes' => $arr]);
+            $avisos = AvisoImputacionVivienda::avisos(
+                (string) ($datos['cuenta'] ?? ''),
+                (string) ($datos['concepto_codigo'] ?? $datos['concepto'] ?? ''),
+                (string) ($datos['fecha'] ?? ''),
+                (string) ($datos['fecha_imputacion'] ?? ''),
+                !empty($datos['contrapartidas']) && count($creados) > 1,
+            );
+
+            return ContestarJson::ok(['apuntes' => $arr, 'avisos' => $avisos]);
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage());
         }

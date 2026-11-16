@@ -143,6 +143,12 @@ final class ProyectorAsientoAFilaExcel
             foreach ($ingresos as $ingreso) {
                 $filas[] = $this->proyectarFila($asiento, $cuentasMov, $personasPorId, $ingreso['item']);
             }
+            // Gastos por encima de los ingresos: los cubre la c/c (el asiento la abona).
+            // Se enseña como «9» en negativo y cuenta en el cuadre A, igual que el
+            // sobrante se queda fuera al recortar el 111.
+            if ($exceso < 0) {
+                $filas[] = $this->proyectarSaldoCcRemesa($asiento, $cuentasMov, $personasPorId, $exceso, true);
+            }
 
             return $filas;
         }
@@ -223,6 +229,7 @@ final class ProyectorAsientoAFilaExcel
         array $cuentasMov,
         array $personasPorId,
         int $sobranteCents,
+        bool $contrapartidaCc = false,
     ): FilaApunteExcel {
         $origen = $this->deducirOrigen($asiento, $cuentasMov);
         $iniciales = null;
@@ -243,6 +250,7 @@ final class ProyectorAsientoAFilaExcel
             $asiento->fecha->format('Y-m-d') !== $asiento->fechaOperacion()->format('Y-m-d')
                 ? $asiento->fecha
                 : null,
+            $contrapartidaCc,
         );
     }
 

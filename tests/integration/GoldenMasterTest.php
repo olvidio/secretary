@@ -23,6 +23,7 @@ use src\conceptos\application\ListarConceptos;
 use src\conceptos\infrastructure\persistence\PdoConceptoRepository;
 use Tests\support\ConceptosCentro;
 use src\configuracion\application\ObtenerConfiguracion;
+use src\configuracion\infrastructure\persistence\ConfiguracionDelEjercicio;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\importacion\application\ImportarExcelSecretario;
 use src\informes\application\CalcularSaldos;
@@ -81,7 +82,13 @@ final class GoldenMasterTest extends TestCase
 
         (new SchemaInstaller($pdo))->install();
 
-        $configRepo = new PdoConfiguracionRepository($pdo);
+        // Como en la aplicación: el período, la sigla, el tipo de cierre y los residentes
+        // salen del centro (aquí, sin sesión, el primero), no de la fila común.
+        $configRepo = new ConfiguracionDelEjercicio(
+            new PdoConfiguracionRepository($pdo),
+            new PdoCentroRepository($pdo),
+            new PdoEjercicioRepository($pdo),
+        );
         $personaRepo = new PdoPersonaRepository($pdo);
         $conceptoRepo = new PdoConceptoRepository($pdo);
         $apunteRepo = new PdoApunteRepository($pdo);

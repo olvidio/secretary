@@ -169,8 +169,9 @@
       comprobando = false;
       espera.hidden = true;
     }
+    const hayNotas = r.ok && pintarNotas(r.notas?.[CUENTA]);
     if (!r.ok || !r.aplica || !(r.avisos || []).length) {
-      sec.hidden = true;
+      sec.hidden = !hayNotas;
       return;
     }
     contenido.hidden = false;
@@ -186,6 +187,29 @@
         + `${enlace}</li>`;
     }).join('');
     avisosPendientes = true;
+  }
+
+  /** Aclaraciones de fechas (no son errores). Devuelve si hay alguna. */
+  function pintarNotas(datos) {
+    const caja = document.getElementById('avisos-613-notas');
+    if (!datos || !(datos.notas || []).length) {
+      caja.hidden = true;
+      return false;
+    }
+    document.getElementById('avisos-613-notas-lista').innerHTML =
+      datos.notas.map((n) => `<li>${esc(n)}</li>`).join('');
+    const btn = document.getElementById('btn-notas-obs');
+    btn.onclick = async () => {
+      const ta = document.getElementById('obs-print');
+      if (!ta || !datos.observaciones) return;
+      if (!ta.value.includes(datos.observaciones)) {
+        ta.value = ta.value.trim() ? ta.value.trimEnd() + '\n' + datos.observaciones : datos.observaciones;
+        if (!(await guardarConfig613())) return;
+      }
+      document.getElementById('notas-obs-msg').hidden = false;
+    };
+    caja.hidden = false;
+    return true;
   }
 
   function confirmarSiHayAvisos() {

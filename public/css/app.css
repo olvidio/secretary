@@ -672,6 +672,9 @@ td.superavit-viv { font-weight: 600; }
 .comprobacion-ayuda { font-size: .85rem; color: #4a5568; margin: .5rem 0 0; }
 .comprobacion-personas { width: 100%; margin-top: .65rem; font-size: .9rem; }
 .comprobacion-personas td:last-child { font-size: .85rem; }
+.comprobacion-personas tr.comprobacion-nota td { font-size: .85rem; color: #4a5568; padding-top: 0; font-style: italic; }
+.avisos-613-notas { margin-top: .85rem; padding-top: .65rem; border-top: 1px solid #f6e05e; }
+.avisos-613-notas ul { margin: .35rem 0 .5rem; }
 .apuntes-cuadre-total { margin: 0 0 .35rem; font-variant-numeric: tabular-nums; }
 #tabla-apuntes tr.apuntes-dia td { font-size: .9rem; }
 #tabla-apuntes tr.apuntes-dia-ok td { background: #f0fff4; }

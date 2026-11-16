@@ -187,7 +187,6 @@ final class Resumen613CentroSgTest extends TestCase
             new DateTimeImmutable('2026-06-30'),
             'vivienda',
             null,
-            null,
         ));
 
         return ['centroId' => $centro->id, 'ejercicioId' => $ej->id];

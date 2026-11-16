@@ -22,7 +22,7 @@ En **Saldos** y **E37** la columna **Saldo cont.** (concepto **9**) es el saldo 
 Orden habitual cuando hay dinero para labores (sobrante de trabajo, no un agujero de vivienda):
 
 1. Terminar apuntes del mes y, si toca, **Cierre de mes** (vivienda).
-2. Cada persona **cierra y envía** su mes; el secretario **Acepta** en **Remesas**. Al aceptar, el neto ingresos menos gastos de esa remesa se **aparca** (la c/c de esa persona queda a cero en contabilidad) y el importe pasa al **disponible** operativo de esta pantalla — salvo que se marque **Sustituir el disponible por este importe** con la tesorería que comunicó la persona.
+2. Cada persona **cierra y envía** su mes; el secretario **Acepta** en **Remesas**. Al aceptar, el neto ingresos menos gastos de esa remesa se queda en la **c/c** de esa persona (saldo contable, en positivo si sobra) y se suma al **disponible** operativo de esta pantalla — salvo que se marque **Sustituir el disponible por este importe** con la tesorería que comunicó la persona.
 3. **Disponible → Proponer destinos 7**: el programa reparte el disponible entre las partidas 7 del centro (presupuesto, tramos de desgravación, tope de la base liquidable, quién puede desgravar).
 4. Revisar el texto «Deberías ingresar…» y **Confirmar instrucciones**. Se reserva el disponible y queda una **instrucción pendiente** (sin asiento en P del centro). La persona lo ve en **Mensajes** y en **Remesa**. Los gastos 7 y la liquidación de c/c se apuntan en P **al aceptar** una remesa suya que incluya esas partidas.
 
@@ -54,4 +54,5 @@ Al aceptar una remesa, si la persona **indicó** un disponible (saldo de su caja
 - **He terminado el mes y no sé en qué partida 7 poner los saldos c/c**: no se elige partida a mano. Revisar la c/c en Saldos; si es negativa, cuadrar con 111 (no con 7). Si es positiva o hay sobrante tras **aceptar remesas**, usar **Proponer destinos 7** aquí: el programa reparte entre 71, 72… y al confirmar liquida la c/c.
 - **La propuesta está vacía**: nadie tiene disponible (o está a cero). Hay que aceptar remesas o ajustar.
 - **Todo va a la prelatura**: esa persona no puede desgravar, o las partidas que desgravan ya cubrieron presupuesto.
+- **En Saldos o en el 613 una persona tiene saldo contable positivo**: si sus apuntes A cuadran, es el sobrante de sus remesas pendiente de destinar a partidas 7. Comprobaciones lo enseña como información («Sobrante de remesas por destinar»), no como error.
 - **El disponible no cuadra con ingresos menos gastos**: es normal; por eso se puede ajustar o sustituir por la tesorería enviada.

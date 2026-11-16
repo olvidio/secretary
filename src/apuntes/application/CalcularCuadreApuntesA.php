@@ -67,11 +67,7 @@ final class CalcularCuadreApuntesA
             if (!empty($apunte['es_cierre'])) {
                 continue;
             }
-            $signed = SaldoCuadreApuntes::signedCents(
-                (string) $apunte['concepto_codigo'],
-                (string) $apunte['cantidad'],
-                $naturalezas,
-            );
+            $signed = SaldoCuadreApuntes::signedFila($apunte, $naturalezas);
             $saldoTotal += $signed;
             $f = (string) $apunte['fecha'];
             if ($f < $fecha) {

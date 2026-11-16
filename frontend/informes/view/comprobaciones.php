@@ -101,6 +101,9 @@ function tablaPersonasComprobacion(c, hasta) {
       <td><a href="/apuntes?${q.toString()}">P/211</a>
         · <a href="/apuntes?${qg.toString()}">G/11</a></td>
     </tr>`;
+    (p.notas || []).forEach((n) => {
+      html += `<tr class="comprobacion-nota"><td colspan="6">${esc(n)}</td></tr>`;
+    });
   });
   return html + '</tbody></table>';
 }

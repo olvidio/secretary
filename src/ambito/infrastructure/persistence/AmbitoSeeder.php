@@ -35,8 +35,20 @@ use src\shared\infrastructure\persistence\ConverterDate;
  */
 final class AmbitoSeeder
 {
-    public static function sembrar(PDO $pdo): void
-    {
+    /**
+     * @param bool $sincronizarEjercicio solo la importación del Excel legado: copia al
+     *        ejercicio existente la fecha de corte de `configuracion`. En `db:migrate` no,
+     *        porque esa fila es común a todos los centros y pisaría la fecha de corte del
+     *        centro con la de otro (p. ej. 01/01 de un libro personal).
+     * @param string|null $codigoCentro sigla del centro a sembrar (la importación la lee
+     *        del Excel). Sin ella, el primer centro dado de alta; en una base vacía se
+     *        crea uno provisional («Centro»). `configuracion` ya no guarda sigla.
+     */
+    public static function sembrar(
+        PDO $pdo,
+        bool $sincronizarEjercicio = false,
+        ?string $codigoCentro = null,
+    ): void {
         $existeConfig = $pdo->query('SELECT id FROM configuracion WHERE id = 1')->fetch();
         if ($existeConfig === false) {
             // Instalación nueva antes de `SchemaInstaller::seedConfig()`: nada que
@@ -45,8 +57,8 @@ final class AmbitoSeeder
         }
         $cfg = (new PdoConfiguracionRepository($pdo))->get();
 
-        $centroId = self::sembrarCentro($pdo, $cfg);
-        self::sembrarEjercicio($pdo, $centroId, $cfg);
+        $centroId = self::sembrarCentro($pdo, $cfg, $codigoCentro);
+        self::sembrarEjercicio($pdo, $centroId, $cfg, $sincronizarEjercicio);
         self::sembrarAmbitoPersonas($pdo, $centroId);
         self::poblarLibros($pdo, $centroId);
     }
@@ -77,9 +89,19 @@ final class AmbitoSeeder
         self::sembrarSuperavitVivienda($pdo, $centroId);
     }
 
-    private static function sembrarCentro(PDO $pdo, ConfiguracionCentro $cfg): int
+    private static function sembrarCentro(PDO $pdo, ConfiguracionCentro $cfg, ?string $codigoCentro): int
     {
-        $codigo = trim($cfg->centro) !== '' ? trim($cfg->centro) : 'CENTRO';
+        $codigo = trim((string) $codigoCentro);
+        if ($codigo === '') {
+            $primero = $pdo->query('SELECT id FROM centros ORDER BY id LIMIT 1')->fetchColumn();
+            if ($primero !== false) {
+                $centroId = (int) $primero;
+                self::asignarPlanH16nSiFalta($pdo, $centroId);
+
+                return $centroId;
+            }
+            $codigo = 'Centro';
+        }
         $st = $pdo->prepare('SELECT id FROM centros WHERE codigo = :c');
         $st->execute([':c' => $codigo]);
         $id = $st->fetchColumn();
@@ -89,18 +111,32 @@ final class AmbitoSeeder
 
             return $centroId;
         }
+        // Instalación nueva: el centro provisional «Centro» pasa a ser el del Excel,
+        // en vez de dejar al lado un centro vacío que sería el primero (el de por defecto).
+        if ($codigo !== 'Centro') {
+            $provisional = $pdo->query("SELECT id FROM centros WHERE codigo = 'Centro'")->fetchColumn();
+            $soloUno = (int) $pdo->query('SELECT COUNT(*) FROM centros')->fetchColumn() === 1;
+            if ($provisional !== false && $soloUno) {
+                $pdo->prepare('UPDATE centros SET codigo = :c, nombre = :n WHERE id = :id')
+                    ->execute([':c' => $codigo, ':n' => $codigo, ':id' => (int) $provisional]);
+                self::asignarPlanH16nSiFalta($pdo, (int) $provisional);
+
+                return (int) $provisional;
+            }
+        }
+        $nombre = $codigo;
         $planId = self::idPlan($pdo, CatalogoPlanesContables::H16N);
         if ($planId === null) {
             $ins = $pdo->prepare(
                 'INSERT INTO centros (codigo, nombre, tipo, tipo_cierre) VALUES (:c, :n, :tipo, :t) RETURNING id'
             );
-            $ins->execute([':c' => $codigo, ':n' => $cfg->centro, ':tipo' => 'n', ':t' => $cfg->tipoCierre]);
+            $ins->execute([':c' => $codigo, ':n' => $nombre, ':tipo' => 'n', ':t' => $cfg->tipoCierre]);
         } else {
             $ins = $pdo->prepare(
                 'INSERT INTO centros (codigo, nombre, tipo, tipo_cierre, plan_contable_id)
                  VALUES (:c, :n, :tipo, :t, :p) RETURNING id'
             );
-            $ins->execute([':c' => $codigo, ':n' => $cfg->centro, ':tipo' => 'n', ':t' => $cfg->tipoCierre, ':p' => $planId]);
+            $ins->execute([':c' => $codigo, ':n' => $nombre, ':tipo' => 'n', ':t' => $cfg->tipoCierre, ':p' => $planId]);
         }
 
         return (int) $ins->fetchColumn();
@@ -113,11 +149,11 @@ final class AmbitoSeeder
      * `configuracion.fecha_cierre`. Confundir estos dos campos es la trampa
      * documentada en `PeriodoEjercicio`.
      *
-     * Se mantiene sincronizada con la `configuracion` legada en cada ejecución
-     * (fecha_fin, fecha_corte, etiqueta), salvo el `estado`: si alguien cerró el
-     * ejercicio a mano, un `db:migrate` posterior no lo reabre.
+     * Si el ejercicio ya existe no se toca, salvo en la importación del Excel legado
+     * ($sincronizar): entonces se alinea con la `configuracion` leída del fichero
+     * (fecha_fin, fecha_corte, etiqueta), nunca el `estado`.
      */
-    private static function sembrarEjercicio(PDO $pdo, int $centroId, ConfiguracionCentro $cfg): void
+    private static function sembrarEjercicio(PDO $pdo, int $centroId, ConfiguracionCentro $cfg, bool $sincronizar = false): void
     {
         $periodo = $cfg->periodo();
         $etiqueta = $cfg->modoEjercicio === 'Curso'
@@ -142,6 +178,9 @@ final class AmbitoSeeder
                 ':fc' => (new ConverterDate('date', $periodo->fechaCorte))->toPg(),
             ]);
 
+            return;
+        }
+        if (!$sincronizar) {
             return;
         }
 

@@ -46,7 +46,7 @@
       if (o.value && !etiquetas.includes(o.value)) etiquetas.push(o.value);
     });
     etiquetas.sort();
-    const defecto = r && (r.etiqueta_trabajo || r.etiqueta_presupuesto || r.etiqueta_defecto);
+    const defecto = r && (r.etiqueta_defecto || r.etiqueta_presupuesto || r.etiqueta_trabajo);
     const activa = r && r.etiqueta_presupuesto;
     sel.innerHTML = '';
     etiquetas.forEach((et) => {

@@ -31,7 +31,6 @@ final class ObtenerDonativosFundacionSgTest extends TestCase
             new DateTimeImmutable('2026-06-30'),
             'vivienda',
             null,
-            null,
         );
         $persona = new Persona(5, 'Ana', 'García', 'ag', null, null, null, null, null, 0, 1, true);
 

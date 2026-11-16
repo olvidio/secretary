@@ -12,6 +12,7 @@ use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\disponible\domain\services\DetectorLaboresDuplicadas;
 use src\shared\domain\value_objects\Dinero;
 use src\informes\domain\services\CuadreViviendaGenerales;
+use src\informes\domain\services\DesfaseImputacionVivienda;
 use src\informes\domain\services\MesesSinMovimiento;
 use src\personas\domain\contracts\PersonaRepository;
 use src\personas\domain\entity\Persona;
@@ -63,11 +64,9 @@ final class ComprobarPersonalesGenerales
                 $apuntesPVivienda[] = $fila;
             }
         }
-        $vivienda = $this->cuadreVivienda->ejecutar(
-            $apuntesPVivienda,
-            $this->listar->ejecutar($rango + ['cuenta' => 'G', 'concepto' => '11']),
-            $personasVivienda,
-        );
+        $apuntesG11 = $this->listar->ejecutar($rango + ['cuenta' => 'G', 'concepto' => '11']);
+        $vivienda = $this->cuadreVivienda->ejecutar($apuntesPVivienda, $apuntesG11, $personasVivienda);
+        $vivienda['por_persona'] = $this->anotarDesfases($vivienda['por_persona'], $apuntesPVivienda, $apuntesG11, $fechaHasta);
 
         $sinMovimiento = $this->mesesSinMovimiento->ejecutar(
             $personasMeses,
@@ -87,7 +86,10 @@ final class ComprobarPersonalesGenerales
                         . $vivienda['total_p21_es'] . ' €).'
                     : 'Las salidas P/211 de quienes aportan son ' . $vivienda['total_p21_es']
                         . ' € y las entradas G/11 ' . $vivienda['total_g11_es']
-                        . ' € (diferencia ' . $vivienda['diferencia_es'] . ' €).',
+                        . ' € (diferencia ' . $vivienda['diferencia_es'] . ' €).'
+                        . (self::hayNotas($vivienda['por_persona'])
+                            ? ' ' . _('Parte de la diferencia es solo de fechas de imputación: ver la nota bajo cada persona.')
+                            : ''),
                 'ayuda' => 'P/211 es la vivienda general (cierre automático o imputación puntual a generales). '
                     . 'Debe cuadrar con G/11. P/212 (vivienda personal) es un gasto propio, sin G/11, '
                     . 'y no entra aquí. Quien no entra en el cierre automático puede igualmente imputar a generales puntualmente (211/11).',
@@ -176,6 +178,57 @@ final class ComprobarPersonalesGenerales
             'ayuda' => _('Pasa con asignaciones confirmadas antes de que los gastos 7 se apuntaran al aceptar la remesa: el gasto se anotó al confirmar y otra vez cuando llegó la remesa con la transferencia. «Anular asignación» quita la asignación y su liquidación de c/c: el gasto queda una sola vez (el de la remesa), el 111 no cambia y la c/c de la persona recupera ese importe. Si los dos apuntes son de verdad dos donativos distintos por el mismo importe, no hay que anular nada.'),
             'duplicados' => $duplicados,
         ];
+    }
+
+    /**
+     * Añade a cada persona las notas de desfase de fechas (P/211 y G/11 que se
+     * cuentan en meses distintos por una fecha de imputación puesta solo en uno).
+     *
+     * @param list<array<string, mixed>> $porPersona
+     * @param list<array<string, mixed>> $pDentro
+     * @param list<array<string, mixed>> $gDentro
+     * @return list<array<string, mixed>>
+     */
+    private function anotarDesfases(array $porPersona, array $pDentro, array $gDentro, DateTimeImmutable $hasta): array
+    {
+        $despues = [
+            'desde' => $hasta->modify('+1 day')->format('Y-m-d'),
+            'hasta' => $hasta->modify('+1 year')->format('Y-m-d'),
+            'origen' => 'A',
+        ];
+        $pDespues = [];
+        foreach (CuadreViviendaGenerales::conceptosPViviendaGeneral() as $concepto) {
+            foreach ($this->listar->ejecutar($despues + ['cuenta' => 'P', 'concepto' => $concepto]) as $fila) {
+                $pDespues[] = $fila;
+            }
+        }
+        $notas = DesfaseImputacionVivienda::notas(
+            $pDentro,
+            $gDentro,
+            $pDespues,
+            $this->listar->ejecutar($despues + ['cuenta' => 'G', 'concepto' => '11']),
+            $hasta->format('Y-m-d'),
+        );
+        foreach ($porPersona as $i => $p) {
+            $ini = strtolower((string) ($p['iniciales'] ?? ''));
+            if (isset($notas[$ini])) {
+                $porPersona[$i]['notas'] = $notas[$ini];
+            }
+        }
+
+        return $porPersona;
+    }
+
+    /** @param list<array<string, mixed>> $porPersona */
+    private static function hayNotas(array $porPersona): bool
+    {
+        foreach ($porPersona as $p) {
+            if (!empty($p['notas'])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** @return list<int> */

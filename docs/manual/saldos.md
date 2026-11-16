@@ -20,17 +20,19 @@ Además tiene un botón que ejecuta unas revisiones automáticas y señala, pers
 2. Pulsar **Calcular** para rehacer las cifras con esa fecha.
 3. Arriba aparece el resumen: dinero en Caja, en Banco y el saldo global de las cuentas personales.
 4. La tabla **Tesorería física** pone una fila por cada caja o cuenta bancaria real del centro, con su parte en el libro personal (P), en el general (G) y el total físico.
-5. La tabla **Cuentas personales** muestra, por persona, el cuadre de apuntes **A**, **C** y **B** (positivo si ha ingresado más de lo que ha gastado; debería ser cero), el **saldo contable** (concepto 9), la **deuda de vivienda** del cierre y el **superávit** (lo ingresado en vivienda por encima de la cuota, todavía sin usar). Las filas con algún valor distinto de cero se resaltan. **Saldar (importe)** aplica primero ese superávit y después el saldo contable positivo, hasta cubrir la deuda. El importe no se teclea.
-6. **Ejecutar comprobaciones** añade abajo tres revisiones: que no haya apuntes descuadrados, que la suma de todas las cuentas personales sea cero y el detalle por persona.
+5. La tabla **Cuentas personales** muestra, por persona, el cuadre de apuntes **A**, **C** y **B** (positivo si ha ingresado más de lo que ha gastado; debería ser cero), el **saldo contable** (concepto 9), la **deuda de vivienda** del cierre y el **superávit** (lo ingresado en vivienda por encima de la cuota, todavía sin usar). Las filas con algún valor distinto de cero se resaltan, y cada cifra A, C o B distinta de cero es un enlace a esos apuntes de la persona, para ver de dónde sale. **Saldar (importe)** aplica primero ese superávit y después el saldo contable positivo, hasta cubrir la deuda. El importe no se teclea.
+6. **Ejecutar comprobaciones** añade abajo las revisiones: que no haya apuntes descuadrados, que la suma de todas las cuentas personales sea cero (descontado el sobrante de remesas por destinar), la deuda de vivienda, el detalle por persona y, como información, quién tiene sobrante de remesas por destinar.
 
 ## Reglas que conviene saber
 
 - Se cuenta desde la fecha de inicio del ejercicio hasta la fecha indicada; los apuntes posteriores no entran.
 - **A:** apuntes que no mueven caja ni banco; deberían cuadrar (ingresos = gastos). En la tabla, positivo = más ingresos que gastos.
+- Una remesa cuadra sola en A: si trae más ingresos que gastos, lo que sobra se ve como una línea **9** (va al saldo contable); si trae más gastos que ingresos, la diferencia sale como una línea **9 en negativo**, que la cubre el saldo contable de la persona.
 - **C** y **B:** apuntes desde caja o banco del centro; misma regla de signo y también deberían cuadrar por persona.
 - **Saldo cont.** (concepto **9**): saldo de la cuenta **CC** en el libro P (persona–centro). La suma es el **IX del 613 P**. No es el dinero en el banco ni la deuda de vivienda del cierre.
 - **Deuda viv.**: vivienda ya imputada en el cierre (P/211 y G/11). Negativa = debe. **Superávit**: lo ingresado en G/11, sin el cierre automático, por encima de la cuota acumulada (gastos G 201–215 repartidos, o el importe fijo). La cuota no está en una cuenta: se recalcula. **Saldar (importe)** aplica primero el superávit y, si no alcanza, el saldo contable positivo. No crea otro ingreso ni otro 211. Lo que sobre de deuda sigue pendiente. La columna Vivienda del E37 no cambia.
 - **Cuenta corriente (banco)** (concepto **90**, informativo): caja y banco que la persona comunica en la remesa o que el secretario anota a mano en **Remesas** (para quien no envía remesa). No genera apuntes. El disponible hacia partidas 7 es la cifra de la remesa menos el remanente; la anotada a mano no toca el disponible. En el 613 P, la línea **90** suma el último dato de cada persona hasta el mes de cierre. Quien no tiene ni remesa aceptada ni saldo anotado no suma.
+- Saldo cont. positivo con los apuntes A cuadrados: es el sobrante de las remesas de esa persona, pendiente de destinar a partidas 7 en **Disponible**. No es un descuadre; las comprobaciones lo enseñan aparte como «Sobrante de remesas por destinar» y no lo cuentan como incidencia.
 - Saldo cont. negativo: falta una contrapartida A que no es la deuda del cierre (esa va en Deuda viv.). Puede coexistir con arqueo físico cuadrado.
 - El total físico de una caja es la suma de lo que hay en P y en G: el dinero es el mismo, aunque la contabilidad lo reparta en dos libros.
 - Caja y Banco del resumen suman todas las cajas y bancos del centro.
@@ -40,6 +42,7 @@ Además tiene un botón que ejecuta unas revisiones automáticas y señala, pers
 - **Avisa de que hay apuntes descuadrados**: algún apunte se grabó con un lado distinto del otro. Hasta corregirlo, los saldos no son fiables.
 - **Hay deuda y no aparece Saldar**: no hay superávit de vivienda ni saldo contable positivo. El superávit sale solo si lo ingresado en vivienda supera la cuota. Si no, anota antes el ingreso (procedencia A). El botón muestra entre paréntesis lo que se puede saldar.
 - **Una persona sale con saldo contable distinto de cero**: le falta la contrapartida de un apunte A que no es el cierre. En las comprobaciones se propone el importe y el concepto (111, 211 o 212). P/211 manual imputa a generales (cuadra con G/11); P/212 es vivienda personal.
+- **A distinto de cero en alguien que solo manda remesas**: pulsar la cifra para ver sus apuntes A. Suele faltar una contrapartida en un apunte suelto, o hay una partida 7 apuntada dos veces (ver **Comprobaciones**).
 - **Los saldos parecen antiguos**: revisar la fecha «Hasta» y volver a pulsar Calcular.
 
 ## Asociación y fundación

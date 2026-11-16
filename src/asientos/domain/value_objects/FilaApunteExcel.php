@@ -21,6 +21,8 @@ final class FilaApunteExcel
         public readonly Dinero $cantidad,
         public readonly bool $esCierre,
         public readonly ?DateTimeImmutable $fechaImputacion = null,
+        /** Línea «9» de una remesa que cubre con la c/c lo que los ingresos no alcanzan: cuenta en el cuadre A. */
+        public readonly bool $contrapartidaCc = false,
     ) {
     }
 
@@ -45,6 +47,9 @@ final class FilaApunteExcel
             'es_cierre' => $this->esCierre,
             'par_id' => null,
         ];
+        if ($this->contrapartidaCc) {
+            $out['contrapartida_cc'] = true;
+        }
         if ($imputacionDistinta) {
             $out['fecha_imputacion'] = $imputacion->format('Y-m-d');
             $out['fecha_imputacion_es'] = $imputacion->format('d/m/Y');

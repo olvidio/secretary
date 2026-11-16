@@ -630,6 +630,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         inpCant.focus();
         return;
       }
+      const avisosPlantilla = [];
       for (let i = 0; i < plantillaActiva.lineas.length; i++) {
         const datos = payloadLinea(plantillaActiva.lineas[i], i, cantidad);
         const s = await api('/api/apuntes', { method: 'POST', body: datos });
@@ -639,8 +640,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           return;
         }
         appendFilaGuardada(datos, (s.apuntes || [])[0]);
+        (s.avisos || []).forEach((a) => { if (!avisosPlantilla.includes(a)) avisosPlantilla.push(a); });
       }
       document.getElementById('msg').hidden = false;
+      if (avisosPlantilla.length) alert(avisosPlantilla.join('\n\n'));
       limpiarFilaActiva();
       inpObs.focus();
       await actualizarCuadre();
@@ -674,6 +677,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (creados.length === 0) {
       appendFilaGuardada(datos, null);
     }
+    if ((s.avisos || []).length) alert(s.avisos.join('\n\n'));
     limpiarFilaActiva();
     inpObs.focus();
     await actualizarCuadre();

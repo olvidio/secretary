@@ -181,6 +181,14 @@ interface AsientoRepository
     /** Id del asiento de liquidación de c/c (asignacion_cc) de esa persona, fecha e importe; null si no hay. */
     public function buscarLiquidacionCc(int $ejercicioId, int $personaId, string $fecha, int $cents): ?int;
 
+    /**
+     * Pares periodificados con una pata a cada lado de la fecha de corte: el
+     * concepto se cuenta hasta el corte y la contrapartida después, o al revés.
+     *
+     * @return list<array{libro:string, imputacion:string, operacion:string, iniciales:string, glosa:string, codigo:string, nombre:string, cents:int}>
+     */
+    public function periodificacionesAbiertas(int $centroId, string $corte): array;
+
     /** Anula a la vez una asignación de destinos 7 y su liquidación de c/c (las dos o ninguna). */
     public function anularAsignacionConLiquidacion(int $asignacionId, int $liquidacionId): void;
 }

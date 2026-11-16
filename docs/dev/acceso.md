@@ -78,7 +78,7 @@ deniega (default deny). Ámbitos: `publico`, `pendiente` (contraseña ok, 2FA no
 `autenticado`, `centro`, `persona`.
 
 El centro de la sesión (`$_SESSION['centro_id']`) tiene preferencia en
-`ResolverAmbitoActual`; si falta, se usa `configuracion.centro` como hasta ahora.
+`ResolverAmbitoActual`; si falta, se usa el primer centro dado de alta (`configuracion` ya no tiene sigla, migración 0098).
 
 El vínculo `identidad_centro.rol` es `admin` (puede modificar) o `consulta`
 (solo lectura). `operador` es el valor antiguo y sigue pudiendo modificar.

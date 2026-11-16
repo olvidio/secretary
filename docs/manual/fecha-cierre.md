@@ -20,8 +20,11 @@ Es un atajo al mismo dato que aparece en la pantalla de Configuración, para no 
 - La fecha de cierre **no** es el final del ejercicio: es la fecha hasta la que se ha contabilizado. El periodo completo se define en **Ejercicios**; aquí solo se mueve la **corte** del ejercicio abierto.
 - La entrada de apuntes propone el día de hoy si estamos dentro del mes de la fecha de cierre; si no, propone la propia fecha de cierre.
 - Cambiarla no borra ni mueve ningún apunte: solo cambia el mes sobre el que se trabaja.
+- Cada centro tiene su propia fecha de cierre (la de su ejercicio abierto). Cambiarla en un centro, restaurar la copia de otro o actualizar el programa no la toca.
 
 ## Problemas frecuentes
+
+- **La fecha de cierre ha vuelto sola al 1 de enero**: pasaba con versiones anteriores al trabajar con varios centros (restaurar una copia o actualizar el programa podía traer la fecha de otro centro). Ya no ocurre; basta con volver a guardarla aquí una vez.
 
 - **La entrada de apuntes sigue proponiendo el mes anterior**: la fecha de cierre no se ha guardado todavía, o se guardó con el mes equivocado.
 

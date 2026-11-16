@@ -17,6 +17,8 @@ use src\ambito\infrastructure\persistence\PdoCuentaRepository;
 use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
 use src\apuntes\application\BorrarApunte;
 use src\apuntes\application\CrearApunte;
+use src\apuntes\application\CrearApuntesDeEntrada;
+use src\apuntes\domain\services\ContrapartidasGastoGeneral;
 use src\apuntes\application\ListarApuntes;
 use src\asientos\domain\services\ProyectorAsientoAFilaExcel;
 use src\asientos\domain\services\TraductorApuntesAAsientos;
@@ -256,6 +258,43 @@ final class PeriodificacionTest extends TestCase
         self::assertSame('A', $filas[0]->origen);
         self::assertSame($y . '-01-31', $filas[0]->fechaImputacion?->format('Y-m-d'));
         self::assertSame(2, $this->contarAsientos());
+    }
+
+    /** Gasto general pagado por una persona: toda la cadena (P/111, P/211, G/11, G/gasto) se cuenta el mismo día. */
+    public function testCadenaDeContrapartidasLlevaLaImputacionEnTodasLasLineas(): void
+    {
+        $deps = $this->deps();
+        $contexto = $deps['ambito']->ejecutar();
+        $personas = new PdoPersonaRepository($this->pdo);
+        $personas->guardar(new Persona(null, 'Antoni C.', 'AC', 'ac', null, null, null, null, null, 1, $contexto->centroId));
+        $persona = $personas->porIniciales('ac');
+        self::assertNotNull($persona);
+        (new AsegurarCuentaCorrientePersona($deps['cuentas']))->ejecutar($persona);
+
+        $entrada = new CrearApuntesDeEntrada(
+            $deps['crear'],
+            ConceptosCentro::resolver($this->pdo),
+            $deps['ambito'],
+            $personas,
+            new ContrapartidasGastoGeneral(),
+            new PdoCentroRepository($this->pdo),
+        );
+        $y = $this->anioAbierto($deps);
+        $filas = $entrada->ejecutar([
+            'fecha' => $y . '-11-04',
+            'fecha_imputacion' => $y . '-10-31',
+            'cuenta' => 'G',
+            'origen' => 'C',
+            'iniciales' => 'ac',
+            'concepto_codigo' => '201',
+            'cantidad' => '1500.00',
+            'contrapartidas' => true,
+        ]);
+
+        self::assertCount(4, $filas);
+        foreach ($filas as $f) {
+            self::assertSame($y . '-10-31', $f->fechaImputacion?->format('Y-m-d'), $f->cuenta . '/' . $f->conceptoCodigo);
+        }
     }
 
     public function testOperacionTrasFechaFinSeAparcaYPasaAlEjercicioSiguiente(): void

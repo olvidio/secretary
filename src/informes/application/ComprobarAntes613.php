@@ -6,14 +6,18 @@ namespace src\informes\application;
 
 use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\domain\contracts\CentroRepository;
+use src\asientos\domain\contracts\AsientoRepository;
 use src\cierre\application\CerrarMes;
+use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\informes\domain\services\AvisosAntes613;
+use src\informes\domain\services\NotasPeriodificacion613;
 use src\plan\domain\services\CatalogoPlanesContables;
 
 /**
  * Lo que conviene revisar antes de ver o imprimir el 613 P o G de un centro n:
  * comprobaciones de Saldos y de Comprobaciones, cierre de vivienda y deuda.
- * El centro sg y el club no tienen libro personal ni cierre: no aplica.
+ * El centro sg y el club no tienen libro personal ni cierre: no hay avisos,
+ * pero sí las aclaraciones de movimientos imputados a otra fecha (`notas`).
  */
 final class ComprobarAntes613
 {
@@ -23,6 +27,8 @@ final class ComprobarAntes613
         private readonly ComprobarSaldos $saldos,
         private readonly ComprobarPersonalesGenerales $personalesGenerales,
         private readonly CerrarMes $cerrarMes,
+        private readonly AsientoRepository $asientos,
+        private readonly ConfiguracionRepository $config,
     ) {
     }
 
@@ -32,8 +38,14 @@ final class ComprobarAntes613
         $contexto = $this->ambito->ejecutar();
         $centro = $this->centros->porId($contexto->centroId);
         $plan = $centro->planContableCodigo ?? CatalogoPlanesContables::H16N;
+        $corte = $this->config->get()->fechaCierre->format('Y-m-d');
+        // Las aclaraciones de fechas valen para cualquier centro; los avisos, solo para centro n.
+        $notas = NotasPeriodificacion613::armar(
+            $this->asientos->periodificacionesAbiertas($contexto->centroId, $corte),
+            $corte,
+        );
         if (CatalogoPlanesContables::esCentroSg($plan) || CatalogoPlanesContables::esClub($plan)) {
-            return ['aplica' => false, 'ok' => true, 'avisos' => []];
+            return ['aplica' => false, 'ok' => true, 'avisos' => [], 'notas' => $notas];
         }
 
         $saldos = $this->saldos->ejecutar(null);
@@ -44,7 +56,7 @@ final class ComprobarAntes613
             $this->comprobacionesCierre(),
         );
 
-        return ['aplica' => true, 'hasta' => $saldos['hasta']] + AvisosAntes613::armar($comprobaciones);
+        return ['aplica' => true, 'hasta' => $saldos['hasta'], 'notas' => $notas] + AvisosAntes613::armar($comprobaciones);
     }
 
     /** @return list<array<string, mixed>> */

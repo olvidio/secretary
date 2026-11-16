@@ -50,7 +50,8 @@ final class GuardarConfiguracionTest extends TestCase
         $uc->ejecutar(['fecha_cierre' => '2026-07-31']);
     }
 
-    public function testSiglaEnCentroNSeGuardaEnElCentroYNoEnElSingletonComun(): void
+    /** La sigla es del centro; la `configuracion` común ya no tiene sigla que guardar. */
+    public function testSiglaEnCentroNSeGuardaEnElCentro(): void
     {
         $ini = new DateTimeImmutable('2026-01-01');
         $corte = new DateTimeImmutable('2026-06-30');
@@ -60,9 +61,7 @@ final class GuardarConfiguracionTest extends TestCase
 
         $repo = $this->createMock(ConfiguracionRepository::class);
         $repo->method('get')->willReturn($actual);
-        $repo->expects(self::once())->method('guardar')->with(self::callback(
-            static fn (ConfiguracionCentro $c): bool => $c->centro === 'Montagut',
-        ));
+        $repo->expects(self::once())->method('guardar');
 
         $centros = $this->createMock(CentroRepository::class);
         $centros->method('porId')->willReturn($centro);

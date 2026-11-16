@@ -48,6 +48,7 @@ const I18N_SALDOS = {
   apuntesSinCuadrar: <?= json_encode(_("Apuntes A sin cuadrar."), JSON_UNESCAPED_UNICODE) ?>,
   sugerencia: <?= json_encode(_(" Sugerencia: apunte P/A concepto "), JSON_UNESCAPED_UNICODE) ?>,
   verApuntesA: <?= json_encode(_("Ver apuntes A"), JSON_UNESCAPED_UNICODE) ?>,
+  verApuntesOrigen: <?= json_encode(_("Ver los apuntes %s de esta persona"), JSON_UNESCAPED_UNICODE) ?>,
   caja: <?= json_encode(_("Caja"), JSON_UNESCAPED_UNICODE) ?>,
   banco: <?= json_encode(_("Banco"), JSON_UNESCAPED_UNICODE) ?>,
   saldoCcGlobal: <?= json_encode(_("Saldo contable global (IX 613 P)"), JSON_UNESCAPED_UNICODE) ?>,
@@ -112,7 +113,7 @@ function renderComprobaciones(data) {
           q.set('from', '/saldos');
           detalle += ` <a href="/apuntes?${q.toString()}">${esc(I18N_SALDOS.verApuntesA)}</a>`;
         }
-        if (!detalle) detalle = p.coherente ? '—' : esc(p.nota || '');
+        if (!detalle) detalle = p.nota ? esc(p.nota) : '—';
         const cuadreEs = p.cuadre ? (p.cuadre.cuadrado ? '0,00' : esc(p.cuadre.saldo_apuntes_es)) : '—';
         html += `<tr>
           <td>${esc(p.nombre)} (${esc(p.iniciales)})</td>
@@ -157,8 +158,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       const accion = parseSaldoNum(saldable) > 0.001
         ? `<button type="button" class="btn-saldar-deuda" data-iniciales="${esc(p.iniciales)}" data-saldable="${esc(saldable)}">${esc(I18N_SALDOS.saldar)} (${esc(saldable)})</button>`
         : '';
+      // A, C y B distintos de cero enlazan a esos apuntes de la persona para ver de dónde salen.
+      const origenes = ['A', 'C', 'B'];
       tr.innerHTML = `<td>${esc(p.nombre)} (${esc(p.iniciales)})</td>`
-        + celdas.map((v) => `<td class="num">${esc(v)}</td>`).join('')
+        + celdas.map((v, i) => {
+          if (i < 3 && Math.abs(parseSaldoNum(v)) > 0.001) {
+            const q = new URLSearchParams({ cuenta: 'P', origen: origenes[i], iniciales: p.iniciales, from: '/saldos' });
+            if (hasta) q.set('hasta', hasta);
+            return `<td class="num"><a href="/apuntes?${q.toString()}" title="${esc(I18N_SALDOS.verApuntesOrigen.replace('%s', origenes[i]))}">${esc(v)}</a></td>`;
+          }
+          return `<td class="num">${esc(v)}</td>`;
+        }).join('')
         + `<td>${accion}</td>`;
       tb.appendChild(tr);
     });

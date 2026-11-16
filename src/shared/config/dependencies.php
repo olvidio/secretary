@@ -130,6 +130,7 @@ use src\configuracion\application\GuardarConfiguracion;
 use src\configuracion\application\ObtenerConfiguracion;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\configuracion\infrastructure\http\ConfiguracionController;
+use src\configuracion\infrastructure\persistence\ConfiguracionDelEjercicio;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\informes\application\CalcularSaldos;
 use src\informes\application\ComprobarAntes613;
@@ -309,7 +310,17 @@ use function DI\get;
 
 return [
     PDO::class => factory([ConnectionFactory::class, 'fromEnv']),
-    ConfiguracionRepository::class => autowire(PdoConfiguracionRepository::class),
+    // Período (año, modo, fechas) del ejercicio abierto del centro de la sesión;
+    // el resto, de la fila global `configuracion`.
+    ConfiguracionRepository::class => factory(static function (
+        PdoConfiguracionRepository $base,
+        CentroRepository $centros,
+        EjercicioRepository $ejercicios,
+    ): ConfiguracionRepository {
+        $centroId = !empty($_SESSION['centro_id']) ? (int) $_SESSION['centro_id'] : null;
+
+        return new ConfiguracionDelEjercicio($base, $centros, $ejercicios, $centroId);
+    }),
     PersonaRepository::class => autowire(PdoPersonaRepository::class),
     ConceptoRepository::class => autowire(PdoConceptoRepository::class),
     ApunteRepository::class => autowire(PdoApunteRepository::class),

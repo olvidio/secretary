@@ -19,6 +19,21 @@ Fase 3.
 Esta es la trampa que **hay que seguir respetando** en cualquier desarrollo
 posterior sobre esta fase.
 
+**Período por centro (2026-11-16).** `configuracion` es una sola fila para toda la
+base, pero el período es de cada centro. `ConfiguracionRepository` se resuelve con
+`ConfiguracionDelEjercicio`: al leer, año, modo, `fecha_inicio` y `fecha_cierre` salen
+del ejercicio abierto del centro de la sesión (`ejercicios.fecha_corte`); el tipo de
+cierre y la sigla, de `centros` (`tipo_cierre`, `codigo`). Sin sesión se usa el primer
+centro dado de alta. La migración 0098 quitó de `configuracion` las columnas `centro` y
+`num_residentes`; el número de residentes no se guarda en ningún sitio (el 613 G lo
+calcula contando personas). `AmbitoSeeder::sembrar` recibe la sigla de forma
+explícita (solo la importación del Excel, que la lee del fichero) y si no, siembra el
+primer centro. La fila ya no es
+fuente de la fecha de corte: `AmbitoSeeder` no actualiza un ejercicio existente salvo
+en la importación del Excel legado (`sembrar($pdo, true)`), y restaurar una copia de
+centro no escribe sus fechas. Antes, una fecha de otro centro (p. ej. el 01/01 de un
+libro personal) llegaba a la fila y un `db:migrate` la copiaba al ejercicio de Montagut.
+
 `configuracion.fecha_cierre` (el campo legado, singleton, de antes de la Fase 2)
 **no es el final del ejercicio fiscal**: es la fecha de corte hasta la que se han
 introducido apuntes y hasta la que calculan los informes hoy. El final real del

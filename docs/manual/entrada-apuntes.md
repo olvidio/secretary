@@ -47,6 +47,8 @@ En **Entrada G** hay un bloque **Importar extracto del banco** (mismo criterio q
 - **Qué es un CSV.** Es un fichero de texto con los movimientos, una línea por movimiento y los datos separados por comas o punto y coma (termina en `.csv`). Es uno de los formatos que ofrece el banco al descargar los movimientos; también puede ofrecer Excel (`.xls` o `.xlsx`). Sirve cualquiera de los que el programa admite para ese banco.
 - Al cambiar la cabecera (fecha, persona o procedencia) se vacía la lista de lo ya añadido con la cabecera anterior, pero lo que se esté escribiendo en la línea (observaciones, concepto, cantidad) se conserva hasta pulsar **Añadir**.
 - La **fecha de imputación** solo se rellena si el movimiento hay que contarlo otro día: operación el 8 de enero, gasto el 31 de diciembre. Vacía, se usa la de cabecera.
+- Si un gasto general lo paga una persona y se anotan a la vez sus contrapartidas (111, 211, G/11), la fecha de imputación se aplica a todas las líneas.
+- Si se anota suelto un P/211 o un G/11 (o un P/6 o un G/14) con fecha de imputación distinta, el programa recuerda que la otra mitad tiene que llevar la misma fecha de imputación. Si no, P/211 y G/11 caen en meses distintos y no cuadran en Comprobaciones ni en el 613.
 - Los conceptos 41 (banco a caja) y 42 (caja a banco) generan el movimiento completo de una vez, sin fecha de imputación distinta.
 - En Entrada G, un gasto con iniciales anota cuatro líneas: ingreso 111 y gasto 21 en el personal, ingreso 11 en el general, y el gasto. Si no aporta vivienda a generales, solo el gasto.
 - Las plantillas salen en el desplegable de concepto; al elegirlas, solo falta la cantidad.

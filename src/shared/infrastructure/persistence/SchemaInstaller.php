@@ -31,8 +31,8 @@ final class SchemaInstaller
         $this->seedUsuario();
         $this->seedConfig();
         // AmbitoSeeder (Fase 2, D2/D3/D10/D11) se invoca aquí, DESPUÉS de seedConfig():
-        // necesita leer la fila de `configuracion` (centro, año, modo, fechas) para saber
-        // qué centro/ejercicio crear, y en una instalación desde cero esa fila no existe
+        // necesita leer la fila de `configuracion` (año, modo, fechas) para saber qué
+        // ejercicio crear, y en una instalación desde cero esa fila no existe
         // hasta este punto. Es el mismo motivo por el que `db:migrate` (bin/console.php),
         // que NO pasa por aquí, tiene que invocarlo también por su cuenta.
         PlanContableSeeder::sembrar($this->pdo);
@@ -93,11 +93,10 @@ final class SchemaInstaller
         }
         $year = (int) date('Y');
         $st = $this->pdo->prepare(
-            'INSERT INTO configuracion (id, centro, anio, modo_ejercicio, fecha_inicio, fecha_cierre, tipo_cierre, version, updated_at)
-             VALUES (1, :centro, :anio, :modo, :ini, :cie, :tipo, :ver, :upd)'
+            'INSERT INTO configuracion (id, anio, modo_ejercicio, fecha_inicio, fecha_cierre, tipo_cierre, version, updated_at)
+             VALUES (1, :anio, :modo, :ini, :cie, :tipo, :ver, :upd)'
         );
         $st->execute([
-            ':centro' => 'Centro',
             ':anio' => $year,
             ':modo' => 'Año',
             ':ini' => sprintf('%d-01-01', $year),

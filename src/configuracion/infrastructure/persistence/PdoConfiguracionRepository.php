@@ -31,20 +31,19 @@ final class PdoConfiguracionRepository implements ConfiguracionRepository
     {
         $st = $this->pdo->prepare(
             'UPDATE configuracion SET
-                centro = :centro, anio = :anio, modo_ejercicio = :modo,
+                anio = :anio, modo_ejercicio = :modo,
                 fecha_inicio = :ini, fecha_cierre = :cie, tipo_cierre = :tipo,
-                num_residentes = :num, version = :ver,
+                version = :ver,
                 updated_at = :upd
              WHERE id = 1'
         );
+        // La sigla (`centro`) es de cada centro (`centros.codigo`): aquí no se guarda.
         $st->execute([
-            ':centro' => $config->centro,
             ':anio' => $config->anio,
             ':modo' => $config->modoEjercicio,
             ':ini' => (new ConverterDate('date', $config->fechaInicio))->toPg(),
             ':cie' => (new ConverterDate('date', $config->fechaCierre))->toPg(),
             ':tipo' => $config->tipoCierre,
-            ':num' => $config->numResidentes,
             ':ver' => $config->version,
             ':upd' => date('c'),
         ]);
@@ -60,13 +59,13 @@ final class PdoConfiguracionRepository implements ConfiguracionRepository
         }
 
         return new ConfiguracionCentro(
-            (string) $row['centro'],
+            // La sigla la pone ConfiguracionDelEjercicio desde el centro.
+            '',
             (int) $row['anio'],
             (string) $row['modo_ejercicio'],
             $ini,
             $cie,
             (string) $row['tipo_cierre'],
-            $row['num_residentes'] !== null ? (int) $row['num_residentes'] : null,
             $row['version'] !== null ? (string) $row['version'] : null,
         );
     }

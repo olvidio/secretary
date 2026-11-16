@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace src\ambito\application;
 
+use DateTimeImmutable;
 use src\ambito\domain\entity\Ejercicio;
 use src\ambito\domain\services\PeriodoEjercicioTipico;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
@@ -29,7 +30,6 @@ final class SincronizarConfiguracionConEjercicio
             $ejercicio->fechaInicio,
             $ejercicio->fechaCorte,
             $actual->tipoCierre,
-            $actual->numResidentes,
             $actual->version,
         ));
     }

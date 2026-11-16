@@ -16,7 +16,6 @@ final class ConfiguracionCentro
         public readonly DateTimeImmutable $fechaInicio,
         public readonly DateTimeImmutable $fechaCierre,
         public readonly string $tipoCierre,
-        public readonly ?int $numResidentes,
         public readonly ?string $version,
     ) {
     }
@@ -51,7 +50,6 @@ final class ConfiguracionCentro
             $this->fechaInicio,
             $fecha,
             $this->tipoCierre,
-            $this->numResidentes,
             $this->version,
         );
     }
@@ -76,7 +74,6 @@ final class ConfiguracionCentro
             'fecha_inicio' => $this->fechaInicio->format('Y-m-d'),
             'fecha_cierre' => $this->fechaCierre->format('Y-m-d'),
             'tipo_cierre' => $this->tipoCierre,
-            'num_residentes' => $this->numResidentes,
             'version' => $this->version,
             'meses' => $this->periodo()->mesesTranscurridos(),
         ];

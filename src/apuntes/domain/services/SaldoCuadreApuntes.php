@@ -24,6 +24,26 @@ final class SaldoCuadreApuntes
     }
 
     /**
+     * Signo de una fila del listado en el cuadre. La línea «9» que cubre con la
+     * c/c el déficit de una remesa (cantidad negativa) compensa ese exceso de gastos.
+     *
+     * @param array<string, mixed> $apunte
+     * @param array<string, string> $naturalezas
+     */
+    public static function signedFila(array $apunte, array $naturalezas): int
+    {
+        if (!empty($apunte['contrapartida_cc'])) {
+            return Dinero::fromInput((string) ($apunte['cantidad'] ?? '0'))->toCents();
+        }
+
+        return self::signedCents(
+            (string) ($apunte['concepto_codigo'] ?? ''),
+            (string) ($apunte['cantidad'] ?? '0'),
+            $naturalezas,
+        );
+    }
+
+    /**
      * @param list<array<string, mixed>> $apuntes
      * @param array<string, string> $naturalezas
      * @param array<string, int> $personaIdPorIniciales iniciales en minúsculas => persona_id
@@ -51,11 +71,7 @@ final class SaldoCuadreApuntes
                 continue;
             }
             $pid = $personaIdPorIniciales[$ini];
-            $signed = self::signedCents(
-                (string) ($apunte['concepto_codigo'] ?? ''),
-                (string) ($apunte['cantidad'] ?? '0'),
-                $naturalezas,
-            );
+            $signed = self::signedFila($apunte, $naturalezas);
             if (!isset($out[$pid])) {
                 $out[$pid] = ['A' => 0, 'B' => 0, 'C' => 0];
             }

@@ -21,7 +21,14 @@ No se llama «fecha de devengo» al 31/12 si el hecho es del 8/01: es imputació
 - **Fechas distintas** y origen B/C: par enlazado con `asiento_par_id`.
   - Imputación (`tipo=normal`, `fecha` = imputación): concepto contra `PUENTE.PERIODIFICACION`.
   - Tesorería (`tipo=periodificacion`, `fecha` = operación): puente contra caja/banco.
-- Origen A, 41/42 y cierre de mes: no admiten imputación distinta.
+- 41/42 y cierre de mes: no admiten imputación distinta. Origen A sí: la pata de operación va contra la cuenta personal (o DEUDORES en G) en vez de caja/banco.
+- Cadena de contrapartidas (gasto general pagado por una persona: P/111, P/211, G/11, G/gasto): la imputación se aplica a **todas** las líneas. Antes solo a la última, y P/211 y G/11 caían en meses distintos.
+
+## Avisos
+
+- Al anotar P/211, G/11, P/6 o G/14 sueltos con imputación distinta, la API devuelve `avisos` (`AvisoImputacionVivienda`): la otra mitad tiene que llevar la misma imputación.
+- Comprobaciones explica las diferencias P/211–G/11 que son solo de fechas (`DesfaseImputacionVivienda`).
+- El 613 muestra los pares a caballo de la fecha de cierre (`periodificacionesAbiertas` + `NotasPeriodificacion613`) como aclaración, no como error, con un botón que copia el texto a Observaciones.
 
 La UI de entrada sigue siendo un solo formulario. El listado de apuntes fusiona el par en una fila (fecha = operación, anotación de imputación).
 

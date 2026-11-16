@@ -328,7 +328,10 @@ operación** y **fecha de imputación**.
 - Si no coinciden y hay tesorería (origen B/C): dos asientos enlazados contra
   `PUENTE.PERIODIFICACION` (concepto en la imputación, caja/banco en la operación).
   El secretario sigue viendo **un** formulario; no piensa en debe/haber.
-- Origen A, traspasos 41/42 y cierre de mes no admiten imputación distinta.
+- Traspasos 41/42 y cierre de mes no admiten imputación distinta. Origen A sí (revisión
+  2026-11-16): la pata de operación va contra la cuenta personal o DEUDORES en lugar de
+  caja/banco. Una cadena de contrapartidas (P/111, P/211, G/11, G/gasto) es una sola
+  operación y lleva la misma imputación en todas sus líneas.
 - No hay tercer campo: `created_at` ya es la entrada en el sistema.
 - **Excepción a «solo el ejercicio abierto admite asientos»:** la pata de imputación
   puede escribirse en el ejercicio anterior cerrado si la operación vive en el abierto;

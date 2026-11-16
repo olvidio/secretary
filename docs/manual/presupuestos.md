@@ -19,7 +19,7 @@ En el libro P, las cifras se pueden generar primero en **Previsión personal** (
 ## Cómo se usa
 
 1. Abrir «Presupuesto P» o «Presupuesto G», según el libro que se quiera presupuestar.
-2. Elegir el **año** en el desplegable (por defecto el **ejercicio abierto** en sesión; puede elegirse el siguiente para planificar). Al guardar un año que aún no existía, se crea en estado planificado.
+2. Elegir el **año** en el desplegable. Por defecto sale el **ejercicio siguiente** al abierto, que es el que se presupuesta (igual que en Previsión); puede elegirse el abierto para consultarlo o corregirlo. Al guardar un año que aún no existía, se crea en estado planificado.
 3. **Presupuesto P** y **Presupuesto G** usan la misma estructura que el 613 P y el 613 G (o 613 G-D en centro sg): capítulos, subtotales y celdas azules editables. Escribir en cada casilla el importe previsto para todo el año, en euros enteros.
 4. Pulsar «Guardar»; aparece el aviso «Guardado».
 

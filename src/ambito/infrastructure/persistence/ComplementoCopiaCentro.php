@@ -24,7 +24,6 @@ final class ComplementoCopiaCentro
     {
         return [
             'centro' => $this->exportarCentro($centroId),
-            'configuracion' => $this->exportarConfiguracion(),
             'ejercicios' => $this->exportarEjercicios($centroId),
             'cuentas_fisicas' => $this->exportarFisicas($centroId),
             'personas' => $this->exportarPersonas($centroId),
@@ -55,9 +54,6 @@ final class ComplementoCopiaCentro
     {
         if (is_array($datos['centro'] ?? null)) {
             $this->restaurarCentro($centroId, $datos['centro']);
-        }
-        if (is_array($datos['configuracion'] ?? null)) {
-            $this->restaurarConfiguracion($datos['configuracion']);
         }
         if (array_key_exists('ejercicios', $datos)) {
             $this->restaurarEjercicios($centroId, $datos['ejercicios']);
@@ -210,56 +206,6 @@ final class ComplementoCopiaCentro
             ->execute([':p' => (int) $planId, ':id' => $centroId]);
     }
 
-    /** @return array<string, mixed>|null */
-    private function exportarConfiguracion(): ?array
-    {
-        $row = $this->pdo->query('SELECT * FROM configuracion WHERE id = 1')->fetch();
-        if (!is_array($row)) {
-            return null;
-        }
-        $ini = $this->fecha($row['fecha_inicio']);
-        $cie = $this->fecha($row['fecha_cierre']);
-        if ($ini === null || $cie === null) {
-            return null;
-        }
-
-        return [
-            'centro' => (string) $row['centro'],
-            'anio' => (int) $row['anio'],
-            'modo_ejercicio' => (string) $row['modo_ejercicio'],
-            'fecha_inicio' => $ini,
-            'fecha_cierre' => $cie,
-            'tipo_cierre' => (string) $row['tipo_cierre'],
-            'num_residentes' => $row['num_residentes'] !== null ? (int) $row['num_residentes'] : null,
-            'version' => $row['version'] !== null ? (string) $row['version'] : null,
-        ];
-    }
-
-    /** @param array<string, mixed> $fila */
-    private function restaurarConfiguracion(array $fila): void
-    {
-        $ini = $this->fecha($fila['fecha_inicio'] ?? null);
-        $cie = $this->fecha($fila['fecha_cierre'] ?? null);
-        if ($ini === null || $cie === null) {
-            return;
-        }
-        $st = $this->pdo->prepare(
-            'UPDATE configuracion SET centro = :centro, anio = :anio, modo_ejercicio = :modo,
-                    fecha_inicio = :ini, fecha_cierre = :cie, tipo_cierre = :tipo,
-                    num_residentes = :num, version = :ver, updated_at = now()
-             WHERE id = 1'
-        );
-        $st->execute([
-            ':centro' => (string) ($fila['centro'] ?? ''),
-            ':anio' => (int) ($fila['anio'] ?? 0),
-            ':modo' => (string) ($fila['modo_ejercicio'] ?? 'Año'),
-            ':ini' => $ini,
-            ':cie' => $cie,
-            ':tipo' => (string) ($fila['tipo_cierre'] ?? 'vivienda'),
-            ':num' => $fila['num_residentes'] ?? null,
-            ':ver' => $fila['version'] ?? null,
-        ]);
-    }
 
     /** @return list<array<string, mixed>> */
     private function exportarEjercicios(int $centroId): array

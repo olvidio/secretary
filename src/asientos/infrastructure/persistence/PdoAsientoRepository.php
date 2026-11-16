@@ -1072,6 +1072,48 @@ final class PdoAsientoRepository implements AsientoRepository
         return $id === false ? null : (int) $id;
     }
 
+    public function periodificacionesAbiertas(int $centroId, string $corte): array
+    {
+        // Pata de imputación (tipo normal, concepto contra el puente) y su par de
+        // operación (tipo periodificacion). Pueden vivir en ejercicios distintos.
+        $st = $this->pdo->prepare(
+            "SELECT a.libro, a.fecha AS imputacion, par.fecha AS operacion,
+                    COALESCE(per.iniciales, '') AS iniciales, COALESCE(a.glosa, '') AS glosa,
+                    c.codigo_maestro AS codigo, c.nombre,
+                    ABS(SUM(m.debe - m.haber)) AS cents
+             FROM asientos a
+             INNER JOIN asientos par ON par.id = a.asiento_par_id
+               AND par.tipo = 'periodificacion' AND par.anulado_at IS NULL
+             INNER JOIN movimientos m ON m.asiento_id = a.id
+             INNER JOIN cuentas c ON c.id = m.cuenta_id AND c.tipo <> 'puente'
+             LEFT JOIN personas per ON per.id = a.persona_id
+             WHERE c.centro_id = :centro
+               AND a.tipo <> 'periodificacion'
+               AND a.anulado_at IS NULL
+               AND ((a.fecha <= :corte AND par.fecha > :corte) OR (a.fecha > :corte AND par.fecha <= :corte))
+             GROUP BY a.id, a.libro, a.fecha, par.fecha, per.iniciales, a.glosa, c.codigo_maestro, c.nombre
+             HAVING SUM(m.debe - m.haber) <> 0
+             ORDER BY a.libro, a.fecha, a.id"
+        );
+        $st->execute([':centro' => $centroId, ':corte' => $corte]);
+
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $out[] = [
+                'libro' => (string) $row['libro'],
+                'imputacion' => (string) $row['imputacion'],
+                'operacion' => (string) $row['operacion'],
+                'iniciales' => (string) $row['iniciales'],
+                'glosa' => (string) $row['glosa'],
+                'codigo' => (string) $row['codigo'],
+                'nombre' => (string) $row['nombre'],
+                'cents' => (int) $row['cents'],
+            ];
+        }
+
+        return $out;
+    }
+
     public function anularAsignacionConLiquidacion(int $asignacionId, int $liquidacionId): void
     {
         $transaccionPropia = !$this->pdo->inTransaction();

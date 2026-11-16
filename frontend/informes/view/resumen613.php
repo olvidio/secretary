@@ -19,6 +19,11 @@ $codigo613 = ($cuenta === 'G' && !empty($esCentroSg)) ? 'G-D' : $cuenta;
             <ul id="avisos-613-lista"></ul>
             <p class="muted"><?= _("Las cifras se pueden ver igualmente, pero pueden no ser las definitivas.") ?></p>
         </div>
+        <div id="avisos-613-notas" class="avisos-613-notas" hidden>
+            <p><strong><?= _("Para tener en cuenta (no es un error):") ?></strong> <?= _("estos movimientos se cuentan en una fecha y su contrapartida va en otra, a distinto lado de la fecha de cierre. Por eso el saldo final o las cuentas personales pueden no ser los esperados.") ?></p>
+            <ul id="avisos-613-notas-lista"></ul>
+            <p><button type="button" id="btn-notas-obs"><?= _("Añadir a observaciones") ?></button> <span id="notas-obs-msg" class="ok" hidden><?= _("Añadido a las observaciones.") ?></span></p>
+        </div>
     </section>
 
     <article class="informe-613" id="informe-613">

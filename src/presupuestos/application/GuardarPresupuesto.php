@@ -79,7 +79,8 @@ final class GuardarPresupuesto
         $opts = $this->hoja->opcionesPrevision();
         $etiqueta = trim((string) ($etiquetaObjetivo ?? ''));
         if ($etiqueta === '') {
-            $etiqueta = (string) ($opts['etiqueta_trabajo'] ?? $opts['etiqueta_defecto']);
+            // Por defecto el ejercicio siguiente (el que se presupuesta), como la previsión.
+            $etiqueta = (string) ($opts['etiqueta_defecto'] ?? $opts['etiqueta_trabajo']);
         }
         $permitidas = $opts['etiquetas'];
         if (!in_array($etiqueta, $permitidas, true)) {
