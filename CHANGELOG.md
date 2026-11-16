@@ -10,10 +10,11 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.43] — 2026-11-16
+
 ### Añadido
 - **613 P y 613 G · avisos antes de enviar**: al abrir el resumen, un recuadro (que no se imprime) avisa de lo que conviene resolver antes: cuentas personales descuadradas, deuda de vivienda sin saldar, P/211 que no cuadra con G/11, meses sin movimiento, meses sin cierre de vivienda y cierre del mes sin generar o desactualizado. Cada aviso dice qué hacer y lleva a Saldos, Comprobaciones, Cierre de mes o Apuntes. Al imprimir o descargar el PDF con avisos pendientes, pregunta antes. Mientras se comprueba, la hoja ya se ve y el recuadro dice «Haciendo comprobaciones, espera un momento…».
 - **Comprobaciones · partidas 7 apuntadas dos veces**: avisa cuando una asignación de destinos 7 anotada al confirmar coincide con otro apunte de la misma persona, partida e importe (normalmente la remesa con la transferencia). El botón «Anular asignación» la quita junto con su liquidación de c/c: el gasto queda una vez, el 111 no cambia y la c/c recupera el importe. También sale en los avisos del 613.
-
 - **Fechas de imputación · avisos y aclaraciones**: al anotar suelto un P/211, G/11, P/6 o G/14 con fecha de imputación distinta, el programa recuerda poner la misma a la otra mitad. Comprobaciones explica las diferencias de vivienda que son solo de fechas, y el 613 enseña como «Para tener en cuenta» los movimientos que se cuentan antes de la fecha de cierre con la contrapartida después (o al revés), con un botón para copiarlos a Observaciones.
 
 ### Cambiado
