@@ -6,6 +6,7 @@ namespace src\informes\infrastructure\http;
 
 use InvalidArgumentException;
 use src\informes\application\CalcularSaldos;
+use src\informes\application\ComprobarAntes613;
 use src\informes\application\ComprobarPersonalesGenerales;
 use src\informes\application\ComprobarSaldos;
 use src\informes\application\GuardarInforme613Mes;
@@ -26,6 +27,7 @@ final class InformeController
         private readonly ComprobarSaldos $comprobarSaldos,
         private readonly ComprobarPersonalesGenerales $comprobarPersonalesGenerales,
         private readonly GuardarInforme613Mes $guardarInforme613Mes,
+        private readonly ComprobarAntes613 $comprobarAntes613,
     ) {
     }
 
@@ -33,6 +35,11 @@ final class InformeController
     {
         $cuenta = strtoupper((string) ($vars['cuenta'] ?? 'P'));
         return ContestarJson::ok($this->resumen613->ejecutar($cuenta));
+    }
+
+    public function avisos613(Request $request, array $vars = []): Response
+    {
+        return ContestarJson::ok($this->comprobarAntes613->ejecutar());
     }
 
     public function guardarManual613(Request $request, array $vars): Response

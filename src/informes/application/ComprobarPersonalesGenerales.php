@@ -7,7 +7,10 @@ namespace src\informes\application;
 use DateTimeImmutable;
 use src\ambito\application\ResolverAmbitoActual;
 use src\apuntes\application\ListarApuntes;
+use src\asientos\domain\contracts\AsientoRepository;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
+use src\disponible\domain\services\DetectorLaboresDuplicadas;
+use src\shared\domain\value_objects\Dinero;
 use src\informes\domain\services\CuadreViviendaGenerales;
 use src\informes\domain\services\MesesSinMovimiento;
 use src\personas\domain\contracts\PersonaRepository;
@@ -22,6 +25,7 @@ final class ComprobarPersonalesGenerales
         private readonly ResolverAmbitoActual $ambito,
         private readonly CuadreViviendaGenerales $cuadreVivienda,
         private readonly MesesSinMovimiento $mesesSinMovimiento,
+        private readonly AsientoRepository $asientos,
     ) {
     }
 
@@ -107,6 +111,7 @@ final class ComprobarPersonalesGenerales
                     . 'Quien no aporta a G debe dejar la exención vacía en Nombres para entrar aquí.',
                 'personas' => $sinMovimiento['por_persona'],
             ],
+            $this->comprobarLaboresDuplicadas($contexto->centroId, $contexto->ejercicioId, $hastaStr, $personasVivienda),
         ];
 
         $ok = array_reduce(
@@ -119,6 +124,57 @@ final class ComprobarPersonalesGenerales
             'hasta' => $hastaStr,
             'ok' => $ok,
             'comprobaciones' => $comprobaciones,
+        ];
+    }
+
+    /**
+     * @param list<array{iniciales: string, nombre: string, aporta: bool}> $personas
+     * @return array<string, mixed>
+     */
+    private function comprobarLaboresDuplicadas(int $centroId, int $ejercicioId, string $hasta, array $personas): array
+    {
+        $nombres = [];
+        foreach ($personas as $p) {
+            $nombres[strtolower($p['iniciales'])] = $p['nombre'];
+        }
+        $pares = DetectorLaboresDuplicadas::detectar($this->asientos->movimientosLabores($centroId, $ejercicioId, $hasta));
+        $total = 0;
+        $duplicados = [];
+        foreach ($pares as $par) {
+            $total += $par['cents'];
+            $duplicados[] = [
+                'iniciales' => $par['iniciales'],
+                'nombre' => $nombres[strtolower($par['iniciales'])] ?? $par['iniciales'],
+                'codigo' => $par['codigo'],
+                'importe_es' => Dinero::fromCents($par['cents'])->formatEs(),
+                'asignacion' => [
+                    'asiento_id' => $par['asignacion']['asiento_id'],
+                    'numero' => $par['asignacion']['numero'],
+                    'fecha' => $par['asignacion']['fecha'],
+                ],
+                'otro' => [
+                    'asiento_id' => $par['otro']['asiento_id'],
+                    'numero' => $par['otro']['numero'],
+                    'fecha' => $par['otro']['fecha'],
+                    'tipo' => $par['otro']['tipo'],
+                ],
+            ];
+        }
+        $ok = $duplicados === [];
+
+        return [
+            'id' => 'labores_duplicadas',
+            'titulo' => _('Partidas 7 apuntadas dos veces'),
+            'ok' => $ok,
+            'mensaje' => $ok
+                ? _('Ninguna asignación de destinos 7 coincide con otro apunte de la misma persona, partida e importe.')
+                : sprintf(
+                    _('%d asignación(es) de destinos 7 coinciden con otro apunte de la misma persona, partida e importe (%s € en total): ese gasto 7 cuenta dos veces.'),
+                    count($duplicados),
+                    Dinero::fromCents($total)->formatEs(),
+                ),
+            'ayuda' => _('Pasa con asignaciones confirmadas antes de que los gastos 7 se apuntaran al aceptar la remesa: el gasto se anotó al confirmar y otra vez cuando llegó la remesa con la transferencia. «Anular asignación» quita la asignación y su liquidación de c/c: el gasto queda una sola vez (el de la remesa), el 111 no cambia y la c/c de la persona recupera ese importe. Si los dos apuntes son de verdad dos donativos distintos por el mismo importe, no hay que anular nada.'),
+            'duplicados' => $duplicados,
         ];
     }
 

@@ -145,12 +145,62 @@
     return `613_${libro}_${centro}_${cierre}.pdf`;
   }
 
+  const RUTAS_DESTINO = {
+    saldos: '/saldos',
+    comprobaciones: '/comprobaciones',
+    cierre: '/cierre',
+    apuntes: '/apuntes',
+  };
+  let avisosPendientes = false;
+  let comprobando = false;
+
+  async function cargarAvisos() {
+    const sec = document.getElementById('avisos-613');
+    const espera = document.getElementById('avisos-613-espera');
+    const contenido = document.getElementById('avisos-613-contenido');
+    comprobando = true;
+    sec.hidden = false;
+    espera.hidden = false;
+    contenido.hidden = true;
+    let r;
+    try {
+      r = await api('/api/informes/613/avisos');
+    } finally {
+      comprobando = false;
+      espera.hidden = true;
+    }
+    if (!r.ok || !r.aplica || !(r.avisos || []).length) {
+      sec.hidden = true;
+      return;
+    }
+    contenido.hidden = false;
+    const i18n = window.I18N_AVISOS_613 || { destinos: {} };
+    const ul = document.getElementById('avisos-613-lista');
+    ul.innerHTML = r.avisos.map((a) => {
+      const href = RUTAS_DESTINO[a.destino];
+      const enlace = href
+        ? ` <a href="${href}?from=${encodeURIComponent(location.pathname)}">${esc(i18n.destinos[a.destino] || a.destino)}</a>`
+        : '';
+      return `<li><strong>${esc(a.titulo)}.</strong> ${esc(a.mensaje)}`
+        + (a.que_hacer ? `<br><span class="comprobacion-ayuda">${esc(a.que_hacer)}</span>` : '')
+        + `${enlace}</li>`;
+    }).join('');
+    avisosPendientes = true;
+  }
+
+  function confirmarSiHayAvisos() {
+    if (comprobando) return confirm(window.I18N_AVISOS_613?.confirmarComprobando || '');
+    if (!avisosPendientes) return true;
+    return confirm(window.I18N_AVISOS_613?.confirmar || '');
+  }
+
   function imprimirInforme613() {
     document.body.classList.add('informe-613-imprimiendo');
     window.print();
   }
 
   async function generarPdf() {
+    if (!confirmarSiHayAvisos()) return;
     const el = document.getElementById('informe-613');
     if (!el || typeof html2pdf === 'undefined') {
       imprimirInforme613();
@@ -174,6 +224,8 @@
 
   document.addEventListener('DOMContentLoaded', async () => {
     document.body.classList.add('informe-613-hoja');
+    // Primero la hoja (rápida); las comprobaciones tardan más y, con la
+    // sesión bloqueada, la retrasarían si fueran a la vez.
     const r = await api('/api/informes/613/' + CUENTA);
     window.__resumen613 = r;
 
@@ -220,7 +272,10 @@
       });
     });
 
-    document.getElementById('btn-imprimir')?.addEventListener('click', imprimirInforme613);
+    cargarAvisos();
+    document.getElementById('btn-imprimir')?.addEventListener('click', () => {
+      if (confirmarSiHayAvisos()) imprimirInforme613();
+    });
     document.getElementById('btn-pdf')?.addEventListener('click', generarPdf);
     window.addEventListener('afterprint', () => {
       document.body.classList.remove('informe-613-imprimiendo');

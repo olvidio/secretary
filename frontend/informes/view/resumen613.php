@@ -12,6 +12,15 @@ $codigo613 = ($cuenta === 'G' && !empty($esCentroSg)) ? 'G-D' : $cuenta;
         · <button type="button" id="btn-pdf"><?= _("Descargar PDF") ?></button>
     </p>
 
+    <section class="aviso-cierre print-hide avisos-613" id="avisos-613" hidden aria-live="polite">
+        <p id="avisos-613-espera" class="avisos-613-espera" hidden><span class="avisos-613-rueda" aria-hidden="true"></span><?= _("Haciendo comprobaciones, espera un momento…") ?></p>
+        <div id="avisos-613-contenido" hidden>
+            <p><strong><?= _("Antes de enviar el resumen, conviene resolver esto:") ?></strong></p>
+            <ul id="avisos-613-lista"></ul>
+            <p class="muted"><?= _("Las cifras se pueden ver igualmente, pero pueden no ser las definitivas.") ?></p>
+        </div>
+    </section>
+
     <article class="informe-613" id="informe-613">
         <header class="informe-613-cab">
             <div class="informe-613-meta">
@@ -125,7 +134,17 @@ $codigo613 = ($cuenta === 'G' && !empty($esCentroSg)) ? 'G-D' : $cuenta;
         </div>
     </article>
 </div>
-<script>window.CUENTA_613 = <?= json_encode($cuenta) ?>;</script>
+<script>window.CUENTA_613 = <?= json_encode($cuenta) ?>;
+window.I18N_AVISOS_613 = {
+  destinos: {
+    saldos: <?= json_encode(_("Ir a Saldos"), JSON_UNESCAPED_UNICODE) ?>,
+    comprobaciones: <?= json_encode(_("Ir a Comprobaciones"), JSON_UNESCAPED_UNICODE) ?>,
+    cierre: <?= json_encode(_("Ir a Cierre de mes"), JSON_UNESCAPED_UNICODE) ?>,
+    apuntes: <?= json_encode(_("Ir a Apuntes"), JSON_UNESCAPED_UNICODE) ?>,
+  },
+  confirmar: <?= json_encode(_("Quedan comprobaciones pendientes (ver el recuadro de arriba). ¿Imprimir igualmente?"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmarComprobando: <?= json_encode(_("Las comprobaciones aún no han terminado. ¿Imprimir igualmente?"), JSON_UNESCAPED_UNICODE) ?>,
+};</script>
 <?php
 $publicJs = dirname(__DIR__, 3) . '/public/js';
 if ($cuenta === 'P'): ?>

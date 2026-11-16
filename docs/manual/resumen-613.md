@@ -15,11 +15,13 @@ Es el resumen mensual que se envía. Compara, capítulo por capítulo, lo presup
 ## Cómo se usa
 
 1. Elegir 613 P o 613 G en el menú. La hoja se pinta con la fecha de cierre del centro.
-2. Rellenar las celdas azules, las únicas que admiten valores escritos a mano, y las Observaciones.
-3. **Imprimir** o **Descargar PDF**. El enlace **Arqueo** lleva al recuento de caja.
+2. Si arriba aparece el recuadro «Antes de enviar el resumen, conviene resolver esto», seguir cada punto: dice qué falla, qué hacer y lleva a la pantalla donde se arregla (Saldos, Comprobaciones, Cierre de mes o Apuntes). Después volver al 613.
+3. Rellenar las celdas azules, las únicas que admiten valores escritos a mano, y las Observaciones.
+4. **Imprimir** o **Descargar PDF**. Si quedan avisos, el programa pregunta antes si se quiere imprimir igualmente. El enlace **Arqueo** lleva al recuento de caja.
 
 ## Reglas que conviene saber
 
+- **Avisos antes de enviar** (solo centro n, en 613 P y 613 G, que dependen del mismo cierre): partida doble; cuentas personales que no suman cero o apuntes A sin cuadrar; deuda de vivienda sin saldar; P/211 que no cuadra con G/11; personas sin movimiento en algún mes; meses anteriores sin cierre de vivienda; y el cierre del mes de la fecha de cierre sin generar o desactualizado (se anotaron gastos o pagos después de generarlo). Son las mismas comprobaciones de **Saldos** y **Comprobaciones**. La hoja se ve igualmente; el recuadro no se imprime.
 - **Previsto**: lo presupuestado para ese concepto, prorrateado. Se multiplica el importe del presupuesto por los meses transcurridos del ejercicio y se divide entre los meses que dura el ejercicio completo. Por eso el primer mes se ve una parte, no el total.
 - **Realizado**: lo anotado desde la fecha de inicio del ejercicio hasta la fecha de cierre.
 - **%**: Realizado entre Previsto, redondeado; en blanco si no hay previsto. Todo sale en euros enteros.
@@ -30,6 +32,7 @@ Es el resumen mensual que se envía. Compara, capítulo por capítulo, lo presup
 
 ## Problemas frecuentes
 
+- **El VIII. Saldo final del 613 P sale negativo**: no es un error de cálculo. Suele deberse a vivienda del cierre aún no saldada (el 211 cuenta como gasto desde que se genera el cierre, aunque el dinero no haya pasado a G), a gastos imputados en el mes cuya contrapartida va después de la fecha de cierre, o a una partida 7 apuntada dos veces. El recuadro de avisos lleva a lo que falta.
 - **El Previsto sale a cero**: falta cargar ese concepto en Presupuesto P o Presupuesto G.
 - **Faltan apuntes del mes**: la hoja corta por la fecha de cierre; hay que actualizarla.
 - **No se guarda una celda azul**: se graba al salir del campo; si se abandona la pantalla con el cursor dentro, se pierde.

@@ -181,6 +181,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/cierre/regularizar', [CierreController::class, 'regularizar']);
     $r->addRoute('POST', '/api/cierre/saldar-deuda', [CierreController::class, 'saldarDeuda']);
 
+    $r->addRoute('GET', '/api/informes/613/avisos', [InformeController::class, 'avisos613']);
     $r->addRoute('GET', '/api/informes/613/{cuenta:P|G}', [InformeController::class, 'resumen613']);
     $r->addRoute('POST', '/api/informes/613/{cuenta:P|G}/manual', [InformeController::class, 'guardarManual613']);
     $r->addRoute('GET', '/api/informes/e37', [InformeController::class, 'e37']);
@@ -274,6 +275,7 @@ return static function (RouteCollector $r): void {
     $r->addRoute('POST', '/api/disponible/ajustar', [DisponibleController::class, 'ajustar']);
     $r->addRoute('POST', '/api/disponible/proponer', [DisponibleController::class, 'proponer']);
     $r->addRoute('POST', '/api/disponible/asignaciones/{id:\d+}/confirmar', [DisponibleController::class, 'confirmar']);
+    $r->addRoute('POST', '/api/disponible/asientos-asignacion/{id:\d+}/anular-duplicada', [DisponibleController::class, 'anularAsignacionDuplicada']);
     $r->addRoute('GET', '/api/disponible/instrucciones-pendientes', [DisponibleController::class, 'instruccionesPendientes']);
     $r->addRoute('POST', '/api/disponible/instrucciones-pendientes/descartar', [DisponibleController::class, 'descartarInstruccion']);
     $r->addRoute('GET', '/api/desgravacion-tramos', [DisponibleController::class, 'tramos']);

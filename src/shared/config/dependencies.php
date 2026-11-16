@@ -132,6 +132,7 @@ use src\configuracion\domain\contracts\ConfiguracionRepository;
 use src\configuracion\infrastructure\http\ConfiguracionController;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\informes\application\CalcularSaldos;
+use src\informes\application\ComprobarAntes613;
 use src\informes\application\ComprobarPersonalesGenerales;
 use src\informes\application\GuardarInforme613Mes;
 use src\informes\application\ObtenerE37;
@@ -629,6 +630,7 @@ return [
     CierreController::class => autowire(),
     InformeController::class => autowire(),
     ComprobarPersonalesGenerales::class => autowire(),
+    ComprobarAntes613::class => autowire(),
     CuadreViviendaGenerales::class => autowire(),
     MesesSinMovimiento::class => autowire(),
     PresupuestoController::class => autowire(),

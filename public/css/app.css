@@ -650,6 +650,15 @@ button[type="button"].arqueo-capuchinos-btn {
 }
 .aviso-cierre p { margin: 0 0 .65rem; }
 .aviso-cierre p:last-child { margin-bottom: 0; }
+.avisos-613-espera { display: flex; align-items: center; gap: .6rem; }
+.avisos-613-espera[hidden] { display: none; }
+.avisos-613-rueda {
+  width: 1rem; height: 1rem; flex: none;
+  border: 2px solid #d69e2e; border-right-color: transparent; border-radius: 50%;
+  animation: avisos-613-girar .8s linear infinite;
+}
+@keyframes avisos-613-girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .avisos-613-rueda { animation: none; } }
 .aviso-saldo-cc {
   max-width: 70ch;
   margin: .85rem 0 0;

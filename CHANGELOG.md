@@ -10,6 +10,13 @@ falta en cada push.
 
 ## [Unreleased]
 
+### Añadido
+- **613 P y 613 G · avisos antes de enviar**: al abrir el resumen, un recuadro (que no se imprime) avisa de lo que conviene resolver antes: cuentas personales descuadradas, deuda de vivienda sin saldar, P/211 que no cuadra con G/11, meses sin movimiento, meses sin cierre de vivienda y cierre del mes sin generar o desactualizado. Cada aviso dice qué hacer y lleva a Saldos, Comprobaciones, Cierre de mes o Apuntes. Al imprimir o descargar el PDF con avisos pendientes, pregunta antes. Mientras se comprueba, la hoja ya se ve y el recuadro dice «Haciendo comprobaciones, espera un momento…».
+- **Comprobaciones · partidas 7 apuntadas dos veces**: avisa cuando una asignación de destinos 7 anotada al confirmar coincide con otro apunte de la misma persona, partida e importe (normalmente la remesa con la transferencia). El botón «Anular asignación» la quita junto con su liquidación de c/c: el gasto queda una vez, el 111 no cambia y la c/c recupera el importe. También sale en los avisos del 613.
+
+### Corregido
+- **Cierre de mes · meses anteriores pendientes**: el aviso «falta el cierre de vivienda» salía en todos los meses con gastos, aunque ya tuvieran su cierre. Ahora solo salen los meses sin ningún cierre, y «Regularizar meses anteriores» solo genera esos.
+
 ## [0.1.42] — 2026-11-15
 
 ### Añadido

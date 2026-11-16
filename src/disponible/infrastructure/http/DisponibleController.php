@@ -7,6 +7,7 @@ namespace src\disponible\infrastructure\http;
 use InvalidArgumentException;
 use src\ambito\application\ResolverAmbitoActual;
 use src\disponible\application\AjustarDisponible;
+use src\disponible\application\AnularAsignacionDuplicada;
 use src\disponible\application\CancelarInstruccionesDestinos7;
 use src\disponible\application\ConfirmarAsignacionLabores;
 use src\disponible\application\ListarInstruccionesDestinos7Pendientes;
@@ -32,12 +33,22 @@ final class DisponibleController
         private readonly ListarInstruccionesDestinos7Pendientes $instruccionesPendientes,
         private readonly CancelarInstruccionesDestinos7 $cancelarInstrucciones,
         private readonly ResolverAmbitoActual $ambito,
+        private readonly AnularAsignacionDuplicada $anularDuplicada,
     ) {
     }
 
     public function listar(Request $request, array $vars = []): Response
     {
         return ContestarJson::ok(['personas' => $this->listar->ejecutar()]);
+    }
+
+    public function anularAsignacionDuplicada(Request $request, array $vars = []): Response
+    {
+        try {
+            return ContestarJson::ok($this->anularDuplicada->ejecutar((int) ($vars['id'] ?? 0)));
+        } catch (InvalidArgumentException | \RuntimeException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
     }
 
     public function ajustar(Request $request, array $vars = []): Response

@@ -1004,4 +1004,100 @@ final class PdoAsientoRepository implements AsientoRepository
                 : null,
         );
     }
+
+    public function movimientosLabores(int $centroId, int $ejercicioId, string $hasta): array
+    {
+        $st = $this->pdo->prepare(
+            "SELECT a.id AS asiento_id, a.numero, a.fecha, a.tipo, a.origen,
+                    COALESCE(m.persona_id, a.persona_id) AS persona_id,
+                    COALESCE(p.iniciales, '') AS iniciales,
+                    c.codigo_maestro AS codigo,
+                    SUM(m.debe - m.haber) AS cents
+             FROM asientos a
+             INNER JOIN movimientos m ON m.asiento_id = a.id
+             INNER JOIN cuentas c ON c.id = m.cuenta_id
+             LEFT JOIN personas p ON p.id = COALESCE(m.persona_id, a.persona_id)
+             WHERE a.ejercicio_id = :ej
+               AND a.libro = 'P'
+               AND a.anulado_at IS NULL
+               AND a.fecha <= :hasta
+               AND c.centro_id = :centro
+               AND c.tipo = 'gasto'
+               AND c.codigo_maestro ~ '^7[0-9]{1,2}$'
+             GROUP BY a.id, a.numero, a.fecha, a.tipo, a.origen,
+                      COALESCE(m.persona_id, a.persona_id), p.iniciales, c.codigo_maestro
+             HAVING SUM(m.debe - m.haber) <> 0
+             ORDER BY a.fecha, a.id"
+        );
+        $st->execute([':ej' => $ejercicioId, ':hasta' => $hasta, ':centro' => $centroId]);
+
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $out[] = [
+                'asiento_id' => (int) $row['asiento_id'],
+                'numero' => (int) $row['numero'],
+                'fecha' => (string) $row['fecha'],
+                'tipo' => (string) $row['tipo'],
+                'origen' => (string) $row['origen'],
+                'persona_id' => $row['persona_id'] !== null ? (int) $row['persona_id'] : null,
+                'iniciales' => (string) $row['iniciales'],
+                'codigo' => (string) $row['codigo'],
+                'cents' => (int) $row['cents'],
+            ];
+        }
+
+        return $out;
+    }
+
+    public function buscarLiquidacionCc(int $ejercicioId, int $personaId, string $fecha, int $cents): ?int
+    {
+        $st = $this->pdo->prepare(
+            "SELECT a.id
+             FROM asientos a
+             INNER JOIN movimientos m ON m.asiento_id = a.id
+             WHERE a.ejercicio_id = :ej
+               AND a.libro = 'P'
+               AND a.tipo = 'asignacion_cc'
+               AND a.anulado_at IS NULL
+               AND a.persona_id = :persona
+               AND a.fecha = :fecha
+             GROUP BY a.id
+             HAVING SUM(m.debe) = :cents
+             ORDER BY a.id
+             LIMIT 1"
+        );
+        $st->execute([':ej' => $ejercicioId, ':persona' => $personaId, ':fecha' => $fecha, ':cents' => $cents]);
+        $id = $st->fetchColumn();
+
+        return $id === false ? null : (int) $id;
+    }
+
+    public function anularAsignacionConLiquidacion(int $asignacionId, int $liquidacionId): void
+    {
+        $transaccionPropia = !$this->pdo->inTransaction();
+        if ($transaccionPropia) {
+            $this->pdo->beginTransaction();
+        }
+        try {
+            $st = $this->pdo->prepare(
+                "UPDATE asientos SET anulado_at = now(), updated_at = now()
+                 WHERE id = :id AND origen = 'asignacion' AND tipo = :tipo AND anulado_at IS NULL"
+            );
+            $st->execute([':id' => $asignacionId, ':tipo' => 'normal']);
+            $n = $st->rowCount();
+            $st->execute([':id' => $liquidacionId, ':tipo' => 'asignacion_cc']);
+            $n += $st->rowCount();
+            if ($n !== 2) {
+                throw new \RuntimeException(_('No se ha podido anular la asignación y su liquidación de c/c.'));
+            }
+            if ($transaccionPropia) {
+                $this->pdo->commit();
+            }
+        } catch (\Throwable $e) {
+            if ($transaccionPropia) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
 }

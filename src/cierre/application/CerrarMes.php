@@ -12,6 +12,7 @@ use src\apuntes\application\CrearApunte;
 use src\apuntes\application\ListarApuntes;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\cierre\application\AplicarSuperavitVivienda;
+use src\cierre\domain\services\ComparadorCierreMes;
 use src\cierre\domain\services\MesesSinCierre;
 use src\cierre\domain\services\RepartoCierre;
 use src\configuracion\domain\contracts\ConfiguracionRepository;
@@ -33,6 +34,14 @@ final class CerrarMes
         private readonly AplicarSuperavitVivienda $superavit,
     ) {
     }
+
+    /**
+     * Memoria de consultas, solo mientras dura pendientes() (que no anota nada).
+     * Al generar o regularizar, los datos cambian a mitad y no se puede usar.
+     *
+     * @var array<string, mixed>|null
+     */
+    private ?array $memo = null;
 
     /** @return array<string, mixed> */
     public function ejecutar(bool $confirmar = true): array
@@ -153,6 +162,107 @@ final class CerrarMes
     }
 
     /**
+     * Qué falta del cierre de vivienda, sin anotar nada: meses anteriores sin
+     * cierre y, en el mes de la fecha de cierre, si el cierre está sin generar
+     * o ya no coincide con lo que saldría ahora (gastos añadidos después).
+     *
+     * @return array{
+     *   meses_anteriores: list<array{ym: string, mes: int, mes_es: string, gastos_es: string}>,
+     *   mes_actual: array{estado: string, diferencias: list<array{iniciales: string, generado_es: string, deberia_es: string}>}
+     * }
+     */
+    public function pendientes(): array
+    {
+        $this->memo = [];
+        try {
+            return $this->calcularPendientes();
+        } finally {
+            $this->memo = null;
+        }
+    }
+
+    /**
+     * @return array{
+     *   meses_anteriores: list<array{ym: string, mes: int, mes_es: string, gastos_es: string}>,
+     *   mes_actual: array{estado: string, diferencias: list<array{iniciales: string, generado_es: string, deberia_es: string}>}
+     * }
+     */
+    private function calcularPendientes(): array
+    {
+        $cfg = $this->config->get();
+        $contexto = $this->ambito->ejecutar();
+        $cierre = $cfg->fechaCierre;
+        $personas = $this->personasDeCentro($contexto->centroId);
+
+        return [
+            'meses_anteriores' => $this->detectarMesesFaltantes($cfg, $contexto)['meses'],
+            'mes_actual' => $this->estadoMes(
+                $cfg,
+                $contexto,
+                $personas,
+                $cierre->modify('first day of this month'),
+                $cierre->modify('last day of this month'),
+            ),
+        ];
+    }
+
+    /**
+     * Lo que anotaría ahora el cierre de un mes frente a lo que ya está anotado.
+     *
+     * @param list<Persona> $personas
+     * @return array{estado: string, diferencias: list<array{iniciales: string, generado_es: string, deberia_es: string}>}
+     */
+    private function estadoMes(
+        ConfiguracionCentro $cfg,
+        ContextoActual $contexto,
+        array $personas,
+        DateTimeImmutable $desde,
+        DateTimeImmutable $hasta,
+    ): array {
+        $reparto = $this->prepararReparto($cfg, $desde, $hasta, $contexto, $personas, (int) $desde->format('n'), true)['reparto'];
+        $deberia = [];
+        foreach ($reparto as $r) {
+            if (!$r['importe']->isZero()) {
+                $ini = strtolower($r['persona']->iniciales);
+                $deberia[$ini] = ($deberia[$ini] ?? 0) + $r['importe']->toCents();
+            }
+        }
+
+        return ComparadorCierreMes::comparar($deberia, $this->cierreGeneradoPorPersona($cfg, $desde, $hasta));
+    }
+
+    /**
+     * G/11 (o G/14) automáticos del mes, por iniciales, en céntimos.
+     *
+     * @return array<string, int>
+     */
+    private function cierreGeneradoPorPersona(
+        ConfiguracionCentro $cfg,
+        DateTimeImmutable $desde,
+        DateTimeImmutable $hasta,
+    ): array {
+        $out = [];
+        foreach ($this->listarApuntes->ejecutar([
+            'desde' => $desde->format('Y-m-d'),
+            'hasta' => $hasta->format('Y-m-d'),
+            'cuenta' => 'G',
+            'concepto' => $cfg->tipoCierre === 'necesidades' ? '14' : '11',
+            'origen' => 'A',
+        ]) as $fila) {
+            if (empty($fila['es_cierre'])) {
+                continue;
+            }
+            $ini = strtolower(trim((string) ($fila['iniciales'] ?? '')));
+            if ($ini === '') {
+                continue;
+            }
+            $out[$ini] = ($out[$ini] ?? 0) + Dinero::fromInput((string) ($fila['cantidad'] ?? '0'))->toCents();
+        }
+
+        return $out;
+    }
+
+    /**
      * @param list<array{persona: Persona, importe: Dinero}> $reparto
      * @return list<array<string, mixed>>
      */
@@ -205,28 +315,14 @@ final class CerrarMes
         foreach ($mesesRevisar as $ym) {
             $desde = new DateTimeImmutable($ym . '-01');
             $hasta = $desde->modify('last day of this month');
-            $mesNum = (int) substr($ym, 5, 2);
-            $preparado = $this->prepararReparto($cfg, $desde, $hasta, $contexto, $personas, $mesNum, true);
-            $gastosEs[$ym] = $preparado['gastos']->formatEs();
-            $reparto = $preparado['reparto'];
-            $requieren[$ym] = $this->repartoGeneraApuntes($reparto);
+            $gastosEs[$ym] = $this->gastosGeneralesDelMes($contexto, $desde, $hasta)->formatEs();
+            // Pendiente solo si hay reparto y ningún automático en el mes. Un cierre
+            // pasado que no coincide con el recálculo de hoy no se marca: regenerarlo
+            // cambiaría la deuda de vivienda ya anotada.
+            $requieren[$ym] = $this->estadoMes($cfg, $contexto, $personas, $desde, $hasta)['estado'] === 'sin_generar';
         }
 
         return $this->mesesSinCierre->ejecutar($mesesRevisar, $requieren, $gastosEs);
-    }
-
-    /**
-     * @param list<array{persona: Persona, importe: Dinero}> $reparto
-     */
-    private function repartoGeneraApuntes(array $reparto): bool
-    {
-        foreach ($reparto as $r) {
-            if (!$r['importe']->isZero()) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function gastosGeneralesDelMes(
@@ -234,6 +330,10 @@ final class CerrarMes
         DateTimeImmutable $desde,
         DateTimeImmutable $hasta,
     ): Dinero {
+        $clave = 'g|' . $desde->format('Y-m-d') . '|' . $hasta->format('Y-m-d');
+        if ($this->memo !== null && isset($this->memo[$clave])) {
+            return $this->memo[$clave];
+        }
         $realizado = $this->asientos->realizadoPorConcepto(
             $contexto->centroId,
             $contexto->ejercicioId,
@@ -248,6 +348,9 @@ final class CerrarMes
             $key = (string) $cod;
             $cents = array_key_exists($key, $realizado) ? $realizado[$key] : 0;
             $gastos = $gastos->add(Dinero::fromCents($cents));
+        }
+        if ($this->memo !== null) {
+            $this->memo[$clave] = $gastos;
         }
 
         return $gastos;
@@ -366,6 +469,11 @@ final class CerrarMes
         $conceptoG = $cfg->tipoCierre === 'necesidades' ? '14' : '11';
         $excluirDesde = $cierreExcluidoDesde?->format('Y-m-d');
         $excluirHasta = $cierreExcluidoHasta?->format('Y-m-d');
+        $clave = 'a|' . $conceptoG . '|' . $desde->format('Y-m-d') . '|' . $hasta->format('Y-m-d')
+            . '|' . ($excluirDesde ?? '') . '|' . ($excluirHasta ?? '');
+        if ($this->memo !== null && isset($this->memo[$clave])) {
+            return $this->memo[$clave];
+        }
         $acumulado = [];
         foreach ($this->listarApuntes->ejecutar([
             'desde' => $desde->format('Y-m-d'),
@@ -393,6 +501,9 @@ final class CerrarMes
         $out = [];
         foreach ($acumulado as $ini => $cents) {
             $out[$ini] = Dinero::fromCents($cents);
+        }
+        if ($this->memo !== null) {
+            $this->memo[$clave] = $out;
         }
 
         return $out;

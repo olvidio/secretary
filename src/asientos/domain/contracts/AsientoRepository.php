@@ -169,4 +169,18 @@ interface AsientoRepository
         string $desde,
         string $hasta,
     ): array;
+
+    /**
+     * Movimientos de partidas 7 (labores) del libro P hasta una fecha, netos
+     * (debe − haber) por asiento, persona y partida.
+     *
+     * @return list<array{asiento_id:int, numero:int, fecha:string, tipo:string, origen:string, persona_id:?int, iniciales:string, codigo:string, cents:int}>
+     */
+    public function movimientosLabores(int $centroId, int $ejercicioId, string $hasta): array;
+
+    /** Id del asiento de liquidación de c/c (asignacion_cc) de esa persona, fecha e importe; null si no hay. */
+    public function buscarLiquidacionCc(int $ejercicioId, int $personaId, string $fecha, int $cents): ?int;
+
+    /** Anula a la vez una asignación de destinos 7 y su liquidación de c/c (las dos o ninguna). */
+    public function anularAsignacionConLiquidacion(int $asignacionId, int $liquidacionId): void;
 }

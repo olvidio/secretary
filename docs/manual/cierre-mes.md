@@ -35,7 +35,8 @@ Al entrar, la pantalla muestra el total de gastos generales del mes, el tipo de 
 - Según el tipo de cierre del centro se anota el gasto de vivienda con su ingreso de generales, o el de necesidades de la casa con la ayuda de los de la casa.
 - Los apuntes generados llevan «automático» en observaciones.
 - Se puede repetir sin miedo: al confirmar, primero se borra el cierre anterior de ese mes y luego se vuelve a generar. Por eso conviene generarlo cuando ya están metidos todos los gastos del mes.
-- La regularización revisa, desde la fecha de inicio del ejercicio hasta el mes anterior al de la fecha de cierre, qué meses tienen gastos generales repartibles pero ningún asiento de cierre. Solo esos meses se pueden regularizar de una vez.
+- La regularización revisa, desde la fecha de inicio del ejercicio hasta el mes anterior al de la fecha de cierre, qué meses tienen algo que repartir pero ningún apunte automático de cierre. Solo esos meses se pueden regularizar de una vez. Un mes que ya tiene su cierre no vuelve a salir, aunque hoy saldría otro importe.
+- El 613 avisa si el cierre del mes de la fecha de cierre no se ha generado o si ya no coincide con lo que se generaría ahora; en ese caso basta con volver a pulsar «Generar apuntes».
 
 ## Problemas frecuentes
 

@@ -21,7 +21,42 @@ const I18N_COMP = {
   si: <?= json_encode(_("sí"), JSON_UNESCAPED_UNICODE) ?>,
   no: <?= json_encode(_("no"), JSON_UNESCAPED_UNICODE) ?>,
   diferencia: <?= json_encode(_("Diferencia"), JSON_UNESCAPED_UNICODE) ?>,
+  partida: <?= json_encode(_("Partida"), JSON_UNESCAPED_UNICODE) ?>,
+  importe: <?= json_encode(_("Importe"), JSON_UNESCAPED_UNICODE) ?>,
+  asignacion: <?= json_encode(_("Asignación"), JSON_UNESCAPED_UNICODE) ?>,
+  otroApunte: <?= json_encode(_("Otro apunte"), JSON_UNESCAPED_UNICODE) ?>,
+  numero: <?= json_encode(_("nº"), JSON_UNESCAPED_UNICODE) ?>,
+  tipos: {
+    remesa: <?= json_encode(_("remesa"), JSON_UNESCAPED_UNICODE) ?>,
+    normal: <?= json_encode(_("apunte"), JSON_UNESCAPED_UNICODE) ?>,
+  },
+  anular: <?= json_encode(_("Anular asignación"), JSON_UNESCAPED_UNICODE) ?>,
+  confirmarAnular: <?= json_encode(_("Se anulará la asignación de %s € a la partida %s de %s del %s y su liquidación de c/c. El gasto queda una sola vez (el del otro apunte), el 111 no cambia y la c/c recupera %s €. ¿Seguir?"), JSON_UNESCAPED_UNICODE) ?>,
+  anulada: <?= json_encode(_("Asignación anulada (%s €)."), JSON_UNESCAPED_UNICODE) ?>,
 };
+function tablaLaboresDuplicadas(c, hasta) {
+  let html = '<table class="comprobacion-personas"><thead><tr>'
+    + '<th>' + esc(I18N_COMP.persona) + '</th><th>' + esc(I18N_COMP.partida) + '</th>'
+    + '<th class="num">' + esc(I18N_COMP.importe) + '</th><th>' + esc(I18N_COMP.asignacion) + '</th>'
+    + '<th>' + esc(I18N_COMP.otroApunte) + '</th><th></th></tr></thead><tbody>';
+  c.duplicados.forEach((d) => {
+    const q = new URLSearchParams({ cuenta: 'P', iniciales: d.iniciales, concepto: d.codigo, from: '/comprobaciones' });
+    if (hasta) q.set('hasta', hasta);
+    const tipo = I18N_COMP.tipos[d.otro.tipo] || d.otro.tipo;
+    html += `<tr class="saldos-alerta">
+      <td>${esc(d.nombre)} (${esc(d.iniciales)})</td>
+      <td>${esc(d.codigo)}</td>
+      <td class="num">${esc(d.importe_es)}</td>
+      <td>${esc(fmtFecha(d.asignacion.fecha))} · ${esc(I18N_COMP.numero)} ${esc(String(d.asignacion.numero))}</td>
+      <td>${esc(fmtFecha(d.otro.fecha))} · ${esc(tipo)} ${esc(I18N_COMP.numero)} ${esc(String(d.otro.numero))}</td>
+      <td><a href="/apuntes?${q.toString()}">${esc(I18N_COMP.apuntes)}</a>
+        · <button type="button" class="btn-anular-asignacion" data-id="${esc(String(d.asignacion.asiento_id))}"
+            data-importe="${esc(d.importe_es)}" data-codigo="${esc(d.codigo)}" data-iniciales="${esc(d.iniciales)}"
+            data-fecha="${esc(fmtFecha(d.asignacion.fecha))}">${esc(I18N_COMP.anular)}</button></td>
+    </tr>`;
+  });
+  return html + '</tbody></table>';
+}
 function tablaPersonasComprobacion(c, hasta) {
   if (c.id === 'meses_sin_movimiento') {
     let html = '<table class="comprobacion-personas"><thead><tr>'
@@ -91,6 +126,9 @@ function renderComprobaciones(data) {
     if (c.personas && c.personas.length) {
       html += tablaPersonasComprobacion(c, data.hasta);
     }
+    if (c.duplicados && c.duplicados.length) {
+      html += tablaLaboresDuplicadas(c, data.hasta);
+    }
     art.innerHTML = html;
     lista.appendChild(art);
   });
@@ -106,6 +144,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderComprobaciones(r);
   }
   document.getElementById('form-comp').onsubmit = (ev) => { ev.preventDefault(); load(); };
+  document.getElementById('comp-lista').addEventListener('click', async (ev) => {
+    const btn = ev.target.closest('.btn-anular-asignacion');
+    if (!btn) return;
+    const imp = btn.dataset.importe;
+    const pregunta = I18N_COMP.confirmarAnular
+      .replace('%s', imp).replace('%s', btn.dataset.codigo).replace('%s', btn.dataset.iniciales)
+      .replace('%s', btn.dataset.fecha).replace('%s', imp);
+    if (!confirm(pregunta)) return;
+    btn.disabled = true;
+    const r = await api('/api/disponible/asientos-asignacion/' + encodeURIComponent(btn.dataset.id) + '/anular-duplicada', { method: 'POST', body: {} });
+    if (!r.ok) {
+      btn.disabled = false;
+      return alert(r.error || 'Error');
+    }
+    alert(I18N_COMP.anulada.replace('%s', r.importe_es));
+    load();
+  });
   load();
 });
 </script>
