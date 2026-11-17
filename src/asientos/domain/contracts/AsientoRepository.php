@@ -178,8 +178,11 @@ interface AsientoRepository
      */
     public function movimientosLabores(int $centroId, int $ejercicioId, string $hasta): array;
 
-    /** Id del asiento de liquidación de c/c (asignacion_cc) de esa persona, fecha e importe; null si no hay. */
-    public function buscarLiquidacionCc(int $ejercicioId, int $personaId, string $fecha, int $cents): ?int;
+    /**
+     * Id del asiento de liquidación de c/c (asignacion_cc) de esa persona, fecha e
+     * importe, de la misma remesa (o de ninguna si $remesaId es null); null si no hay.
+     */
+    public function buscarLiquidacionCc(int $ejercicioId, int $personaId, string $fecha, int $cents, ?int $remesaId = null): ?int;
 
     /**
      * Pares periodificados con una pata a cada lado de la fecha de corte: el

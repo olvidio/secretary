@@ -1049,7 +1049,7 @@ final class PdoAsientoRepository implements AsientoRepository
         return $out;
     }
 
-    public function buscarLiquidacionCc(int $ejercicioId, int $personaId, string $fecha, int $cents): ?int
+    public function buscarLiquidacionCc(int $ejercicioId, int $personaId, string $fecha, int $cents, ?int $remesaId = null): ?int
     {
         $st = $this->pdo->prepare(
             "SELECT a.id
@@ -1061,12 +1061,13 @@ final class PdoAsientoRepository implements AsientoRepository
                AND a.anulado_at IS NULL
                AND a.persona_id = :persona
                AND a.fecha = :fecha
+               AND a.remesa_id IS NOT DISTINCT FROM CAST(:remesa AS bigint)
              GROUP BY a.id
              HAVING SUM(m.debe) = :cents
              ORDER BY a.id
              LIMIT 1"
         );
-        $st->execute([':ej' => $ejercicioId, ':persona' => $personaId, ':fecha' => $fecha, ':cents' => $cents]);
+        $st->execute([':ej' => $ejercicioId, ':persona' => $personaId, ':fecha' => $fecha, ':cents' => $cents, ':remesa' => $remesaId]);
         $id = $st->fetchColumn();
 
         return $id === false ? null : (int) $id;

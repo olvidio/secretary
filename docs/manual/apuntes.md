@@ -17,7 +17,7 @@ Es el listado de todo lo anotado en el centro, con filtros. Sirve para buscar un
 1. Ajustar los filtros: libro (P, G o los dos), procedencia (A, B o C), iniciales, concepto y fechas.
 2. Pulsar «Filtrar». El listado sale ordenado por fecha.
 3. Para corregir una fila, pulsar «Editar»: se abre una ventana con todos los campos y el cursor puesto en observaciones. Guardar aplica el cambio; Escape o «Cancelar» lo descarta.
-4. Para quitar una fila, «Borrar» y confirmar.
+4. Para quitar una fila, «Borrar» y confirmar. Si es una asignación de destinos 7 antigua («Asignación labores», anotada al confirmar en Disponible), pide una segunda confirmación y borra también su liquidación de c/c: la c/c de la persona recupera el importe y el 111 no cambia. El disponible de Disponible no se toca.
 
 ## Reglas que conviene saber
 

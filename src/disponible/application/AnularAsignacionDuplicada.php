@@ -54,7 +54,7 @@ final class AnularAsignacionDuplicada
         }
 
         $fecha = $asiento->fecha->format('Y-m-d');
-        $liquidacion = $this->asientos->buscarLiquidacionCc($contexto->ejercicioId, $asiento->personaId, $fecha, $total);
+        $liquidacion = $this->asientos->buscarLiquidacionCc($contexto->ejercicioId, $asiento->personaId, $fecha, $total, $asiento->remesaId);
         if ($liquidacion === null) {
             throw new InvalidArgumentException(_('No se encuentra la liquidación de c/c de esta asignación; no se anula para no descuadrar el 111.'));
         }

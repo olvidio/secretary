@@ -15,7 +15,12 @@ function enlazarAccionesApunte(tr, a, onSaved) {
   if (del) {
     del.onclick = async () => {
       if (!confirm(t('borrar_apunte_confirm'))) return;
-      const s = await api('/api/apuntes/' + a.id, { method: 'DELETE' });
+      let s = await api('/api/apuntes/' + a.id, { method: 'DELETE' });
+      // Asignación de destinos 7: se borra con su liquidación de c/c, previa confirmación.
+      if (!s.ok && s.confirmar) {
+        if (!confirm(s.error)) return;
+        s = await api('/api/apuntes/' + a.id + '?con_liquidacion=1', { method: 'DELETE' });
+      }
       if (!s.ok) return alert(s.error || t('no_se_pudo_borrar'));
       onSaved();
     };

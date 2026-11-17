@@ -111,9 +111,12 @@ final class ApunteController
     public function delete(Request $request, array $vars): Response
     {
         try {
-            $this->borrar->ejecutar((int) $vars['id']);
+            $aviso = $this->borrar->ejecutar((int) $vars['id'], $request->query('con_liquidacion') === '1');
         } catch (InvalidArgumentException $e) {
             return ContestarJson::error($e->getMessage(), 404);
+        }
+        if ($aviso !== null) {
+            return ContestarJson::error($aviso, 409, ['confirmar' => true]);
         }
 
         return ContestarJson::ok();
