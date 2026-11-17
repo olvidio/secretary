@@ -1882,5 +1882,14 @@
   "La fecha «desde» es posterior a «hasta»": "La data «des de» és posterior a «fins a»",
   "El importe mínimo es mayor que el máximo": "L'import mínim és més gran que el màxim",
   "Fecha no válida: %s": "Data no vàlida: %s",
-  "Importe no válido: %s": "Import no vàlid: %s"
+  "Importe no válido: %s": "Import no vàlid: %s",
+  "Descartados": "Descartats",
+  "Movimientos del extracto cuyo apunte se borró en Apuntes. No vuelven a entrar al importar otra vez el extracto. «Recuperar» los devuelve a Por categorizar.": "Moviments de l'extracte l'apunt dels quals es va esborrar a Apunts. No tornen a entrar en importar de nou l'extracte. «Recuperar» els torna a Per categoritzar.",
+  "No hay movimientos descartados.": "No hi ha moviments descartats.",
+  "Recuperar": "Recuperar",
+  "¿Devolver este movimiento a Por categorizar? Al categorizarlo se volverá a crear su apunte.": "Tornar aquest moviment a Per categoritzar? En categoritzar-lo es tornarà a crear el seu apunt.",
+  "Ese movimiento no está entre los descartados": "Aquest moviment no és entre els descartats",
+  "Este movimiento se descartó al borrar su apunte; recupérelo antes de categorizarlo": "Aquest moviment es va descartar en esborrar el seu apunt; recupereu-lo abans de categoritzar-lo",
+  "Movimientos del extracto que borraste de la lista. No vuelven a entrar al importar otra vez el extracto. «Recuperar» los devuelve a Por categorizar.": "Moviments de l'extracte que vas esborrar de la llista. No tornen a entrar en importar de nou l'extracte. «Recuperar» els torna a Per categoritzar.",
+  "¿Devolver este movimiento a Por categorizar?": "Tornar aquest moviment a Per categoritzar?"
 }
