@@ -1865,5 +1865,22 @@
   "Responda aquí a lo que se le pregunta…": "Respongui aquí al que se li pregunta…",
   "Una liquidación de c/c de destinos 7 no se borra sola; se borra su asignación": "Una liquidació de c/c de destinacions 7 no s'esborra sola; s'esborra la seva assignació",
   "No se encuentra la liquidación de c/c de esta asignación de destinos 7; no se borra para no descuadrar el 111.": "No es troba la liquidació de c/c d'aquesta assignació de destinacions 7; no s'esborra per no desquadrar el 111.",
-  "Es una asignación de destinos 7 y va con su liquidación de c/c (%s €). Se borrarán las dos: la c/c de la persona recupera el importe y el 111 no cambia. ¿Seguir?": "És una assignació de destinacions 7 i va amb la seva liquidació de c/c (%s €). S'esborraran les dues: la c/c de la persona recupera l'import i el 111 no canvia. Continuar?"
+  "Es una asignación de destinos 7 y va con su liquidación de c/c (%s €). Se borrarán las dos: la c/c de la persona recupera el importe y el 111 no cambia. ¿Seguir?": "És una assignació de destinacions 7 i va amb la seva liquidació de c/c (%s €). S'esborraran les dues: la c/c de la persona recupera l'import i el 111 no canvia. Continuar?",
+  "Buscar movimientos": "Cercar moviments",
+  "Este año": "Aquest any",
+  "Año pasado": "L'any passat",
+  "Últimos 12 meses": "Últims 12 mesos",
+  "Caja / banco": "Caixa / banc",
+  "Texto en la nota o la categoría": "Text a la nota o la categoria",
+  "p. ej. farmacia": "p. ex. farmàcia",
+  "Importe mínimo": "Import mínim",
+  "Importe máximo": "Import màxim",
+  "Ningún movimiento cumple el filtro.": "Cap moviment no compleix el filtre.",
+  "movimiento": "moviment",
+  "movimientos": "moviments",
+  "saldo": "saldo",
+  "La fecha «desde» es posterior a «hasta»": "La data «des de» és posterior a «fins a»",
+  "El importe mínimo es mayor que el máximo": "L'import mínim és més gran que el màxim",
+  "Fecha no válida: %s": "Data no vàlida: %s",
+  "Importe no válido: %s": "Import no vàlid: %s"
 }
