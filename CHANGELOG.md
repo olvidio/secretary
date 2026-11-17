@@ -10,6 +10,17 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.44] — 2026-11-17
+
+### Cambiado
+- **613 P y 613 G · letra más grande en papel**: al imprimir y al descargar el PDF, las columnas de cifras son más estrechas y las filas más ajustadas, y la letra pasa de 9,5 a 11,5 puntos. Sigue cabiendo en un A4 aunque salgan todas las filas (212, nueve partidas 7 y concepto 90). Descargar PDF sale ahora igual que la hoja impresa, con las firmas y el código 613 al pie.
+- **613 P · IX propuesto**: la suma de las cuentas personales se recalcula cada vez que se abre la pantalla; solo se guarda si se escribe otra cifra a mano (guardar las Observaciones ya no la fija). Para volver a la calculada, se borra la casilla.
+- **Apuntes · borrar una asignación de destinos 7 antigua**: el asiento «Asignación labores» que se anotaba al confirmar en Disponible ya se puede borrar. Pide una segunda confirmación y borra a la vez su liquidación de c/c: la c/c de la persona recupera el importe y el 111 no cambia.
+
+### Corregido
+- **613 · Descargar PDF corrido**: la hoja salía desplazada a la derecha y cortaba la columna «%».
+- **Anular asignación de destinos 7 · liquidación de otra remesa**: la liquidación de c/c se buscaba solo por persona, fecha e importe y podía coger la de una remesa distinta. Ahora tiene que ser de la misma remesa (o de ninguna).
+
 ## [0.1.43] — 2026-11-16
 
 ### Añadido
