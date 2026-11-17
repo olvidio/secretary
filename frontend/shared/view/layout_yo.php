@@ -26,6 +26,7 @@ if (!empty($contentView) && is_file($contentView)) {
 <nav class="yo-tabbar">
     <a href="/yo" class="<?= ($nav ?? '') === 'yo' ? 'on' : '' ?>"><?= _("Resumen") ?></a>
     <a href="/yo/movimientos" class="<?= ($nav ?? '') === 'yo-movimientos' ? 'on' : '' ?>"><?= _("Lista") ?></a>
+    <a href="/yo/buscar" class="<?= ($nav ?? '') === 'yo-buscar' ? 'on' : '' ?>"><?= _("Buscar") ?></a>
     <a href="/yo/banco" class="<?= ($nav ?? '') === 'yo-banco' ? 'on' : '' ?>"><?= _("Banco") ?></a>
     <a href="/yo/categorias" class="<?= ($nav ?? '') === 'yo-categorias' ? 'on' : '' ?>"><?= _("Categorías") ?></a>
     <?php if (!empty($mostrarRemesas)): ?>

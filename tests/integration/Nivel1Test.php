@@ -269,8 +269,8 @@ final class Nivel1Test extends TestCase
                     $cuentas,
                 ),
             ),
-            'listarA' => new ListarMovimientosPersonales($resolverA, $asientos, $cuentas, new PdoPlantillaApunteRepository($this->pdo)),
-            'listarB' => new ListarMovimientosPersonales($resolverB, $asientos, $cuentas, new PdoPlantillaApunteRepository($this->pdo)),
+            'listarA' => new ListarMovimientosPersonales($resolverA, $asientos, $cuentas, new PdoPlantillaApunteRepository($this->pdo), $ejercicios),
+            'listarB' => new ListarMovimientosPersonales($resolverB, $asientos, $cuentas, new PdoPlantillaApunteRepository($this->pdo), $ejercicios),
             'subcuentaA' => new CrearSubcuentaPersonal($resolverA, $cuentas),
             'saldos' => new CalcularSaldos(
                 $asientos,

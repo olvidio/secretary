@@ -7,6 +7,7 @@ namespace src\personal\infrastructure\http;
 use InvalidArgumentException;
 use src\personal\application\ActualizarMovimientoPersonal;
 use src\personal\application\BorrarCierrePersonalMes;
+use src\personal\application\BuscarMovimientosPersonales;
 use src\personal\application\BorrarMovimientoPersonal;
 use src\personal\application\DesdoblarMovimientoPersonal;
 use src\personal\application\CrearSubcuentaPersonal;
@@ -44,6 +45,7 @@ final class PersonalController
         private readonly BorrarCierrePersonalMes $borrarCierreMes,
         private readonly RemanentePersonal $remanente,
         private readonly ListarGastosOrdinarios $ordinarios,
+        private readonly BuscarMovimientosPersonales $buscar,
     ) {
     }
 
@@ -66,6 +68,19 @@ final class PersonalController
             'movimientos' => $this->listar->ejecutar($periodo['desde'], $periodo['hasta']),
             'fecha_cierre' => $periodo['fecha_cierre'],
         ]);
+    }
+
+    public function buscarMovimientos(Request $request, array $vars = []): Response
+    {
+        $p = [];
+        foreach (['desde', 'hasta', 'sentido', 'categoria_id', 'tesoreria', 'texto', 'importe_min', 'importe_max'] as $k) {
+            $p[$k] = $request->query($k);
+        }
+        try {
+            return ContestarJson::ok($this->buscar->ejecutar($p));
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
     }
 
     public function gastosOrdinarios(Request $request, array $vars = []): Response

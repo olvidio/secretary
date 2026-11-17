@@ -26,6 +26,7 @@ Desde aquí se corrige lo anotado: cada línea tiene un menú con tres puntos (�
 - Las dos partes de un desdoble deben sumar exactamente el importe original; el movimiento antiguo desaparece y quedan dos nuevos.
 - No se pueden desdoblar los traspasos entre caja y banco ni los apuntes repartidos entre dos meses; en esos casos la opción sale en gris.
 - Lo que ha llegado del envío mensual al centro no se toca a mano: se corrige reenviando el mes.
+- Para ver movimientos de otro periodo o solo de una categoría (p. ej. los gastos médicos del año), usar **Buscar** (`/yo/buscar`).
 
 ## Problemas frecuentes
 

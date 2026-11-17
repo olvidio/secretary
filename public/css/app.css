@@ -2136,6 +2136,14 @@ body.admin { margin: 0; background: #f8fafc; }
 .yo-ayuda-bloque .yo-ayuda-cuerpo { margin-top: .5rem; }
 .yo-banco-form { display: grid; gap: .7rem; margin: 1rem 0; }
 .yo-banco-form select, .yo-banco-form input[type=file] { width: 100%; }
+.yo-buscar-form { display: grid; gap: .65rem; margin: 0 0 1rem; background: #fff; padding: .9rem 1rem; border-radius: 12px; }
+.yo-buscar-form label { display: grid; gap: .2rem; font-size: .85rem; color: #475569; min-width: 0; }
+.yo-buscar-form input, .yo-buscar-form select { width: 100%; min-width: 0; box-sizing: border-box; }
+.yo-buscar-fila { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+.yo-buscar-rapido { display: flex; flex-wrap: wrap; gap: .35rem; }
+.yo-buscar-rapido button { font-size: .8rem; padding: .3rem .6rem; border-radius: 999px; }
+.yo-buscar-acciones { display: grid; grid-template-columns: 2fr 1fr; gap: .5rem; }
+.yo-buscar-totales { margin: 0 0 .8rem; }
 .yo-banco-pend-acc {
   display: grid;
   gap: .45rem;

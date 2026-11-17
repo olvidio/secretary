@@ -518,6 +518,11 @@ final class PageController
         return $this->paginaYo('personal/view/movimientos.php', 'yo-movimientos');
     }
 
+    public function yoBuscar(Request $request, array $vars = []): Response
+    {
+        return $this->paginaYo('personal/view/buscar.php', 'yo-buscar');
+    }
+
     public function yoCategorias(Request $request, array $vars = []): Response
     {
         return $this->paginaYo('personal/view/categorias.php', 'yo-categorias');

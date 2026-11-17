@@ -319,12 +319,16 @@
 
   async function pintarLista() {
     const r = await api('/api/yo/movimientos?' + paramsMes());
+    if (!qs('#yo-lista')) return;
+    if (!r.ok) return alert(r.error || t('error'));
+    actualizarTituloMes(r.fecha_cierre);
+    pintarMovimientos(r.movimientos || []);
+  }
+
+  function pintarMovimientos(movs) {
     const ul = qs('#yo-lista');
     const vacia = qs('#yo-lista-vacia');
     if (!ul) return;
-    if (!r.ok) return alert(r.error || t('error'));
-    actualizarTituloMes(r.fecha_cierre);
-    const movs = r.movimientos || [];
     if (vacia) vacia.hidden = movs.length > 0;
     ul.innerHTML = '';
     movs.slice().reverse().forEach((m) => {
@@ -353,6 +357,107 @@
       enlazarMenuMovimiento(li, m);
       ul.appendChild(li);
     });
+  }
+
+  const BUSCAR_CAMPOS = ['desde', 'hasta', 'sentido', 'tesoreria', 'categoria_id', 'texto', 'importe_min', 'importe_max'];
+
+  function isoDe(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function periodoRapido(clave) {
+    const hoy = new Date();
+    const y = hoy.getFullYear();
+    if (clave === 'anio-ant') return [(y - 1) + '-01-01', (y - 1) + '-12-31'];
+    if (clave === 'mes') return [isoDe(new Date(y, hoy.getMonth(), 1)), isoDe(new Date(y, hoy.getMonth() + 1, 0))];
+    if (clave === '12m') return [isoDe(new Date(y - 1, hoy.getMonth(), hoy.getDate() + 1)), isoDe(hoy)];
+    return [y + '-01-01', y + '-12-31'];
+  }
+
+  function rellenarSelectsBuscar() {
+    const cat = qs('#yo-buscar-categoria');
+    if (cat) {
+      const grupos = [['gasto', t('buscar_gastos')], ['ingreso', t('buscar_ingresos')]];
+      grupos.forEach(([tipo, etiqueta]) => {
+        const og = document.createElement('optgroup');
+        og.label = etiqueta;
+        state.categorias.filter((c) => c.tipo === tipo).forEach((c) => {
+          const o = document.createElement('option');
+          o.value = c.id;
+          o.textContent = c.codigo + ' · ' + c.nombre;
+          og.appendChild(o);
+        });
+        if (og.children.length) cat.appendChild(og);
+      });
+    }
+    const tes = qs('#yo-buscar-tesoreria');
+    if (tes) {
+      state.tesoreria.forEach((c) => {
+        if (!c.codigo_maestro) return;
+        const o = document.createElement('option');
+        o.value = c.codigo_maestro;
+        o.textContent = c.nombre;
+        tes.appendChild(o);
+      });
+    }
+  }
+
+  function bindBuscar() {
+    const form = qs('#yo-buscar-form');
+    if (!form) return;
+    rellenarSelectsBuscar();
+    const url = new URLSearchParams(window.location.search);
+    let alguno = false;
+    BUSCAR_CAMPOS.forEach((k) => {
+      if (url.has(k) && form.elements[k]) { form.elements[k].value = url.get(k); alguno = true; }
+    });
+    if (!form.elements.desde.value && !form.elements.hasta.value) {
+      const [d, h] = periodoRapido('anio');
+      form.elements.desde.value = d;
+      form.elements.hasta.value = h;
+    }
+    form.querySelectorAll('[data-periodo]').forEach((b) => {
+      b.onclick = () => {
+        const [d, h] = periodoRapido(b.getAttribute('data-periodo'));
+        form.elements.desde.value = d;
+        form.elements.hasta.value = h;
+        pintarBuscar();
+      };
+    });
+    form.onsubmit = (e) => { e.preventDefault(); pintarBuscar(); };
+    const limpiar = qs('#yo-buscar-limpiar');
+    if (limpiar) {
+      limpiar.onclick = () => {
+        form.reset();
+        const [d, h] = periodoRapido('anio');
+        form.elements.desde.value = d;
+        form.elements.hasta.value = h;
+        qs('#yo-buscar-resultado').hidden = true;
+        history.replaceState(null, '', window.location.pathname);
+      };
+    }
+    if (alguno) pintarBuscar();
+  }
+
+  async function pintarBuscar() {
+    const form = qs('#yo-buscar-form');
+    if (!form) return;
+    const q = new URLSearchParams();
+    BUSCAR_CAMPOS.forEach((k) => {
+      const v = form.elements[k] ? String(form.elements[k].value).trim() : '';
+      if (v !== '') q.set(k, v);
+    });
+    history.replaceState(null, '', window.location.pathname + '?' + q.toString());
+    const r = await api('/api/yo/movimientos/buscar?' + q.toString());
+    if (!r.ok) return alert(r.error || t('error'));
+    qs('#yo-buscar-resultado').hidden = false;
+    const tot = r.totales || {};
+    qs('#yo-buscar-ing').textContent = tot.ingresos_es || '0,00';
+    qs('#yo-buscar-gas').textContent = tot.gastos_es || '0,00';
+    qs('#yo-buscar-resumen').textContent = fmtFecha(r.desde) + ' – ' + fmtFecha(r.hasta) + ' · '
+      + (tot.numero || 0) + ' ' + t(tot.numero === 1 ? 'buscar_movimiento' : 'buscar_movimientos')
+      + ' · ' + t('buscar_saldo') + ' ' + (tot.neto_es || '0,00');
+    pintarMovimientos(r.movimientos || []);
   }
 
   function catsDelSentido(sentido) {
@@ -946,6 +1051,9 @@
       await cargarCategorias();
       await pintarLista();
     }
+    if (nav === 'yo-buscar') {
+      await pintarBuscar();
+    }
     if (nav === 'yo-remesas') {
       await pintarRemesas();
     }
@@ -1335,6 +1443,10 @@
     if (nav === 'yo-movimientos') {
       await cargarCategorias();
       await pintarLista();
+    }
+    if (nav === 'yo-buscar') {
+      await cargarCategorias();
+      bindBuscar();
     }
     if (nav === 'yo-categorias') {
       await pintarCategorias();

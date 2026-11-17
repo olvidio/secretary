@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace src\personal\application;
 
 use src\ambito\domain\contracts\CuentaRepository;
+use src\ambito\domain\contracts\EjercicioRepository;
 use src\ambito\domain\entity\Cuenta;
 use src\apuntes\domain\contracts\PlantillaApunteRepository;
 use src\asientos\domain\contracts\AsientoRepository;
@@ -18,16 +19,50 @@ final class ListarMovimientosPersonales
         private readonly AsientoRepository $asientos,
         private readonly CuentaRepository $cuentas,
         private readonly PlantillaApunteRepository $plantillas,
+        private readonly EjercicioRepository $ejercicios,
     ) {
     }
 
     /**
+     * Movimientos del ejercicio abierto entre dos fechas (el listado del mes).
+     *
      * @return list<array<string, mixed>>
      */
     public function ejecutar(?string $desde, ?string $hasta): array
     {
         $ctx = $this->ambito->ejecutar();
-        $filtros = ['libro' => 'X', 'persona_id' => $ctx->personaId];
+
+        return $this->listar($ctx->centroId, $ctx->personaId, [$ctx->ejercicioId], $desde, $hasta);
+    }
+
+    /**
+     * Movimientos entre dos fechas aunque caigan en ejercicios ya cerrados
+     * (el buscador): se recorren todos los ejercicios del centro que solapan.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function ejecutarEntre(string $desde, string $hasta): array
+    {
+        $ctx = $this->ambito->ejecutar();
+        $ids = [];
+        foreach ($this->ejercicios->listarDeCentro($ctx->centroId) as $ej) {
+            if ($ej->id !== null
+                && $ej->fechaInicio->format('Y-m-d') <= $hasta
+                && $ej->fechaFin->format('Y-m-d') >= $desde) {
+                $ids[] = $ej->id;
+            }
+        }
+
+        return $this->listar($ctx->centroId, $ctx->personaId, $ids, $desde, $hasta);
+    }
+
+    /**
+     * @param list<int> $ejercicioIds
+     * @return list<array<string, mixed>>
+     */
+    private function listar(int $centroId, int $personaId, array $ejercicioIds, ?string $desde, ?string $hasta): array
+    {
+        $filtros = ['libro' => 'X', 'persona_id' => $personaId];
         if ($desde !== null && $desde !== '') {
             $filtros['desde'] = $desde;
         }
@@ -36,26 +71,31 @@ final class ListarMovimientosPersonales
         }
         $nombres = [];
         $porCodigo = [];
-        foreach ($this->cuentas->listarDePersona($ctx->centroId, $ctx->personaId, 'X') as $c) {
+        foreach ($this->cuentas->listarDePersona($centroId, $personaId, 'X') as $c) {
             if ($c->id !== null) {
                 $nombres[$c->id] = $c;
                 $porCodigo[$c->codigo] = $c;
             }
         }
         $codigoPorId = [];
-        foreach ($this->cuentas->listarDeCentro($ctx->centroId) as $c) {
+        foreach ($this->cuentas->listarDeCentro($centroId) as $c) {
             if ($c->id !== null) {
                 $codigoPorId[$c->id] = $c->codigo;
             }
         }
         $asientos = [];
-        foreach ($this->asientos->listar($ctx->ejercicioId, $filtros) as $asiento) {
-            if ($asiento->tipo === 'periodificacion') {
-                continue;
+        foreach ($ejercicioIds as $ejercicioId) {
+            foreach ($this->asientos->listar($ejercicioId, $filtros) as $asiento) {
+                if ($asiento->tipo === 'periodificacion') {
+                    continue;
+                }
+                $asientos[] = $asiento;
             }
-            $asientos[] = $asiento;
         }
-        $nombresPlantilla = $this->nombresPlantilla($ctx->centroId, $asientos);
+        if (count($ejercicioIds) > 1) {
+            usort($asientos, static fn (Asiento $a, Asiento $b): int => [$a->fecha, $a->id] <=> [$b->fecha, $b->id]);
+        }
+        $nombresPlantilla = $this->nombresPlantilla($centroId, $asientos);
         $out = [];
         foreach ($asientos as $asiento) {
             $out[] = $this->fila($asiento, $nombres, $porCodigo, $codigoPorId, $nombresPlantilla);
@@ -137,6 +177,7 @@ final class ListarMovimientosPersonales
             'fecha' => $asiento->fecha->format('Y-m-d'),
             'fecha_operacion' => $asiento->fechaOperacion()->format('Y-m-d'),
             'sentido' => $sentido,
+            'cents' => abs($cents),
             'cantidad' => Dinero::fromCents(abs($cents))->toString(),
             'cantidad_es' => Dinero::fromCents(abs($cents))->formatEs(),
             'nota' => $asiento->glosa,

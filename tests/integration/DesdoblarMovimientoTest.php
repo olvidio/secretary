@@ -135,7 +135,7 @@ final class DesdoblarMovimientoTest extends TestCase
         ]);
         self::assertCount(2, $partidos);
 
-        $movs = (new ListarMovimientosPersonales($resolver, $asientos, $cuentas, new PdoPlantillaApunteRepository($pdo)))
+        $movs = (new ListarMovimientosPersonales($resolver, $asientos, $cuentas, new PdoPlantillaApunteRepository($pdo), $ejercicios))
             ->ejecutar($anio . '-08-01', $anio . '-08-31');
         self::assertCount(2, $movs);
         $importes = array_map(static fn (array $m): float => (float) $m['cantidad'], $movs);
