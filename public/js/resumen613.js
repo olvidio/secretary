@@ -110,8 +110,9 @@
       else body.observaciones_613_g = ta.value;
     }
     if (CUENTA === 'P') {
+      // El IX propuesto (suma de cuentas personales) no se congela: solo se guarda si se ha tocado.
       const scc = document.getElementById('saldo-cc-personales');
-      if (scc) body.saldo_cc_personales = scc.value;
+      if (scc && scc.dataset.tocado === '1') body.saldo_cc_personales = scc.value;
     } else {
       const mes = document.getElementById('rg-cocina-mes');
       const acum = document.getElementById('rg-cocina-acum');
@@ -273,10 +274,15 @@
     const dineroCaja = document.getElementById('rg-dinero-caja');
     const dineroBanco = document.getElementById('rg-dinero-banco');
     if (obs) obs.value = r.observaciones || '';
+    const l9 = r.lineas?.find((l) => l.codigo === '9');
+    const sccPropuesto = l9?.realizado != null && l9.realizado !== ''
+      ? decimalEs(l9.realizado, { vacio: '' }) : '';
     if (scc) {
-      const l9 = r.lineas?.find((l) => l.codigo === '9');
-      const raw = r.saldo_cc_personales ?? l9?.realizado ?? '';
-      scc.value = raw !== '' && raw != null ? decimalEs(raw, { vacio: '' }) : '';
+      const manual = r.saldo_cc_personales;
+      scc.value = manual != null && manual !== '' ? decimalEs(manual, { vacio: '' }) : sccPropuesto;
+      scc.dataset.tocado = '0';
+      scc.title = window.I18N_AVISOS_613?.sccTitulo || '';
+      scc.addEventListener('input', () => { scc.dataset.tocado = '1'; });
     }
     if (cocinaMes) cocinaMes.value = r.media_cocina_mes ? decimalEs(r.media_cocina_mes) : '';
     if (cocinaAcum) cocinaAcum.value = r.media_cocina_acum ? decimalEs(r.media_cocina_acum) : '';
@@ -290,9 +296,14 @@
     }
 
     [obs, scc, cocinaMes, cocinaAcum, dineroCaja, dineroBanco].filter(Boolean).forEach((el) => {
-      el.addEventListener('change', () => {
+      el.addEventListener('change', async () => {
         if (el.classList.contains('informe-613-cocina-input')) formatearInputMoneda(el);
-        guardarConfig613();
+        const ok = await guardarConfig613();
+        // IX vaciado: se borra lo escrito y vuelve la cifra calculada.
+        if (ok && el === scc && scc.value.trim() === '') {
+          scc.value = sccPropuesto;
+          scc.dataset.tocado = '0';
+        }
       });
     });
 

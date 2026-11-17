@@ -149,6 +149,7 @@ window.I18N_AVISOS_613 = {
   },
   confirmar: <?= json_encode(_("Quedan comprobaciones pendientes (ver el recuadro de arriba). ¿Imprimir igualmente?"), JSON_UNESCAPED_UNICODE) ?>,
   confirmarComprobando: <?= json_encode(_("Las comprobaciones aún no han terminado. ¿Imprimir igualmente?"), JSON_UNESCAPED_UNICODE) ?>,
+  sccTitulo: <?= json_encode(_("Se propone la suma de las cuentas personales. Si se escribe otra cifra, se guarda; para volver a la calculada, borrar la casilla."), JSON_UNESCAPED_UNICODE) ?>,
 };</script>
 <?php
 $publicJs = dirname(__DIR__, 3) . '/public/js';

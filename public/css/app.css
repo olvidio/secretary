@@ -1223,6 +1223,40 @@ body.e37-hoja main { max-width: none; }
     display: flex !important;
     margin-top: auto;
   }
+  /* Resumen 613 P/G en papel: columnas de cifras estrechas y filas ajustadas
+     para usar letra más grande. Probado con el caso más largo (613 P con 212,
+     nueve partidas 7 y concepto 90): cabe en un A4 con ~1 cm de holgura. */
+  body.informe-613-hoja #informe-613 {
+    --613-col-desc: 56fr;
+    --613-col-sep: 1fr;
+    --613-col-num: 13fr;
+    --613-col-pct: 8fr;
+    font-size: 11.5pt;
+    line-height: 1.2;
+  }
+  body.informe-613-hoja #informe-613 .informe-613-meta,
+  body.informe-613-hoja #informe-613 .informe-613-resumen-g,
+  body.informe-613-hoja #informe-613 .informe-613-vb-fila,
+  body.informe-613-hoja #informe-613 .informe-613-obs h2,
+  body.informe-613-hoja #informe-613 .informe-613-nota,
+  body.informe-613-hoja #informe-613 .informe-613-firmas { font-size: inherit; }
+  body.informe-613-hoja #informe-613 .informe-613-pie-meta { font-size: .85em; }
+  body.informe-613-hoja #informe-613 .informe-613-tabla col.col-desc { width: 56%; }
+  body.informe-613-hoja #informe-613 .informe-613-tabla col.col-num { width: 13%; }
+  body.informe-613-hoja #informe-613 .informe-613-tabla col.col-sep { width: 1%; }
+  body.informe-613-hoja #informe-613 .informe-613-tabla col.col-pct { width: 8%; }
+  body.informe-613-hoja #informe-613 .informe-613-tabla th.sep,
+  body.informe-613-hoja #informe-613 .informe-613-tabla td.sep { width: auto; }
+  body.informe-613-hoja #informe-613 .informe-613-cols th.num span { min-width: 0; }
+  body.informe-613-hoja #informe-613 .informe-613-tabla th,
+  body.informe-613-hoja #informe-613 .informe-613-tabla td { padding-top: .04em; padding-bottom: .04em; }
+  body.informe-613-hoja #informe-613 .informe-613-tabla tr.sec-divide td { border-top-width: .4em; }
+  body.informe-613-hoja #informe-613 .informe-613-resumen-fila.informe-613-resumen-divide { border-top-width: .4em; }
+  /* Arqueo de G: ocupa hasta la columna Realizado para que las etiquetas no se partan. */
+  body.informe-613-hoja #informe-613 .informe-613-resumen-fila.informe-613-resumen-arqueo {
+    grid-column: 1 / 6;
+    grid-template-columns: 1fr 5.5em 1.1em 1fr 5.5em;
+  }
   body.prevision-hoja .prevision-print-cab {
     display: block;
     font-size: 10pt;
