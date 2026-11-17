@@ -10,6 +10,12 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.46] — 2026-11-17
+
+### Cambiado
+- **Apuntes · borrar un apunte importado del banco del centro**: el movimiento del extracto no se pierde, sino que pasa a **Descartados** (Entrada G → Importar extracto del banco). No vuelve a entrar al reimportar el extracto; si se borró por error, **Recuperar** lo devuelve a Por categorizar.
+- **Mis cuentas · borrar un movimiento importado del banco**: igual que en el centro, pasa a **Descartados** (al final de Banco) y no vuelve a entrar al reimportar el extracto; **Recuperar** lo devuelve a Por categorizar.
+
 ## [0.1.45] — 2026-11-17
 
 ### Añadido
