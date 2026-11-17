@@ -233,16 +233,23 @@
     }
     const btn = document.getElementById('btn-pdf');
     if (btn) btn.disabled = true;
+    // Misma maquetación que al imprimir (ver informe-613-papel en app.css).
+    document.body.classList.add('informe-613-papel', 'informe-613-pdf');
     try {
       await html2pdf().set({
-        margin: [10, 10, 12, 10],
+        margin: 12,
         filename: nombrePdf(window.__resumen613 || {}),
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        // Sin la barra de desplazamiento: si no, la hoja sale corrida y cortada a la derecha.
+        html2canvas: {
+          scale: 2, useCORS: true, letterRendering: true,
+          windowWidth: document.documentElement.clientWidth,
+        },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
       }).from(el).save();
     } finally {
+      document.body.classList.remove('informe-613-papel', 'informe-613-pdf');
       if (btn) btn.disabled = false;
     }
   }
@@ -312,8 +319,11 @@
       if (confirmarSiHayAvisos()) imprimirInforme613();
     });
     document.getElementById('btn-pdf')?.addEventListener('click', generarPdf);
+    window.addEventListener('beforeprint', () => {
+      document.body.classList.add('informe-613-papel');
+    });
     window.addEventListener('afterprint', () => {
-      document.body.classList.remove('informe-613-imprimiendo');
+      document.body.classList.remove('informe-613-imprimiendo', 'informe-613-papel');
     });
   });
 })();
