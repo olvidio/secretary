@@ -23,6 +23,17 @@ interface BancoCentroImportRepository
      */
     public function porId(int $centroId, int $filaId): ?array;
 
+    /**
+     * Suelta las filas importadas de un asiento (asiento_id a NULL) para que
+     * no se borren con él; devuelve sus ids para volver a ligarlas.
+     *
+     * @return list<int>
+     */
+    public function desligarDeAsiento(int $asientoId): array;
+
+    /** @param list<int> $filaIds */
+    public function religarAsiento(array $filaIds, int $asientoId): void;
+
     public function vincularAsiento(
         int $filaId,
         int $asientoId,

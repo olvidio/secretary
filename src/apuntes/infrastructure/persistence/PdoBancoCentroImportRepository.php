@@ -72,6 +72,27 @@ final class PdoBancoCentroImportRepository implements BancoCentroImportRepositor
         return $this->hydrateFila($row);
     }
 
+    public function desligarDeAsiento(int $asientoId): array
+    {
+        $st = $this->pdo->prepare(
+            'UPDATE banco_centro_import_filas SET asiento_id = NULL WHERE asiento_id = :a RETURNING id'
+        );
+        $st->execute([':a' => $asientoId]);
+
+        return array_map('intval', $st->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    public function religarAsiento(array $filaIds, int $asientoId): void
+    {
+        if ($filaIds === []) {
+            return;
+        }
+        $st = $this->pdo->prepare('UPDATE banco_centro_import_filas SET asiento_id = :a WHERE id = :id');
+        foreach ($filaIds as $id) {
+            $st->execute([':a' => $asientoId, ':id' => $id]);
+        }
+    }
+
     public function vincularAsiento(
         int $filaId,
         int $asientoId,

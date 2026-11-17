@@ -6,6 +6,7 @@ namespace src\apuntes\application;
 
 use InvalidArgumentException;
 use PDO;
+use src\apuntes\domain\contracts\BancoCentroImportRepository;
 use src\asientos\domain\value_objects\FilaApunteExcel;
 use src\asientos\domain\contracts\AsientoRepository;
 use Throwable;
@@ -16,6 +17,7 @@ final class ActualizarApunte
         private readonly AsientoRepository $asientos,
         private readonly CrearApunte $crear,
         private readonly PDO $pdo,
+        private readonly BancoCentroImportRepository $bancoImport,
     ) {
     }
 
@@ -41,8 +43,14 @@ final class ActualizarApunte
 
         $this->pdo->beginTransaction();
         try {
+            // Editar es borrar y volver a crear: la huella del extracto (banco del
+            // centro) se pasa al asiento nuevo para que reimportar no lo duplique.
+            $filasBanco = $this->bancoImport->desligarDeAsiento($id);
             $this->asientos->borrar($id);
             $filas = $this->crear->ejecutar($datos);
+            if ($filasBanco !== [] && isset($filas[0])) {
+                $this->bancoImport->religarAsiento($filasBanco, $filas[0]->id);
+            }
             $this->pdo->commit();
 
             return $filas;

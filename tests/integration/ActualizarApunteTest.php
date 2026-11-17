@@ -17,6 +17,7 @@ use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
 use src\apuntes\application\ActualizarApunte;
 use src\apuntes\application\CrearApunte;
 use src\apuntes\application\ListarApuntes;
+use src\apuntes\infrastructure\persistence\PdoBancoCentroImportRepository;
 use src\asientos\domain\services\ProyectorAsientoAFilaExcel;
 use src\asientos\domain\services\TraductorApuntesAAsientos;
 use src\asientos\infrastructure\persistence\PdoAsientoRepository;
@@ -87,8 +88,13 @@ final class ActualizarApunteTest extends TestCase
         ]);
         self::assertCount(1, $filas);
         $id = $filas[0]->id;
+        // Como si viniera de un extracto del banco del centro.
+        $banco = new PdoBancoCentroImportRepository($this->pdo);
+        $banco->guardar($centroId, null, 'sabadell', 'huella-1', $y . '-03-15', '-12.50', 'COMIDA');
+        $filaBanco = (int) $this->pdo->query("SELECT id FROM banco_centro_import_filas WHERE huella = 'huella-1'")->fetchColumn();
+        $banco->vincularAsiento($filaBanco, $id, null, '22');
 
-        $nuevas = (new ActualizarApunte($asientos, $crear, $this->pdo))->ejecutar($id, [
+        $nuevas = (new ActualizarApunte($asientos, $crear, $this->pdo, new PdoBancoCentroImportRepository($this->pdo)))->ejecutar($id, [
             'fecha' => $y . '-03-15',
             'cuenta' => 'P',
             'origen' => 'A',
@@ -101,6 +107,11 @@ final class ActualizarApunteTest extends TestCase
         self::assertSame('super', $nuevas[0]->observaciones);
         self::assertSame('22', $nuevas[0]->conceptoCodigo);
         self::assertSame('12.50', $nuevas[0]->cantidad->toString());
+        // La huella sigue y apunta al asiento nuevo: reimportar no lo duplica.
+        self::assertTrue($banco->existe($centroId, null, 'sabadell', 'huella-1'));
+        $st = $this->pdo->prepare('SELECT asiento_id FROM banco_centro_import_filas WHERE id = :id');
+        $st->execute([':id' => $filaBanco]);
+        self::assertSame($nuevas[0]->id, (int) $st->fetchColumn());
 
         $listados = (new ListarApuntes(
             $asientos,
@@ -154,7 +165,7 @@ final class ActualizarApunteTest extends TestCase
         $id = $filas[0]->id;
 
         try {
-            (new ActualizarApunte($asientos, $crear, $this->pdo))->ejecutar($id, [
+            (new ActualizarApunte($asientos, $crear, $this->pdo, new PdoBancoCentroImportRepository($this->pdo)))->ejecutar($id, [
                 'fecha' => $y . '-03-15',
                 'cuenta' => 'P',
                 'origen' => 'A',
