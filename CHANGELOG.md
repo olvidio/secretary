@@ -10,6 +10,14 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.45] — 2026-11-17
+
+### Añadido
+- **Mis cuentas · Buscar**: nueva pestaña para listar los movimientos del libro personal de cualquier periodo (este año, año pasado, últimos 12 meses, este mes o fechas a mano), filtrando por tipo, categoría (con sus subcategorías), caja o banco, texto de la nota e importe. Muestra el total de ingresos, gastos y saldo, y cada línea se puede editar, desdoblar o borrar como en Lista. El filtro queda en la dirección de la página, para guardarlo en favoritos.
+
+### Corregido
+- **Apuntes · importación del banco del centro**: editar un apunte importado (por ejemplo, para añadir detalles a las observaciones) ya no hace que vuelva a entrar como nuevo al reimportar el extracto.
+
 ## [0.1.44] — 2026-11-17
 
 ### Cambiado
