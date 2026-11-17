@@ -35,6 +35,12 @@
         <p class="muted" id="entrada-banco-otra-vacio" hidden><?= _("No hay movimientos en otra contabilidad.") ?></p>
         <ul id="entrada-banco-otra" class="yo-lista"></ul>
     </details>
+    <details class="yo-ayuda-bloque" id="entrada-banco-desc-bloque">
+        <summary><?= _("Descartados") ?> <span class="muted" id="entrada-banco-desc-cnt" hidden></span></summary>
+        <p class="muted"><?= _("Movimientos del extracto cuyo apunte se borró en Apuntes. No vuelven a entrar al importar otra vez el extracto. «Recuperar» los devuelve a Por categorizar.") ?></p>
+        <p class="muted" id="entrada-banco-desc-vacio" hidden><?= _("No hay movimientos descartados.") ?></p>
+        <ul id="entrada-banco-desc" class="yo-lista"></ul>
+    </details>
 </details>
 <?php endif; ?>
 
@@ -124,6 +130,8 @@ function recordadoClub(clave) {
   try { return localStorage.getItem(clave); } catch (e) { return null; }
 }
 const I18N_ENTRADA = {
+  recuperar: <?= json_encode(_("Recuperar"), JSON_UNESCAPED_UNICODE) ?>,
+  recuperarConfirm: <?= json_encode(_("¿Devolver este movimiento a Por categorizar? Al categorizarlo se volverá a crear su apunte."), JSON_UNESCAPED_UNICODE) ?>,
   plantillas: <?= json_encode(_("Plantillas"), JSON_UNESCAPED_UNICODE) ?>,
   conceptos: <?= json_encode(_("Conceptos"), JSON_UNESCAPED_UNICODE) ?>,
   anadir: <?= json_encode(_("Añadir"), JSON_UNESCAPED_UNICODE) ?>,
@@ -989,7 +997,39 @@ async function pintarImportBancoCentro() {
     }
   }
 
+  async function pintarDescartadosBanco() {
+    const r = await api('/api/banco-centro/descartados');
+    if (!r.ok) return mostrarErrBanco(r.error || 'Error');
+    const ul = document.getElementById('entrada-banco-desc');
+    const vacio = document.getElementById('entrada-banco-desc-vacio');
+    const cnt = document.getElementById('entrada-banco-desc-cnt');
+    if (!ul) return;
+    const filas = r.descartados || [];
+    ul.innerHTML = '';
+    if (vacio) vacio.hidden = filas.length > 0;
+    if (cnt) {
+      cnt.hidden = filas.length === 0;
+      cnt.textContent = filas.length ? '(' + filas.length + ')' : '';
+    }
+    filas.forEach((p) => {
+      const li = document.createElement('li');
+      const imp = String(p.importe || '').replace('.', ',');
+      li.innerHTML = `<span class="meta"><strong>${esc(fmtFecha(p.fecha))} · ${esc(imp)}</strong><small>${esc(p.concepto || '')}</small></span>`
+        + `<button type="button">${esc(I18N_ENTRADA.recuperar)}</button>`;
+      li.querySelector('button').onclick = async (ev) => {
+        if (!confirm(I18N_ENTRADA.recuperarConfirm)) return;
+        ev.target.disabled = true;
+        const s = await api('/api/banco-centro/recuperar', { method: 'POST', body: { fila_id: p.fila_id } });
+        if (!s.ok) { ev.target.disabled = false; alert(s.error || 'Error'); return; }
+        await pintarPendientesBanco();
+        await pintarDescartadosBanco();
+      };
+      ul.appendChild(li);
+    });
+  }
+
   await pintarPendientesBanco();
+  await pintarDescartadosBanco();
 
   form.onsubmit = async (ev) => {
     ev.preventDefault();

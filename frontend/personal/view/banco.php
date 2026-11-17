@@ -45,3 +45,17 @@
 </div>
 <p class="muted" id="yo-banco-otra-vacio" hidden><?= _("No hay movimientos en otra contabilidad.") ?></p>
 <ul id="yo-banco-otra" class="yo-lista"></ul>
+
+<div class="yo-con-ayuda">
+    <h2><?= _("Descartados") ?></h2>
+    <details class="yo-ayuda">
+        <summary aria-label="<?= htmlspecialchars(_("Ayuda"), ENT_QUOTES) ?>">i</summary>
+        <div class="yo-ayuda-cuerpo">
+            <p class="muted">
+                <?= _("Movimientos del extracto que borraste de la lista. No vuelven a entrar al importar otra vez el extracto. «Recuperar» los devuelve a Por categorizar.") ?>
+            </p>
+        </div>
+    </details>
+</div>
+<p class="muted" id="yo-banco-desc-vacio" hidden><?= _("No hay movimientos descartados.") ?></p>
+<ul id="yo-banco-desc" class="yo-lista"></ul>

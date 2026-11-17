@@ -59,7 +59,8 @@ final class PdoBancoCentroImportRepository implements BancoCentroImportRepositor
     public function porId(int $centroId, int $filaId): ?array
     {
         $st = $this->pdo->prepare(
-            'SELECT id, asiento_id, fecha, importe, concepto, banco, cuenta_fisica_id, persona_id, concepto_asignado
+            'SELECT id, asiento_id, fecha, importe, concepto, banco, cuenta_fisica_id, persona_id, concepto_asignado,
+                    descartada_at
              FROM banco_centro_import_filas
              WHERE id = :id AND centro_id = :c'
         );
@@ -91,6 +92,40 @@ final class PdoBancoCentroImportRepository implements BancoCentroImportRepositor
         foreach ($filaIds as $id) {
             $st->execute([':a' => $asientoId, ':id' => $id]);
         }
+    }
+
+    public function descartarDeAsiento(int $asientoId): void
+    {
+        $this->pdo->prepare(
+            'UPDATE banco_centro_import_filas
+             SET asiento_id = NULL, persona_id = NULL, descartada_at = now()
+             WHERE asiento_id = :a'
+        )->execute([':a' => $asientoId]);
+    }
+
+    public function descartadas(int $centroId): array
+    {
+        $st = $this->pdo->prepare(
+            'SELECT id AS fila_id, asiento_id, fecha, importe, concepto, banco, cuenta_fisica_id, persona_id, concepto_asignado
+             FROM banco_centro_import_filas
+             WHERE centro_id = :c AND asiento_id IS NULL AND descartada_at IS NOT NULL
+             ORDER BY fecha DESC, id DESC'
+        );
+        $st->execute([':c' => $centroId]);
+
+        return $this->mapFilas($st->fetchAll(), incluirNota: false);
+    }
+
+    public function recuperar(int $centroId, int $filaId): bool
+    {
+        $st = $this->pdo->prepare(
+            'UPDATE banco_centro_import_filas
+             SET descartada_at = NULL, persona_id = NULL
+             WHERE id = :id AND centro_id = :c AND asiento_id IS NULL AND descartada_at IS NOT NULL'
+        );
+        $st->execute([':id' => $filaId, ':c' => $centroId]);
+
+        return $st->rowCount() > 0;
     }
 
     public function vincularAsiento(
@@ -147,7 +182,7 @@ final class PdoBancoCentroImportRepository implements BancoCentroImportRepositor
         $st = $this->pdo->prepare(
             'SELECT id AS fila_id, asiento_id, fecha, importe, concepto, banco, cuenta_fisica_id, persona_id, concepto_asignado
              FROM banco_centro_import_filas
-             WHERE centro_id = :c AND asiento_id IS NULL AND persona_id IS NULL
+             WHERE centro_id = :c AND asiento_id IS NULL AND persona_id IS NULL AND descartada_at IS NULL
              ORDER BY fecha DESC, id DESC'
         );
         $st->execute([':c' => $centroId]);
@@ -219,6 +254,7 @@ final class PdoBancoCentroImportRepository implements BancoCentroImportRepositor
             'concepto_asignado' => is_string($row['concepto_asignado'] ?? null)
                 ? (string) $row['concepto_asignado'] : null,
             'sentido' => str_starts_with($importe, '-') ? 'gasto' : 'ingreso',
+            'descartada' => ($row['descartada_at'] ?? null) !== null,
         ];
     }
 

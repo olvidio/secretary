@@ -6,6 +6,7 @@ namespace src\personal\infrastructure\http;
 
 use InvalidArgumentException;
 use src\personal\application\CategorizarMovimientoBanco;
+use src\personal\application\DescartadosBancoPersonal;
 use src\personal\application\ImportarCsvBanco;
 use src\personal\application\ListarPendientesBanco;
 use src\personal\application\ListarPlantillasCentroPersonal;
@@ -26,6 +27,7 @@ final class BancoPersonalController
         private readonly CategorizarMovimientoBanco $categorizar,
         private readonly PreferenciaBancoPersonal $preferenciaBanco,
         private readonly ListarPlantillasCentroPersonal $plantillasCentro,
+        private readonly DescartadosBancoPersonal $descartados,
     ) {
     }
 
@@ -55,6 +57,22 @@ final class BancoPersonalController
             'otras' => $this->pendientes->otras(),
             'plantillas' => $this->plantillasCentro->ejecutar(),
         ]);
+    }
+
+    public function descartados(Request $request, array $vars = []): Response
+    {
+        return ContestarJson::ok(['descartados' => $this->descartados->listar()]);
+    }
+
+    public function recuperar(Request $request, array $vars = []): Response
+    {
+        try {
+            $this->descartados->recuperar((int) ($request->json()['fila_id'] ?? 0));
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage(), 400);
+        }
+
+        return ContestarJson::ok(['ok' => true]);
     }
 
     public function importar(Request $request, array $vars = []): Response

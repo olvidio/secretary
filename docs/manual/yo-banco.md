@@ -17,12 +17,14 @@ Permite subir el extracto del banco y convertirlo en movimientos del libro propi
 4. Revisar el texto de «Observaciones», que viene con el concepto del banco, y corregirlo si se quiere.
 5. Elegir categoría en el desplegable y pulsar **Asignar**: la línea sale de «Por categorizar» y ya cuenta como ingreso o gasto. Al final del desplegable hay también **Otra contabilidad** y **Traspaso a caja** / **Traspaso desde caja** (según cobro o pago): se eligen igual y se confirman con **Asignar**.
 6. En observaciones, **×** borra el texto guardado de ese comercio para que no vuelva a preseleccionarse.
+7. Si se borra en Lista (o Buscar) un movimiento que vino del extracto, pasa a **Descartados**, al final de esta pantalla: no vuelve a entrar al subir otra vez el extracto. Si se borró por error, **Recuperar** lo devuelve a «Por categorizar».
 
 En N26 el fichero se descarga desde la web: cuenta → Descargas → actividad de la cuenta → CSV. En CaixaBank, desde CaixaBankNow → Cuentas → la cuenta, cargando todo el periodo con «Ver más movimientos» antes de extraerlo. En BBVA, Cuentas → la cuenta → Movimientos → Descargar en Excel o CSV. En Banco Santander, desde los movimientos de la cuenta, descargar el Excel (`.xls`). En Banco Sabadell, Operativa diaria → Cuentas → Saldos y movimientos → Descargar → Excel o CSV. En Arquia, descargar los movimientos de la cuenta en Excel (`.xlsx`).
 
 ## Reglas que conviene saber
 
 - Dos apuntes iguales (mismo día, concepto e importe) se importan los dos. Volver a subir el mismo extracto no duplica nada: el programa reconoce las líneas que ya tenía, incluida cada repetición.
+- Lo descartado al borrarlo tampoco vuelve a entrar al reimportar; solo vuelve con **Recuperar**.
 - Si antes se clasificó algo del mismo comercio, la categoría aparece preseleccionada.
 - La categoría elegida debe ser del mismo signo: un cobro no admite una categoría de gasto.
 - «Otra contabilidad» aparca un movimiento que no es propio: sigue moviendo el banco, para que el saldo cuadre con el extracto, pero no suma en ingresos ni gastos ni viaja al centro. Después se le puede poner una categoría normal.

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace src\personal\application;
 
-use DateTimeImmutable;
 use InvalidArgumentException;
 use PDO;
 use src\ambito\domain\contracts\CuentaRepository;
@@ -14,12 +13,12 @@ use src\personal\domain\contracts\BancoImportRepository;
 use src\importacion\domain\contracts\LectorExtractoEnFilas;
 use src\importacion\domain\services\CatalogoBancosCsv;
 use src\importacion\domain\services\HuellasExtracto;
-use src\personal\domain\services\ConstructorAsientoPersonal;
-use src\importacion\domain\value_objects\LineaExtractoBanco;
 use src\shared\domain\value_objects\Dinero;
 
 final class ImportarCsvBanco
 {
+    private readonly AsentarLineaBancoPersonal $asentar;
+
     public function __construct(
         private readonly PDO $pdo,
         private readonly ResolverPersonaActual $ambito,
@@ -29,6 +28,7 @@ final class ImportarCsvBanco
         private readonly EjercicioRepository $ejercicios,
         private readonly AsegurarPlanPersonal $plan,
     ) {
+        $this->asentar = new AsentarLineaBancoPersonal($asientos, $cuentas, $ejercicios, $plan);
     }
 
     /**
@@ -50,10 +50,7 @@ final class ImportarCsvBanco
         $lineas = HuellasExtracto::distinguirIguales($lineas);
         $ctx = $this->ambito->ejecutar();
         $this->plan->ejecutar($ctx->centroId, $ctx->personaId);
-        $tesoreria = $this->cuentas->tesoreriaDePersona($ctx->centroId, $ctx->personaId, 'X', 'BANCO');
-        if ($tesoreria === null || $tesoreria->id === null) {
-            throw new InvalidArgumentException(_("No hay cuenta BANCO personal"));
-        }
+        $tesoreriaId = $this->asentar->tesoreriaBanco($ctx->centroId, $ctx->personaId);
 
         $nuevos = 0;
         $repetidos = 0;
@@ -66,7 +63,7 @@ final class ImportarCsvBanco
                     continue;
                 }
                 try {
-                    $asientoId = $this->asentar($ctx->centroId, $ctx->personaId, (int) $tesoreria->id, $linea);
+                    $asientoId = $this->asentar->ejecutar($ctx->centroId, $ctx->personaId, $tesoreriaId, $linea);
                 } catch (InvalidArgumentException) {
                     $omitidos++;
                     continue;
@@ -99,40 +96,5 @@ final class ImportarCsvBanco
                 AsegurarPlanPersonal::CODIGO_PENDIENTE_INGRESO,
             ])),
         ];
-    }
-
-    private function asentar(int $centroId, int $personaId, int $tesoreriaId, LineaExtractoBanco $linea): int
-    {
-        $fecha = new DateTimeImmutable($linea->fecha);
-        $ejercicio = $this->ejercicios->deCentroEnFecha($centroId, $fecha);
-        if ($ejercicio === null || $ejercicio->id === null) {
-            throw new InvalidArgumentException(sprintf(_("No hay ejercicio que cubra %s"), $linea->fecha));
-        }
-        if ($ejercicio->estado === 'cerrado') {
-            throw new InvalidArgumentException(sprintf(_("El ejercicio de %s está cerrado"), $linea->fecha));
-        }
-        $categoria = $this->plan->pendienteDe($centroId, $personaId, $linea->sentido());
-        if ($categoria->id === null) {
-            throw new InvalidArgumentException(_("No hay cuenta pendiente"));
-        }
-        $asiento = ConstructorAsientoPersonal::movimiento(
-            $ejercicio->id,
-            $personaId,
-            $fecha,
-            $linea->concepto !== '' ? $linea->concepto : null,
-            $linea->sentido(),
-            $categoria->id,
-            $tesoreriaId,
-            $linea->centsAbs(),
-            $categoria->codigo,
-            $fecha,
-            'banco',
-        );
-        $guardado = $this->asientos->guardar($asiento);
-        if ($guardado->id === null) {
-            throw new InvalidArgumentException(_("No se pudo guardar el movimiento"));
-        }
-
-        return $guardado->id;
     }
 }

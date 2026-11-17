@@ -15,6 +15,7 @@ use src\ambito\infrastructure\persistence\PdoCuentaFisicaRepository;
 use src\ambito\infrastructure\persistence\PdoCuentaRepository;
 use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
 use src\apuntes\application\ActualizarApunte;
+use src\apuntes\application\BorrarApunte;
 use src\apuntes\application\CrearApunte;
 use src\apuntes\application\ListarApuntes;
 use src\apuntes\infrastructure\persistence\PdoBancoCentroImportRepository;
@@ -123,6 +124,24 @@ final class ActualizarApunteTest extends TestCase
         self::assertCount(1, $listados);
         self::assertSame('super', $listados[0]['observaciones']);
         self::assertSame($asientos->porId($id), null);
+
+        // Borrar el apunte deja la fila descartada con su huella: reimportar no lo
+        // trae ni sale en pendientes; recuperarla lo devuelve a pendientes.
+        (new BorrarApunte($asientos, $banco, $this->pdo))->ejecutar($nuevas[0]->id);
+        self::assertNull($asientos->porId($nuevas[0]->id));
+        self::assertTrue($banco->existe($centroId, null, 'sabadell', 'huella-1'));
+        self::assertSame([], $banco->sinAsentar($centroId));
+        $descartadas = $banco->descartadas($centroId);
+        self::assertCount(1, $descartadas);
+        self::assertSame($filaBanco, $descartadas[0]['fila_id']);
+        self::assertTrue($banco->porId($centroId, $filaBanco)['descartada'] ?? false);
+
+        self::assertTrue($banco->recuperar($centroId, $filaBanco));
+        self::assertFalse($banco->recuperar($centroId, $filaBanco));
+        self::assertSame([], $banco->descartadas($centroId));
+        $pendientes = $banco->sinAsentar($centroId);
+        self::assertCount(1, $pendientes);
+        self::assertSame($filaBanco, $pendientes[0]['fila_id']);
     }
 
     public function testRechazaSiElConceptoNoExisteYNoBorraElOriginal(): void

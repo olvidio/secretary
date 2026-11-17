@@ -144,4 +144,49 @@ final class PdoBancoImportRepository implements BancoImportRepository
 
         return $out;
     }
+
+    public function descartarDeAsiento(int $asientoId): void
+    {
+        $this->pdo->prepare(
+            'UPDATE banco_import_filas SET asiento_id = NULL, descartada_at = now() WHERE asiento_id = :a'
+        )->execute([':a' => $asientoId]);
+    }
+
+    public function descartadas(int $personaId): array
+    {
+        $st = $this->pdo->prepare(
+            'SELECT id, fecha, importe, concepto, banco, huella
+             FROM banco_import_filas
+             WHERE persona_id = :p AND asiento_id IS NULL AND descartada_at IS NOT NULL
+             ORDER BY fecha DESC, id DESC'
+        );
+        $st->execute([':p' => $personaId]);
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $importe = (string) $row['importe'];
+            $fecha = (new ConverterDate('date', $row['fecha']))->fromPg();
+            $out[] = [
+                'fila_id' => (int) $row['id'],
+                'fecha' => $fecha !== null ? $fecha->format('Y-m-d') : '',
+                'importe' => $importe,
+                'concepto' => (string) $row['concepto'],
+                'banco' => (string) $row['banco'],
+                'huella' => (string) $row['huella'],
+                'sentido' => str_starts_with($importe, '-') ? 'gasto' : 'ingreso',
+            ];
+        }
+
+        return $out;
+    }
+
+    public function recuperar(int $personaId, int $filaId, int $asientoId): bool
+    {
+        $st = $this->pdo->prepare(
+            'UPDATE banco_import_filas SET asiento_id = :a, descartada_at = NULL
+             WHERE id = :id AND persona_id = :p AND asiento_id IS NULL AND descartada_at IS NOT NULL'
+        );
+        $st->execute([':a' => $asientoId, ':id' => $filaId, ':p' => $personaId]);
+
+        return $st->rowCount() > 0;
+    }
 }

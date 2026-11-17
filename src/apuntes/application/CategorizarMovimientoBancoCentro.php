@@ -226,6 +226,9 @@ final class CategorizarMovimientoBancoCentro
         if ($fila['asiento_id'] !== null && $fila['persona_id'] !== null) {
             throw new InvalidArgumentException(_('Este movimiento ya está categorizado'));
         }
+        if (!empty($fila['descartada'])) {
+            throw new InvalidArgumentException(_('Este movimiento se descartó al borrar su apunte; recupérelo antes de categorizarlo'));
+        }
 
         return $fila;
     }

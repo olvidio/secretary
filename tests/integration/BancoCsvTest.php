@@ -13,7 +13,10 @@ use src\ambito\infrastructure\persistence\PdoEjercicioRepository;
 use src\asientos\infrastructure\persistence\PdoAsientoRepository;
 use src\configuracion\infrastructure\persistence\PdoConfiguracionRepository;
 use src\personal\application\AsegurarPlanPersonal;
+use src\personal\application\AsentarLineaBancoPersonal;
+use src\personal\application\BorrarMovimientoPersonal;
 use src\personal\application\CategorizarMovimientoBanco;
+use src\personal\application\DescartadosBancoPersonal;
 use src\personal\application\ImportarCsvBanco;
 use src\personal\application\ListarPendientesBanco;
 use src\personal\application\PreferenciaBancoPersonal;
@@ -194,5 +197,35 @@ final class BancoCsvTest extends TestCase
         }
         self::assertSame(5000, $porCuenta[$caja->id]->debeCents - $porCuenta[$caja->id]->haberCents);
         self::assertSame(-5000, $porCuenta[$banco->id]->debeCents - $porCuenta[$banco->id]->haberCents);
+
+        // Borrar un movimiento importado lo descarta con su huella: reimportar no lo
+        // trae; recuperarlo lo vuelve a anotar en Por categorizar.
+        (new BorrarMovimientoPersonal($resolver, $asientos, $filas, $pdo))->ejecutar((int) $cajero[0]['asiento_id']);
+        self::assertNull($asientos->porId((int) $cajero[0]['asiento_id']));
+        $reimport = $importar->ejecutar('n26', $csvCajero);
+        self::assertSame(0, $reimport['nuevos']);
+        self::assertSame(1, $reimport['repetidos']);
+        self::assertCount(0, $listar->ejecutar());
+        $descartados = new DescartadosBancoPersonal(
+            $pdo,
+            $resolver,
+            $filas,
+            new AsentarLineaBancoPersonal($asientos, $cuentas, $ejercicios, $plan),
+            $plan,
+        );
+        $desc = $descartados->listar();
+        self::assertCount(1, $desc);
+        self::assertSame('CAJERO', $desc[0]['concepto']);
+        $descartados->recuperar($desc[0]['fila_id']);
+        self::assertSame([], $descartados->listar());
+        $recuperado = $listar->ejecutar();
+        self::assertCount(1, $recuperado);
+        self::assertSame('gasto', $recuperado[0]['sentido']);
+        self::assertSame('-50.00', $recuperado[0]['importe']);
+        try {
+            $descartados->recuperar($desc[0]['fila_id']);
+            self::fail('Ya no estaba descartado');
+        } catch (\InvalidArgumentException) {
+        }
     }
 }

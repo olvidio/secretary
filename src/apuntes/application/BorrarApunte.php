@@ -5,14 +5,20 @@ declare(strict_types=1);
 namespace src\apuntes\application;
 
 use InvalidArgumentException;
+use PDO;
+use src\apuntes\domain\contracts\BancoCentroImportRepository;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\asientos\domain\entity\Asiento;
 use src\shared\domain\value_objects\Dinero;
+use Throwable;
 
 final class BorrarApunte
 {
-    public function __construct(private readonly AsientoRepository $asientos)
-    {
+    public function __construct(
+        private readonly AsientoRepository $asientos,
+        private readonly BancoCentroImportRepository $bancoImport,
+        private readonly PDO $pdo,
+    ) {
     }
 
     /**
@@ -34,7 +40,19 @@ final class BorrarApunte
         if ($asiento->origen === 'asignacion' || $asiento->tipo === 'asignacion_cc') {
             return $this->borrarAsignacion($asiento, $conLiquidacion);
         }
-        $this->asientos->borrar($id);
+        // Si venía del extracto del banco, su fila queda descartada con la huella:
+        // reimportar no lo vuelve a traer, y desde Banco se puede recuperar.
+        $this->pdo->beginTransaction();
+        try {
+            $this->bancoImport->descartarDeAsiento($id);
+            $this->asientos->borrar($id);
+            $this->pdo->commit();
+        } catch (Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
 
         return null;
     }

@@ -17,7 +17,7 @@ Desde aquí se corrige lo anotado: cada línea tiene un menú con tres puntos (�
 2. Pulsar el menú ⋮ de la línea que se quiere tocar.
 3. **Editar**: se abre el mismo formulario del alta con los datos puestos; se cambia lo que haga falta y se guarda. Si el movimiento es del banco, debajo de las categorías aparece **Traspaso a caja** (en un pago) o **Traspaso desde caja** (en un cobro): pasa a ser un traspaso entre banco y caja, no un gasto ni un ingreso.
 4. **Desdoblar**: sirve cuando un solo pago incluye dos cosas. Se escribe el importe de la primera parte y la segunda se rellena sola con el resto; se elige categoría (también una plantilla del centro, como Club) y nota de cada parte y se pulsa «Desdoblar».
-5. **Borrar**: pide confirmación antes de quitarlo; no se puede deshacer.
+5. **Borrar**: pide confirmación antes de quitarlo. Si venía del extracto del banco, queda en **Descartados** (Banco) y desde allí se puede recuperar; si no, no se puede deshacer.
 
 ## Reglas que conviene saber
 

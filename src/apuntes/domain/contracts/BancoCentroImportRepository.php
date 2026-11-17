@@ -34,6 +34,22 @@ interface BancoCentroImportRepository
     /** @param list<int> $filaIds */
     public function religarAsiento(array $filaIds, int $asientoId): void;
 
+    /**
+     * Antes de borrar el asiento: sus filas del extracto quedan descartadas
+     * (sin asiento, con la huella) para que reimportar no las vuelva a traer.
+     */
+    public function descartarDeAsiento(int $asientoId): void;
+
+    /**
+     * Filas descartadas al borrar su apunte, las más recientes primero.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function descartadas(int $centroId): array;
+
+    /** Devuelve una fila descartada a pendientes de categorizar; false si no lo estaba. */
+    public function recuperar(int $centroId, int $filaId): bool;
+
     public function vincularAsiento(
         int $filaId,
         int $asientoId,

@@ -122,7 +122,7 @@ final class PdoCopiaPersonalRepository implements CopiaPersonalRepository
 
         $banco = [];
         $stB = $this->pdo->prepare(
-            'SELECT asiento_id, banco, huella, fecha, importe, concepto
+            'SELECT asiento_id, banco, huella, fecha, importe, concepto, descartada_at
              FROM banco_import_filas WHERE persona_id = :p'
         );
         $stB->execute([':p' => $personaId]);
@@ -135,6 +135,7 @@ final class PdoCopiaPersonalRepository implements CopiaPersonalRepository
                 'fecha' => $f !== null ? $f->format('Y-m-d') : '',
                 'importe' => (string) $row['importe'],
                 'concepto' => (string) $row['concepto'],
+                'descartada' => $row['descartada_at'] !== null,
             ];
         }
 
@@ -377,8 +378,8 @@ final class PdoCopiaPersonalRepository implements CopiaPersonalRepository
     private function restaurarBanco(int $personaId, array $filas, array $mapa): void
     {
         $ins = $this->pdo->prepare(
-            'INSERT INTO banco_import_filas (persona_id, banco, huella, asiento_id, fecha, importe, concepto)
-             VALUES (:p, :b, :h, :a, :f, :i, :c)'
+            'INSERT INTO banco_import_filas (persona_id, banco, huella, asiento_id, fecha, importe, concepto, descartada_at)
+             VALUES (:p, :b, :h, :a, :f, :i, :c, CASE WHEN CAST(:d AS boolean) THEN now() END)'
         );
         foreach ($filas as $fila) {
             if (!is_array($fila)) {
@@ -386,7 +387,8 @@ final class PdoCopiaPersonalRepository implements CopiaPersonalRepository
             }
             $ref = (int) ($fila['asiento_ref'] ?? 0);
             $asientoId = $mapa[$ref] ?? null;
-            if ($asientoId === null) {
+            // Una fila descartada no tiene asiento: se restaura igual, conservando la huella.
+            if ($asientoId === null && empty($fila['descartada'])) {
                 continue;
             }
             $ins->execute([
@@ -397,6 +399,7 @@ final class PdoCopiaPersonalRepository implements CopiaPersonalRepository
                 ':f' => (new ConverterDate('date', (string) ($fila['fecha'] ?? '')))->toPg(),
                 ':i' => (string) ($fila['importe'] ?? ''),
                 ':c' => (string) ($fila['concepto'] ?? ''),
+                ':d' => $asientoId === null ? 'true' : 'false',
             ]);
         }
     }

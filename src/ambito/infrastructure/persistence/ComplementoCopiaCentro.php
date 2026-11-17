@@ -1123,7 +1123,7 @@ final class ComplementoCopiaCentro
     {
         $st = $this->pdo->prepare(
             'SELECT f.nombre AS fisica, b.banco, b.huella, b.asiento_id, b.fecha, b.importe, b.concepto,
-                    b.concepto_asignado, p.iniciales
+                    b.concepto_asignado, p.iniciales, b.descartada_at
              FROM banco_centro_import_filas b
              LEFT JOIN cuentas_fisicas f ON f.id = b.cuenta_fisica_id
              LEFT JOIN personas p ON p.id = b.persona_id
@@ -1143,6 +1143,7 @@ final class ComplementoCopiaCentro
                 'concepto' => (string) $row['concepto'],
                 'concepto_asignado' => $row['concepto_asignado'] !== null ? (string) $row['concepto_asignado'] : null,
                 'iniciales' => $row['iniciales'] !== null ? strtolower((string) $row['iniciales']) : '',
+                'descartada' => $row['descartada_at'] !== null,
             ];
         }
 
@@ -1159,8 +1160,8 @@ final class ComplementoCopiaCentro
         $st = $this->pdo->prepare(
             'INSERT INTO banco_centro_import_filas (
                 centro_id, cuenta_fisica_id, banco, huella, asiento_id, fecha, importe, concepto,
-                concepto_asignado, persona_id
-             ) VALUES (:c, :f, :b, :h, :a, :fecha, :imp, :con, :asig, :p)'
+                concepto_asignado, persona_id, descartada_at
+             ) VALUES (:c, :f, :b, :h, :a, :fecha, :imp, :con, :asig, :p, CASE WHEN CAST(:d AS boolean) THEN now() END)'
         );
         foreach ($filas as $fila) {
             if (!is_array($fila)) {
@@ -1180,6 +1181,7 @@ final class ComplementoCopiaCentro
                 ':con' => (string) ($fila['concepto'] ?? ''),
                 ':asig' => $fila['concepto_asignado'] ?? null,
                 ':p' => $iniciales !== '' ? $this->exigirPersona($centroId, $iniciales) : null,
+                ':d' => !empty($fila['descartada']) ? 'true' : 'false',
             ]);
         }
     }
@@ -1788,7 +1790,8 @@ final class ComplementoCopiaCentro
     private function exportarBancoPersonal(int $centroId): array
     {
         $st = $this->pdo->prepare(
-            'SELECT lower(p.iniciales) AS iniciales, f.asiento_id, f.banco, f.huella, f.fecha, f.importe, f.concepto
+            'SELECT lower(p.iniciales) AS iniciales, f.asiento_id, f.banco, f.huella, f.fecha, f.importe, f.concepto,
+                    f.descartada_at
              FROM banco_import_filas f
              JOIN personas p ON p.id = f.persona_id
              WHERE p.centro_id = :c
@@ -1809,6 +1812,7 @@ final class ComplementoCopiaCentro
                 'fecha' => $fecha,
                 'importe' => (string) $row['importe'],
                 'concepto' => (string) $row['concepto'],
+                'descartada' => $row['descartada_at'] !== null,
             ];
         }
 
@@ -1828,8 +1832,8 @@ final class ComplementoCopiaCentro
             return;
         }
         $ins = $this->pdo->prepare(
-            'INSERT INTO banco_import_filas (persona_id, banco, huella, asiento_id, fecha, importe, concepto)
-             VALUES (:p, :b, :h, :a, :f, :i, :c)'
+            'INSERT INTO banco_import_filas (persona_id, banco, huella, asiento_id, fecha, importe, concepto, descartada_at)
+             VALUES (:p, :b, :h, :a, :f, :i, :c, CASE WHEN CAST(:d AS boolean) THEN now() END)'
         );
         foreach ($filas as $fila) {
             if (!is_array($fila)) {
@@ -1837,7 +1841,8 @@ final class ComplementoCopiaCentro
             }
             $ref = (int) ($fila['asiento_ref'] ?? 0);
             $asientoId = $asientos[$ref] ?? null;
-            if ($asientoId === null) {
+            // Una fila descartada no tiene asiento: se restaura igual, conservando la huella.
+            if ($asientoId === null && empty($fila['descartada'])) {
                 continue;
             }
             $ins->execute([
@@ -1848,6 +1853,7 @@ final class ComplementoCopiaCentro
                 ':f' => (new ConverterDate('date', (string) ($fila['fecha'] ?? '')))->toPg(),
                 ':i' => (string) ($fila['importe'] ?? ''),
                 ':c' => (string) ($fila['concepto'] ?? ''),
+                ':d' => $asientoId === null ? 'true' : 'false',
             ]);
         }
     }

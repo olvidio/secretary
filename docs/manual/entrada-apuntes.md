@@ -20,6 +20,7 @@ En **Entrada G** hay un bloque **Importar extracto del banco** (mismo criterio q
 
 1. Elegir el fichero (CSV o Excel) y pulsar **Importar**. El formato se reconoce solo (N26, CaixaBank, BBVA, Banco Santander, Banco Sabadell o Arquia; de otro banco, el formato propio que se explica más abajo). Si hay varias cuentas de tesorería activas, indicar cuál es. Dos apuntes iguales del extracto entran los dos. Al volver a subir el mismo extracto no se duplican filas ya importadas. Hasta que no se categorice, no se crean asientos ni apuntes.
 2. Los movimientos nuevos quedan en **Por categorizar**: elegir concepto e iniciales si procede, observaciones y pulsar **Asignar**. **Cambiar a P** sustituye el desplegable por conceptos P (vuelve con **Cambiar a G**); al **Asignar** en modo P las iniciales son obligatorias. En el desplegable de concepto G, al final aparecen **Otra contabilidad** (registra el movimiento en el banco del centro sin apunte ni ingreso/gasto del plan) y **Traspaso a caja** (usa los conceptos 41/42); ambas se confirman con **Asignar**.
+3. Un apunte creado desde el extracto se puede editar en Apuntes (por ejemplo, para añadir detalles a las observaciones) sin que vuelva a entrar al reimportar. Si se **borra**, el movimiento pasa a **Descartados**: tampoco vuelve a entrar al subir otra vez el extracto. Si se borró por error, en **Descartados** se pulsa **Recuperar** y vuelve a **Por categorizar**, donde se asigna de nuevo.
 
 ### Teclear apuntes
 

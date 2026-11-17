@@ -508,7 +508,7 @@ final class RemesaTest extends TestCase
                     new \src\apuntes\infrastructure\persistence\PdoPlantillaApunteRepository($this->pdo),
                 ),
             ),
-            'borrar' => new BorrarApunte($asientos),
+            'borrar' => new BorrarApunte($asientos, new \src\apuntes\infrastructure\persistence\PdoBancoCentroImportRepository($this->pdo), $this->pdo),
             'listar' => new ListarApuntes(
                 $asientos,
                 $cuentas,

@@ -1333,6 +1333,33 @@
     state.plantillasCentro = r.plantillas || [];
     pintarFilasBanco(qs('#yo-banco-pend'), qs('#yo-banco-vacio'), r.pendientes || []);
     pintarFilasBanco(qs('#yo-banco-otra'), qs('#yo-banco-otra-vacio'), r.otras || []);
+    await pintarDescartadosBanco();
+  }
+
+  async function pintarDescartadosBanco() {
+    const ul = qs('#yo-banco-desc');
+    if (!ul) return;
+    const r = await api('/api/yo/banco/descartados');
+    if (!r.ok) return alert(r.error || t('error'));
+    const filas = r.descartados || [];
+    const vacio = qs('#yo-banco-desc-vacio');
+    if (vacio) vacio.hidden = filas.length > 0;
+    ul.innerHTML = '';
+    filas.forEach((p) => {
+      const li = document.createElement('li');
+      const imp = String(p.importe || '').replace('.', ',');
+      li.innerHTML = '<span class="meta"><strong>' + esc(fmtFecha(p.fecha)) + ' · ' + esc(imp)
+        + '</strong><small>' + esc(p.concepto || '') + '</small></span>'
+        + '<button type="button">' + esc(t('banco_recuperar')) + '</button>';
+      li.querySelector('button').onclick = async (ev) => {
+        if (!confirm(t('banco_recuperar_confirm'))) return;
+        ev.target.disabled = true;
+        const s = await api('/api/yo/banco/recuperar', { method: 'POST', body: { fila_id: p.fila_id } });
+        if (!s.ok) { ev.target.disabled = false; alert(s.error || t('error')); return; }
+        await pintarListasBanco();
+      };
+      ul.appendChild(li);
+    });
   }
 
   function pintarFilasBanco(ul, vacio, rows) {

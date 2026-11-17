@@ -160,6 +160,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/banco-centro/bancos', [BancoCentroController::class, 'bancos']);
     $r->addRoute('POST', '/api/banco-centro/preferencia', [BancoCentroController::class, 'guardarPreferencia']);
     $r->addRoute('GET', '/api/banco-centro/pendientes', [BancoCentroController::class, 'pendientes']);
+    $r->addRoute('GET', '/api/banco-centro/descartados', [BancoCentroController::class, 'descartados']);
+    $r->addRoute('POST', '/api/banco-centro/recuperar', [BancoCentroController::class, 'recuperar']);
     $r->addRoute('POST', '/api/banco-centro/csv', [BancoCentroController::class, 'importar']);
     $r->addRoute('POST', '/api/banco-centro/categorizar', [BancoCentroController::class, 'categorizar']);
     $r->addRoute('POST', '/api/apuntes', [ApunteController::class, 'create']);
@@ -253,6 +255,8 @@ return static function (RouteCollector $r): void {
     $r->addRoute('GET', '/api/yo/banco/bancos', [BancoPersonalController::class, 'bancos']);
     $r->addRoute('POST', '/api/yo/banco/preferencia', [BancoPersonalController::class, 'guardarPreferencia']);
     $r->addRoute('GET', '/api/yo/banco/pendientes', [BancoPersonalController::class, 'pendientes']);
+    $r->addRoute('GET', '/api/yo/banco/descartados', [BancoPersonalController::class, 'descartados']);
+    $r->addRoute('POST', '/api/yo/banco/recuperar', [BancoPersonalController::class, 'recuperar']);
     $r->addRoute('POST', '/api/yo/banco/csv', [BancoPersonalController::class, 'importar']);
     $r->addRoute('POST', '/api/yo/banco/categorizar', [BancoPersonalController::class, 'categorizar']);
 

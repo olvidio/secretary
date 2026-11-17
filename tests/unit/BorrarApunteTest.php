@@ -6,7 +6,9 @@ namespace Tests\unit;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
+use PDO;
 use PHPUnit\Framework\TestCase;
+use src\apuntes\domain\contracts\BancoCentroImportRepository;
 use src\apuntes\application\BorrarApunte;
 use src\asientos\domain\contracts\AsientoRepository;
 use src\asientos\domain\entity\Asiento;
@@ -14,6 +16,18 @@ use src\asientos\domain\entity\Movimiento;
 
 final class BorrarApunteTest extends TestCase
 {
+    private BancoCentroImportRepository $banco;
+
+    protected function setUp(): void
+    {
+        $this->banco = $this->createMock(BancoCentroImportRepository::class);
+    }
+
+    private function borrar(AsientoRepository $repo): BorrarApunte
+    {
+        return new BorrarApunte($repo, $this->banco, $this->createMock(PDO::class));
+    }
+
     private function asignacion(string $tipo = 'normal', ?int $remesaId = null): Asiento
     {
         // Gasto 7 (dos partidas) contra 111, como lo anotaba el confirmar antiguo.
@@ -32,7 +46,7 @@ final class BorrarApunteTest extends TestCase
         $repo->expects(self::never())->method('anularAsignacionConLiquidacion');
         $repo->expects(self::never())->method('borrar');
 
-        $aviso = (new BorrarApunte($repo))->ejecutar(40);
+        $aviso = $this->borrar($repo)->ejecutar(40);
 
         self::assertNotNull($aviso);
         self::assertStringContainsString('125,50', $aviso);
@@ -46,7 +60,7 @@ final class BorrarApunteTest extends TestCase
         $repo->expects(self::once())->method('anularAsignacionConLiquidacion')->with(40, 41);
         $repo->expects(self::never())->method('borrar');
 
-        self::assertNull((new BorrarApunte($repo))->ejecutar(40, true));
+        self::assertNull($this->borrar($repo)->ejecutar(40, true));
     }
 
     public function testSinLiquidacionNoSeBorra(): void
@@ -57,7 +71,7 @@ final class BorrarApunteTest extends TestCase
         $repo->expects(self::never())->method('anularAsignacionConLiquidacion');
 
         $this->expectException(InvalidArgumentException::class);
-        (new BorrarApunte($repo))->ejecutar(40, true);
+        $this->borrar($repo)->ejecutar(40, true);
     }
 
     public function testLiquidacionSolaNoSeBorra(): void
@@ -67,7 +81,7 @@ final class BorrarApunteTest extends TestCase
         $repo->expects(self::never())->method('anularAsignacionConLiquidacion');
 
         $this->expectException(InvalidArgumentException::class);
-        (new BorrarApunte($repo))->ejecutar(40, true);
+        $this->borrar($repo)->ejecutar(40, true);
     }
 
     public function testAsignacionDeRemesaSigueSinBorrarse(): void
@@ -78,7 +92,7 @@ final class BorrarApunteTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('remesa');
-        (new BorrarApunte($repo))->ejecutar(40, true);
+        $this->borrar($repo)->ejecutar(40, true);
     }
 
     public function testApunteNormalSeBorraSinPreguntar(): void
@@ -90,7 +104,8 @@ final class BorrarApunteTest extends TestCase
         $repo = $this->createMock(AsientoRepository::class);
         $repo->method('porId')->willReturn($normal);
         $repo->expects(self::once())->method('borrar')->with(50);
+        $this->banco->expects(self::once())->method('descartarDeAsiento')->with(50);
 
-        self::assertNull((new BorrarApunte($repo))->ejecutar(50));
+        self::assertNull($this->borrar($repo)->ejecutar(50));
     }
 }

@@ -201,7 +201,7 @@ final class PeriodificacionTest extends TestCase
         ]);
         self::assertCount(0, $soloFebrero);
 
-        (new BorrarApunte($deps['asientos']))->ejecutar($filas[0]->id);
+        (new BorrarApunte($deps['asientos'], new \src\apuntes\infrastructure\persistence\PdoBancoCentroImportRepository($this->pdo), $this->pdo))->ejecutar($filas[0]->id);
         self::assertSame(0, $this->contarAsientos());
     }
 

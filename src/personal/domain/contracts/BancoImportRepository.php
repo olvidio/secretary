@@ -46,4 +46,20 @@ interface BancoImportRepository
      * @return list<array{concepto:string, cuenta_id:int, tipo:string}>
      */
     public function historialCategorizado(int $personaId): array;
+
+    /**
+     * Antes de borrar el movimiento: su fila del extracto queda descartada
+     * (sin asiento, con la huella) para que reimportar no la vuelva a traer.
+     */
+    public function descartarDeAsiento(int $asientoId): void;
+
+    /**
+     * Filas descartadas al borrar su movimiento, las más recientes primero.
+     *
+     * @return list<array{fila_id:int, fecha:string, importe:string, concepto:string, banco:string, huella:string, sentido:string}>
+     */
+    public function descartadas(int $personaId): array;
+
+    /** Vuelve a ligar una fila descartada a un asiento nuevo; false si no estaba descartada. */
+    public function recuperar(int $personaId, int $filaId, int $asientoId): bool;
 }

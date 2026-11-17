@@ -6,6 +6,7 @@ namespace src\apuntes\infrastructure\http;
 
 use InvalidArgumentException;
 use src\apuntes\application\CategorizarMovimientoBancoCentro;
+use src\apuntes\application\DescartadosBancoCentro;
 use src\apuntes\application\ImportarCsvBancoCentro;
 use src\apuntes\application\ListarPendientesBancoCentro;
 use src\apuntes\application\PreferenciaBancoCentro;
@@ -24,6 +25,7 @@ final class BancoCentroController
         private readonly ListarPendientesBancoCentro $pendientes,
         private readonly CategorizarMovimientoBancoCentro $categorizar,
         private readonly PreferenciaBancoCentro $preferenciaBanco,
+        private readonly DescartadosBancoCentro $descartados,
     ) {
     }
 
@@ -52,6 +54,22 @@ final class BancoCentroController
             'pendientes' => $this->pendientes->ejecutar(),
             'otras' => $this->pendientes->otras(),
         ]);
+    }
+
+    public function descartados(Request $request, array $vars = []): Response
+    {
+        return ContestarJson::ok(['descartados' => $this->descartados->listar()]);
+    }
+
+    public function recuperar(Request $request, array $vars = []): Response
+    {
+        try {
+            $this->descartados->recuperar((int) ($request->json()['fila_id'] ?? 0));
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage(), 400);
+        }
+
+        return ContestarJson::ok(['ok' => true]);
     }
 
     public function importar(Request $request, array $vars = []): Response
