@@ -1862,5 +1862,8 @@
   "No se reconoce el formato del extracto. Use un CSV o Excel de N26, CaixaBank, BBVA, Banco Santander, Banco Sabadell o Arquia, o un fichero propio con las columnas Fecha, Concepto e Importe.": "No es reconeix el format de l'extracte. Feu servir un CSV o Excel d'N26, CaixaBank, BBVA, Banco Santander, Banc Sabadell o Arquia, o un fitxer propi amb les columnes Data, Concepte i Import.",
   "Otro banco: prepara un CSV o Excel con una primera fila de cabecera «Fecha», «Concepto» e «Importe» y un movimiento por fila (por ejemplo 15/01/2026 · Compra de papelería · -23,50). El importe va en negativo si sale dinero.": "Un altre banc: prepara un CSV o Excel amb una primera fila de capçalera «Data», «Concepte» i «Import» i un moviment per fila (per exemple 15/01/2026 · Compra de papereria · -23,50). L'import va en negatiu si surten diners.",
   "Descargar plantilla": "Baixa la plantilla",
-  "Responda aquí a lo que se le pregunta…": "Respongui aquí al que se li pregunta…"
+  "Responda aquí a lo que se le pregunta…": "Respongui aquí al que se li pregunta…",
+  "Una liquidación de c/c de destinos 7 no se borra sola; se borra su asignación": "Una liquidació de c/c de destinacions 7 no s'esborra sola; s'esborra la seva assignació",
+  "No se encuentra la liquidación de c/c de esta asignación de destinos 7; no se borra para no descuadrar el 111.": "No es troba la liquidació de c/c d'aquesta assignació de destinacions 7; no s'esborra per no desquadrar el 111.",
+  "Es una asignación de destinos 7 y va con su liquidación de c/c (%s €). Se borrarán las dos: la c/c de la persona recupera el importe y el 111 no cambia. ¿Seguir?": "És una assignació de destinacions 7 i va amb la seva liquidació de c/c (%s €). S'esborraran les dues: la c/c de la persona recupera l'import i el 111 no canvia. Continuar?"
 }
