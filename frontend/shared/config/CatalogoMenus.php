@@ -68,8 +68,8 @@ final class CatalogoMenus
         return [
             ['nav' => 'inicio', 'href' => '/', 'label' => _("Inicio")],
             ['nav' => 'arqueo', 'href' => '/arqueo', 'label' => _("Arqueo")],
-            ['nav' => 'aportaciones', 'href' => '/aportaciones', 'label' => _("Listado de aportaciones")],
-            ['nav' => 'donativos-fundacion', 'href' => '/donativos-fundacion', 'label' => _("Donativos a Fundación")],
+            ['nav' => 'aportaciones', 'href' => '/aportaciones', 'label' => _("Aportaciones de personas")],
+            ['nav' => 'donativos-fundacion', 'href' => '/donativos-fundacion', 'label' => _("Aportaciones por destino")],
             ['nav' => 'entradas-periodicas', 'href' => '/entradas-periodicas', 'label' => _("Entradas periódicas")],
             ['nav' => 'ejecutar-entradas-periodicas', 'href' => '/ejecutar-entradas-periodicas', 'label' => _("Ejecutar periódicas")],
             ['nav' => 'mensajes', 'href' => '/mensajes', 'label' => _("Mensajes")],

@@ -18,7 +18,7 @@ Es la pantalla de entrada al libro del centro: cuentas personales (P) y generale
 
 Contabilidad de un centro sg: un solo libro, como el Excel Secretario sg.
 
-Las tarjetas son Nombres, Entrada, Apuntes, Presupuesto, 613, Listado de aportaciones y Arqueo. No hay entrada P, cierre de mes, comprobaciones ni remesas.
+Las tarjetas son Nombres, Entrada, Apuntes, Presupuesto, 613, Aportaciones de personas y Arqueo. No hay entrada P, cierre de mes, comprobaciones ni remesas.
 
 ## Asociación y fundación
 

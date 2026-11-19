@@ -9,7 +9,7 @@
     <li><a href="/apuntes"><?= _("Listado de apuntes") ?></a></li>
     <li><a href="/presupuesto-g"><?= _("Presupuesto") ?></a></li>
     <li><a href="/613-g"><?= _("613") ?></a></li>
-    <li><a href="/aportaciones"><?= _("Listado de aportaciones") ?></a></li>
+    <li><a href="/aportaciones"><?= _("Aportaciones de personas") ?></a></li>
     <li><a href="/arqueo-g"><?= _("Arqueo") ?></a></li>
 </ul>
 <?php elseif ($esClub): ?>

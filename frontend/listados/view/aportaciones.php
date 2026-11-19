@@ -1,7 +1,7 @@
 <style>
 @page { size: A4 landscape; margin: 8mm; }
 </style>
-<h1 class="print-hide"><?= _("Listado de aportaciones") ?></h1>
+<h1 class="print-hide"><?= _("Aportaciones de personas") ?></h1>
 <p class="muted print-hide"><?= _("Como la hoja E 32 del Excel: cada s, por grupo, con la aportación ordinaria (11) y la extraordinaria (12) de cada mes. Debajo, las ayudas de los cp (13). Solo entran los nombres con grupo y clase s o cp.") ?></p>
 <p class="filters print-hide">
     <button type="button" id="btn-imprimir-aportaciones" hidden><?= _("Imprimir") ?></button>

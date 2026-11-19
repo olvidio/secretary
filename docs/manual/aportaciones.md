@@ -1,8 +1,8 @@
-# Listado de aportaciones
+# Aportaciones de personas
 
 - Ruta: `/aportaciones`
 - Ámbito: centro-sg
-- Menú: Presupuesto e informes → Listado de aportaciones
+- Menú: Presupuesto e informes → Aportaciones de personas
 - Quién: el secretario de un centro sg
 
 ## Para qué sirve
@@ -12,7 +12,7 @@ Es la hoja E 32 del Excel Secretario sg. Muestra, mes a mes, lo aportado por cad
 ## Cómo se usa
 
 1. En Nombres, dar a cada persona un **grupo** y la clase **s** o **cp**.
-2. Abrir **Listado de aportaciones**.
+2. Abrir **Aportaciones de personas**.
 3. Los **s** salen agrupados. Cada uno tiene dos filas: ordinaria (concepto 11) y extraordinaria (concepto 12), y al final el total del grupo.
 4. Los **cp** salen debajo, con las ayudas del concepto 13.
 

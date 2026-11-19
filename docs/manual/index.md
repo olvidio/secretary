@@ -52,7 +52,8 @@ Un solo libro, como el Excel Secretario sg. No hay libro personal, ni remesas, n
 | Repetir un apunte que se hace siempre igual | Talonario → Plantillas |
 | Poner el presupuesto y los destinos 42–54 | Presupuesto e informes → Presupuesto |
 | Sacar el resumen 613 G-D | Presupuesto e informes → 613 |
-| Ver las aportaciones | Presupuesto e informes → Listado de aportaciones |
+| Ver las aportaciones de cada persona | Presupuesto e informes → Aportaciones de personas |
+| Ver quién ha aportado a cada destino | Presupuesto e informes → Aportaciones por destino |
 | Contar el dinero de la caja | Cierre y arqueo → Arqueo |
 | Consultar los conceptos | Plan y ejercicio → Conceptos |
 | Cambiar la fecha de cierre o el ejercicio | Cierre y arqueo → Fecha cierre; Plan y ejercicio → Ejercicios |

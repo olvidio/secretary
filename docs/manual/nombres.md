@@ -55,7 +55,7 @@ Desde aquí se abre también el libro personal de cada una, con solo poner su co
 
 - Menú: Centro → Nombres
 
-Apellidos y nombre, como en el Excel. El **grupo** y la clase (**s** o **cp**) ordenan el listado de aportaciones. El correo no abre un libro personal: un centro sg no admite cuentas personales ni solicitudes de acceso. No hay vivienda, exención, base liquidable ni «puede desgravar».
+Apellidos y nombre, como en el Excel. El **grupo** y la clase (**s** o **cp**) ordenan el listado de **Aportaciones de personas**. El correo no abre un libro personal: un centro sg no admite cuentas personales ni solicitudes de acceso. No hay vivienda, exención, base liquidable ni «puede desgravar».
 
 Antes del listado, **Nº de s del centro** es la cifra prevista que usa el 613 G-D en la columna «previsto» de las estadísticas de aportaciones (no es el recuento automático de personas con clase s).
 

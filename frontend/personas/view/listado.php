@@ -1,6 +1,6 @@
 <h1><?= _("Nombres") ?></h1>
 <?php if (!empty($esCentroSg)): ?>
-<p class="muted"><?= _("Apellidos y nombre, como en el Excel. El grupo y la clase (s o cp) ordenan el listado de aportaciones. El correo no abre un libro personal: un centro sg no admite cuentas personales.") ?></p>
+<p class="muted"><?= _("Apellidos y nombre, como en el Excel. El grupo y la clase (s o cp) ordenan el listado de Aportaciones de personas. El correo no abre un libro personal: un centro sg no admite cuentas personales.") ?></p>
 <?php else: ?>
 <p class="muted"><?= _("El correo convierte a esa persona en usuario del libro personal de este centro. Si el correo es nuevo, se muestra una contraseña inicial para comunicársela una vez. «Vivienda aporta a generales» indica si entra en el cierre automático (P/211, típico de n); quien no aporta puede igualmente imputar a generales puntualmente (P/211 y G/11). P/212 (vivienda personal) es un gasto propio, sin G/11. La exención de meses es para quien llega o se va a mitad de año (no se le pide movimiento ni entra en el cierre esos meses).") ?></p>
 <?php endif; ?>
