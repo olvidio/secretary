@@ -874,6 +874,45 @@ final class PdoAsientoRepository implements AsientoRepository
         return $out;
     }
 
+    public function ingresosPorPersona(
+        int $centroId,
+        int $ejercicioId,
+        string $libro,
+        string $desde,
+        string $hasta,
+    ): array {
+        $sql = "SELECT COALESCE(m.persona_id, a.persona_id, 0) AS persona_id,
+                       COALESCE(SUM(m.haber - m.debe), 0) AS cents
+                FROM movimientos m
+                INNER JOIN cuentas c ON c.id = m.cuenta_id
+                INNER JOIN asientos a ON a.id = m.asiento_id
+                  AND a.ejercicio_id = :ej
+                  AND a.libro = :lib
+                  AND a.anulado_at IS NULL
+                  AND a.fecha >= :desde
+                  AND a.fecha <= :hasta
+                WHERE c.centro_id = :centro
+                  AND c.libro = :lib
+                  AND c.tipo = 'ingreso'
+                GROUP BY COALESCE(m.persona_id, a.persona_id, 0)";
+
+        $st = $this->pdo->prepare($sql);
+        $st->execute([
+            ':centro' => $centroId,
+            ':ej' => $ejercicioId,
+            ':lib' => $libro,
+            ':desde' => $desde,
+            ':hasta' => $hasta,
+        ]);
+
+        $out = [];
+        foreach ($st->fetchAll() as $row) {
+            $out[(int) $row['persona_id']] = (int) $row['cents'];
+        }
+
+        return $out;
+    }
+
     public function movimientosE37PorPersona(
         int $centroId,
         int $ejercicioId,

@@ -159,6 +159,19 @@ interface AsientoRepository
     ): array;
 
     /**
+     * Lo ingresado en conceptos de ingreso, sumado por persona (0 = sin persona), en céntimos.
+     *
+     * @return array<int, int> persona_id (0 si no lleva) => cents
+     */
+    public function ingresosPorPersona(
+        int $centroId,
+        int $ejercicioId,
+        string $libro,
+        string $desde,
+        string $hasta,
+    ): array;
+
+    /**
      * Agregado E37 por persona y código maestro de concepto (ingreso/gasto).
      *
      * @return array<string, array<string, int>> iniciales => codigo_maestro => cents

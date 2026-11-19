@@ -53,6 +53,13 @@ final class ObtenerDonativosFundacionSgTest extends TestCase
         $asientos->method('realizadoPorConceptoYPersona')->willReturn([
             5 => ['42' => 12500],
         ]);
+        // Al 42 han salido 125 a nombre de Ana y 40 sin persona.
+        $asientos->method('realizadoPorConcepto')->willReturn(['42' => 16500]);
+        $asientos->method('ingresosPorPersona')->willReturn([
+            5 => 30000,
+            0 => 2000,
+            77 => 500,
+        ]);
 
         $ejercicios = $this->createMock(\src\ambito\domain\contracts\EjercicioRepository::class);
         $ejercicios->method('abiertoDe')->willReturn(new \src\ambito\domain\entity\Ejercicio(
@@ -69,8 +76,9 @@ final class ObtenerDonativosFundacionSgTest extends TestCase
 
         $uc = new ObtenerDonativosFundacionSg($resolver, $centros, $config, $destinos, $personas, $asientos);
         $sinConcepto = $uc->ejecutar(null);
-        self::assertCount(2, $sinConcepto['fundaciones']);
-        self::assertSame('41', $sinConcepto['fundaciones'][0]['codigo']);
+        self::assertCount(3, $sinConcepto['fundaciones']);
+        self::assertSame(ObtenerDonativosFundacionSg::INGRESOS_CAJA, $sinConcepto['fundaciones'][0]['codigo']);
+        self::assertSame('41', $sinConcepto['fundaciones'][1]['codigo']);
         self::assertSame('2026-01-01', $sinConcepto['periodo']['desde']);
         self::assertNull($sinConcepto['destino']);
         self::assertSame([], $sinConcepto['filas']);
@@ -78,7 +86,20 @@ final class ObtenerDonativosFundacionSgTest extends TestCase
         $con = $uc->ejecutar('42');
         self::assertSame('42', $con['destino']['codigo']);
         self::assertSame('125,00', $con['filas'][0]['acumulado_es']);
-        self::assertSame('125,00', $con['total_es']);
+        self::assertCount(2, $con['filas']);
+        self::assertSame('Sin nombre', $con['filas'][1]['nombre']);
+        self::assertSame('40,00', $con['filas'][1]['acumulado_es']);
+        self::assertSame('165,00', $con['total_es']);
         self::assertSame('ag', $con['filas'][0]['iniciales']);
+
+        // Ingresos en caja: lo ingresado menos lo que ya sale en los destinos (41+) a su nombre.
+        $caja = $uc->ejecutar(ObtenerDonativosFundacionSg::INGRESOS_CAJA);
+        self::assertSame('Ingresos en caja', $caja['destino']['etiqueta']);
+        self::assertCount(2, $caja['filas']);
+        self::assertSame('175,00', $caja['filas'][0]['acumulado_es']);
+        // Sin persona y persona que ya no está en Nombres, juntas en una fila.
+        self::assertSame(0, $caja['filas'][1]['persona_id']);
+        self::assertSame('25,00', $caja['filas'][1]['acumulado_es']);
+        self::assertSame('200,00', $caja['total_es']);
     }
 }
