@@ -15,7 +15,7 @@ En **Arqueo Caja** se cuenta el efectivo y se compara con la contabilidad (bille
 ## Cómo se usa
 
 1. Entrar desde el menú, desde el enlace **Arqueo** del 613 o desde Fecha cierre. Arriba sale el saldo contable de esa caja y su reparto entre el libro personal y el general.
-2. Si el centro tiene más de una caja, elegirla en **Caja física**. La **Fecha** propone el día de hoy y se puede cambiar (por ejemplo para un recuento de otro día).
+2. Si el centro tiene más de una caja, elegirla en **Caja física**. La **Fecha** propone la fecha de cierre y se puede cambiar (por ejemplo para un recuento de otro día). Al cambiarla, el saldo contable se recalcula hasta ese día y, si ese día ya hay un recuento guardado, aparece relleno; si no, el formulario sale en blanco.
 3. En **Billetes** y **Monedas**, poner cuántas unidades hay de cada valor. No es el importe, sino el número de billetes o monedas.
 4. En **Vales / cheques** sí se pone el importe de cada uno (hasta dos vales y dos cheques).
 5. Mirar el **Total** y la **Diferencia**: sale en verde cuando es cero y en rojo cuando no.
@@ -28,6 +28,8 @@ En **Arqueo Caja** se cuenta el efectivo y se compara con la contabilidad (bille
 - Guardar el arqueo no crea ni corrige apuntes: solo deja constancia del recuento. El descuadre se arregla corrigiendo apuntes.
 - El bloque final del 613 G propone **Dinero y vales de Caja** y **Dinero en banco** con el último arqueo o saldo guardado hasta la fecha de cierre (si no había ya un valor manual en el 613).
 - Tras **Guardar arqueo** aparece un mensaje de confirmación con el total.
+- Si ese día se vuelve a guardar, vale el último recuento.
+- Debajo, **Arqueos guardados** (o **Saldos guardados** en el banco) lista los del ejercicio, uno por día: lo contado, el saldo contable de ese día y la diferencia («Cuadra» si no hay). **Ver** carga ese día en el formulario con su desglose.
 - Si la diferencia no es cero pero es múltiplo de nueve, aparece **Buscar capuchinos**: eso suele pasar al escribir dos cifras al revés o al correr la coma. Se listan los apuntes de caja que, cambiados así, explicarían el descuadre, con el importe **Anotado**, el que tendría que ser en **Si fuera** y un enlace al apunte.
 
 ## Problemas frecuentes

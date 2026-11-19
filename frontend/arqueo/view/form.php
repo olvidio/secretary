@@ -48,6 +48,20 @@ $etiquetaFisica = $esBanco ? _('Cuenta bancaria') : _('Caja física');
     <p id="arqueo-msg" class="ok print-hide" hidden aria-live="polite"></p>
 </form>
 <div id="capuchinos-res" class="arqueo-capuchinos" hidden></div>
+<h2 class="print-hide"><?= $esBanco ? _("Saldos guardados") : _("Arqueos guardados") ?></h2>
+<p class="muted print-hide" id="historial-vacio" hidden><?= $esBanco ? _("Todavía no hay ningún saldo guardado en este ejercicio.") : _("Todavía no hay ningún arqueo guardado en este ejercicio.") ?></p>
+<table id="tabla-historial" class="print-hide" hidden>
+    <thead>
+    <tr>
+        <th><?= _("Fecha") ?></th>
+        <th class="num"><?= $esBanco ? _("Extracto") : _("Contado") ?></th>
+        <th class="num"><?= _("Saldo contable") ?></th>
+        <th class="num"><?= _("Diferencia") ?></th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
 <script>
 const I18N_ARQUEO = {
   saldoContable: <?= json_encode(_("Saldo contable (P+G) %s · P: %s · G: %s"), JSON_UNESCAPED_UNICODE) ?>,
@@ -66,6 +80,7 @@ const I18N_ARQUEO = {
   errorGuardar: <?= json_encode(_("No se pudo guardar el arqueo"), JSON_UNESCAPED_UNICODE) ?>,
   errorGuardarSaldo: <?= json_encode(_("No se pudo guardar el saldo"), JSON_UNESCAPED_UNICODE) ?>,
   volver613: <?= json_encode(_("← Volver al resumen 613 %s"), JSON_UNESCAPED_UNICODE) ?>,
+  cuadra: <?= json_encode(_("Cuadra"), JSON_UNESCAPED_UNICODE) ?>,
 };
 const TIPO_TESORERIA = <?= json_encode($tipoTesoreria, JSON_UNESCAPED_UNICODE) ?>;
 const ES_CAJA = TIPO_TESORERIA === 'caja';
@@ -142,13 +157,12 @@ function grid(el, valores, prefix) {
   });
 }
 
+/** Rellena el formulario con el recuento guardado ese día, o lo deja en blanco si no hay. */
 function aplicarArqueoPrevio(r) {
+  const form = document.getElementById('form-arq');
+  form.querySelectorAll('input[name]:not([name=fecha])').forEach((inp) => { inp.value = ''; });
   const arqueo = r?.arqueo;
   if (!arqueo) return;
-  const form = document.getElementById('form-arq');
-  if (arqueo.fecha) {
-    form.querySelector('[name=fecha]').value = arqueo.fecha;
-  }
   if (!ES_CAJA) {
     const d = arqueo.desglose || {};
     const raw = d.saldo_extracto ?? arqueo.total_es ?? arqueo.total ?? '';
@@ -174,18 +188,46 @@ function aplicarArqueoPrevio(r) {
   });
 }
 
-async function refreshSaldos() {
-  if (!fisicaId) return;
-  const r = await api('/api/arqueos/fisica/' + fisicaId);
-  if (!r.ok) return alert(r.error);
+function pintarHistorial(historial) {
+  const tabla = document.getElementById('tabla-historial');
+  const cuerpo = tabla.querySelector('tbody');
+  cuerpo.replaceChildren();
+  tabla.hidden = historial.length === 0;
+  document.getElementById('historial-vacio').hidden = historial.length > 0;
+  const actual = document.querySelector('#form-arq [name=fecha]').value;
+  historial.forEach((h) => {
+    const dif = h.diferencia_cents;
+    const tr = document.createElement('tr');
+    if (h.fecha === actual) tr.className = 'seleccionada';
+    tr.innerHTML = '<td>' + esc(fmtFecha(h.fecha)) + '</td>'
+      + '<td class="num">' + esc(h.total_es) + '</td>'
+      + '<td class="num">' + esc(h.saldo_es) + '</td>'
+      + '<td class="num' + (dif !== 0 ? ' error' : ' ok') + '">' + esc(dif === 0 ? I18N_ARQUEO.cuadra : h.diferencia_es) + '</td>'
+      + '<td class="acc"><button type="button" data-fecha="' + esc(h.fecha) + '">' + esc(I18N_ARQUEO.ver) + '</button></td>';
+    cuerpo.appendChild(tr);
+  });
+}
+
+function pintarEstado(r) {
+  const form = document.getElementById('form-arq');
+  if (r.fecha) form.querySelector('[name=fecha]').value = r.fecha;
   document.getElementById('saldos').textContent = I18N_ARQUEO.saldoContable
     .replace('%s', r.saldo_fisico_es || r.saldo_fisico)
     .replace('%s', r.saldo_caja_p)
     .replace('%s', r.saldo_caja_g);
   saldoContable = parseImporte(r.saldo_fisico);
-  const form = document.getElementById('form-arq');
   aplicarArqueoPrevio(r);
-  if (form) mostrarTotal(form);
+  pintarHistorial(r.historial || []);
+  mostrarTotal(form);
+}
+
+async function refreshSaldos() {
+  if (!fisicaId) return;
+  const fecha = document.querySelector('#form-arq [name=fecha]').value;
+  const q = fecha ? '?fecha=' + encodeURIComponent(fecha) : '';
+  const r = await api('/api/arqueos/fisica/' + fisicaId + q);
+  if (!r.ok) return alert(r.error);
+  pintarEstado(r);
 }
 
 function pintarCapuchinos(s) {
@@ -247,7 +289,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('form-arq');
   form.addEventListener('input', () => mostrarTotal(form));
 
-  form.querySelector('[name=fecha]').value = new Date().toISOString().slice(0, 10);
   const r = await api('/api/arqueos/tesoreria/' + TIPO_TESORERIA);
   if (!r.ok) return alert(r.error);
   const fisicas = r.fisicas_activas || [];
@@ -266,8 +307,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     sel.value = fisicaId;
     sel.onchange = () => { fisicaId = parseInt(sel.value, 10); refreshSaldos(); };
   }
-  await refreshSaldos();
-  mostrarTotal(form);
+  pintarEstado(r);
+  form.querySelector('[name=fecha]').addEventListener('change', (ev) => {
+    if (fechaIsoValida(ev.target.value)) refreshSaldos();
+  });
+  document.getElementById('tabla-historial').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('button[data-fecha]');
+    if (!btn) return;
+    form.querySelector('[name=fecha]').value = btn.dataset.fecha;
+    document.getElementById('arqueo-msg').hidden = true;
+    refreshSaldos();
+    form.scrollIntoView({ behavior: 'smooth' });
+  });
 
   document.getElementById('btn-capuchinos').onclick = async () => {
     if (!ES_CAJA) return;
@@ -318,7 +369,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       msg.hidden = false;
     }
-    mostrarTotal(form);
+    await refreshSaldos();
   };
 });
 </script>

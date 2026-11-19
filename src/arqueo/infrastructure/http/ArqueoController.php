@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace src\arqueo\infrastructure\http;
 
+use DateTimeImmutable;
 use InvalidArgumentException;
 use RuntimeException;
 use src\ambito\application\ResolverAmbitoActual;
 use src\ambito\domain\contracts\CuentaFisicaRepository;
+use src\ambito\domain\entity\CuentaFisica;
 use src\arqueo\application\BuscarCapuchinos;
 use src\arqueo\application\GuardarArqueo;
 use src\arqueo\domain\contracts\ArqueoRepository;
@@ -81,17 +83,11 @@ final class ArqueoController
         if ($defecto === null || $defecto->id === null) {
             return ContestarJson::ok($payload);
         }
-        $arqueo = $this->repo->ultimoPorFisica($defecto->id);
-        $desglose = $this->saldosFisica($defecto->id);
-
-        return ContestarJson::ok(array_merge($payload, [
-            'arqueo' => $arqueo?->toArray(),
-            'saldo_fisico' => $desglose['saldo_fisico'],
-            'saldo_fisico_es' => $desglose['saldo_fisico_es'] ?? $desglose['saldo_fisico'],
-            'saldo_caja_p' => $desglose['saldo_caja_p'],
-            'saldo_caja_g' => $desglose['saldo_caja_g'],
-            'fisica' => $defecto->toArray(),
-        ]));
+        try {
+            return ContestarJson::ok(array_merge($payload, $this->estadoFisica($defecto, $request->query('fecha'))));
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
     }
 
     public function capuchinos(Request $request, array $vars): Response
@@ -136,14 +132,57 @@ final class ArqueoController
         if ($fisica === null) {
             return ContestarJson::error(_("Cuenta física no encontrada"));
         }
-        $arqueo = $this->repo->ultimoPorFisica($fisicaId);
-        $desglose = $this->saldosFisica($fisicaId);
+        try {
+            return ContestarJson::ok($this->estadoFisica($fisica, $request->query('fecha')));
+        } catch (InvalidArgumentException $e) {
+            return ContestarJson::error($e->getMessage());
+        }
+    }
 
-        return ContestarJson::ok([
+    /**
+     * Arqueo de una caja o banco a una fecha (por defecto, la fecha de cierre): el recuento
+     * guardado ese día, el saldo contable P+G hasta ese día y los recuentos anteriores.
+     *
+     * @return array<string, mixed>
+     */
+    private function estadoFisica(CuentaFisica $fisica, mixed $fechaPedida): array
+    {
+        $fisicaId = (int) $fisica->id;
+        $cfg = $this->config->get();
+        $fechaCierre = $cfg->fechaCierre->format('Y-m-d');
+        $fecha = trim((string) ($fechaPedida ?? ''));
+        if ($fecha === '') {
+            $fecha = $fechaCierre;
+        } elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha) !== 1) {
+            throw new InvalidArgumentException(_('Fecha no válida'));
+        }
+        $arqueo = $this->repo->deFisicaEnFecha($fisicaId, new DateTimeImmutable($fecha));
+        $ejercicioId = $this->ambito->ejecutar()->ejercicioId;
+        $historial = [];
+        foreach ($this->repo->historialDeFisica($fisicaId) as $previo) {
+            if ($previo->ejercicioId !== null && $previo->ejercicioId !== $ejercicioId) {
+                continue;
+            }
+            $f = $previo->fecha->format('Y-m-d');
+            $saldo = new Dinero($this->saldosFisica($fisicaId, $f)['saldo_fisico']);
+            $historial[] = [
+                'fecha' => $f,
+                'total' => $previo->total->toString(),
+                'total_es' => $previo->total->formatEs(),
+                'saldo_es' => $saldo->formatEs(),
+                'diferencia_cents' => $previo->total->toCents() - $saldo->toCents(),
+                'diferencia_es' => $previo->total->sub($saldo)->formatEs(),
+            ];
+        }
+
+        return [
+            'fecha' => $fecha,
+            'fecha_cierre' => $fechaCierre,
             'arqueo' => $arqueo?->toArray(),
             'fisica' => $fisica->toArray(),
-            ...$desglose,
-        ]);
+            'historial' => $historial,
+            ...$this->saldosFisica($fisicaId, $fecha),
+        ];
     }
 
     public function saveFisica(Request $request, array $vars): Response
@@ -168,12 +207,12 @@ final class ArqueoController
     }
 
     /** @return array{saldo_fisico:string,saldo_caja_p:string,saldo_caja_g:string,saldo_fisico_es?:string} */
-    private function saldosFisica(int $fisicaId): array
+    private function saldosFisica(int $fisicaId, ?string $hasta = null): array
     {
         $contexto = $this->ambito->ejecutar();
         $cfg = $this->config->get();
         $desde = $cfg->fechaInicio->format('Y-m-d');
-        $hasta = $cfg->fechaCierre->format('Y-m-d');
+        $hasta ??= $cfg->fechaCierre->format('Y-m-d');
         $saldoP = Dinero::zero();
         $saldoG = Dinero::zero();
         foreach ($this->asientos->saldosPorCuenta($contexto->centroId, $contexto->ejercicioId, $desde, $hasta) as $row) {
@@ -197,7 +236,7 @@ final class ArqueoController
         ];
     }
 
-    private function primeraCajaActiva(): ?\src\ambito\domain\entity\CuentaFisica
+    private function primeraCajaActiva(): ?CuentaFisica
     {
         $cajas = $this->fisicas->listarActivasDeCentro($this->ambito->ejecutar()->centroId, 'caja');
 

@@ -614,6 +614,8 @@ button[type="button"].arqueo-capuchinos-btn {
   border-color: var(--err);
 }
 .arqueo-capuchinos { margin: 1.25rem 0 2rem; max-width: 960px; }
+#tabla-historial td.acc { white-space: nowrap; width: 1%; text-align: right; }
+#tabla-historial tr.seleccionada td { background: #eef4ff; font-weight: 600; }
 .arqueo-capuchinos h2 { font-size: 1.1rem; margin: 0 0 .35rem; }
 .arqueo-volver { margin: 0 0 .75rem; }
 .arqueo-volver a { text-decoration: none; }
