@@ -10,6 +10,20 @@ falta en cada push.
 
 ## [Unreleased]
 
+## [0.1.47] — 2026-11-19
+
+### Añadido
+- **Arqueo Caja y Saldo banco · arqueos guardados**: debajo del formulario, la lista de los recuentos del ejercicio (uno por día) con lo contado, el saldo contable de ese día y la diferencia («Cuadra» si es cero). **Ver** carga ese día en el formulario con su desglose.
+- **Aportaciones por destino · Ingresos en caja** (centro sg): primera opción del desplegable. Muestra los ingresos de cada persona que no han salido a necesidades generales ni a fundaciones; lo enviado ya sale en el listado de cada destino.
+
+### Cambiado
+- **Arqueo Caja y Saldo banco · fecha**: propone la fecha de cierre en lugar de la del último arqueo. Al cambiar la fecha, el saldo contable se calcula hasta ese día y, si ya hay un recuento guardado ese día, aparece relleno.
+- **Centro sg · menús**: **Listado de aportaciones** pasa a llamarse **Aportaciones de personas**, y **Donativos a Fundación**, **Aportaciones por destino**.
+- **Aportaciones por destino**: el desplegable está en blanco al entrar y no saca ningún listado hasta elegir un destino.
+
+### Corregido
+- **Aportaciones por destino**: lo enviado a un destino sin persona (por ejemplo, una salida a necesidades generales) ya no se pierde. Sale en una fila **Sin nombre** y el total es todo lo enviado a ese destino.
+
 ## [0.1.46] — 2026-11-17
 
 ### Cambiado
