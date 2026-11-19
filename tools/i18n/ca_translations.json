@@ -1891,5 +1891,18 @@
   "Ese movimiento no está entre los descartados": "Aquest moviment no és entre els descartats",
   "Este movimiento se descartó al borrar su apunte; recupérelo antes de categorizarlo": "Aquest moviment es va descartar en esborrar el seu apunt; recupereu-lo abans de categoritzar-lo",
   "Movimientos del extracto que borraste de la lista. No vuelven a entrar al importar otra vez el extracto. «Recuperar» los devuelve a Por categorizar.": "Moviments de l'extracte que vas esborrar de la llista. No tornen a entrar en importar de nou l'extracte. «Recuperar» els torna a Per categoritzar.",
-  "¿Devolver este movimiento a Por categorizar?": "Tornar aquest moviment a Per categoritzar?"
+  "¿Devolver este movimiento a Por categorizar?": "Tornar aquest moviment a Per categoritzar?",
+  "Saldos guardados": "Saldos desats",
+  "Arqueos guardados": "Arqueigs desats",
+  "Todavía no hay ningún saldo guardado en este ejercicio.": "Encara no hi ha cap saldo desat en aquest exercici.",
+  "Todavía no hay ningún arqueo guardado en este ejercicio.": "Encara no hi ha cap arqueig desat en aquest exercici.",
+  "Extracto": "Extracte",
+  "Cuadra": "Quadra",
+  "Aportaciones de personas": "Aportacions de persones",
+  "Aportaciones por destino": "Aportacions per destinació",
+  "Por destino (41 en adelante): lo aportado por cada persona desde el inicio del ejercicio hasta la fecha de cierre. «Ingresos en caja» muestra los ingresos de cada persona que no han salido a necesidades generales ni a fundaciones (lo enviado ya sale en el listado de cada destino).": "Per destinació (41 en endavant): el que ha aportat cada persona des de l'inici de l'exercici fins a la data de tancament. «Ingressos a caixa» mostra els ingressos de cada persona que no han sortit a necessitats generals ni a fundacions (el que s'ha enviat ja surt al llistat de cada destinació).",
+  "No hay ingresos en el periodo.": "No hi ha ingressos en el període.",
+  "Apellidos y nombre, como en el Excel. El grupo y la clase (s o cp) ordenan el listado de Aportaciones de personas. El correo no abre un libro personal: un centro sg no admite cuentas personales.": "Cognoms i nom, com a l'Excel. El grup i la classe (s o cp) ordenen el llistat d'Aportacions de persones. El correu no obre un llibre personal: un centre sg no admet comptes personals.",
+  "Sin nombre": "Sense nom",
+  "Ingresos en caja": "Ingressos a caixa"
 }
